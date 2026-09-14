@@ -34,3 +34,10 @@ img {
   height: auto;
   display: block
 }
+
+/* --- ACCESSIBILITY (A11Y) --- */
+:focus-visible {
+  outline: 3px solid var(--color-primary-green) !important;
+  outline-offset: 3px !important;
+  border-radius: 4px;
+}

@@ -100,3 +100,43 @@ function initHeroSlider() {
   startSlide();
 }
 window.initHeroSlider = initHeroSlider;
+
+function initBackToTop() {
+  var backToTopBtn = document.getElementById('backToTop');
+  if (!backToTopBtn) return;
+
+  window.addEventListener('scroll', function() {
+    if (window.scrollY > 300) {
+      backToTopBtn.classList.add('show');
+    } else {
+      backToTopBtn.classList.remove('show');
+    }
+  }, { passive: true });
+
+  backToTopBtn.addEventListener('click', function() {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  });
+}
+window.initBackToTop = initBackToTop;
+
+function initDarkMode() {
+  var toggleBtn = document.getElementById('darkModeToggle');
+  var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  var storedTheme = localStorage.getItem('theme');
+  
+  if (storedTheme === 'dark' || (!storedTheme && prefersDark)) {
+    document.documentElement.classList.add('dark-mode');
+  }
+
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', function() {
+      document.documentElement.classList.toggle('dark-mode');
+      var isDark = document.documentElement.classList.contains('dark-mode');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    });
+  }
+}
+window.initDarkMode = initDarkMode;

@@ -5,6 +5,8 @@ document.addEventListener('DOMContentLoaded', function () {
     if (typeof initClock === 'function') { initClock() }
     if (typeof initHeroSlider === 'function') { initHeroSlider() }
     if (typeof initScrollAnimations === 'function') { initScrollAnimations() }
+    if (typeof initBackToTop === 'function') { initBackToTop() }
+    if (typeof initDarkMode === 'function') { initDarkMode() }
     
     // Inject wm.js for copyright & watermark after footer is loaded
     var wmScript = document.createElement('script');
