@@ -15,7 +15,7 @@
 }
 
 .header-top-bar {
-  background-color: var(--color-white);
+  background-color: var(--color-surface);
   padding: 15px 0;
   position: relative
 }
@@ -82,7 +82,7 @@
 }
 
 .nav-container {
-  background-color: var(--color-primary-green);
+  background-color: var(--color-header-bg);
   border-radius: 6px 6px 0 0;
   box-shadow: 0 4px 6px rgb(0 0 0 / .1)
 }
@@ -138,7 +138,7 @@
   position: absolute;
   top: 100%;
   left: 0;
-  background-color: var(--color-primary-green);
+  background-color: var(--color-header-bg);
   min-width: 250px;
   opacity: 0;
   visibility: hidden;
@@ -200,7 +200,7 @@
 
 @media (max-width:991px) {
   .header-top-bar {
-    background-color: var(--color-primary-green);
+    background-color: var(--color-header-bg);
     padding: 8px 0
   }
 

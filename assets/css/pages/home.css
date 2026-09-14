@@ -73,7 +73,7 @@
 }
 
 .ticker-label {
-  background-color: #007bff;
+  background-color: var(--color-primary-blue);
   padding: 10px 15px;
   font-weight: 700;
   display: flex;

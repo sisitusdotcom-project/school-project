@@ -1,7 +1,7 @@
 /* === KOMPONEN FOOTER === */
 .app-footer {
-  background-color: var(--color-primary-green);
-  color: var(--color-neutral-light);
+  background-color: var(--color-footer-bg);
+  color: var(--color-text-on-primary);
   padding: 40px 0 15px;
   margin-top: 40px;
   position: relative;
@@ -31,7 +31,7 @@
 .footer-about-title {
   font-size: 1.05rem;
   font-weight: 800;
-  color: var(--color-neutral-light);
+  color: var(--color-text-on-primary);
   line-height: 1.2;
 }
 
@@ -67,7 +67,7 @@
   height: 32px;
   background-color: rgba(255, 255, 255, 0.1);
   border-radius: 50%;
-  color: var(--color-neutral-light);
+  color: var(--color-text-on-primary);
   font-size: 1rem;
   transition: all 0.3s ease;
 }
@@ -80,7 +80,7 @@
 
 /* Kolom 2, 3, 4: Konten */
 .footer-judul {
-  color: var(--color-neutral-light);
+  color: var(--color-text-on-primary);
   font-size: 1.05rem;
   font-weight: 800;
   margin-bottom: 15px;

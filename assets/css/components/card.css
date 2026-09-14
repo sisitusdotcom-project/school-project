@@ -89,7 +89,7 @@
   display: flex;
   gap: 15px;
   padding-bottom: 15px;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--color-border);
   cursor: pointer;
   transition: background-color 0.2s ease
 }
@@ -100,7 +100,7 @@
 }
 
 .news-list-item:hover {
-  background-color: #f9f9f9
+  background-color: var(--color-hover)
 }
 
 .news-thumb {
@@ -109,7 +109,7 @@
   object-fit: cover;
   border-radius: 6px;
   flex-shrink: 0;
-  border: 1px solid #eee
+  border: 1px solid var(--color-border)
 }
 
 .news-item-content {
@@ -119,7 +119,7 @@
 }
 
 .news-item-content .news-date {
-  color: #777;
+  color: var(--color-neutral-medium);
   font-size: .8rem
 }
 
@@ -206,7 +206,7 @@
 .section-title {
   font-family: 'Nunito', sans-serif;
   font-size: 1.4rem;
-  color: var(--color-black);
+  color: var(--color-neutral-dark);
   margin-bottom: 8px;
   text-transform: uppercase;
   display: flex;
@@ -222,7 +222,7 @@
 .section-divider {
   width: 100%;
   height: 3px;
-  background-color: #e0e0e0;
+  background-color: var(--color-border);
   position: relative;
   border-radius: 3px;
   margin-top: 10px
@@ -322,8 +322,8 @@
 }
 
 .poll-widget {
-  background-color: #fff;
-  border: 1px solid #e0e0e0;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-top: none;
   border-radius: 0 0 6px 6px;
   padding: 15px
@@ -348,7 +348,7 @@
   align-items: center;
   gap: 8px;
   cursor: pointer;
-  color: #555
+  color: var(--color-neutral-medium)
 }
 
 .poll-option input[type="radio"] {
@@ -394,7 +394,7 @@
 .map-embed {
   border-radius: 0 0 6px 6px;
   overflow: hidden;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--color-border);
   border-top: none
 }
 
@@ -405,7 +405,7 @@
 .card-horizontal {
   display: flex;
   gap: 20px;
-  background: var(--color-white);
+  background: var(--color-surface);
   border-radius: 8px;
   margin-bottom: 20px;
   overflow: hidden;
@@ -439,7 +439,7 @@
 
 .card-horizontal .news-excerpt {
   font-size: .95rem;
-  color: #555;
+  color: var(--color-neutral-medium);
   line-height: 1.5;
   margin-bottom: 15px;
   max-height: calc(1.5em * 3);
@@ -560,15 +560,15 @@
 }
 
 .profile-welcome {
-  background-color: #fff;
+  background-color: var(--color-surface);
   padding: 15px;
   text-align: left;
   font-family: Georgia, 'Times New Roman', Times, serif;
   font-style: italic;
-  color: #555;
+  color: var(--color-neutral-medium);
   font-size: .95rem;
   line-height: 1.5;
-  border-top: 1px solid #eee;
+  border-top: 1px solid var(--color-border);
   position: relative
 }
 
