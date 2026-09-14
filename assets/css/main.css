@@ -10,6 +10,7 @@
 @import "components/footer.css?v=3.0";
 @import "components/banner.css?v=3.0";
 @import "components/modal.css?v=2.1";
+@import "components/custom-font.css?v=1.0";
 
 /* === UTILITAS === */
 @import "utilities/helpers.css?v=3.3";

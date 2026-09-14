@@ -1,6 +1,5 @@
 // Semua fungsi sudah dimuat lewat urutan <script> di HTML
 window.onload = function () {
-  if (typeof initNavigation === "function") initNavigation();
   initClock();
   initScrollAnimations();
 };
@@ -60,3 +59,49 @@ function initClock() {
     clockEl.innerText = day + ', ' + date + ' ' + month + ' ' + year + ', ' + h + ':' + m + ':' + s;
   }, 1000);
 }
+
+function initHeroSlider() {
+  var slider = document.getElementById('heroSlider');
+  if (!slider) return;
+
+  var slides = slider.querySelectorAll('.hero-image');
+  var prevBtn = document.getElementById('prevSlide');
+  var nextBtn = document.getElementById('nextSlide');
+  var currentSlide = 0;
+  var slideCount = slides.length;
+  var slideInterval;
+
+  if (slideCount === 0) return;
+
+  function goToSlide(index) {
+    slides[currentSlide].classList.remove('slide-active');
+    currentSlide = (index + slideCount) % slideCount;
+    slides[currentSlide].classList.add('slide-active');
+  }
+
+  function nextSlide() { goToSlide(currentSlide + 1); }
+  function prevSlide() { goToSlide(currentSlide - 1); }
+
+  function startSlide() { slideInterval = setInterval(nextSlide, 5000); }
+  function resetInterval() { clearInterval(slideInterval); startSlide(); }
+
+  if (prevBtn) {
+    prevBtn.addEventListener('click', function () { prevSlide(); resetInterval(); });
+  }
+  if (nextBtn) {
+    nextBtn.addEventListener('click', function () { nextSlide(); resetInterval(); });
+  }
+
+  var touchStartX = 0;
+  var touchEndX = 0;
+  slider.addEventListener('touchstart', function (e) { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
+  slider.addEventListener('touchend', function (e) {
+    touchEndX = e.changedTouches[0].screenX;
+    var swipeThreshold = 50;
+    if (touchEndX < touchStartX - swipeThreshold) { nextSlide(); resetInterval(); }
+    if (touchEndX > touchStartX + swipeThreshold) { prevSlide(); resetInterval(); }
+  }, { passive: true });
+
+  startSlide();
+}
+window.initHeroSlider = initHeroSlider;
