@@ -1,7 +1,3 @@
-// Semua fungsi sudah dimuat lewat urutan <script> di HTML
-window.onload = function () {
-  // Kosong, inisialisasi dipindahkan ke layout.js agar sinkron dengan komponen
-};
 
 function initScrollAnimations() {
   var animatedElements = document.querySelectorAll('.animate-on-scroll');
