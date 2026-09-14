@@ -5,10 +5,11 @@ document.addEventListener('DOMContentLoaded', function () {
       break
     }
   }
-  var loadComponent = function (id, url) { var el = document.getElementById(id); if (!el) return Promise.resolve(); return fetch(baseUrl + url).then(function (response) { if (!response.ok) throw new Error('Failed to load ' + url); return response.text() }).then(function (html) { var processedHtml = html.replace(/\{BASE_URL\}/g, baseUrl); el.outerHTML = processedHtml }).catch(function (error) { console.error('Error loading component:', error) }) }; Promise.all([loadComponent('app-header', 'components/header.html'), loadComponent('app-hero', 'components/hero.html'), loadComponent('app-footer', 'components/footer.html')]).then(function () {
+  var loadComponent = function (id, url) { var el = document.getElementById(id); if (!el) return Promise.resolve(); return fetch(baseUrl + url + '?v=2.2').then(function (response) { if (!response.ok) throw new Error('Failed to load ' + url); return response.text() }).then(function (html) { var processedHtml = html.replace(/\{BASE_URL\}/g, baseUrl); el.outerHTML = processedHtml }).catch(function (error) { console.error('Error loading component:', error) }) }; Promise.all([loadComponent('app-header', 'components/header.html'), loadComponent('app-hero', 'components/hero.html'), loadComponent('app-sidebar', 'components/sidebar.html'), loadComponent('app-footer', 'components/footer.html')]).then(function () {
     if (typeof initNavigation === 'function') { initNavigation() }
     if (typeof initClock === 'function') { initClock() }
     if (typeof initHeroSlider === 'function') { initHeroSlider() }
+    if (typeof initScrollAnimations === 'function') { initScrollAnimations() }
     
     // Inject wm.js for copyright & watermark after footer is loaded
     var wmScript = document.createElement('script');

@@ -1,7 +1,6 @@
 // Semua fungsi sudah dimuat lewat urutan <script> di HTML
 window.onload = function () {
-  initClock();
-  initScrollAnimations();
+  // Kosong, inisialisasi dipindahkan ke layout.js agar sinkron dengan komponen
 };
 
 function initScrollAnimations() {
