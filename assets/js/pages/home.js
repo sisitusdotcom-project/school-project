@@ -1,1 +1,0 @@
-// Skrip dipindahkan ke assets/js/main.js agar dapat berfungsi di semua halaman (reusable)

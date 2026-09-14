@@ -8,18 +8,11 @@
 @import "components/button.css?v=3.4";
 @import "components/card.css?v=3.35";
 @import "components/footer.css?v=3.0";
-@import "components/banner.css?v=3.0";
 @import "components/modal.css?v=2.1";
 @import "components/custom-font.css?v=1.0";
 
 /* === UTILITAS === */
 @import "utilities/helpers.css?v=3.3";
-@import "utilities/responsive.css?v=3.0";
 
 /* === HALAMAN KHUSUS === */
 @import "pages/home.css?v=3.1";
-@import "pages/profil.css?v=3.0";
-@import "pages/bidang.css?v=3.0";
-@import "pages/galeri.css?v=3.0";
-@import "pages/informasi.css?v=3.0";
-@import "pages/ebook.css?v=3.0";
