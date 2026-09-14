@@ -1,0 +1,35 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0
+}
+
+html {
+  width: 100%;
+  background-color: var(--color-bg-light)
+}
+
+body {
+  width: 100%;
+  overflow-x: hidden;
+  line-height: 1.6;
+  color: var(--color-neutral-dark)
+}
+
+ul,
+ol {
+  list-style: none
+}
+
+a {
+  text-decoration: none;
+  color: inherit
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block
+}

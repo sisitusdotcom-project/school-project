@@ -1,0 +1,36 @@
+.btn-view-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--color-yellow);
+  color: var(--color-neutral-dark);
+  padding: 12px 28px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: .9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+  box-shadow: 0 2px 8px rgb(0 0 0 / .15)
+}
+
+.btn-view-more:hover {
+  background-color: #e0a800;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgb(0 0 0 / .2)
+}
+
+.btn-view-more:active {
+  transform: translateY(0)
+}
+
+.btn-view-more-inline {
+  align-self: flex-end;
+  font-size: .7rem;
+  padding: 6px 14px;
+  border-radius: 4px;
+  background-color: var(--color-yellow);
+  box-shadow: none;
+  letter-spacing: 0
+}

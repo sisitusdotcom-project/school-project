@@ -1,0 +1,17 @@
+:root {
+  --color-primary-green: #0F7E41;
+  --color-primary-blue: #004b99;
+  --strip-red: #e30a13;
+  --strip-yellow: #f8e110;
+  --color-yellow: #ffc107;
+  --color-neutral-dark: #222222;
+  --color-neutral-medium: #666666;
+  --color-neutral-light: #f5f5f5;
+  --color-bg-light: #f8f9fa;
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-border: #eaeaea;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.125);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --border-radius: 4px
+}
