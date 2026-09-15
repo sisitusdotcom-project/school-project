@@ -20,6 +20,4 @@ Secara bawaan, elemen anak dari CSS Grid (`grid-item`) memiliki `min-width: auto
 ## 3. Padding Responsif
 - **Aturan:** Jangan menggunakan *padding* yang terlalu besar secara statis. Jika `.article-card` memiliki `padding: 30px`, ia mengambil ruang 60px secara horizontal, yang sangat membebani layar kecil (320px). Selalu kurangi padding di mode mobile (contoh: jadi `15px` pada layar `< 768px`).
 
-## 4. Animasi Horizontal
-- **Aturan:** Hati-hati dengan animasi scroll berbasis geser menyamping (seperti `transform: translateX(30px)`). Elemen yang berada di pinggir kanan layar dan digeser 30px ke luar layar akan memperlebar dokumen saat dimuat di ponsel.
-- **Solusi:** Matikan geseran horizontal di layar ponsel dan ubah menjadi geseran vertikal (`translateY(30px)`) melalui *media query*.
+
