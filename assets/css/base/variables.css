@@ -18,22 +18,21 @@
   --color-footer-bg: var(--color-primary-green);
   --color-surface: var(--color-white);
   --color-text-on-primary: var(--color-white);
-  --color-hover: #f9f9f9;
+  --color-hover: #f9f9f9
 }
 
-/* --- DARK MODE VARIABLES --- */
 html.dark-mode {
   --color-primary-green: #2ecc71;
   --color-neutral-dark: #f0f2f5;
   --color-neutral-medium: #cfd2d6;
   --color-neutral-light: #3a3b3c;
   --color-bg-light: #18191a;
-  --color-white: #ffffff; /* Keep white as white for text! */
+  --color-white: #ffffff;
   --color-black: #000000;
   --color-border: #3a3b3c;
-  --color-surface: #242526; /* Dark surface for cards/header-top-bar */
+  --color-surface: #242526;
   --color-header-bg: #242526;
   --color-footer-bg: #18191a;
   --color-text-on-primary: #e4e6eb;
-  --color-hover: #2f3032;
+  --color-hover: #2f3032
 }

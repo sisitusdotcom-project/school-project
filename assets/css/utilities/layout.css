@@ -1,5 +1,3 @@
-/* === GRID LAYOUTS === */
-
 .main-sidebar-grid {
   display: grid;
   grid-template-columns: 2.3fr 1fr;
@@ -11,7 +9,6 @@
     grid-template-columns: 1fr
   }
 }
-
 
 .infografis-grid {
   display: grid;

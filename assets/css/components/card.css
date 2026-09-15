@@ -2,8 +2,6 @@
   width: 100%
 }
 
-
-
 .featured-news {
   position: relative;
   border-radius: 8px;
@@ -189,13 +187,6 @@
     margin-bottom: 6px
   }
 }
-
-
-
-
-
-
-
 
 .card-horizontal {
   display: flex;

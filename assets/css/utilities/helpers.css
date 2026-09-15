@@ -63,21 +63,16 @@
   }
 }
 
-
-
-
-
-
-
-/* --- ANTI-CLS (CUMULATIVE LAYOUT SHIFT) --- */
 #app-header:empty {
-  min-height: 195px;
+  min-height: 195px
 }
+
 #app-footer:empty {
-  min-height: 350px;
+  min-height: 350px
 }
+
 @media (max-width:991px) {
   #app-header:empty {
-    min-height: 65px;
+    min-height: 65px
   }
 }

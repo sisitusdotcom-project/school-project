@@ -29,7 +29,6 @@ p {
   font-weight: 700
 }
 
-/* --- HEADERS & TITLES --- */
 .page-title {
   font-family: 'Nunito', sans-serif;
   font-size: 1.4rem;
@@ -78,30 +77,31 @@ p {
   width: 114px;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 114 10' preserveAspectRatio='none'%3E%3Cpath d='M0,0 H95 L100,5 L95,10 H0 Z' fill='%23ffc107'/%3E%3Cpath d='M98,0 H102 L107,5 L102,10 H98 L103,5 Z' fill='%23ffc107'/%3E%3Cpath d='M105,0 H109 L114,5 L109,10 H105 L110,5 Z' fill='%23ffc107'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-size: 100% 100%;
+  background-size: 100% 100%
 }
 
-/* --- LISTS --- */
 .list-spaced {
   display: flex;
   flex-direction: column;
   gap: 10px;
   list-style: none;
-  padding-left: 0;
+  padding-left: 0
 }
+
 .list-spaced li {
   position: relative;
-  padding-left: 20px;
+  padding-left: 20px
 }
+
 .list-spaced li::before {
   content: "•";
   position: absolute;
   left: 0;
   color: var(--color-primary-green);
-  font-weight: bold;
+  font-weight: 700
 }
 
 .list-alpha {
   list-style-type: lower-alpha;
-  padding-left: 20px;
+  padding-left: 20px
 }

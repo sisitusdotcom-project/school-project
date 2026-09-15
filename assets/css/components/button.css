@@ -17,27 +17,24 @@
 
 .btn-view-more:hover {
   background-color: #e0a800;
-  box-shadow: 0 4px 12px rgb(0 0 0 / .2);
+  box-shadow: 0 4px 12px rgb(0 0 0 / .2)
 }
 
-/* --- TACTILE FEEDBACK (MICRO-ANIMATION) --- */
-button, 
-.btn-view-more, 
+button,
+.btn-view-more,
 .slider-btn,
 .btn-poll,
 .back-to-top {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(.4, 0, .2, 1)
 }
 
-button:active, 
-.btn-view-more:active, 
+button:active,
+.btn-view-more:active,
 .slider-btn:active,
 .btn-poll:active,
 .back-to-top:active {
-  transform: scale(0.95) !important;
+  transform: scale(.95) !important
 }
-
-
 
 .btn-view-more-inline {
   align-self: flex-end;
@@ -48,7 +45,7 @@ button:active,
   box-shadow: none;
   letter-spacing: 0
 }
- /* Back to Top Button */
+
 .back-to-top {
   position: fixed;
   bottom: 30px;
@@ -68,18 +65,18 @@ button:active,
   opacity: 0;
   visibility: hidden;
   transform: translateY(20px);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 999;
+  transition: all 0.3s cubic-bezier(.4, 0, .2, 1);
+  z-index: 999
 }
 
 .back-to-top.show {
   opacity: 1;
   visibility: visible;
-  transform: translateY(0);
+  transform: translateY(0)
 }
 
 .back-to-top:hover {
   background-color: var(--color-yellow);
   color: var(--color-neutral-dark);
-  transform: translateY(-5px);
+  transform: translateY(-5px)
 }
