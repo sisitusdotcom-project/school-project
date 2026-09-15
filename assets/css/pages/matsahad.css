@@ -288,3 +288,152 @@
     margin-bottom: 0.2rem; /* Small space below icon */
   }
 }
+
+/* --- Program Kerja / Portfolio Style --- */
+.program-kerja-style {
+  line-height: 1.7;
+}
+.profile-header-card {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  background: var(--color-surface-hover);
+  padding: 1.5rem;
+  border-radius: var(--radius-besar);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 2rem;
+  border-left: 5px solid var(--color-primary-green);
+}
+.profile-photo {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #fff;
+  box-shadow: var(--shadow-sm);
+  flex-shrink: 0;
+}
+.profile-badge {
+  display: inline-block;
+  background-color: var(--color-primary-green);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+.profile-name {
+  font-size: 1.4rem;
+  margin: 0 0 0.25rem 0;
+  color: var(--color-text-main);
+}
+.profile-desc {
+  color: var(--color-neutral-medium);
+  margin: 0;
+  font-size: 0.95rem;
+}
+.section-subtitle {
+  font-size: 1.3rem;
+  color: var(--color-primary-green);
+  border-bottom: 2px dashed #ddd;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+.program-kerja-style .program-list ol {
+  list-style-type: none;
+  counter-reset: program-counter;
+  padding-left: 0;
+}
+.program-kerja-style .program-list > ol > li {
+  position: relative;
+  counter-increment: program-counter;
+  background: #fff;
+  border: 1px solid #eee;
+  padding: 1.25rem 1.25rem 1.25rem 3.5rem; /* Tighter padding */
+  border-radius: var(--radius-sedang);
+  margin-bottom: 0.75rem; /* Tighter margin */
+  box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+  transition: all 0.3s ease;
+}
+.program-kerja-style .program-list > ol > li:hover {
+  border-color: var(--color-primary-green);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+.program-kerja-style .program-list > ol > li::before {
+  content: counter(program-counter);
+  position: absolute;
+  left: 1rem;
+  top: 1.25rem;
+  background: var(--color-primary-green);
+  color: #fff;
+  width: 1.8rem;
+  height: 1.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-weight: bold;
+  font-size: 1rem;
+}
+.program-kerja-style .program-list > ol > li > strong {
+  display: block;
+  font-size: 1.15rem;
+  color: var(--color-text-main);
+  margin-bottom: 0.75rem;
+  line-height: 1.4;
+}
+.program-kerja-style .program-list ul.list-alpha {
+  padding-left: 1.25rem;
+  margin-top: 0.5rem;
+}
+.program-kerja-style .program-list ul.list-alpha li {
+  margin-bottom: 0.4rem;
+  color: var(--color-neutral-medium);
+}
+
+@media (max-width: 576px) {
+  .profile-header-card {
+    flex-direction: column;
+    text-align: center;
+    padding: 1rem;
+    gap: 1rem;
+  }
+  .profile-photo {
+    width: 80px;
+    height: 80px;
+  }
+  .profile-name {
+    font-size: 1.2rem;
+  }
+  .program-kerja-style .program-list > ol > li {
+    padding: 0.85rem;
+    margin-bottom: 0.5rem;
+    position: static; /* Clear relative positioning */
+    display: flow-root; /* Establish BFC to contain floats */
+  }
+  .program-kerja-style .program-list > ol > li > strong {
+    font-size: 1.05rem;
+    margin-bottom: 0.5rem;
+  }
+  .program-kerja-style .program-list > ol > li::before {
+    position: static; /* Remove absolute positioning */
+    float: left; /* Float the circle left */
+    margin-right: 0.5rem; /* Space between circle and text */
+    margin-bottom: 0.25rem;
+    left: auto;
+    top: auto;
+    width: 1.5rem;
+    height: 1.5rem;
+    font-size: 0.9rem;
+  }
+  .program-kerja-style .program-list ul.list-alpha {
+    padding-left: 0.75rem;
+  }
+  .program-kerja-style .program-list ul.list-alpha li {
+    font-size: 0.95rem;
+    margin-bottom: 0.25rem;
+  }
+}
