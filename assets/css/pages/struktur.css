@@ -188,3 +188,46 @@
       display: block;
       margin-top: 1px;
     }
+
+/* Dark Mode Overrides */
+html.dark-mode .outer-border {
+  border-color: var(--color-primary-green);
+}
+
+html.dark-mode .inner-border {
+  background-color: var(--color-surface);
+  border-color: var(--color-primary-green);
+}
+
+html.dark-mode .chart-container {
+  background: var(--color-surface);
+}
+
+html.dark-mode .header-title h1,
+html.dark-mode .header-title h2,
+html.dark-mode .legend {
+  color: var(--color-text-on-primary);
+}
+
+html.dark-mode .legend-solid {
+  border-top-color: var(--color-neutral-medium);
+}
+
+html.dark-mode .legend-dashed {
+  border-top-color: var(--color-neutral-medium);
+}
+
+html.dark-mode .tree-lines line,
+html.dark-mode .tree-lines polyline,
+html.dark-mode .tree-lines path {
+  stroke: var(--color-neutral-medium);
+}
+
+html.dark-mode .node {
+  border-color: var(--color-neutral-medium);
+  box-shadow: 1px 1px 3px rgba(255, 255, 255, 0.1);
+}
+
+html.dark-mode .avatar-wrapper {
+  box-shadow: 0 0 0 1px var(--color-neutral-medium);
+}
