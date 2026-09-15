@@ -1,32 +1,20 @@
-<!DOCTYPE html>
-<html lang="id">
+import re
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Video | MTs Al-Ittihad</title>
-  <script src="https://unpkg.com/@phosphor-icons/web"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap"
-    rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/main.css" />
-  <link rel="stylesheet" href="/assets/css/pages/gallery.css" />
-</head>
+video_html = r"e:\web-projects\MTSALITTIHADMLG.SCH.ID\galeri\video.html"
 
-<body>
-  <div id="app-header"></div>
-  <main class="wrapper mb-3">
-    <div id="app-hero"></div>
-    <div class="breadcrumb-wrapper">
-      <div class="breadcrumb"><a href="/index.html"><i class="ph-bold ph-house"></i> Beranda</a><span>/</span><span
-          class="current-page">Video</span></div>
-    </div>
-    <section class="mt-4 mb-4">
-      <div class="main-sidebar-grid">
-        <article class="article-content article-card">
-          <h2 class="section-title"><strong>VIDEO</strong><span>TERBARU</span></h2>
-          <div class="section-divider"></div>
+with open(video_html, "r", encoding="utf8") as f:
+    html = f.read()
+
+# Add gallery.css link
+if "gallery.css" not in html:
+    html = html.replace(
+        '<link rel="stylesheet" href="/assets/css/main.css" />', 
+        '<link rel="stylesheet" href="/assets/css/main.css" />\n  <link rel="stylesheet" href="/assets/css/pages/gallery.css" />'
+    )
+
+old_article_content = re.search(r'<div class="section-divider"></div>(.*?)<div id="app-sidebar"></div>', html, re.DOTALL).group(1)
+
+new_article_content = '''
           <div class="gallery-page-grid">
             
             <!-- Video 1 -->
@@ -86,14 +74,11 @@
             <a href="#" class="pagination-btn">&raquo;</a>
           </div>
         </article>
-<div id="app-sidebar"></div>
-      </div>
-    </section>
-  </main>
-  <div id="app-footer"></div>
-  <script src="/assets/js/base/layout.js"></script>
-  <script src="/assets/js/components/navigation.js"></script>
-  <script src="/assets/js/main.js"></script>
-</body>
+'''
 
-</html>
+html = html.replace(old_article_content, new_article_content)
+
+with open(video_html, "w", encoding="utf8") as f:
+    f.write(html)
+
+print("Updated video.html layout.")
