@@ -41,3 +41,9 @@ img {
   outline-offset: 3px !important;
   border-radius: 4px
 }
+
+@media (max-width: 991px) {
+  html, body {
+    overflow-x: hidden;
+  }
+}
