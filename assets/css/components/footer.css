@@ -30,7 +30,8 @@
   font-size: 1.05rem;
   font-weight: 800;
   color: var(--color-text-on-primary);
-  line-height: 1.2
+  line-height: 1.2;
+  font-family: 'Nunito', sans-serif
 }
 
 .footer-logo {
@@ -166,7 +167,8 @@
 .footer-news-title {
   font-weight: 700;
   margin-bottom: 3px;
-  font-size: .85rem
+  font-size: .85rem;
+  font-family: 'Nunito', sans-serif
 }
 
 .footer-news-date {

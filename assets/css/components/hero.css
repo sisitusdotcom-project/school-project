@@ -107,6 +107,11 @@
 }
 
 @media (max-width:991px) {
+  .hero-section {
+    margin-left: -15px;
+    margin-right: -15px;
+  }
+
   .hero-slider {
     height: 180px
   }

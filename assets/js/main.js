@@ -18,4 +18,43 @@ window.initBackToTop = initBackToTop; function initDarkMode() {
   var toggleBtns = document.querySelectorAll('.dark-mode-toggle'); var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches; var storedTheme = localStorage.getItem('theme'); if (storedTheme === 'dark' || (!storedTheme && prefersDark)) { document.documentElement.classList.add('dark-mode') }
   toggleBtns.forEach(function(btn) { btn.addEventListener('click', function () { document.documentElement.classList.toggle('dark-mode'); var isDark = document.documentElement.classList.contains('dark-mode'); localStorage.setItem('theme', isDark ? 'dark' : 'light') }) })
 }
-window.initDarkMode = initDarkMode
+window.initDarkMode = initDarkMode;
+
+function initNumberCounters() {
+  var counters = document.querySelectorAll('.stat-number');
+  if (counters.length === 0) return;
+  var observer = new IntersectionObserver(function(entries, obs) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        var el = entry.target;
+        var targetValue = parseInt(el.getAttribute('data-target'), 10);
+        if (!isNaN(targetValue)) {
+          var duration = 2000;
+          var start = null;
+          function step(timestamp) {
+            if (!start) start = timestamp;
+            var progress = timestamp - start;
+            var current = Math.min(Math.floor((progress / duration) * targetValue), targetValue);
+            el.innerText = current;
+            if (progress < duration) {
+              window.requestAnimationFrame(step);
+            } else {
+              el.innerText = targetValue;
+            }
+          }
+          window.requestAnimationFrame(step);
+        }
+        obs.unobserve(el);
+      }
+    });
+  }, { threshold: 0.1 });
+  counters.forEach(function(el) {
+    var text = el.innerText.trim();
+    if (text) {
+      el.setAttribute('data-target', text);
+      el.innerText = '0';
+      observer.observe(el);
+    }
+  });
+}
+window.initNumberCounters = initNumberCounters;

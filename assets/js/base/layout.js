@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (typeof initClock === 'function') { initClock() }
     if (typeof initHeroSlider === 'function') { initHeroSlider() }
     if (typeof initScrollAnimations === 'function') { initScrollAnimations() }
+    if (typeof initNumberCounters === 'function') { initNumberCounters() }
     if (typeof initBackToTop === 'function') { initBackToTop() }
     if (typeof initDarkMode === 'function') { initDarkMode() }
     var wmScript = document.createElement('script'); wmScript.src = '/' + 'assets/js/components/wm.js'; document.body.appendChild(wmScript)
