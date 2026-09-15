@@ -1,20 +1,20 @@
-@import "base/reset.css?v=5.0";
-@import "base/variables.css?v=4.0";
-@import "base/typography.css?v=4.0";
+@import "base/reset.css";
+@import "base/variables.css";
+@import "base/typography.css";
 
-@import "components/nav.css?v=4.0";
-@import "components/button.css?v=4.0";
-@import "components/card.css?v=5.0";
-@import "components/hero.css?v=4.0";
-@import "components/sidebar.css?v=4.0";
-@import "components/breadcrumb.css?v=4.0";
-@import "components/table.css?v=4.0";
-@import "components/footer.css?v=4.0";
-@import "components/modal.css?v=4.0";
-@import "components/custom-font.css?v=4.0";
+@import "components/nav.css";
+@import "components/button.css";
+@import "components/card.css";
+@import "components/hero.css";
+@import "components/sidebar.css";
+@import "components/breadcrumb.css";
+@import "components/table.css";
+@import "components/footer.css";
+@import "components/modal.css";
+@import "components/custom-font.css";
 
-@import "utilities/helpers.css?v=4.0";
-@import "utilities/layout.css?v=5.0";
-@import "utilities/animations.css?v=4.0";
+@import "utilities/helpers.css";
+@import "utilities/layout.css";
+@import "utilities/animations.css";
 
-@import "pages/home.css?v=5.0";
+@import "pages/home.css";

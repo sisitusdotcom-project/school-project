@@ -20,18 +20,6 @@ body {
   overflow-wrap: break-word;
 }
 
-@media (max-width: 991px) {
-  html, body {
-    overflow-x: hidden;
-  }
-}
-
-@media (min-width: 992px) {
-  body {
-    overflow-x: clip;
-  }
-}
-
 ul,
 ol {
   list-style: none
