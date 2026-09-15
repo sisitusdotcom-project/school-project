@@ -236,8 +236,11 @@
 
 .header-border-strip {
   height: 5px;
+  min-height: 5px;
+  flex-shrink: 0;
   background: linear-gradient(90deg, #E63946 0%, #E63946 25%, #F4A261 25%, #F4A261 50%, #E9C46A 50%, #E9C46A 75%, #2A9D8F 75%, #2A9D8F 100%);
-  width: 100%
+  width: 100%;
+  z-index: 10;
 }
 
 .mobile-menu-toggle {
@@ -332,11 +335,22 @@
     box-shadow: 0 4px 6px rgb(0 0 0 / .3)
   }
 
+  .nav-container.active {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    z-index: 9999;
+  }
   .nav-container.active .nav-wrapper {
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    height: calc(100vh - 58px);
+    flex-grow: 1;
+    overflow-y: auto;
   }
 
   .main-nav {
