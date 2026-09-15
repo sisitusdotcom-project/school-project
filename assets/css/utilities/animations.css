@@ -1,0 +1,68 @@
+/* === SCROLL ANIMATIONS === */
+.animate-on-scroll {
+  opacity: 0;
+  transition: opacity 1.2s cubic-bezier(.22, 1, .36, 1), transform 1.2s cubic-bezier(.22, 1, .36, 1) !important;
+  will-change: opacity, transform
+}
+
+.anim-fade-up {
+  transform: translateY(30px)
+}
+
+.anim-fade-down {
+  transform: translateY(-30px)
+}
+
+.anim-fade-left {
+  transform: translateX(30px)
+}
+
+.anim-fade-right {
+  transform: translateX(-30px)
+}
+
+.anim-zoom-in {
+  transform: scale(.95)
+}
+
+.anim-zoom-out {
+  transform: scale(1.02)
+}
+
+.animate-on-scroll.is-visible {
+  opacity: 1;
+  transform: translate(0) scale(1)
+}
+
+/* --- ANIMATION DELAYS --- */
+.delay-100 {
+  transition-delay: 100ms !important
+}
+
+.delay-200 {
+  transition-delay: 200ms !important
+}
+
+.delay-300 {
+  transition-delay: 300ms !important
+}
+
+.delay-400 {
+  transition-delay: 400ms !important
+}
+
+.delay-500 {
+  transition-delay: 500ms !important
+}
+
+.delay-600 {
+  transition-delay: 600ms !important
+}
+
+.delay-700 {
+  transition-delay: 700ms !important
+}
+
+.delay-800 {
+  transition-delay: 800ms !important
+}

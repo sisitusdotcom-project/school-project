@@ -1,18 +1,24 @@
 /* === BASE === */
 @import "base/reset.css?v=3.1";
 @import "base/variables.css?v=3.1";
-@import "base/typography.css?v=3.0";
+@import "base/typography.css?v=3.1";
 
 /* === KOMPONEN === */
 @import "components/nav.css?v=3.1";
 @import "components/button.css?v=3.4";
-@import "components/card.css?v=3.35";
+@import "components/card.css?v=3.4";
+@import "components/hero.css?v=1.0";
+@import "components/sidebar.css?v=1.0";
+@import "components/breadcrumb.css?v=1.0";
+@import "components/table.css?v=1.0";
 @import "components/footer.css?v=3.0";
 @import "components/modal.css?v=2.1";
 @import "components/custom-font.css?v=1.0";
 
 /* === UTILITAS === */
-@import "utilities/helpers.css?v=3.3";
+@import "utilities/helpers.css?v=3.4";
+@import "utilities/layout.css?v=1.0";
+@import "utilities/animations.css?v=1.0";
 
 /* === HALAMAN KHUSUS === */
 @import "pages/home.css?v=3.1";
