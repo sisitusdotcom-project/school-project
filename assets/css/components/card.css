@@ -411,6 +411,6 @@
 
 @media (max-width: 768px) {
   .article-card {
-    padding: 15px;
+    padding: 15px 10px;
   }
 }
