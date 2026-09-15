@@ -37,13 +37,21 @@ button:active,
 }
 
 .btn-view-more-inline {
-  align-self: flex-end;
+  display: inline-block;
   font-size: .7rem;
   padding: 6px 14px;
   border-radius: 4px;
   background-color: var(--color-yellow);
+  color: var(--color-neutral-dark);
+  text-decoration: none;
+  font-weight: 600;
   box-shadow: none;
-  letter-spacing: 0
+  letter-spacing: 0;
+  transition: all 0.3s ease;
+}
+
+.btn-view-more-inline:hover {
+  background-color: #e0a800;
 }
 
 .back-to-top {

@@ -25,6 +25,10 @@
   text-align: center
 }
 
+.text-right {
+  text-align: right
+}
+
 .ml-3 {
   margin-left: 1rem
 }
