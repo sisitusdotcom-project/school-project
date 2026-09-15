@@ -4,6 +4,10 @@
   gap: 30px
 }
 
+.main-sidebar-grid > * {
+  min-width: 0;
+}
+
 @media (max-width:991px) {
   .main-sidebar-grid {
     grid-template-columns: 1fr
@@ -14,4 +18,8 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px
+}
+
+.infografis-grid > * {
+  min-width: 0;
 }

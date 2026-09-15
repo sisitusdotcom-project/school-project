@@ -9,16 +9,27 @@
 
 html {
   width: 100%;
-  overflow-x: hidden;
-  background-color: var(--color-bg-light)
+  background-color: var(--color-bg-light);
 }
 
 body {
   width: 100%;
   max-width: 100%;
-  overflow-x: hidden;
   line-height: 1.6;
-  color: var(--color-neutral-dark)
+  color: var(--color-neutral-dark);
+  overflow-wrap: break-word;
+}
+
+@media (max-width: 991px) {
+  html, body {
+    overflow-x: hidden;
+  }
+}
+
+@media (min-width: 992px) {
+  body {
+    overflow-x: clip;
+  }
 }
 
 ul,

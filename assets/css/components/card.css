@@ -408,3 +408,9 @@
   border-radius: var(--border-radius);
   box-shadow: var(--shadow-sm)
 }
+
+@media (max-width: 768px) {
+  .article-card {
+    padding: 15px;
+  }
+}

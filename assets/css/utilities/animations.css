@@ -20,6 +20,13 @@
   transform: translateX(-30px)
 }
 
+@media (max-width: 991px) {
+  .anim-fade-left, 
+  .anim-fade-right {
+    transform: translateY(30px)
+  }
+}
+
 .anim-zoom-in {
   transform: scale(.95)
 }

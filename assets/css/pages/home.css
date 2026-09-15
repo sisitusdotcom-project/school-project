@@ -4,6 +4,10 @@
   gap: 20px
 }
 
+.news-grid > * {
+  min-width: 0;
+}
+
 @media (max-width:991px) {
   .news-grid {
     grid-template-columns: 1fr
@@ -18,6 +22,10 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 15px
+}
+
+.stats-grid > * {
+  min-width: 0;
 }
 
 .stat-box {
