@@ -63,6 +63,16 @@
   }
 }
 
+.d-mobile-only {
+  display: none !important
+}
+
+@media (max-width:991px) {
+  .d-mobile-only {
+    display: block !important
+  }
+}
+
 #app-header:empty {
   min-height: 195px
 }
