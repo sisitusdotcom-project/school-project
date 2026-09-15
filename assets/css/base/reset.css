@@ -9,11 +9,13 @@
 
 html {
   width: 100%;
+  overflow-x: hidden;
   background-color: var(--color-bg-light)
 }
 
 body {
   width: 100%;
+  max-width: 100%;
   overflow-x: hidden;
   line-height: 1.6;
   color: var(--color-neutral-dark)
