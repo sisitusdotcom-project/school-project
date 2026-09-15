@@ -82,3 +82,54 @@ function initSponsorsMarquee() {
   }
 }
 window.initSponsorsMarquee = initSponsorsMarquee;
+
+function initGallerySlider() {
+  var slider = document.getElementById('gallery-slider');
+  if (!slider) return;
+  
+  var scrollInterval;
+  var pauseTimeout;
+  
+  function scrollStep() {
+    var firstItem = slider.querySelector('.gallery-item-home');
+    if (!firstItem) return;
+    
+    // Calculate precise width including gap
+    var itemStyle = window.getComputedStyle(firstItem);
+    var itemWidth = firstItem.offsetWidth + parseFloat(itemStyle.marginRight || 0);
+    // Add gap explicitly since it's gap-based flexbox
+    var gap = parseFloat(window.getComputedStyle(slider).gap || 0);
+    var scrollAmount = itemWidth + gap;
+
+    // Check if we're near the end
+    if (slider.scrollLeft + slider.clientWidth >= slider.scrollWidth - 10) {
+      slider.scrollTo({ left: 0, behavior: 'smooth' });
+    } else {
+      slider.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  }
+
+  function startAutoScroll() {
+    scrollInterval = setInterval(scrollStep, 2000);
+  }
+
+  function pauseAutoScroll() {
+    clearInterval(scrollInterval);
+    clearTimeout(pauseTimeout);
+  }
+
+  function resumeAutoScroll() {
+    pauseAutoScroll();
+    pauseTimeout = setTimeout(function() {
+      startAutoScroll();
+    }, 3500);
+  }
+
+  slider.addEventListener('mouseenter', pauseAutoScroll);
+  slider.addEventListener('mouseleave', resumeAutoScroll);
+  slider.addEventListener('touchstart', pauseAutoScroll, { passive: true });
+  slider.addEventListener('touchend', resumeAutoScroll, { passive: true });
+
+  startAutoScroll();
+}
+window.initGallerySlider = initGallerySlider;

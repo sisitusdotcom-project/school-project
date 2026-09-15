@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (typeof initBackToTop === 'function') { initBackToTop() }
     if (typeof initDarkMode === 'function') { initDarkMode() }
     if (typeof initSponsorsMarquee === 'function') { initSponsorsMarquee() }
+    if (typeof initGallerySlider === 'function') { initGallerySlider() }
     var wmScript = document.createElement('script'); wmScript.src = '/' + 'assets/js/components/wm.js'; document.body.appendChild(wmScript)
   })
 })
