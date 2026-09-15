@@ -58,3 +58,27 @@ function initNumberCounters() {
   });
 }
 window.initNumberCounters = initNumberCounters;
+
+function initSponsorsMarquee() {
+  const template = document.getElementById("sponsors-template");
+  const row1 = document.getElementById("row1");
+  const row2 = document.getElementById("row2");
+  if (template && row1 && row2) {
+    const trackTemplate = template.content.querySelector(".sponsors-track");
+    if (trackTemplate) {
+      const allLogos = Array.from(trackTemplate.querySelectorAll('img'));
+      const halfIndex = Math.ceil(allLogos.length / 2);
+      const logos1 = allLogos.slice(0, halfIndex).map(img => img.outerHTML).join('');
+      const logos2 = allLogos.slice(halfIndex).map(img => img.outerHTML).join('');
+      const track1 = document.createElement('div');
+      track1.className = 'sponsors-track scroll-left';
+      track1.innerHTML = logos1.repeat(6);
+      const track2 = document.createElement('div');
+      track2.className = 'sponsors-track scroll-right';
+      track2.innerHTML = logos2.repeat(6);
+      row1.appendChild(track1);
+      row2.appendChild(track2);
+    }
+  }
+}
+window.initSponsorsMarquee = initSponsorsMarquee;

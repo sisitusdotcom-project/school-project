@@ -179,3 +179,125 @@
     font-size: .7rem
   }
 }
+/* Galeri & Link Terkait */
+.gallery-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+.gallery-item-home {
+  display: flex;
+  flex-direction: column;
+}
+.gallery-item-home img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-bottom: 0;
+}
+.gallery-item-meta {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+.gallery-badge {
+  background-color: var(--color-primary-green);
+  color: #fff;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 2px;
+}
+.gallery-date {
+  font-size: 0.8rem;
+  color: var(--color-neutral-medium);
+}
+
+.link-terkait-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  width: auto;
+  text-align: center;
+  transition: transform 0.3s ease;
+}
+.link-terkait-item:hover {
+  transform: translateY(-5px);
+}
+.link-terkait-item img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  margin-bottom: 0;
+}
+
+
+@media (max-width: 991px) {
+  .gallery-grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 576px) {
+  .gallery-grid-4 {
+    grid-template-columns: 1fr;
+  }
+  .link-terkait-grid {
+    gap: 15px;
+  }
+  .link-terkait-item {
+    
+  }
+  .link-terkait-item img {
+    width: 60px;
+    height: 60px;
+  }
+}
+
+/* Marquee Animation Mysisi Style */
+.sponsors-wrapper {
+  width: 100%;
+}
+.sponsors-container {
+  overflow: hidden;
+  width: 100%;
+  position: relative;
+  height: 60px;
+  mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+}
+.sponsors-track {
+  display: flex;
+  align-items: center;
+  width: max-content;
+  will-change: transform;
+  gap: 3.5rem;
+}
+.sponsors-track img {
+  height: 45px;
+  width: auto;
+  object-fit: contain;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+.sponsors-track img:hover {
+  transform: scale(1.1);
+}
+.scroll-left {
+  animation: scroll-left 80s linear infinite;
+}
+.scroll-right {
+  animation: scroll-right 80s linear infinite;
+}
+@keyframes scroll-left {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@keyframes scroll-right {
+  from { transform: translateX(-50%); }
+  to { transform: translateX(0); }
+}
+.sponsors-container:hover .sponsors-track {
+  animation-play-state: paused;
+}

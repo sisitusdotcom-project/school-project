@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (typeof initNumberCounters === 'function') { initNumberCounters() }
     if (typeof initBackToTop === 'function') { initBackToTop() }
     if (typeof initDarkMode === 'function') { initDarkMode() }
+    if (typeof initSponsorsMarquee === 'function') { initSponsorsMarquee() }
     var wmScript = document.createElement('script'); wmScript.src = '/' + 'assets/js/components/wm.js'; document.body.appendChild(wmScript)
   })
 })
