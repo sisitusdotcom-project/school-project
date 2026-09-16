@@ -403,14 +403,14 @@
 }
 
 .article-card {
-  background: var(--color-surface);
-  padding: 30px;
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow-sm)
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 @media (max-width: 768px) {
   .article-card {
-    padding: 15px 10px;
+    padding: 0;
   }
 }
