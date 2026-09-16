@@ -1,6 +1,6 @@
 import re
 
-video_html = r"e:\web-projects\MTSALITTIHADMLG.SCH.ID\galeri\video.html"
+video_html = r"e:\web-projects\MTSALMUHAMMADIYAH 1MLG.SCH.ID\galeri\video.html"
 
 with open(video_html, "r", encoding="utf8") as f:
     html = f.read()
@@ -25,7 +25,7 @@ new_article_content = '''
               </div>
               <div class="video-card-content">
                 <span class="video-date">02 September 2026</span>
-                <h3 class="gallery-title">Semarak Kemerdekaan MTs Al Ittihad Poncokusumo</h3>
+                <h3 class="gallery-title">Semarak Kemerdekaan SD Muhammadiyah 1 Sedati Sedati</h3>
               </div>
             </a>
 
@@ -37,7 +37,7 @@ new_article_content = '''
               </div>
               <div class="video-card-content">
                 <span class="video-date">02 September 2026</span>
-                <h3 class="gallery-title">MATAMUDA MTs Al Ittihad Poncokusumo Tahun Ajaran 2026/2027</h3>
+                <h3 class="gallery-title">MATAMUDA SD Muhammadiyah 1 Sedati Sedati Tahun Ajaran 2026/2027</h3>
               </div>
             </a>
 

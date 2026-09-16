@@ -1,6 +1,6 @@
 import os
 
-css_dir = r"e:\web-projects\MTSALITTIHADMLG.SCH.ID\assets\css\pages"
+css_dir = r"e:\web-projects\MTSALMUHAMMADIYAH 1MLG.SCH.ID\assets\css\pages"
 css_path = os.path.join(css_dir, "gallery.css")
 
 css_content = '''

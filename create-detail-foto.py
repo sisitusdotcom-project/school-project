@@ -1,6 +1,6 @@
 import os
 
-detail_html = r"e:\web-projects\MTSALITTIHADMLG.SCH.ID\galeri\detail-foto.html"
+detail_html = r"e:\web-projects\MTSALMUHAMMADIYAH 1MLG.SCH.ID\galeri\detail-foto.html"
 
 html_content = '''<!DOCTYPE html>
 <html lang="id">
@@ -8,7 +8,7 @@ html_content = '''<!DOCTYPE html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Detail Foto | MTs Al-Ittihad</title>
+  <title>Detail Foto | MTs Al-Muhammadiyah 1</title>
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

@@ -1,6 +1,6 @@
 import os
 
-css_path = r"e:\web-projects\MTSALITTIHADMLG.SCH.ID\assets\css\pages\karya-siswa.css"
+css_path = r"e:\web-projects\MTSALMUHAMMADIYAH 1MLG.SCH.ID\assets\css\pages\karya-siswa.css"
 
 css_content = '''
 /* =========================================

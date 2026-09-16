@@ -1,6 +1,6 @@
 import os
 
-karya_html = r"e:\web-projects\MTSALITTIHADMLG.SCH.ID\karya-siswa.html"
+karya_html = r"e:\web-projects\MTSALMUHAMMADIYAH 1MLG.SCH.ID\karya-siswa.html"
 
 html_content = '''<!DOCTYPE html>
 <html lang="id">
@@ -8,7 +8,7 @@ html_content = '''<!DOCTYPE html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Karya Siswa | MTs Al-Ittihad</title>
+  <title>Karya Siswa | MTs Al-Muhammadiyah 1</title>
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,7 +29,7 @@ html_content = '''<!DOCTYPE html>
       
       <div style="position: relative; z-index: 1;">
         <h1 style="font-size: 3rem; font-weight: 800; margin-bottom: 1rem;">Karya Siswa</h1>
-        <p style="font-size: 1.2rem; max-width: 600px; margin: 0 auto; opacity: 0.9;">Ruang apresiasi untuk kreativitas, karya, dan prestasi siswa MTs Al-Ittihad.</p>
+        <p style="font-size: 1.2rem; max-width: 600px; margin: 0 auto; opacity: 0.9;">Ruang apresiasi untuk kreativitas, karya, dan prestasi siswa MTs Al-Muhammadiyah 1.</p>
       </div>
     </section>
 
@@ -67,7 +67,7 @@ html_content = '''<!DOCTYPE html>
           <div class="karya-author-meta">
             <div class="author-avatar"><i class="ph-fill ph-student"></i></div>
             <div class="author-info">
-              <span class="author-name">Tim Robotika Al-Ittihad</span>
+              <span class="author-name">Tim Robotika Al-Muhammadiyah 1</span>
               <span class="author-class">Ekstrakurikuler Robotika</span>
             </div>
           </div>

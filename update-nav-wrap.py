@@ -1,6 +1,6 @@
 import os
 
-nav_css_path = r"e:\web-projects\MTSALITTIHADMLG.SCH.ID\assets\css\components\nav.css"
+nav_css_path = r"e:\web-projects\MTSALMUHAMMADIYAH 1MLG.SCH.ID\assets\css\components\nav.css"
 with open(nav_css_path, "r", encoding="utf8") as f:
     nav_css = f.read()
 

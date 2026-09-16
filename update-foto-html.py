@@ -1,6 +1,6 @@
 import re
 
-foto_html = r"e:\web-projects\MTSALITTIHADMLG.SCH.ID\galeri\foto.html"
+foto_html = r"e:\web-projects\MTSALMUHAMMADIYAH 1MLG.SCH.ID\galeri\foto.html"
 
 with open(foto_html, "r", encoding="utf8") as f:
     html = f.read()
@@ -62,7 +62,7 @@ new_article_content = '''
             <!-- Album 4 -->
             <a href="/galeri/detail-foto.html" class="gallery-card">
               <div class="gallery-card-img-wrapper">
-                <img src="/assets/img/pegawai/fatchul-munir.jpg" alt="KSM SD MI KEC PONCOKUSUMO 2020">
+                <img src="/assets/img/pegawai/fatchul-munir.jpg" alt="KSM SD MI KEC SEDATI 2020">
                 <div class="album-icon-overlay" style="position: absolute; top: 10px; left: 10px; width: 32px; height: 32px; background: #fbbf24; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
                   <i class="ph-bold ph-camera" style="font-size: 1.1rem; color: #000;"></i>
                 </div>
@@ -72,7 +72,7 @@ new_article_content = '''
                   <span class="gallery-badge">4 Foto</span>
                   <span class="gallery-date">Kamis, 20 Oktober 2022</span>
                 </div>
-                <h3 class="gallery-title">KSM SD MI KEC PONCOKUSUMO 2020</h3>
+                <h3 class="gallery-title">KSM SD MI KEC SEDATI 2020</h3>
               </div>
             </a>
 

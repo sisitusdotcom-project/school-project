@@ -1,6 +1,6 @@
 import os
 
-detail_html = r"e:\web-projects\MTSALITTIHADMLG.SCH.ID\detail-karya.html"
+detail_html = r"e:\web-projects\MTSALMUHAMMADIYAH 1MLG.SCH.ID\detail-karya.html"
 
 html_content = '''<!DOCTYPE html>
 <html lang="id">
@@ -8,7 +8,7 @@ html_content = '''<!DOCTYPE html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Detail Karya Siswa | MTs Al-Ittihad</title>
+  <title>Detail Karya Siswa | MTs Al-Muhammadiyah 1</title>
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -46,7 +46,7 @@ html_content = '''<!DOCTYPE html>
           <div class="karya-author-meta" style="margin-bottom: 0;">
             <div class="author-avatar"><i class="ph-fill ph-student"></i></div>
             <div class="author-info">
-              <span class="author-name">Tim Robotika Al-Ittihad (Budi, Fikri, dkk)</span>
+              <span class="author-name">Tim Robotika Al-Muhammadiyah 1 (Budi, Fikri, dkk)</span>
               <span class="author-class">Ekstrakurikuler Robotika / Kelas 8</span>
             </div>
           </div>
@@ -63,7 +63,7 @@ html_content = '''<!DOCTYPE html>
           <!-- Main Description -->
           <div class="detail-desc-box">
             <h3 style="margin-top: 0; color: var(--color-primary-green); margin-bottom: 1rem;">Deskripsi Karya</h3>
-            <p>Robot pembersih lingkungan otomatis ini merupakan proyek inovatif yang dikembangkan oleh tim ekstrakurikuler robotika MTs Al-Ittihad. Dilengkapi dengan sensor ultrasonik, robot ini mampu mendeteksi halangan di sekitarnya dan berbelok secara otomatis, sehingga dapat menyapu area yang luas tanpa bantuan kendali manual.</p>
+            <p>Robot pembersih lingkungan otomatis ini merupakan proyek inovatif yang dikembangkan oleh tim ekstrakurikuler robotika MTs Al-Muhammadiyah 1. Dilengkapi dengan sensor ultrasonik, robot ini mampu mendeteksi halangan di sekitarnya dan berbelok secara otomatis, sehingga dapat menyapu area yang luas tanpa bantuan kendali manual.</p>
             <p>Tujuan utama dari proyek ini adalah untuk menanamkan kesadaran peduli lingkungan melalui pemanfaatan teknologi yang tepat guna. Robot ini dibuat dari bahan-bahan daur ulang dan komponen elektronik dasar, menjadikannya solusi cerdas yang hemat biaya.</p>
             <p>Proyek ini telah melalui proses uji coba selama 3 bulan dan berhasil menyabet juara 1 pada ajang Lomba Inovasi Teknologi Tepat Guna tingkat Kabupaten tahun 2026.</p>
           </div>
