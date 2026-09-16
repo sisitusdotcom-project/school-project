@@ -365,7 +365,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      transform: scale(0.7);
+      transform: scale(0.9);
       transform-origin: center bottom;
   }
 
@@ -390,6 +390,7 @@
       -webkit-background-clip: text;
       background-clip: text;
       -webkit-text-fill-color: transparent;
+      -webkit-text-stroke: 0.6px #ffffff;
   }
 
   .mobile-animation-logo-inner .sd-besar {
@@ -428,6 +429,7 @@
       font-weight: bold;
       text-align: center;
       white-space: nowrap;
+      -webkit-text-stroke: 0.3px #ffffff;
       animation: munculBounce 0.8s ease-out 0.5s forwards;
       opacity: 0;
   }
