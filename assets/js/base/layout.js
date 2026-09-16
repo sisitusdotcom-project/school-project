@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function () {
   if (localStorage.getItem('theme') === 'dark') {
       preloader.classList.add('dark-mode-preloader');
   }
-  preloader.innerHTML = '<div class="mobile-animation-logo-inner" style="transform: scale(1.2); transform-origin: center center;"><div class="baris-atas"><div class="biru-elegan"><span class="sd-besar">SD</span><span class="muhammadiyah">MUHAMMADIYAH</span><span class="sedati">SEDATI</span></div><div class="angka-satu">1</div></div><div class="merah">“ISLAMIC MODERN SCHOOL”</div></div>';
+  preloader.innerHTML = '<div class="mobile-animation-logo-inner"><div class="baris-atas"><div class="biru-elegan"><span class="sd-besar">SD</span><span class="muhammadiyah">MUHAMMADIYAH</span><span class="sedati">SEDATI</span></div><div class="angka-satu">1</div></div><div class="merah">“ISLAMIC MODERN SCHOOL”</div></div>';
   document.body.prepend(preloader);
 
   var baseUrl = '/'; var loadComponent = function (id, url) { var el = document.getElementById(id); if (!el) return Promise.resolve(); return fetch('/' + url + '').then(function (response) { if (!response.ok) throw new Error('Failed to load ' + url); return response.text() }).then(function (html) { var processedHtml = html.replace(/\{BASE_URL\}/g, baseUrl); el.outerHTML = processedHtml }).catch(function (error) { console.error('Error loading component:', error) }) }; Promise.all([loadComponent('app-header', 'components/header.html'), loadComponent('app-hero', 'components/hero.html'), loadComponent('app-sidebar', 'components/sidebar.html'), loadComponent('app-footer', 'components/footer.html')]).then(function () {
