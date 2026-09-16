@@ -45,9 +45,9 @@
   padding-left: 8px
 }
 
-.widget-header-green {
+.widget-header-blue {
   font-family: 'Nunito', sans-serif;
-  background-color: var(--color-primary-green);
+  background-color: var(--color-primary-blue);
   color: #fff;
   font-size: 1rem;
   font-weight: 700;
@@ -90,7 +90,7 @@
 }
 
 .poll-option input[type="radio"] {
-  accent-color: var(--color-primary-green)
+  accent-color: var(--color-primary-blue)
 }
 
 .poll-actions {
@@ -106,12 +106,12 @@
   font-weight: 700;
   text-transform: uppercase;
   cursor: pointer;
-  border: 2px solid var(--color-primary-green);
+  border: 2px solid var(--color-primary-blue);
   transition: all 0.2s ease
 }
 
 .btn-poll-primary {
-  background-color: var(--color-primary-green);
+  background-color: var(--color-primary-blue);
   color: #fff
 }
 
@@ -121,11 +121,11 @@
 
 .btn-poll-outline {
   background-color: #fff0;
-  color: var(--color-primary-green)
+  color: var(--color-primary-blue)
 }
 
 .btn-poll-outline:hover {
-  background-color: var(--color-primary-green);
+  background-color: var(--color-primary-blue);
   color: #fff
 }
 

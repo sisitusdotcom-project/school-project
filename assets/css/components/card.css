@@ -50,7 +50,7 @@
 }
 
 .news-badge {
-  background-color: var(--color-primary-green);
+  background-color: var(--color-primary-blue);
   color: #fff;
   font-size: .75rem;
   font-weight: 600;
@@ -129,7 +129,7 @@
 }
 
 .news-list-item:hover .news-title {
-  color: var(--color-primary-green)
+  color: var(--color-primary-blue)
 }
 
 @media (max-width:991px) {
@@ -382,7 +382,7 @@
   font-size: .65rem;
   display: inline-flex;
   margin-top: 5px;
-  color: var(--color-primary-green);
+  color: var(--color-primary-blue);
   font-weight: 600;
   letter-spacing: .5px
 }
@@ -398,7 +398,7 @@
   margin-bottom: 0;
   margin-top: 20px;
   font-weight: 700;
-  color: var(--color-primary-green);
+  color: var(--color-primary-blue);
   font-size: 1rem
 }
 

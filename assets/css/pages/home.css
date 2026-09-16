@@ -211,7 +211,7 @@
   gap: 15px;
 }
 .gallery-badge {
-  background-color: var(--color-primary-green);
+  background-color: var(--color-primary-blue);
   color: #fff;
   padding: 4px 10px;
   font-size: 0.75rem;

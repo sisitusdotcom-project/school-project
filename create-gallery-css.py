@@ -62,7 +62,7 @@ css_content = '''
   margin-bottom: 0.75rem;
 }
 .gallery-badge {
-  background-color: var(--color-primary-green);
+  background-color: var(--color-primary-blue);
   color: #fff;
   font-size: 0.75rem;
   font-weight: 700;
@@ -264,7 +264,7 @@ css_content = '''
   padding: 1rem;
   background: var(--color-surface-hover);
   border-radius: var(--radius-sedang);
-  border-left: 4px solid var(--color-primary-green);
+  border-left: 4px solid var(--color-primary-blue);
 }
 
 @media (max-width: 991px) {

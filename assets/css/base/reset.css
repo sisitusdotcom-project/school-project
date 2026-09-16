@@ -37,7 +37,7 @@ img {
 }
 
 :focus-visible {
-  outline: 3px solid var(--color-primary-green) !important;
+  outline: 3px solid var(--color-primary-blue) !important;
   outline-offset: 3px !important;
   border-radius: 4px
 }

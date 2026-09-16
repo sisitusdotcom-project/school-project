@@ -35,7 +35,7 @@ css_content = '''
   content: "";
   position: absolute;
   top: 0; left: 0; right: 0; height: 4px;
-  background: var(--color-primary-green);
+  background: var(--color-primary-blue);
   transform: scaleX(0);
   transform-origin: left;
   transition: transform 0.4s ease;
@@ -52,7 +52,7 @@ css_content = '''
   width: 60px;
   height: 60px;
   background: #ecfdf5;
-  color: var(--color-primary-green);
+  color: var(--color-primary-blue);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -63,7 +63,7 @@ css_content = '''
 }
 .karya-category-card:hover .karya-cat-icon {
   transform: scale(1.1) rotate(5deg);
-  background: var(--color-primary-green);
+  background: var(--color-primary-blue);
   color: #fff;
 }
 .karya-cat-title {
@@ -143,7 +143,7 @@ css_content = '''
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-primary-green);
+  color: var(--color-primary-blue);
   font-size: 1.4rem;
 }
 .author-info {
@@ -206,7 +206,7 @@ css_content = '''
   top: 1rem;
   right: 1rem;
   background: rgba(255,255,255,0.95);
-  color: var(--color-primary-green);
+  color: var(--color-primary-blue);
   font-weight: 700;
   font-size: 0.75rem;
   padding: 0.3rem 0.8rem;
@@ -241,7 +241,7 @@ css_content = '''
   gap: 0.5rem;
 }
 .karya-card-author-icon {
-  color: var(--color-primary-green);
+  color: var(--color-primary-blue);
   font-size: 1.2rem;
 }
 .karya-card-author-text {
@@ -357,7 +357,7 @@ css_content = '''
 }
 .karya-badge-cat {
   background: #ecfdf5;
-  color: var(--color-primary-green);
+  color: var(--color-primary-blue);
   padding: 0.3rem 0.8rem;
   border-radius: 20px;
   font-size: 0.85rem;

@@ -60,7 +60,7 @@ button:active,
   right: 35px;
   width: 40px;
   height: 40px;
-  background-color: var(--color-primary-green);
+  background-color: var(--color-primary-blue);
   color: var(--color-white);
   border: none;
   border-radius: 50%;

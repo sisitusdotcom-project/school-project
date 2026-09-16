@@ -103,7 +103,7 @@ p {
   content: "•";
   position: absolute;
   left: 0;
-  color: var(--color-primary-green);
+  color: var(--color-primary-blue);
   font-weight: 700
 }
 

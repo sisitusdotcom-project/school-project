@@ -191,12 +191,12 @@
 
 /* Dark Mode Overrides */
 html.dark-mode .outer-border {
-  border-color: var(--color-primary-green);
+  border-color: var(--color-primary-blue);
 }
 
 html.dark-mode .inner-border {
   background-color: var(--color-surface);
-  border-color: var(--color-primary-green);
+  border-color: var(--color-primary-blue);
 }
 
 html.dark-mode .chart-container {

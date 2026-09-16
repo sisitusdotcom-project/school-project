@@ -91,7 +91,7 @@
   padding: 30px 40px 10px;
   text-align: left;
   position: relative;
-  border-bottom: 2px solid var(--color-primary-green)
+  border-bottom: 2px solid var(--color-primary-blue)
 }
 
 .modal-header h3 {
@@ -126,7 +126,7 @@
 }
 
 .profile-welcome-full h4 {
-  color: var(--color-primary-green);
+  color: var(--color-primary-blue);
   font-family: 'Georgia', serif;
   font-size: 1.8rem;
   font-weight: 700;
@@ -161,7 +161,7 @@
   padding-top: 4px;
   padding-right: 8px;
   padding-left: 3px;
-  color: var(--color-primary-green);
+  color: var(--color-primary-blue);
   font-family: 'Georgia', serif;
   font-weight: 700
 }

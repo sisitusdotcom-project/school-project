@@ -1,6 +1,6 @@
 :root {
-  --color-primary-green: #0F7E41;
-  --color-primary-blue: #004b99;
+  --color-primary-blue: #003B9C;
+  --color-accent-gold: #F9A826;
   --strip-red: #e30a13;
   --strip-yellow: #f8e110;
   --color-yellow: #ffc107;
@@ -14,15 +14,15 @@
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.125);
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
   --border-radius: 4px;
-  --color-header-bg: var(--color-primary-green);
-  --color-footer-bg: var(--color-primary-green);
+  --color-header-bg: var(--color-primary-blue);
+  --color-footer-bg: var(--color-primary-blue);
   --color-surface: var(--color-white);
   --color-text-on-primary: var(--color-white);
   --color-hover: #f9f9f9
 }
 
 html.dark-mode {
-  --color-primary-green: #2ecc71;
+  --color-primary-blue: #3b82f6;
   --color-neutral-dark: #f0f2f5;
   --color-neutral-medium: #cfd2d6;
   --color-neutral-light: #3a3b3c;

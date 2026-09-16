@@ -62,7 +62,7 @@ html_content = '''<!DOCTYPE html>
           
           <!-- Main Description -->
           <div class="detail-desc-box">
-            <h3 style="margin-top: 0; color: var(--color-primary-green); margin-bottom: 1rem;">Deskripsi Karya</h3>
+            <h3 style="margin-top: 0; color: var(--color-primary-blue); margin-bottom: 1rem;">Deskripsi Karya</h3>
             <p>Robot pembersih lingkungan otomatis ini merupakan proyek inovatif yang dikembangkan oleh tim ekstrakurikuler robotika MTs Al-Muhammadiyah 1. Dilengkapi dengan sensor ultrasonik, robot ini mampu mendeteksi halangan di sekitarnya dan berbelok secara otomatis, sehingga dapat menyapu area yang luas tanpa bantuan kendali manual.</p>
             <p>Tujuan utama dari proyek ini adalah untuk menanamkan kesadaran peduli lingkungan melalui pemanfaatan teknologi yang tepat guna. Robot ini dibuat dari bahan-bahan daur ulang dan komponen elektronik dasar, menjadikannya solusi cerdas yang hemat biaya.</p>
             <p>Proyek ini telah melalui proses uji coba selama 3 bulan dan berhasil menyabet juara 1 pada ajang Lomba Inovasi Teknologi Tepat Guna tingkat Kabupaten tahun 2026.</p>
@@ -72,12 +72,12 @@ html_content = '''<!DOCTYPE html>
           <div class="detail-info-sidebar">
             <div class="info-sidebar-block">
               <span class="info-label">Guru Pembimbing</span>
-              <span class="info-value"><i class="ph-fill ph-chalkboard-teacher" style="color: var(--color-primary-green);"></i> Bapak Ahmad Yani, S.Pd.</span>
+              <span class="info-value"><i class="ph-fill ph-chalkboard-teacher" style="color: var(--color-primary-blue);"></i> Bapak Ahmad Yani, S.Pd.</span>
             </div>
             
             <div class="info-sidebar-block">
               <span class="info-label">Kategori Karya</span>
-              <span class="info-value"><i class="ph-fill ph-flask" style="color: var(--color-primary-green);"></i> Proyek & Sains</span>
+              <span class="info-value"><i class="ph-fill ph-flask" style="color: var(--color-primary-blue);"></i> Proyek & Sains</span>
             </div>
 
             <div class="info-sidebar-block">
