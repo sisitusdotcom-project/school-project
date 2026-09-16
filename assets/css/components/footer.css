@@ -42,7 +42,8 @@
 
 .footer-logo img {
   height: 45px;
-  width: auto
+  width: auto;
+  object-fit: contain;
 }
 
 .footer-deskripsi {
