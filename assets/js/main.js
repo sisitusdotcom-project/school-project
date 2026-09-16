@@ -15,7 +15,7 @@ function initHeroSlider() {
 }
 window.initHeroSlider = initHeroSlider; function initBackToTop() { var backToTopBtn = document.getElementById('backToTop'); if (!backToTopBtn) return; window.addEventListener('scroll', function () { if (window.scrollY > 300) { backToTopBtn.classList.add('show') } else { backToTopBtn.classList.remove('show') } }, { passive: !0 }); backToTopBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }) }) }
 window.initBackToTop = initBackToTop; function initDarkMode() {
-  var toggleBtns = document.querySelectorAll('.dark-mode-toggle'); var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches; var storedTheme = localStorage.getItem('theme'); if (storedTheme === 'dark' || (!storedTheme && prefersDark)) { document.documentElement.classList.add('dark-mode') }
+  var toggleBtns = document.querySelectorAll('.dark-mode-toggle'); var storedTheme = localStorage.getItem('theme'); if (storedTheme === 'dark') { document.documentElement.classList.add('dark-mode') }
   toggleBtns.forEach(function(btn) { btn.addEventListener('click', function () { document.documentElement.classList.toggle('dark-mode'); var isDark = document.documentElement.classList.contains('dark-mode'); localStorage.setItem('theme', isDark ? 'dark' : 'light') }) })
 }
 window.initDarkMode = initDarkMode;
