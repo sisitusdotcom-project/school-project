@@ -133,3 +133,38 @@ function initGallerySlider() {
   startAutoScroll();
 }
 window.initGallerySlider = initGallerySlider;
+
+function initInfografisSliders() {
+  var sliders = document.querySelectorAll('.infografis-slider');
+  if (!sliders.length) return;
+
+  sliders.forEach(function(slider) {
+    var slides = slider.querySelectorAll('.infografis-slide');
+    if (slides.length < 2) return;
+
+    var currentIndex = 0;
+    var intervalMs = Number(slider.dataset.interval) || 2600;
+
+    function showSlide(index) {
+      slides.forEach(function(slide, slideIndex) {
+        slide.classList.toggle('active', slideIndex === index);
+      });
+    }
+
+    function nextSlide() {
+      currentIndex = (currentIndex + 1) % slides.length;
+      showSlide(currentIndex);
+    }
+
+    var intervalId = setInterval(nextSlide, intervalMs);
+
+    slider.addEventListener('mouseenter', function() {
+      clearInterval(intervalId);
+    });
+
+    slider.addEventListener('mouseleave', function() {
+      intervalId = setInterval(nextSlide, intervalMs);
+    });
+  });
+}
+window.initInfografisSliders = initInfografisSliders;
