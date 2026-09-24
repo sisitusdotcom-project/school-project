@@ -224,6 +224,10 @@
   margin-top: 0.7rem;
 }
 
+.secondary-input--hidden {
+  display: none;
+}
+
 .form-submit-row {
   margin-top: 1.25rem;
 }
