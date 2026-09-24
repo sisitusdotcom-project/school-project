@@ -202,12 +202,6 @@
   line-height: 1.5;
 }
 
-.choice-item small {
-  display: block;
-  color: var(--color-neutral-medium);
-  font-size: 0.78rem;
-}
-
 .inline-options {
   display: flex;
   flex-wrap: wrap;
