@@ -42,7 +42,7 @@ const AdminPages = {
         <div class="card-header">
           <h3 class="card-title">Pengaturan tahun ajaran</h3>
         </div>
-        <form id="form-settings" class="inline-form">
+        <form id="form-academic-settings" class="inline-form">
           <div class="form-group compact-field">
             <label>Tahun ajaran aktif</label>
             <input id="set-year" value="${settings.currentAcademicYear}" placeholder="Contoh: 2026/2027">
@@ -54,6 +54,15 @@ const AdminPages = {
               <option value="2" ${settings.currentSemester === '2' ? 'selected' : ''}>Semester 2</option>
             </select>
           </div>
+          <button type="submit" class="btn btn-primary"><i class="ph ph-floppy-disk"></i> Simpan</button>
+        </form>
+      </section>
+
+      <section class="card section-spacer">
+        <div class="card-header">
+          <h3 class="card-title">Pengaturan jam masuk</h3>
+        </div>
+        <form id="form-attendance-time-settings" class="inline-form">
           <div class="form-group compact-field">
             <label>Jam masuk mulai</label>
             <input id="set-checkin-start" type="time" value="${attendanceRules.checkInStart || '07:00'}">
@@ -70,6 +79,15 @@ const AdminPages = {
             <label>Jam pulang selesai</label>
             <input id="set-checkout-end" type="time" value="${attendanceRules.checkOutEnd || '17:00'}">
           </div>
+          <button type="submit" class="btn btn-primary"><i class="ph ph-floppy-disk"></i> Simpan</button>
+        </form>
+      </section>
+
+      <section class="card section-spacer">
+        <div class="card-header">
+          <h3 class="card-title">Pengaturan tanggal absensi</h3>
+        </div>
+        <form id="form-attendance-date-settings" class="inline-form">
           <div class="form-group compact-field">
             <label>Tanggal absensi mulai</label>
             <input id="set-date-start" type="date" value="${attendanceRules.attendanceStartDate || ''}">
@@ -90,28 +108,60 @@ const AdminPages = {
         <p class="text-muted soft-note">Kelola di menu <strong>Indikator Karakter</strong> pada sidebar.</p>
       </section>
     `;
-    document.getElementById('form-settings').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const btn = e.target.querySelector('button');
-      btn.disabled = true;
-      btn.innerHTML = '<i class="ph ph-spinner"></i> Menyimpan...';
-      await DB.updateSettings({
+    const bindSettingsForm = ({ formId, buildPayload }) => {
+      const form = document.getElementById(formId);
+      if (!form) return;
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = form.querySelector('button');
+        const originalHtml = btn.innerHTML;
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="ph ph-spinner"></i> Menyimpan...';
+
+        try {
+          await DB.updateSettings(buildPayload());
+          btn.innerHTML = '<i class="ph ph-check"></i> Tersimpan';
+        } finally {
+          btn.disabled = false;
+          setTimeout(() => {
+            btn.innerHTML = originalHtml;
+          }, 1500);
+        }
+      });
+    };
+
+    bindSettingsForm({
+      formId: 'form-academic-settings',
+      buildPayload: () => ({
         currentAcademicYear: document.getElementById('set-year').value.trim(),
-        currentSemester: document.getElementById('set-sem').value,
+        currentSemester: document.getElementById('set-sem').value
+      })
+    });
+
+    bindSettingsForm({
+      formId: 'form-attendance-time-settings',
+      buildPayload: () => ({
         attendanceRules: {
+          ...attendanceRules,
           checkInStart: document.getElementById('set-checkin-start').value || '07:00',
           checkInEnd: document.getElementById('set-checkin-end').value || '09:00',
           checkOutStart: document.getElementById('set-checkout-start').value || '15:00',
-          checkOutEnd: document.getElementById('set-checkout-end').value || '17:00',
+          checkOutEnd: document.getElementById('set-checkout-end').value || '17:00'
+        }
+      })
+    });
+
+    bindSettingsForm({
+      formId: 'form-attendance-date-settings',
+      buildPayload: () => ({
+        attendanceRules: {
+          ...attendanceRules,
           attendanceStartDate: document.getElementById('set-date-start').value || '',
           attendanceEndDate: document.getElementById('set-date-end').value || ''
         }
-      });
-      btn.disabled = false;
-      btn.innerHTML = '<i class="ph ph-check"></i> Tersimpan';
-      setTimeout(() => {
-        btn.innerHTML = '<i class="ph ph-floppy-disk"></i> Simpan';
-      }, 1500);
+      })
     });
   },
   // ========== INDIKATOR KARAKTER ==========
