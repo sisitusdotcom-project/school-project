@@ -704,6 +704,47 @@
   color: var(--primary)
 }
 
+.badge-outline {
+  background-color: var(--bg-body);
+  color: var(--text-muted);
+  border: 1px solid var(--border-strong);
+}
+
+/* Custom Checkbox Grid for Assignments UI */
+.checkbox-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.checkbox-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--transition);
+  font-size: 14px;
+}
+.checkbox-card:hover {
+  background: var(--bg-body);
+  border-color: var(--border-strong);
+}
+.checkbox-card input[type="checkbox"] {
+  accent-color: var(--primary);
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+.checkbox-card:has(input:checked) {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary);
+  font-weight: 500;
+}
+
 .modal-overlay {
   position: fixed;
   inset: 0;

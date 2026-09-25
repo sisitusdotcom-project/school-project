@@ -324,8 +324,8 @@ const AdminPages = {
           document.getElementById('usr-password').placeholder = '(Kosongkan jika tidak diubah)';
           document.getElementById('usr-role').value = u.role;
           const selectedAssignments = AppConfig.normalizeAssignments(u.assignments || []);
-          Array.from(document.querySelectorAll('#usr-assignments option')).forEach((option) => {
-            option.selected = selectedAssignments.includes(option.value);
+          Array.from(document.querySelectorAll('#usr-assignments-group input[type="checkbox"]')).forEach((cb) => {
+            cb.checked = selectedAssignments.includes(cb.value);
           });
           document.getElementById('usr-password').removeAttribute('required');
           App.openModal('modal-usr');
@@ -381,13 +381,13 @@ const AdminPages = {
               <div class="form-group"><label>Peran utama</label><select id="usr-role" required><option value="guru">Guru</option><option value="ortu">Orang Tua</option><option value="admin">Admin</option><option value="kepsek">Kepsek</option></select></div>
               <div class="form-group">
                 <label>Tugas / unit kerja</label>
-                <select id="usr-assignments" multiple size="6" style="min-height:140px;">
-                  <option value="finance">Keuangan</option>
-                  <option value="curriculum">Kurikulum</option>
-                  <option value="studentAffairs">Kesiswaan</option>
-                  <option value="personnel">Personalia</option>
-                  <option value="facilities">Sarpras</option>
-                </select>
+                <div class="checkbox-grid" id="usr-assignments-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                  <label class="checkbox-card"><input type="checkbox" value="finance"> <span>Keuangan</span></label>
+                  <label class="checkbox-card"><input type="checkbox" value="curriculum"> <span>Kurikulum</span></label>
+                  <label class="checkbox-card"><input type="checkbox" value="studentAffairs"> <span>Kesiswaan</span></label>
+                  <label class="checkbox-card"><input type="checkbox" value="personnel"> <span>Personalia</span></label>
+                  <label class="checkbox-card"><input type="checkbox" value="facilities"> <span>Sarpras</span></label>
+                </div>
                 <small class="text-muted">Pilih satu atau lebih tugas tambahan. Guru bisa menyambi unit seperti keuangan, kesiswaan, atau kurikulum.</small>
               </div>
             </div>
@@ -416,8 +416,8 @@ const AdminPages = {
       document.getElementById('usr-password').value = '';
       document.getElementById('usr-password').placeholder = '';
       document.getElementById('usr-role').value = 'guru';
-      Array.from(document.querySelectorAll('#usr-assignments option')).forEach((option) => {
-        option.selected = false;
+      Array.from(document.querySelectorAll('#usr-assignments-group input[type="checkbox"]')).forEach((cb) => {
+        cb.checked = false;
       });
       document.getElementById('usr-password').setAttribute('required', 'true');
       App.openModal('modal-usr');
@@ -430,7 +430,7 @@ const AdminPages = {
       btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Menyimpan...';
       const id = document.getElementById('usr-id').value || null;
       const pwd = document.getElementById('usr-password').value;
-      const assignments = Array.from(document.querySelectorAll('#usr-assignments option:checked')).map((option) => option.value);
+      const assignments = Array.from(document.querySelectorAll('#usr-assignments-group input[type="checkbox"]:checked')).map((cb) => cb.value);
       const data = {
         name: document.getElementById('usr-name').value.trim(),
         email: document.getElementById('usr-email').value.trim(),
