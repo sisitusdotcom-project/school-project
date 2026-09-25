@@ -194,7 +194,7 @@ async function generateReport(studentId, container) {
         <button class="btn-action" id="btn-do-print">🖨️ Cetak Rapor (F4)</button>
       </div>
       <div class="page">
-          <!-- Identitas Murid -->
+          
           <table class="identity-table">
               <tr>
                   <td style="width: 15%;">Nama Murid</td>
@@ -222,7 +222,7 @@ async function generateReport(studentId, container) {
               </tr>
           </table>
 
-          <!-- Tabel Mata Pelajaran Utama -->
+          
           <table class="data-table">
               <thead>
                   <tr>
@@ -237,13 +237,13 @@ async function generateReport(studentId, container) {
               </tbody>
           </table>
 
-          <!-- Kokurikuler -->
+          
           <div class="section-header">Kokurikuler</div>
           <div class="content-box">
             ${cocu && cocu.description ? cocu.description.replace(/\\n/g, '<br>') : '-'}
           </div>
 
-          <!-- Ekstrakurikuler -->
+          
           <table class="data-table">
               <thead>
                   <tr>
@@ -257,7 +257,7 @@ async function generateReport(studentId, container) {
               </tbody>
           </table>
 
-          <!-- Ketidakhadiran & Catatan Wali Kelas -->
+          
           <div class="flex-row">
               <div class="flex-col-left">
                   <table class="attendance-table">
@@ -290,13 +290,13 @@ async function generateReport(studentId, container) {
               </div>
           </div>
 
-          <!-- Tanggapan Orang Tua/Wali Murid -->
+          
           <div class="section-header">Tanggapan Orang Tua/Wali Murid</div>
           <div class="content-box" style="min-height: 50px;">
             ${parentResp && parentResp.response ? parentResp.response.replace(/\\n/g, '<br>') : '-'}
           </div>
 
-          <!-- Tanda Tangan -->
+          
           <table class="signature-table">
               <tr>
                   <td>

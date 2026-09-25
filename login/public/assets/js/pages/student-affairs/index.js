@@ -23,7 +23,7 @@ const StudentAffairsPages = {
           <div class="stat-icon stat-icon--success"><i class="ph ph-school"></i></div>
           <div><p class="stat-value">${classList.length}</p><p class="stat-label text-muted">Rombel</p></div>
         </div>
-        <!-- removed duplicate stat card -->
+        
         <div class="card stat-card">
           <div class="stat-icon stat-icon--danger"><i class="ph ph-bell"></i></div>
           <div><p class="stat-value">${readOnly ? 'Read' : 'Edit'}</p><p class="stat-label text-muted">Mode</p></div>

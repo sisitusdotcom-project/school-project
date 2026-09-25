@@ -610,6 +610,28 @@ const DB = {
     if (!bill) return;
     await db.ref(`finance/student_bills/${id}/status`).set('paid');
   }
+,
+
+  async getStudentReferenceIndex() {
+    const students = await this.getAllStudents();
+    const index = {};
+    for (const key in students) {
+      index[key] = { name: students[key].name, nis: students[key].nis };
+    }
+    return index;
+  },
+  async getPersonnelDirectory() {
+    return this._readCollection('personnel/directory', {});
+  },
+  async getFacilityAssets() {
+    return this._readCollection('facilities/assets', {});
+  },
+  async getFacilityRooms() {
+    return this._readCollection('facilities/rooms', {});
+  },
+  async getFacilityMaintenance() {
+    return this._readCollection('facilities/maintenance', {});
+  }
 };
 
 Object.assign(DB, {

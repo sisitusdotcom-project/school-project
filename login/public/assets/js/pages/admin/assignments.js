@@ -28,9 +28,9 @@ window.AdminAssignmentsModule = {
 
     const assignmentRows = assignmentPillars.map((item) => `
       <tr>
-        <td><strong>${item.title}</strong></td>
+        <td><strong>${AppConfig.escapeHtml(item.title)}</strong></td>
         <td>${item.owner}</td>
-        <td>${item.detail}</td>
+        <td>${AppConfig.escapeHtml(item.detail)}</td>
       </tr>
     `).join('');
 

@@ -181,7 +181,7 @@ const AdminPages = {
     const rows = charArr.length ? charArr.map(c => `
       <tr>
         <td>${c.order || '-'}</td>
-        <td><strong>${c.name}</strong></td>
+        <td><strong>${AppConfig.escapeHtml(c.name)}</strong></td>
         <td><span class="badge ${c.active !== false ? 'badge-success' : 'badge-danger'}">${c.active !== false ? 'Aktif' : 'Nonaktif'}</span></td>
         <td class="action-cell">
           <button class="btn btn-outline btn-sm" data-edit-char="${c.id}"><i class="ph ph-pencil-simple"></i></button>
@@ -452,7 +452,7 @@ const AdminPages = {
       const count = studentArr.filter(s => s.classId === c.id).length;
       return `
         <tr>
-          <td><strong>${c.name}</strong></td>
+          <td><strong>${AppConfig.escapeHtml(c.name)}</strong></td>
           <td>${teacher ? teacher.name : '<span class="text-muted">Belum ditugaskan</span>'}</td>
           <td>${count} siswa</td>
           <td class="action-cell table-col-lg">
@@ -464,10 +464,10 @@ const AdminPages = {
         </tr>`;
     }).join('') : '<tr><td colspan="4" class="text-center text-muted">Belum ada kelas.</td></tr>';
     
-    const guruOptions = guruArr.map(g => `<option value="${g.id}">${g.name}</option>`).join('');
+    const guruOptions = guruArr.map(g => `<option value="${g.id}">${AppConfig.escapeHtml(g.name)}</option>`).join('');
     const mapelRows = subArr.map(sub => `
       <div class="subject-editor-row">
-        <label>${sub.name}</label>
+        <label>${AppConfig.escapeHtml(sub.name)}</label>
         <select class="mapel-select" data-subject-id="${sub.id}">
           <option value="">— Default (Wali Kelas) —</option>
           ${guruOptions}
@@ -561,7 +561,7 @@ const AdminPages = {
       btn.onclick = () => {
         const c = classArr.find(x => x.id === btn.dataset.mapelCls);
         if (!c) return;
-        document.getElementById('mapel-modal-title').innerText = `Guru Mapel - Kelas ${c.name}`;
+        document.getElementById('mapel-modal-title').innerText = `Guru Mapel - Kelas ${AppConfig.escapeHtml(c.name)}`;
         document.getElementById('mapel-cls-id').value = c.id;
         const selects = document.querySelectorAll('.mapel-select');
         selects.forEach(sel => {
@@ -628,7 +628,7 @@ const AdminPages = {
       container.innerHTML = '<div class="card"><p class="error-text">Kelas tidak ditemukan.</p></div>';
       return;
     }
-    Router.setTitle(`Siswa kelas ${cls.name}`, 'Kelola data siswa dan hubungkan dengan akun orang tua.');
+    Router.setTitle(`Siswa kelas ${AppConfig.escapeHtml(cls.name)}`, 'Kelola data siswa dan hubungkan dengan akun orang tua.');
     const [studentData, users] = await Promise.all([
       DB.getStudentsByClass(classId),
       DB.getAllUsers()
@@ -651,7 +651,7 @@ const AdminPages = {
         return `
           <tr>
             <td>${s.nis || '-'}</td>
-            <td><strong>${s.name}</strong></td>
+            <td><strong>${AppConfig.escapeHtml(s.name)}</strong></td>
             <td>${s.gender === 'L' ? 'Laki-laki' : s.gender === 'P' ? 'Perempuan' : '-'}</td>
             <td>${parent ? parent.name : '<span class="text-muted">Belum tertaut</span>'}</td>
             <td class="action-cell">
@@ -687,7 +687,7 @@ const AdminPages = {
       });
     };
 
-    const ortuOptions = ortuArr.map(p => `<option value="${p.id}">${p.name} (${p.username})</option>`).join('');
+    const ortuOptions = ortuArr.map(p => `<option value="${p.id}">${AppConfig.escapeHtml(p.name)} (${AppConfig.escapeHtml(p.username)})</option>`).join('');
     
     container.innerHTML = `
       <div class="toolbar-panel"><a href="#/admin/classes" class="btn btn-outline"><i class="ph ph-arrow-left"></i> Kembali ke kelas</a></div>
@@ -794,7 +794,7 @@ const AdminPages = {
       const rows = filtered.length ? filtered.map(s => `
         <tr>
           <td>${s.order || '-'}</td>
-          <td><strong>${s.name}</strong></td>
+          <td><strong>${AppConfig.escapeHtml(s.name)}</strong></td>
           <td><span class="badge ${categoryBadge[s.category] || 'badge-primary'}">${categoryLabel[s.category] || s.category}</span></td>
           <td class="action-cell">
             <button class="btn btn-outline btn-sm" data-edit-sub="${s.id}"><i class="ph ph-pencil-simple"></i></button>
@@ -915,7 +915,7 @@ const AdminPages = {
       return `
       <tr>
         <td>${e.order || '-'}</td>
-        <td><strong>${e.name}</strong></td>
+        <td><strong>${AppConfig.escapeHtml(e.name)}</strong></td>
         <td>${guru ? guru.name : '<span class="text-muted">Belum ada pembina</span>'}</td>
         <td class="action-cell">
           <button class="btn btn-outline btn-sm" data-edit-eks="${e.id}"><i class="ph ph-pencil-simple"></i></button>
@@ -1025,7 +1025,7 @@ const AdminPages = {
         : '<span class="text-muted">Tidak ada bukti</span>';
       return `
         <tr>
-          <td>${g.name}</td>
+          <td>${AppConfig.escapeHtml(g.name)}</td>
           <td><span class="badge ${att.time_in ? 'badge-success' : 'badge-warning'}">${status}</span></td>
           <td>${timeIn}</td>
           <td>${timeOut}</td>
@@ -1047,7 +1047,7 @@ const AdminPages = {
       });
       return `
         <tr>
-          <td>${cls.name}</td>
+          <td>${AppConfig.escapeHtml(cls.name)}</td>
           <td>${had}</td>
           <td>${sick}</td>
           <td>${izin}</td>

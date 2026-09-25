@@ -90,7 +90,7 @@ const GuruPages = {
       return `
         <div class="card class-card" onclick="window.location.hash='#/guru/assess/${c.id}'">
           <div class="card-header">
-            <h3 class="card-title">${c.name}</h3>
+            <h3 class="card-title">${AppConfig.escapeHtml(c.name)}</h3>
             ${isWali ? '<span class="badge badge-primary">Wali Kelas</span>' : '<span class="badge badge-success">Guru Mapel</span>'}
           </div>
           <p class="text-muted">${count} siswa terdaftar</p>
@@ -113,7 +113,7 @@ const GuruPages = {
       container.innerHTML = '<div class="card"><p class="error-text">Kelas tidak ditemukan.</p></div>';
       return;
     }
-    Router.setTitle(`Penilaian ${cls.name}`, `${settings.currentAcademicYear} — Semester ${settings.currentSemester}`);
+    Router.setTitle(`Penilaian ${AppConfig.escapeHtml(cls.name)}`, `${settings.currentAcademicYear} — Semester ${settings.currentSemester}`);
     const studentData = await DB.getStudentsByClass(classId);
     const studentArr = DB.toArray(studentData).sort((a, b) => a.name.localeCompare(b.name));
     const charArr = DB.toArray(charData).filter(c => c.active !== false).sort((a, b) => (a.order || 0) - (b.order || 0));
@@ -147,14 +147,14 @@ const GuruPages = {
         `).join('');
         return `
           <div class="rating-row">
-            <div class="rating-label">${ch.name}</div>
+            <div class="rating-label">${AppConfig.escapeHtml(ch.name)}</div>
             <div class="rating-options">${btns}</div>
           </div>`;
       }).join('');
       return `
         <div class="card assess-card">
           <div class="card-header">
-            <h3 class="card-title" style="font-size:15px">${s.name}</h3>
+            <h3 class="card-title" style="font-size:15px">${AppConfig.escapeHtml(s.name)}</h3>
             <div style="display:flex; gap:6px;">
               <button class="btn btn-outline btn-sm" onclick="window.open('print.html?id=${s.id}', '_blank')">
                 <i class="ph ph-printer"></i> Cetak
@@ -203,11 +203,11 @@ const GuruPages = {
       container.innerHTML = '<div class="card"><p class="error-text">Kelas tidak ditemukan.</p></div>';
       return;
     }
-    Router.setTitle(`Catatan observasi — ${cls.name}`, 'Catat perilaku positif atau yang perlu bimbingan.');
+    Router.setTitle(`Catatan observasi — ${AppConfig.escapeHtml(cls.name)}`, 'Catat perilaku positif atau yang perlu bimbingan.');
     const studentArr = DB.toArray(studentData).sort((a, b) => a.name.localeCompare(b.name));
     const charArr = DB.toArray(charData).filter(c => c.active !== false);
-    const stuOpts = studentArr.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
-    const charOpts = charArr.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+    const stuOpts = studentArr.map(s => `<option value="${s.id}">${AppConfig.escapeHtml(s.name)}</option>`).join('');
+    const charOpts = charArr.map(c => `<option value="${c.id}">${AppConfig.escapeHtml(c.name)}</option>`).join('');
     const obsData = await DB.getObservationsByTeacher(Auth.currentUser.uid);
     const obsArr = DB.toArray(obsData).filter(o => studentArr.some(s => s.id === o.studentId)).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)).slice(0, 30); // 30 terbaru
     const obsRows = obsArr.length ? obsArr.map(o => {
@@ -304,7 +304,7 @@ const GuruPages = {
       container.innerHTML = `<div class="card"><p class="text-muted">Data kelas atau mata pelajaran belum tersedia untuk Anda.</p></div>`;
       return;
     }
-    const classOpts = classArr.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+    const classOpts = classArr.map(c => `<option value="${c.id}">${AppConfig.escapeHtml(c.name)}</option>`).join('');
     
     container.innerHTML = `
       <div class="card" style="margin-bottom:20px">
@@ -349,7 +349,7 @@ const GuruPages = {
       }
       
       availableSubjects.forEach(s => {
-        subSelect.innerHTML += `<option value="${s.id}">${s.name}</option>`;
+        subSelect.innerHTML += `<option value="${s.id}">${AppConfig.escapeHtml(s.name)}</option>`;
       });
       subSelect.disabled = availableSubjects.length === 0;
     });
@@ -379,7 +379,7 @@ const GuruPages = {
       }
       const rows = studentArr.map((s, idx) => `
         <div class="card" style="margin-bottom: 12px; padding: 12px;">
-          <h4 style="margin-top:0; margin-bottom:12px; font-size:15px">${idx + 1}. ${s.name}</h4>
+          <h4 style="margin-top:0; margin-bottom:12px; font-size:15px">${idx + 1}. ${AppConfig.escapeHtml(s.name)}</h4>
           <div style="display:flex; gap:16px; flex-wrap:wrap">
             <div class="form-group" style="flex: 0 0 100px; margin-bottom:0">
               <label>Nilai Akhir</label>
@@ -446,7 +446,7 @@ const GuruPages = {
       container.innerHTML = `<div class="card"><p class="text-muted">Data kelas belum tersedia.</p></div>`;
       return;
     }
-    const classOpts = classArr.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+    const classOpts = classArr.map(c => `<option value="${c.id}">${AppConfig.escapeHtml(c.name)}</option>`).join('');
     container.innerHTML = `
       <div class="card" style="margin-bottom:20px">
         <div class="form-group" style="margin-bottom:0">
@@ -476,7 +476,7 @@ const GuruPages = {
         stuContainer.innerHTML = `<div class="card"><p class="text-muted">Belum ada siswa di kelas ini.</p></div>`;
         return;
       }
-      const stuOpts = studentArr.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+      const stuOpts = studentArr.map(s => `<option value="${s.id}">${AppConfig.escapeHtml(s.name)}</option>`).join('');
       stuContainer.innerHTML = `
         <div class="card" style="margin-bottom:20px">
           <div class="form-group" style="margin-bottom:0">
@@ -509,7 +509,7 @@ const GuruPages = {
             <div style="border: 1px solid #ddd; padding: 12px; border-radius: 8px; margin-bottom: 8px;">
               <label style="display:flex; align-items:center; gap:8px; margin-bottom:8px; font-weight:bold; cursor:pointer">
                 <input type="checkbox" class="chk-eks" data-id="${e.id}" ${selected ? 'checked' : ''}>
-                ${e.name}
+                ${AppConfig.escapeHtml(e.name)}
               </label>
               <textarea id="desc-eks-${e.id}" rows="2" placeholder="Keterangan untuk ekstrakurikuler ini..." style="display: ${selected ? 'block' : 'none'}; width:100%">${selected ? (selected.description || '') : ''}</textarea>
             </div>
@@ -610,7 +610,7 @@ const GuruPages = {
     };
   },
   _obsModal(charArr) {
-    const charOpts = charArr.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+    const charOpts = charArr.map(c => `<option value="${c.id}">${AppConfig.escapeHtml(c.name)}</option>`).join('');
     return `
     <div class="modal-overlay" id="modal-obs">
       <div class="modal">
@@ -636,7 +636,7 @@ const GuruPages = {
     </div>`;
   },
   _openObsModal(studentId, studentName) {
-    document.getElementById('obs-title').innerText = `Catatan — ${studentName}`;
+    document.getElementById('obs-title').innerText = `Catatan — ${AppConfig.escapeHtml(studentName)}`;
     document.getElementById('obs-stu-id').value = studentId;
     document.getElementById('obs-note').value = '';
     document.getElementById('modal-obs').classList.add('active');
@@ -671,10 +671,10 @@ const GuruPages = {
       return;
     }
     
-    Router.setTitle(`Nilai Ekskul: ${eks.name}`, 'Pilih kelas untuk menginput nilai siswa.');
+    Router.setTitle(`Nilai Ekskul: ${AppConfig.escapeHtml(eks.name)}`, 'Pilih kelas untuk menginput nilai siswa.');
     
     const classArr = DB.toArray(classes);
-    const classOpts = classArr.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+    const classOpts = classArr.map(c => `<option value="${c.id}">${AppConfig.escapeHtml(c.name)}</option>`).join('');
     
     container.innerHTML = `
       <div style="margin-bottom:16px"><a href="#/dashboard" class="btn btn-outline"><i class="ph ph-arrow-left"></i> Kembali</a></div>
@@ -720,7 +720,7 @@ const GuruPages = {
       
       const rows = studentArr.map((s, idx) => `
         <div class="card" style="margin-bottom: 12px; padding: 12px;">
-          <h4 style="margin-top:0; margin-bottom:12px; font-size:15px">${idx + 1}. ${s.name}</h4>
+          <h4 style="margin-top:0; margin-bottom:12px; font-size:15px">${idx + 1}. ${AppConfig.escapeHtml(s.name)}</h4>
           <div style="display:flex; gap:16px; flex-wrap:wrap">
             <div class="form-group" style="flex: 0 0 120px; margin-bottom:0">
               <label>Nilai (A/B/C/D)</label>
@@ -1149,7 +1149,7 @@ const GuruPages = {
     const cards = classArr.map(c => `
       <div class="card class-card" style="cursor: pointer; display: flex; align-items: center; justify-content: space-between;" onclick="window.location.hash='#/guru/student-attendance/${c.id}'">
         <div>
-          <h3 class="card-title" style="margin: 0 0 4px 0;">${c.name}</h3>
+          <h3 class="card-title" style="margin: 0 0 4px 0;">${AppConfig.escapeHtml(c.name)}</h3>
           <p class="text-muted" style="margin: 0; font-size: 13px;">Input Absensi Kelas</p>
         </div>
         <i class="ph ph-caret-right" style="color: #9CA3AF;"></i>
@@ -1170,7 +1170,7 @@ const GuruPages = {
     const dateStr = today.toISOString().slice(0, 10);
     const dateDisplay = today.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
     
-    Router.setTitle(`Absensi ${cls.name}`, dateDisplay);
+    Router.setTitle(`Absensi ${AppConfig.escapeHtml(cls.name)}`, dateDisplay);
     
     const studentData = await DB.getStudentsByClass(classId);
     const studentArr = DB.toArray(studentData).sort((a, b) => a.name.localeCompare(b.name));
@@ -1187,7 +1187,7 @@ const GuruPages = {
       return `
         <div class="card" style="margin-bottom: 8px; padding: 12px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
           <div style="flex: 1; min-width: 150px;">
-            <p style="margin: 0; font-weight: 500; font-size: 14px;">${idx + 1}. ${s.name}</p>
+            <p style="margin: 0; font-weight: 500; font-size: 14px;">${idx + 1}. ${AppConfig.escapeHtml(s.name)}</p>
           </div>
           <div class="att-toggle-group" data-stu="${s.id}" style="display: flex; background: #F3F4F6; border-radius: 8px; padding: 2px;">
             <button class="att-btn ${currentAtt === 'H' ? 'active-h' : ''}" data-val="H" style="border: none; background: transparent; padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; color: #6B7280;">H</button>
@@ -1267,7 +1267,4 @@ const GuruPages = {
     };
   }
 };
-
-
-
 

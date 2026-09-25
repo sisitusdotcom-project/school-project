@@ -1,4 +1,9 @@
-const FinancePages = {
+import os
+
+BASE_DIR = r"e:\web-projects\MTSALITTIHADMLG.SCH.ID\login"
+finance_js_path = os.path.join(BASE_DIR, 'public/assets/js/pages/finance/index.js')
+
+finance_js_content = """const FinancePages = {
   async renderDashboard(container) {
     const role = Auth.currentRole || AppConfig.ROLES.ADMIN;
     const isReadOnly = role !== AppConfig.ROLES.ADMIN;
@@ -103,7 +108,7 @@ const FinancePages = {
         </div>
       </div>
 
-      
+      <!-- Modal Transaksi -->
       <div class="modal-overlay" id="modal-ledger">
         <div class="modal">
           <div class="modal-header">
@@ -140,7 +145,7 @@ const FinancePages = {
         </div>
       </div>
 
-      
+      <!-- Modal Tagihan -->
       <div class="modal-overlay" id="modal-bill">
         <div class="modal">
           <div class="modal-header">
@@ -240,3 +245,8 @@ const FinancePages = {
     }
   }
 };
+"""
+
+with open(finance_js_path, 'w', encoding='utf-8') as f:
+    f.write(finance_js_content)
+print("Updated finance/index.js with full CRUD support.")

@@ -55,7 +55,7 @@ const OrtuPages = {
         return `
           <div class="char-progress-item">
             <div class="char-progress-header">
-              <span class="char-name">${c.name}</span>
+              <span class="char-name">${AppConfig.escapeHtml(c.name)}</span>
               <span class="char-score" style="color:${sc ? scoreColor[sc] : 'var(--text-muted)'}">
                 ${sc ? scoreLabel[sc] : 'Belum dinilai'}
               </span>
@@ -83,7 +83,7 @@ const OrtuPages = {
         const g = acadGrades ? acadGrades[s.id] : null;
         return `
           <tr>
-            <td>${s.name}</td>
+            <td>${AppConfig.escapeHtml(s.name)}</td>
             <td class="text-center"><strong>${g && g.score ? g.score : '-'}</strong></td>
             <td class="text-muted cocurr-desc">${g && g.desc ? g.desc : '-'}</td>
           </tr>
@@ -109,10 +109,10 @@ const OrtuPages = {
       `;
       html += `
         <section class="student-report" >
-          <!-- Profil Singkat -->
+          
           <div class="card student-report-profile">
             <div>
-              <h3 >${student.name}</h3>
+              <h3 >${AppConfig.escapeHtml(student.name)}</h3>
               <p class="text-muted" class="student-report-profile__meta">${cls ? cls.name : '-'} · NIS: ${student.nis || '-'} · ${year} Sem ${sem}</p>
             </div>
             <div class="avg-score" class="avg-score-header">
@@ -121,14 +121,14 @@ const OrtuPages = {
             </div>
           </div>
 
-          <!-- Navigasi Tabs -->
+          
           <div class="tabs student-report-tabs">
             <button class="btn btn-tab active" data-target="tab-karakter-${student.id}" data-student="${student.id}" data-tab="karakter"><i class="ph ph-star"></i> Karakter</button>
             <button class="btn btn-tab" data-target="tab-akademik-${student.id}" data-student="${student.id}" data-tab="akademik"><i class="ph ph-books"></i> Akademik</button>
             <button class="btn btn-tab" data-target="tab-lain-${student.id}" data-student="${student.id}" data-tab="lain"><i class="ph ph-info"></i> Lainnya</button>
           </div>
 
-          <!-- TAB 1: Karakter -->
+          
           <div id="tab-karakter-${student.id}" class="tab-content active">
             <div class="card-grid ortu-grid">
               <div class="card ortu-inner-card">
@@ -148,7 +148,7 @@ const OrtuPages = {
             </div>
           </div>
 
-          <!-- TAB 2: Akademik -->
+          
           <div id="tab-akademik-${student.id}" class="tab-content hidden">
             <div class="card ortu-inner-card">
               <h3 class="card-title ortu-inner-title">Nilai Capaian Kompetensi (Akademik)</h3>
@@ -161,7 +161,7 @@ const OrtuPages = {
             </div>
           </div>
 
-          <!-- TAB 3: Lainnya -->
+          
           <div id="tab-lain-${student.id}" class="tab-content hidden">
             <div class="card-grid ortu-grid">
               <div class="card ortu-inner-card">
@@ -185,7 +185,7 @@ const OrtuPages = {
             </div>
           </div>
 
-          <!-- TANGGAPAN ORTU (Selalu muncul di bawah) -->
+          
           <div class="card parent-response-card">
             <h3 class="card-title ortu-inner-title">Tanggapan Orang Tua / Wali</h3>
             <div class="form-group" >
@@ -278,7 +278,7 @@ const OrtuPages = {
     parent.querySelectorAll('.btn-tab').forEach(b => {
       if (b.dataset.target.includes(studentId)) b.classList.remove('active');
     });
-    parent.querySelector(`#tab-${tabName}-${studentId}`).classList.remove('hidden');
-    parent.querySelector(`[data-target="tab-${tabName}-${studentId}"]`).classList.add('active');
+    parent.querySelector(`#tab-${AppConfig.escapeHtml(tabName)}-${studentId}`).classList.remove('hidden');
+    parent.querySelector(`[data-target="tab-${AppConfig.escapeHtml(tabName)}-${studentId}"]`).classList.add('active');
   }
 };

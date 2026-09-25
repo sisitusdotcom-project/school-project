@@ -85,7 +85,7 @@ const KepsekPages = {
       const cls = classArr.find(c => c.id === item.student.classId);
       return `
         <tr>
-          <td><strong>${item.student.name}</strong></td>
+          <td><strong>${AppConfig.escapeHtml(item.student.name)}</strong></td>
           <td>${cls ? cls.name : '-'}</td>
           <td class="text-center"><span class="badge ${item.avg < 2.5 && item.avg !== '-' ? 'badge-danger' : 'badge-warning'}">${item.avg}</span></td>
           <td class="text-center">${item.warningCount > 0 ? `<span class="badge badge-warning">${item.warningCount} Catatan</span>` : '-'}</td>
@@ -205,7 +205,7 @@ const KepsekPages = {
       const avg = clsCount > 0 ? (clsTotal / clsCount).toFixed(2) : '-';
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td><strong>${cls.name}</strong></td>
+        <td><strong>${AppConfig.escapeHtml(cls.name)}</strong></td>
         <td>${clsStudents.length}</td>
         <td>${avg !== '-' ? avg + ' / 4' : '<span class="text-muted">Belum ada data</span>'}</td>
         <td><a href="#/kepsek/class/${cls.id}" class="btn btn-outline btn-sm"><i class="ph ph-eye"></i> Detail</a></td>`;
@@ -224,7 +224,7 @@ const KepsekPages = {
       container.innerHTML = '<div class="card"><p class="error-text">Kelas tidak ditemukan.</p></div>';
       return;
     }
-    Router.setTitle(`Rekap ${cls.name}`, `${settings.currentAcademicYear} — Semester ${settings.currentSemester}`);
+    Router.setTitle(`Rekap ${AppConfig.escapeHtml(cls.name)}`, `${settings.currentAcademicYear} — Semester ${settings.currentSemester}`);
     const studentArr = DB.toArray(students).sort((a, b) => a.name.localeCompare(b.name));
     const charArr = DB.toArray(chars).filter(c => c.active !== false).sort((a, b) => (a.order || 0) - (b.order || 0));
     const year = settings.currentAcademicYear;
@@ -245,7 +245,7 @@ const KepsekPages = {
       2: 'badge-warning',
       1: 'badge-danger'
     };
-    const thChars = charArr.map(c => `<th class="text-center">${c.name}</th>`).join('');
+    const thChars = charArr.map(c => `<th class="text-center">${AppConfig.escapeHtml(c.name)}</th>`).join('');
     const rows = studentArr.map(s => {
       const scores = allScores[s.id] || {};
       let total = 0,
@@ -259,7 +259,7 @@ const KepsekPages = {
         return `<td class="text-center">${sc ? `<span class="badge ${scoreBadge[sc] || ''}">${sc}</span>` : '<span class="text-muted">—</span>'}</td>`;
       }).join('');
       const avg = count > 0 ? (total / count).toFixed(1) : '-';
-      return `<tr><td><strong>${s.name}</strong></td>${tds}<td class="text-center" style="font-weight:600">${avg}</td></tr>`;
+      return `<tr><td><strong>${AppConfig.escapeHtml(s.name)}</strong></td>${tds}<td class="text-center" style="font-weight:600">${avg}</td></tr>`;
     }).join('');
     container.innerHTML = `
       <div class="kepsek-back-btn"><a href="#/dashboard" class="btn btn-outline"><i class="ph ph-arrow-left"></i> Kembali</a></div>
@@ -282,7 +282,7 @@ const KepsekPages = {
       const count = studentArr.filter(s => s.classId === c.id).length;
       return `
         <div class="card class-card" data-href="#/kepsek/class/${c.id}">
-          <h3 class="card-title">${c.name}</h3>
+          <h3 class="card-title">${AppConfig.escapeHtml(c.name)}</h3>
           <p class="text-muted">${count} siswa</p>
         </div>`;
     }).join('');
