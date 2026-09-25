@@ -24,20 +24,20 @@ const App = {
   getManagementRouteConfig() {
     return {
       [AppConfig.ROLES.ADMIN]: [
-        { path: '#/admin/assignments', title: 'Penugasan', icon: 'ph-clipboard-check' },
+        { path: '#/admin/assignments', title: 'Penugasan', icon: 'ph-clipboard-text' },
         { path: '#/admin/users', title: 'Pengguna', icon: 'ph-users' },
         { path: '#/admin/classes', title: 'Kelas & Siswa', icon: 'ph-books' },
-        { path: '#/admin/students/:id', title: 'Siswa', icon: 'ph-student' },
+        { path: '#/admin/students/:id', title: 'Siswa', icon: 'ph-graduation-cap' },
         { path: '#/admin/subjects', title: 'Mata Pelajaran', icon: 'ph-book-bookmark' },
         { path: '#/admin/characters', title: 'Indikator Karakter', icon: 'ph-star' },
-        { path: '#/admin/extracurriculars', title: 'Ekstrakurikuler', icon: 'ph-person-simple-run' },
+        { path: '#/admin/extracurriculars', title: 'Ekstrakurikuler', icon: 'ph-trophy' },
         { path: '#/admin/attendance', title: 'Rekap Presensi', icon: 'ph-calendar-check' }
       ],
       [AppConfig.ROLES.GURU]: [
         { path: '#/guru/attendance', title: 'Presensi Guru', icon: 'ph-map-pin' },
         { path: '#/guru/student-attendance', title: 'Absensi Siswa', icon: 'ph-users-three' },
         { path: '#/guru/classes', title: 'E-Rapor', icon: 'ph-chalkboard-teacher' },
-        { path: '#/guru/academic', title: 'Nilai Akademik', icon: 'ph-exam' },
+        { path: '#/guru/academic', title: 'Nilai Akademik', icon: 'ph-check-square' },
         { path: '#/guru/additional', title: 'Data Tambahan Rapor', icon: 'ph-folder-plus' },
         { path: '#/guru/observations', title: 'Observasi', icon: 'ph-note-pencil' }
       ],
@@ -45,7 +45,7 @@ const App = {
         { path: '#/kepsek/reports', title: 'Laporan Kelas', icon: 'ph-file-text' }
       ],
       [AppConfig.ROLES.ORTU]: [
-        { path: '#/ortu/dashboard', title: 'Perkembangan Anak', icon: 'ph-student' }
+        { path: '#/ortu/dashboard', title: 'Perkembangan Anak', icon: 'ph-graduation-cap' }
       ]
     };
   },

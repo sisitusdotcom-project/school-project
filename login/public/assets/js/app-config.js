@@ -204,11 +204,11 @@
   const NAV_ITEMS = Object.freeze({
     [ROLES.ADMIN]: [
       { hash: '#/dashboard', icon: 'ph-squares-four', text: 'Dashboard' },
-      { hash: '#/admin/assignments', icon: 'ph-clipboard-check', text: 'Penugasan' },
+      { hash: '#/admin/assignments', icon: 'ph-clipboard-text', text: 'Penugasan' },
       { hash: '#/admin/users', icon: 'ph-users', text: 'Pengguna' },
       { hash: '#/admin/classes', icon: 'ph-books', text: 'Kelas & Siswa' },
       { hash: '#/admin/subjects', icon: 'ph-book-bookmark', text: 'Mata Pelajaran' },
-      { hash: '#/admin/extracurriculars', icon: 'ph-person-simple-run', text: 'Ekstrakurikuler' },
+      { hash: '#/admin/extracurriculars', icon: 'ph-trophy', text: 'Ekstrakurikuler' },
       { hash: '#/admin/characters', icon: 'ph-star', text: 'Indikator Karakter' },
       { hash: '#/admin/attendance', icon: 'ph-calendar-check', text: 'Rekap Presensi' }
     ],
@@ -217,7 +217,7 @@
       { hash: '#/guru/attendance', icon: 'ph-map-pin', text: 'Presensi Guru' },
       { hash: '#/guru/student-attendance', icon: 'ph-users-three', text: 'Absensi Siswa' },
       { hash: '#/guru/classes', icon: 'ph-chalkboard-teacher', text: 'E-Rapor (Kelas)' },
-      { hash: '#/guru/academic', icon: 'ph-exam', text: 'Nilai Akademik' },
+      { hash: '#/guru/academic', icon: 'ph-check-square', text: 'Nilai Akademik' },
       { hash: '#/guru/additional', icon: 'ph-folder-plus', text: 'Data Tambahan Rapor' },
       { hash: '#/guru/observations', icon: 'ph-note-pencil', text: 'Riwayat Observasi' }
     ],
@@ -231,7 +231,7 @@
       { hash: '#/kepsek/reports', icon: 'ph-file-text', text: 'Laporan Kelas' }
     ],
     [ROLES.ORTU]: [
-      { hash: '#/ortu/dashboard', icon: 'ph-student', text: 'Perkembangan Anak' }
+      { hash: '#/ortu/dashboard', icon: 'ph-graduation-cap', text: 'Perkembangan Anak' }
     ]
   });
 
