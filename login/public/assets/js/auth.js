@@ -98,7 +98,13 @@ const Auth = {
     try {
       await auth.signInWithEmailAndPassword(email, password);
     } catch (error) {
-      err.innerText = 'Email atau password salah.';
+      if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+        err.innerText = 'Email atau password salah.';
+      } else if (error.code === 'auth/too-many-requests') {
+        err.innerText = 'Terlalu banyak percobaan. Silakan coba lagi nanti.';
+      } else {
+        err.innerText = 'Terjadi kesalahan saat login: ' + error.message;
+      }
       err.classList.remove('hidden');
       btn.disabled = false;
       btn.querySelector('.btn-text').innerText = 'Masuk';

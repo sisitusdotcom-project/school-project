@@ -151,10 +151,6 @@
     return permissions.includes(permission);
   }
 
-  function can(role, permissionKey) {
-    return hasPermission(role, permissionKey);
-  }
-
   function getAllowedModules(role) {
     const roleKey = role || 'ortu';
     return Object.values(MODULES).filter((module) => module.slug === 'dashboard' || canAccessModule(roleKey, module.slug));
@@ -169,7 +165,6 @@
     PERMISSIONS,
     ROLE_PERMISSIONS,
     hasPermission,
-    can,
     getAllowedModules,
     canAccessModule
   });

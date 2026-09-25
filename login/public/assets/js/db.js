@@ -1,5 +1,3 @@
-// db.js — service layer untuk seluruh operasi Firebase RTDB.
-// Setiap fungsi return data langsung (bukan snapshot) supaya caller bersih.
 const DB = {
   _read(path, fallback = null) {
     if (!isDBReady()) return Promise.resolve(fallback);
@@ -47,8 +45,6 @@ const DB = {
     });
     return normalized;
   },
-
-  // --- USERS ---
   async getUser(uid) {
     return this._read(`users/${uid}`, null);
   },
@@ -86,7 +82,6 @@ const DB = {
     if (!isDBReady()) return;
     await db.ref(`users/${uid}`).remove();
   },
-  // --- SETTINGS (Tahun ajaran & semester) ---
   async getSettings() {
     const defaultSettings = AppConfig.DEFAULT_SETTINGS;
 
@@ -99,7 +94,6 @@ const DB = {
     if (!isDBReady()) return;
     await db.ref('settings').update(data);
   },
-  // --- SCHOOL SETTINGS (Global config) ---
   async getSchoolSettings() {
     const defaultSettings = {
       location: {
@@ -125,7 +119,6 @@ const DB = {
     if (!isDBReady()) return;
     await db.ref('school_settings').update(data);
   },
-  // --- TEACHER ATTENDANCE ---
   async getTeacherAttendance(dateStr, teacherId) {
     return this._read(`teacher_attendance/${dateStr}/${teacherId}`, null);
   },
@@ -197,7 +190,6 @@ const DB = {
 
     return result;
   },
-  // --- STUDENT ATTENDANCE (Daily per class) ---
   async getDailyStudentAttendance(dateStr, classId) {
     return this._readCollection(`student_attendance_daily/${dateStr}/${classId}`, {});
   },
@@ -217,7 +209,6 @@ const DB = {
     if (!Object.keys(normalized).length) return;
     await db.ref(`student_attendance_daily/${dateStr}/${classId}`).update(normalized);
   },
-  // --- CHARACTERS (Aspek/Indikator) ---
   async getCharacters() {
     if (!isDBReady()) return {};
     const snap = await db.ref('characters').orderByChild('order').once('value');
@@ -233,7 +224,6 @@ const DB = {
     if (!isDBReady()) return;
     await db.ref(`characters/${id}`).remove();
   },
-  // --- CLASSES ---
   async getClasses() {
     return this._readCollection('classes', {});
   },
@@ -259,7 +249,6 @@ const DB = {
     if (!isDBReady()) return;
     await db.ref(`classes/${classId}/subjectTeachers`).set(subjectTeachers);
   },
-  // --- STUDENTS ---
   async getAllStudents() {
     return this._readCollection('students', {});
   },
@@ -293,8 +282,6 @@ const DB = {
     if (!isDBReady()) return;
     await db.ref(`students/${id}`).remove();
   },
-  // --- ASSESSMENTS (Penilaian skala 1-4) ---
-  // Struktur: assessments/{year-sem}/{studentId}/{charId} = { score, updatedAt, updatedBy }
   _assessPath(year, sem) {
     return `assessments/${year.replace('/', '-')}_${sem}`;
   },
@@ -312,7 +299,6 @@ const DB = {
       updatedBy: teacherId
     });
   },
-  // --- OBSERVATIONS (Catatan perilaku) ---
   async getObservationsByStudent(studentId) {
     if (!isDBReady()) return {};
     const snap = await db.ref('observations').orderByChild('studentId').equalTo(studentId).once('value');
@@ -336,7 +322,6 @@ const DB = {
     if (!isDBReady()) return;
     await db.ref(`observations/${id}`).remove();
   },
-  // --- SUBJECTS (Mata Pelajaran) ---
   async getSubjects() {
     if (!isDBReady()) return {};
     const snap = await db.ref('subjects').orderByChild('order').once('value');
@@ -352,7 +337,6 @@ const DB = {
     if (!isDBReady()) return;
     await db.ref(`subjects/${id}`).remove();
   },
-  // --- EXTRACURRICULARS (Master Data Ekskul) ---
   async getExtracurriculars() {
     return this._readCollection('extracurriculars', {});
   },
@@ -366,7 +350,6 @@ const DB = {
     if (!isDBReady()) return;
     await db.ref(`extracurriculars/${id}`).remove();
   },
-  // --- FACILITIES / SARPRAS ---
   async getFacilityAssets() {
     return this._readCollection('facilities/assets', {});
   },
@@ -424,7 +407,6 @@ const DB = {
     await ref.set(normalized);
     return ref.key;
   },
-  // --- PERSONNEL / STAFF ---
   async getPersonnelDirectory() {
     return this._readCollection('personnel/employees', {});
   },
@@ -460,7 +442,6 @@ const DB = {
     await ref.set(normalized);
     return ref.key;
   },
-  // --- STUDENT AFFAIRS: ACHIEVEMENTS, VIOLATIONS ---
   async getStudentAchievements() {
     return this._readCollection('student_affairs/achievements', {});
   },
@@ -497,11 +478,9 @@ const DB = {
     await ref.set(normalized);
     return ref.key;
   },
-  // --- RAPOR DATA PATH HELPER ---
   _raporPath(type, year, sem) {
     return `${type}/${year.replace('/', '-')}_${sem}`;
   },
-  // --- ACADEMIC GRADES ---
   async getAcademicGrades(year, sem, studentId) {
     return this._readCollection(`${this._raporPath('academic_grades', year, sem)}/${studentId}`, {});
   },
@@ -515,7 +494,6 @@ const DB = {
       updatedAt: firebase.database.ServerValue.TIMESTAMP
     });
   },
-  // --- STUDENT EXTRACURRICULARS ---
   async getStudentExtracurriculars(year, sem, studentId) {
     return this._readCollection(`${this._raporPath('student_extracurriculars', year, sem)}/${studentId}`, {});
   },
@@ -530,7 +508,6 @@ const DB = {
     if (!isDBReady()) return;
     await db.ref(`${this._raporPath('student_extracurriculars', year, sem)}/${studentId}/${ekskulId}`).remove();
   },
-  // --- COCURRICULARS ---
   async getCocurricular(year, sem, studentId) {
     return this._read(`${this._raporPath('cocurriculars', year, sem)}/${studentId}`, null);
   },
@@ -541,7 +518,6 @@ const DB = {
       updatedAt: firebase.database.ServerValue.TIMESTAMP
     });
   },
-  // --- ATTENDANCES ---
   async getAttendance(year, sem, studentId) {
     return this._read(`${this._raporPath('attendances', year, sem)}/${studentId}`, null);
   },
@@ -552,7 +528,6 @@ const DB = {
       updatedAt: firebase.database.ServerValue.TIMESTAMP
     });
   },
-  // --- TEACHER NOTES ---
   async getTeacherNote(year, sem, studentId) {
     return this._read(`${this._raporPath('teacher_notes', year, sem)}/${studentId}`, null);
   },
@@ -563,7 +538,6 @@ const DB = {
       updatedAt: firebase.database.ServerValue.TIMESTAMP
     });
   },
-  // --- PARENT RESPONSES ---
   async getParentResponse(year, sem, studentId) {
     return this._read(`${this._raporPath('parent_responses', year, sem)}/${studentId}`, null);
   },
@@ -574,7 +548,6 @@ const DB = {
       updatedAt: firebase.database.ServerValue.TIMESTAMP
     });
   },
-  // --- FINANCE ---
   async getFinanceLedger() {
     return this._readCollection('finance/ledger', {});
   },
@@ -640,6 +613,5 @@ const DB = {
 };
 
 Object.assign(DB, {
-  normalizeSettings: AppConfig.normalizeSettings,
   toArray: AppConfig.toArray
 });

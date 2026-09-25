@@ -1,6 +1,3 @@
-// guru.js — Modul Guru/Wali Kelas.
-// Fitur: melihat kelas yang diampu, penilaian karakter tap-to-rate,
-// catatan observasi, dan riwayat observasi.
 const ATTENDANCE_GEOFENCE = window.APP_ATTENDANCE_GEOFENCE || {
   lat: null,
   lng: null,
@@ -8,11 +5,8 @@ const ATTENDANCE_GEOFENCE = window.APP_ATTENDANCE_GEOFENCE || {
 };
 
 const GuruPages = {
-  // ========== BERANDA (Dasbor Universal) ==========
   async renderDashboard(container) {
     Router.setTitle('Beranda', 'Selamat datang di Dasbor Digital Sekolah.');
-    
-    // Ambil data hari ini
     const today = new Date();
     const dateStr = today.toISOString().slice(0, 10);
     const timeStr = today.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
@@ -81,7 +75,6 @@ const GuruPages = {
       </div>
     `;
   },
-  // ========== KELAS SAYA (Untuk E-Rapor) ==========
   async renderClasses(container) {
     Router.setTitle('Kelas Saya', 'Pilih kelas untuk menilai karakter dan akademik.');
     const classArr = await DB.getClassesForTeacher(Auth.currentUser.uid);
@@ -109,7 +102,6 @@ const GuruPages = {
     }).join('');
     container.innerHTML = `<div class="card-grid">${cards}</div>`;
   },
-  // ========== PENILAIAN KARAKTER (tap-to-rate) ==========
   async renderAssessment(container, classId) {
     const [classes, charData, settings] = await Promise.all([
       DB.getClasses(),
@@ -133,7 +125,6 @@ const GuruPages = {
       container.innerHTML = `<div class="card"><p class="text-muted">Belum ada indikator karakter aktif. Minta admin untuk menambahkan indikator.</p></div>`;
       return;
     }
-    // Fetch existing scores for every student in this period
     const year = settings.currentAcademicYear;
     const sem = settings.currentSemester;
     const allScores = {};
@@ -183,7 +174,6 @@ const GuruPages = {
       <div class="card-grid">${studentCards}</div>
       ${this._obsModal(charArr)}
     `;
-    // delegated click handler — tap-to-rate
     container.addEventListener('click', async (e) => {
       const btn = e.target.closest('.rating-btn');
       if (!btn) return;
@@ -195,7 +185,6 @@ const GuruPages = {
       const siblings = btn.parentElement.querySelectorAll('.rating-btn');
       siblings.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      // simpan ke Firebase
       try {
         await DB.saveAssessment(year, sem, stu, char, score, Auth.currentUser.uid);
       } catch (err) {
@@ -203,7 +192,6 @@ const GuruPages = {
       }
     });
   },
-  // ========== CATATAN OBSERVASI (per kelas) ==========
   async renderObserveClass(container, classId) {
     const [classes, charData, studentData] = await Promise.all([
       DB.getClasses(),
@@ -218,10 +206,8 @@ const GuruPages = {
     Router.setTitle(`Catatan observasi — ${cls.name}`, 'Catat perilaku positif atau yang perlu bimbingan.');
     const studentArr = DB.toArray(studentData).sort((a, b) => a.name.localeCompare(b.name));
     const charArr = DB.toArray(charData).filter(c => c.active !== false);
-    // tampilkan form catatan cepat
     const stuOpts = studentArr.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
     const charOpts = charArr.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-    // fetch existing observations by this teacher
     const obsData = await DB.getObservationsByTeacher(Auth.currentUser.uid);
     const obsArr = DB.toArray(obsData).filter(o => studentArr.some(s => s.id === o.studentId)).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)).slice(0, 30); // 30 terbaru
     const obsRows = obsArr.length ? obsArr.map(o => {
@@ -277,11 +263,9 @@ const GuruPages = {
         note: document.getElementById('oq-note').value.trim(),
         date: today
       });
-      // re-render to show new entry
       this.renderObserveClass(container, classId);
     };
   },
-  // ========== RIWAYAT OBSERVASI GLOBAL ==========
   async renderObservationHistory(container) {
     Router.setTitle('Riwayat observasi', 'Seluruh catatan perilaku yang pernah Anda tulis.');
     const [obsData, students, charData] = await Promise.all([
@@ -311,7 +295,6 @@ const GuruPages = {
     }).join('');
     container.innerHTML = `<div class="card"><div class="obs-list">${items}</div></div>`;
   },
-  // ========== PENILAIAN AKADEMIK ==========
   async renderAcademicGrades(container) {
     Router.setTitle('Nilai Akademik', 'Input nilai akhir dan capaian kompetensi siswa.');
     const uid = Auth.currentUser.uid; const [classArr, subjects, settings] = await Promise.all([DB.getClassesForTeacher(uid), DB.getSubjects(), DB.getSettings()]);
@@ -450,7 +433,6 @@ const GuruPages = {
       };
     };
   },
-  // ========== DATA TAMBAHAN RAPOR ==========
   async renderAdditionalData(container) {
     Router.setTitle('Data Tambahan', 'Input Kokurikuler, Ekstrakurikuler, Kehadiran, dan Catatan Wali Kelas.');
     const [classes, ekskuls, settings] = await Promise.all([
@@ -573,14 +555,12 @@ const GuruPages = {
 
           <button id="btn-save-additional" class="btn btn-primary" style="width:100%; margin-bottom:40px"><i class="ph ph-floppy-disk"></i> Simpan Data Tambahan</button>
         `;
-        // Toggle textarea visibility for extracurriculars
         document.querySelectorAll('.chk-eks').forEach(chk => {
           chk.onchange = (e) => {
             const txt = document.getElementById(`desc-eks-${e.target.dataset.id}`);
             txt.style.display = e.target.checked ? 'block' : 'none';
           };
         });
-        // Save logic
         document.getElementById('btn-save-additional').onclick = async (e) => {
           const btn = e.target;
           btn.disabled = true;
@@ -629,7 +609,6 @@ const GuruPages = {
       };
     };
   },
-  // ========== MODAL OBSERVASI (dari halaman penilaian) ==========
   _obsModal(charArr) {
     const charOpts = charArr.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
     return `
@@ -661,7 +640,6 @@ const GuruPages = {
     document.getElementById('obs-stu-id').value = studentId;
     document.getElementById('obs-note').value = '';
     document.getElementById('modal-obs').classList.add('active');
-    // attach submit only once
     const form = document.getElementById('form-obs-modal');
     form.onsubmit = async (e) => {
       e.preventDefault();
@@ -680,8 +658,6 @@ const GuruPages = {
       App.closeModal('modal-obs');
     };
   },
-
-  // ========== INPUT EKSTRAKURIKULER (Khusus Guru Pembina) ==========
   async renderEkskulInput(container, eksId) {
     const [ekskuls, classes, settings] = await Promise.all([
       DB.getExtracurriculars(),
@@ -804,7 +780,6 @@ const GuruPages = {
       };
     };
   },
-  // ========== PRESENSI GURU (Geofencing) ==========
   async renderTeacherAttendance(container) {
     Router.setTitle('Presensi Kehadiran', 'Rekam kehadiran harian Anda di area sekolah.');
     container.innerHTML = `
@@ -961,8 +936,6 @@ const GuruPages = {
     const today = new Date();
     const dateStr = today.toISOString().slice(0, 10);
     const teacherId = Auth.currentUser.uid;
-
-    // Load History
     const loadHistory = async () => {
       const myAtt = await DB.getTeacherAttendance(dateStr, teacherId);
       if (!myAtt) {
@@ -994,8 +967,6 @@ const GuruPages = {
       }
     };
     await loadHistory();
-
-    // Geolocation Logic
     const schoolLat = Number(ATTENDANCE_GEOFENCE?.lat);
     const schoolLng = Number(ATTENDANCE_GEOFENCE?.lng);
     const maxRadius = Number(ATTENDANCE_GEOFENCE?.radiusMeters ?? 0);
@@ -1165,8 +1136,6 @@ const GuruPages = {
     btnCheckin.onclick = () => handlePresensi('in');
     btnCheckout.onclick = () => handlePresensi('out');
   },
-  
-  // ========== ABSENSI SISWA (Oleh Guru) ==========
   async renderStudentAttendance(container) {
     Router.setTitle('Absensi Siswa', 'Pilih kelas untuk mengabsen siswa hari ini.');
     const classes = await DB.getClasses();
@@ -1229,8 +1198,6 @@ const GuruPages = {
         </div>
       `;
     }).join('');
-
-    // Inject CSS khusus untuk toggle absensi agar tidak mengganggu global
     const style = `
       <style>
         .att-btn { transition: all 0.2s; }
@@ -1256,8 +1223,6 @@ const GuruPages = {
         </button>
       </div>
     `;
-
-    // Event delegation for toggles
     document.getElementById('student-list-container').addEventListener('click', (e) => {
       if (e.target.classList.contains('att-btn')) {
         const group = e.target.closest('.att-toggle-group');

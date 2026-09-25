@@ -1,7 +1,6 @@
 const FinancePages = {
   async renderDashboard(container) {
     const role = Auth.currentRole || AppConfig.ROLES.ADMIN;
-    const readOnly = role !== AppConfig.ROLES.ADMIN;
     Router.setTitle('Keuangan', 'Ringkasan kas, tagihan, dan laporan sekolah.');
 
     const [summary, billsData, studentIndex] = await Promise.all([

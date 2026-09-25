@@ -1,7 +1,6 @@
 const FacilitiesPages = {
   async renderDashboard(container) {
     const role = Auth.currentRole || AppConfig.ROLES.ADMIN;
-    const readOnly = role !== AppConfig.ROLES.ADMIN && role !== AppConfig.ROLES.KEPSEK;
     Router.setTitle('Sarana & Prasarana', 'Ringkasan aset, kebutuhan, dan maintenance sekolah.');
 
     const [assetsData, roomsData, maintenanceData] = await Promise.all([

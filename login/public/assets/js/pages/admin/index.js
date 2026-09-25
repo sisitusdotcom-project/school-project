@@ -1,7 +1,4 @@
-// admin.js — Modul Admin: dashboard ringkasan, CRUD pengguna, kelas, siswa,
-// indikator karakter, dan pengaturan tahun ajaran/semester.
 const AdminPages = {
-  // ========== DASHBOARD ==========
   async renderDashboard(container) {
     Router.setTitle('Dashboard admin', 'Ringkasan data dan pengaturan sistem.');
     const [settings, users, classes, chars, students] = await Promise.all([
@@ -177,7 +174,6 @@ const AdminPages = {
       })
     });
   },
-  // ========== INDIKATOR KARAKTER ==========
   async renderCharacters(container) {
     Router.setTitle('Indikator karakter', 'Aspek karakter yang dinilai guru.');
     const chars = await DB.getCharacters();
@@ -206,16 +202,13 @@ const AdminPages = {
       </div>
       ${this._charModal()}
     `;
-    // event: tambah
     document.getElementById('btn-add-char').onclick = () => this._openCharModal(null, charArr.length + 1);
-    // event: edit
     container.querySelectorAll('[data-edit-char]').forEach(btn => {
       btn.onclick = () => {
         const c = charArr.find(x => x.id === btn.dataset.editChar);
         if (c) this._openCharModal(c);
       };
     });
-    // event: hapus
     container.querySelectorAll('[data-del-char]').forEach(btn => {
       btn.onclick = async () => {
         if (!confirm('Yakin hapus indikator ini?')) return;
@@ -223,7 +216,6 @@ const AdminPages = {
         this.renderCharacters(container);
       };
     });
-    // event: simpan modal
     document.getElementById('form-char').onsubmit = async (e) => {
       e.preventDefault();
       const id = document.getElementById('char-id').value || null;
@@ -276,7 +268,6 @@ const AdminPages = {
     document.getElementById('char-active').value = existing ? String(existing.active !== false) : 'true';
     App.openModal('modal-char');
   },
-  // ========== MANAJEMEN PENGGUNA ==========
   async renderUsers(container) {
     Router.setTitle('Kelola Pengguna', 'Tambah, edit, dan atur peran pengguna sistem.');
     const users = await DB.getAllUsers();
@@ -294,8 +285,8 @@ const AdminPages = {
       
       const rows = filtered.length ? filtered.map(u => `
         <tr>
-          <td><strong>${u.name}</strong><br><small class="text-muted">${u.email || '-'}</small></td>
-          <td>${u.username}</td>
+          <td><strong>${AppConfig.escapeHtml(u.name)}</strong><br><small class="text-muted">${u.email || '-'}</small></td>
+          <td>${AppConfig.escapeHtml(u.username)}</td>
           <td>
             <span class="badge ${AppConfig.getRoleBadgeClass(u.role)}">${u.role}</span>
             ${AppConfig.getRoleAssignments(u).length ? `<div class="mt-4"><small class="text-muted">${AppConfig.getRoleAssignments(u).map((item) => AppConfig.UNIT_LABELS[item] || item).join(', ')}</small></div>` : ''}
@@ -309,8 +300,6 @@ const AdminPages = {
       
       const tbody = container.querySelector('#tbody-users');
       if (tbody) tbody.innerHTML = rows;
-      
-      // Bind events for dynamically rendered rows
       container.querySelectorAll('[data-edit-usr]').forEach(btn => {
         btn.onclick = () => {
           const u = userArr.find(x => x.id === btn.dataset.editUsr);
@@ -399,11 +388,7 @@ const AdminPages = {
         </div>
       </div>
     `;
-    
-    // Initial render
     renderTable();
-
-    // Event listeners for search and filter
     document.getElementById('search-user').addEventListener('input', renderTable);
     document.getElementById('filter-role').addEventListener('change', renderTable);
 
@@ -480,8 +465,6 @@ const AdminPages = {
     }).join('') : '<tr><td colspan="4" class="text-center text-muted">Belum ada kelas.</td></tr>';
     
     const guruOptions = guruArr.map(g => `<option value="${g.id}">${g.name}</option>`).join('');
-    
-    // Generate subjects dropdowns for mapel modal
     const mapelRows = subArr.map(sub => `
       <div class="subject-editor-row">
         <label>${sub.name}</label>
@@ -580,8 +563,6 @@ const AdminPages = {
         if (!c) return;
         document.getElementById('mapel-modal-title').innerText = `Guru Mapel - Kelas ${c.name}`;
         document.getElementById('mapel-cls-id').value = c.id;
-        
-        // Reset and prefill selects
         const selects = document.querySelectorAll('.mapel-select');
         selects.forEach(sel => {
           const subId = sel.dataset.subjectId;
@@ -640,7 +621,6 @@ const AdminPages = {
       this.renderClasses(container);
     };
   },
-  // ========== DATA SISWA (per kelas) ==========
   async renderStudents(container, classId) {
     const classes = await DB.getClasses();
     const cls = classes[classId];
@@ -684,8 +664,6 @@ const AdminPages = {
       
       const tbody = container.querySelector('#tbody-students');
       if (tbody) tbody.innerHTML = rows;
-
-      // Bind events
       container.querySelectorAll('[data-edit-stu]').forEach(btn => {
         btn.onclick = () => {
           const s = studentArr.find(x => x.id === btn.dataset.editStu);
@@ -1021,7 +999,6 @@ const AdminPages = {
     document.getElementById('eks-order').value = existing ? existing.order : (nextOrder || 1);
     document.getElementById('modal-eks').classList.add('active');
   },
-  // ========== REKAP PRESENSI ==========
   async renderAttendance(container) {
     Router.setTitle('Rekapan Presensi', 'Monitoring absensi guru dan siswa per hari.');
     const today = new Date();
@@ -1162,6 +1139,5 @@ const AdminPages = {
 
     await buildTable(defaultDate);
   },
-  // ========== HELPERS ==========
 
 };

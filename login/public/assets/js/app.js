@@ -50,7 +50,7 @@ const App = {
     };
   },
 
-  isManagementRouteAllowed(path, role = Auth.currentRole, assignments = []) {
+  isManagementRouteAllowed(path, role = Auth.currentRole) {
     if (!role) return false;
     const modules = {
       '#/finance': 'finance',
@@ -109,8 +109,7 @@ const App = {
     const registerProtectedRoute = ({ path, title, icon, handler, permissionKey }) => {
       Router.add(path, async (container) => {
         const role = Auth.currentRole || AppConfig.ROLES.ADMIN;
-        const assignments = Auth.userData?.assignments || Auth.currentAssignments || [];
-        const hasAccess = this.isManagementRouteAllowed(path, role, assignments)
+        const hasAccess = this.isManagementRouteAllowed(path, role)
           && (!permissionKey || !window.PermissionManager || window.PermissionManager.hasPermission(role, permissionKey));
 
         if (!hasAccess) {
@@ -185,7 +184,6 @@ const App = {
       Router.add(path, async (container, routeParams) => {
         const role = Auth.currentRole || AppConfig.ROLES.ADMIN;
         const permission = this.getManagementPermissionKey(path, 'view');
-        const assignments = Auth.userData?.assignments || Auth.currentAssignments || [];
         const hasAccess = this.isRouteAllowed(path, role)
           && (!permission || (window.PermissionManager ? window.PermissionManager.hasPermission(role, permission) : true));
 

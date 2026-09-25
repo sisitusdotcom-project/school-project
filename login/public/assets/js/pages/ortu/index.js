@@ -1,5 +1,3 @@
-// ortu.js — Modul Orang Tua / Wali.
-// Dashboard lengkap: Karakter, Akademik, dan Catatan lainnya (dengan tab navigasi).
 const OrtuPages = {
   async renderDashboard(container) {
     Router.setTitle('Perkembangan anak', 'Pantau seluruh hasil belajar dan karakter anak Anda.');
@@ -7,9 +5,9 @@ const OrtuPages = {
     const studentArr = DB.toArray(myStudents);
     if (!studentArr.length) {
       container.innerHTML = `
-        <div class="card panel-callout" style="margin-top:20px;text-align:center;padding:40px 20px;">
-          <div style="font-size:48px;color:var(--text-muted);margin-bottom:16px"><i class="ph ph-users-three"></i></div>
-          <h3 style="margin-bottom:8px">Akun belum terhubung</h3>
+        <div class="card panel-callout ortu-empty-panel">
+          <div class="ortu-empty-icon"><i class="ph ph-users-three"></i></div>
+          <h3 class="ortu-empty-title">Akun belum terhubung</h3>
           <p class="text-muted">Silakan hubungi wali kelas atau admin sekolah untuk menautkan akun ini ke data anak Anda.</p>
         </div>`;
       return;
@@ -52,7 +50,6 @@ const OrtuPages = {
         DB.getTeacherNote(year, sem, student.id)
       ]);
       const obsArr = DB.toArray(obsData).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)).slice(0, 15);
-      // --- TAB 1: KARAKTER & OBSERVASI ---
       const charCards = charArr.map(c => {
         const sc = scores[c.id]?.score;
         return `
@@ -79,75 +76,73 @@ const OrtuPages = {
               <span class="obs-date text-muted">${o.date || ''}</span>
             </div>
             <p class="obs-note">${o.note || '-'}</p>
-            <p class="text-muted" style="font-size:12px">${ch ? ch.name : ''}</p>
+            <p class="text-muted" class="obs-char-meta">${ch ? ch.name : ''}</p>
           </div>`;
-      }).join('') : '<p class="text-muted" style="padding:8px 0">Belum ada catatan observasi dari guru.</p>';
-      // --- TAB 2: AKADEMIK ---
+      }).join('') : '<p class="text-muted" >Belum ada catatan observasi dari guru.</p>';
       const acadHtml = subjArr.map(s => {
         const g = acadGrades ? acadGrades[s.id] : null;
         return `
           <tr>
             <td>${s.name}</td>
             <td class="text-center"><strong>${g && g.score ? g.score : '-'}</strong></td>
-            <td style="font-size:13px;color:var(--text-muted)">${g && g.desc ? g.desc : '-'}</td>
+            <td class="text-muted cocurr-desc">${g && g.desc ? g.desc : '-'}</td>
           </tr>
         `;
       }).join('');
-      // --- TAB 3: LAIN-LAIN ---
       const extraHtml = DB.toArray(stuExtra || {}).map(e => {
         const baseEx = exArr.find(x => x.id === e.extraId);
         return `<tr><td>${baseEx ? baseEx.name : 'Ekstrakurikuler'}</td><td>${e.score || '-'}</td><td>${e.desc || '-'}</td></tr>`;
       }).join('') || '<tr><td colspan="3" class="text-muted text-center">Belum ada data ekstrakurikuler.</td></tr>';
       const cocurrHtml = DB.toArray(cocurr || {}).map(c => `
-        <div style="margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border)">
+        <div class="cocurr-item">
           <strong>${c.title || 'Proyek'}</strong><br>
-          <span style="font-size:13px" class="text-muted">${c.desc || '-'}</span>
+          <span class="student-report-profile__meta" class="text-muted">${c.desc || '-'}</span>
         </div>
       `).join('') || '<p class="text-muted">Belum ada catatan proyek.</p>';
       const att = attendance || {};
       const attHtml = `
-        <table class="table" style="width:100%">
-          <tr><td style="width:60%">Sakit</td><td style="width:40%"><strong>${att.sakit || 0}</strong> hari</td></tr>
+        <table class="table" >
+          <tr><td class="table-col-lg">Sakit</td><td ><strong>${att.sakit || 0}</strong> hari</td></tr>
           <tr><td>Izin</td><td><strong>${att.izin || 0}</strong> hari</td></tr>
           <tr><td>Tanpa Keterangan</td><td><strong>${att.alpa || 0}</strong> hari</td></tr>
         </table>
       `;
       html += `
-        <section class="student-report" style="margin-bottom:40px">
+        <section class="student-report" >
           <!-- Profil Singkat -->
-          <div class="card" style="margin-bottom:16px; display:flex; justify-content:space-between; align-items:center;">
+          <div class="card student-report-profile">
             <div>
-              <h3 style="margin-bottom:4px">${student.name}</h3>
-              <p class="text-muted" style="font-size:13px">${cls ? cls.name : '-'} · NIS: ${student.nis || '-'} · ${year} Sem ${sem}</p>
+              <h3 >${student.name}</h3>
+              <p class="text-muted" class="student-report-profile__meta">${cls ? cls.name : '-'} · NIS: ${student.nis || '-'} · ${year} Sem ${sem}</p>
             </div>
-            <div class="avg-score" style="text-align:right">
-              <div style="font-size:11px;text-transform:uppercase;color:var(--text-muted);font-weight:600">Skor Karakter</div>
+            <div class="avg-score" class="avg-score-header">
+              <div class="avg-score-label">Skor Karakter</div>
               <div>${avg}<span class="avg-max">/4</span></div>
             </div>
           </div>
 
           <!-- Navigasi Tabs -->
-          <div class="tabs" style="margin-bottom:16px; display:flex; gap:8px; border-bottom:1px solid var(--border); padding-bottom:8px; overflow-x:auto">
-            <button class="btn btn-tab active" data-target="tab-karakter-${student.id}" onclick="OrtuPages.switchTab('${student.id}', 'karakter')"><i class="ph ph-star"></i> Karakter</button>
-            <button class="btn btn-tab" data-target="tab-akademik-${student.id}" onclick="OrtuPages.switchTab('${student.id}', 'akademik')"><i class="ph ph-books"></i> Akademik</button>
-            <button class="btn btn-tab" data-target="tab-lain-${student.id}" onclick="OrtuPages.switchTab('${student.id}', 'lain')"><i class="ph ph-info"></i> Lainnya</button>
+          <div class="tabs student-report-tabs">
+            <button class="btn btn-tab active" data-target="tab-karakter-${student.id}" data-student="${student.id}" data-tab="karakter"><i class="ph ph-star"></i> Karakter</button>
+            <button class="btn btn-tab" data-target="tab-akademik-${student.id}" data-student="${student.id}" data-tab="akademik"><i class="ph ph-books"></i> Akademik</button>
+            <button class="btn btn-tab" data-target="tab-lain-${student.id}" data-student="${student.id}" data-tab="lain"><i class="ph ph-info"></i> Lainnya</button>
           </div>
 
           <!-- TAB 1: Karakter -->
           <div id="tab-karakter-${student.id}" class="tab-content active">
-            <div class="card-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); align-items:start; gap:16px;">
-              <div class="card" style="padding:16px">
-                <h3 class="card-title" style="margin-bottom:12px;font-size:15px">Perkembangan Aspek Karakter</h3>
+            <div class="card-grid ortu-grid">
+              <div class="card ortu-inner-card">
+                <h3 class="card-title ortu-inner-title">Perkembangan Aspek Karakter</h3>
                 <div class="char-progress-list">${charCards}</div>
               </div>
-              <div style="display:grid;gap:16px">
-                <div class="card" style="padding:16px">
-                  <h3 class="card-title" style="margin-bottom:12px;font-size:15px">Catatan Observasi Guru</h3>
+              <div class="ortu-sub-grid">
+                <div class="card ortu-inner-card">
+                  <h3 class="card-title ortu-inner-title">Catatan Observasi Guru</h3>
                   <div class="obs-list">${obsHtml}</div>
                 </div>
-                <div class="card" style="padding:16px">
-                  <h3 class="card-title" style="margin-bottom:12px;font-size:15px">Grafik Rata-rata</h3>
-                  <div style="position:relative;width:100%"><canvas id="chart-${student.id}"></canvas></div>
+                <div class="card ortu-inner-card">
+                  <h3 class="card-title ortu-inner-title">Grafik Rata-rata</h3>
+                  <div class="kepsek-chart-wrap"><canvas id="chart-${student.id}"></canvas></div>
                 </div>
               </div>
             </div>
@@ -155,11 +150,11 @@ const OrtuPages = {
 
           <!-- TAB 2: Akademik -->
           <div id="tab-akademik-${student.id}" class="tab-content hidden">
-            <div class="card" style="padding:16px">
-              <h3 class="card-title" style="margin-bottom:16px;font-size:15px">Nilai Capaian Kompetensi (Akademik)</h3>
+            <div class="card ortu-inner-card">
+              <h3 class="card-title ortu-inner-title">Nilai Capaian Kompetensi (Akademik)</h3>
               <div class="table-responsive">
                 <table class="table">
-                  <thead><tr><th>Mata Pelajaran</th><th style="width:80px;text-align:center">Nilai</th><th>Deskripsi Capaian</th></tr></thead>
+                  <thead><tr><th>Mata Pelajaran</th><th class="table-col-md text-center">Nilai</th><th>Deskripsi Capaian</th></tr></thead>
                   <tbody>${acadHtml}</tbody>
                 </table>
               </div>
@@ -168,33 +163,33 @@ const OrtuPages = {
 
           <!-- TAB 3: Lainnya -->
           <div id="tab-lain-${student.id}" class="tab-content hidden">
-            <div class="card-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); align-items:start; gap:16px;">
-              <div class="card" style="padding:16px">
-                <h3 class="card-title" style="margin-bottom:12px;font-size:15px">Ketidakhadiran</h3>
+            <div class="card-grid ortu-grid">
+              <div class="card ortu-inner-card">
+                <h3 class="card-title ortu-inner-title">Ketidakhadiran</h3>
                 ${attHtml}
               </div>
-              <div class="card" style="padding:16px">
-                <h3 class="card-title" style="margin-bottom:12px;font-size:15px">Catatan Wali Kelas</h3>
-                <p style="background:var(--primary-light);padding:12px;border-radius:8px;font-size:14px;color:var(--text-main)">
+              <div class="card ortu-inner-card">
+                <h3 class="card-title ortu-inner-title">Catatan Wali Kelas</h3>
+                <p class="ortu-teacher-note">
                   ${teacherNote ? (teacherNote.note || '-') : '-'}
                 </p>
               </div>
-              <div class="card" style="padding:16px">
-                <h3 class="card-title" style="margin-bottom:12px;font-size:15px">Ekstrakurikuler</h3>
+              <div class="card ortu-inner-card">
+                <h3 class="card-title ortu-inner-title">Ekstrakurikuler</h3>
                 <div class="table-responsive"><table class="table"><thead><tr><th>Kegiatan</th><th>Predikat</th><th>Keterangan</th></tr></thead><tbody>${extraHtml}</tbody></table></div>
               </div>
-              <div class="card" style="padding:16px">
-                <h3 class="card-title" style="margin-bottom:12px;font-size:15px">Kokurikuler (Proyek Profil Pelajar Pancasila)</h3>
+              <div class="card ortu-inner-card">
+                <h3 class="card-title ortu-inner-title">Kokurikuler (Proyek Profil Pelajar Pancasila)</h3>
                 ${cocurrHtml}
               </div>
             </div>
           </div>
 
           <!-- TANGGAPAN ORTU (Selalu muncul di bawah) -->
-          <div class="card" style="margin-top:16px; border-left:4px solid var(--primary)">
-            <h3 class="card-title" style="margin-bottom:12px;font-size:15px">Tanggapan Orang Tua / Wali</h3>
-            <div class="form-group" style="margin-bottom:12px">
-              <textarea id="resp-${student.id}" rows="3" placeholder="Tuliskan tanggapan Anda mengenai perkembangan Ananda..." style="background:#fafafa">${parentResp ? (parentResp.response || '') : ''}</textarea>
+          <div class="card parent-response-card">
+            <h3 class="card-title ortu-inner-title">Tanggapan Orang Tua / Wali</h3>
+            <div class="form-group" >
+              <textarea id="resp-${student.id}" rows="3" placeholder="Tuliskan tanggapan Anda mengenai perkembangan Ananda..." class="ortu-textarea">${parentResp ? (parentResp.response || '') : ''}</textarea>
             </div>
             <button class="btn btn-primary btn-sm btn-save-resp" data-stu="${student.id}"><i class="ph ph-floppy-disk"></i> Simpan Tanggapan</button>
           </div>
@@ -202,6 +197,14 @@ const OrtuPages = {
       `;
     }
     container.innerHTML = html;
+    
+    container.querySelectorAll('.btn-tab').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const studentId = e.currentTarget.dataset.student;
+        const tabName = e.currentTarget.dataset.tab;
+        if (studentId && tabName) OrtuPages.switchTab(studentId, tabName);
+      });
+    });
     container.querySelectorAll('.btn-save-resp').forEach(btn => {
       btn.onclick = async (e) => {
         const studentId = e.target.dataset.stu;

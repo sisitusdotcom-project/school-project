@@ -1,7 +1,4 @@
-// kepsek.js — Modul Kepala Sekolah.
-// Memantau metrik sekolah secara keseluruhan, rata-rata kelas, dan siswa dengan perhatian khusus.
 const KepsekPages = {
-  // ========== DASHBOARD (Global) ==========
   async renderDashboard(container) {
     Router.setTitle('Dasbor Kepala Sekolah', 'Ringkasan data akademik dan karakter seluruh sekolah.');
     const settings = await DB.getSettings();
@@ -28,7 +25,6 @@ const KepsekPages = {
         count: 0
       };
     });
-    // Calculate Character averages and find at-risk students
     const atRiskStudents = [];
     studentArr.forEach(s => {
       const scores = allAssess?.[s.id];
@@ -65,7 +61,6 @@ const KepsekPages = {
         });
       }
     });
-    // Calculate Academic Global Average
     let globalAcadTotal = 0;
     let globalAcadCount = 0;
     Object.values(allAcad || {}).forEach(studentGrades => {
@@ -77,10 +72,8 @@ const KepsekPages = {
       });
     });
     const globalAcadAvg = globalAcadCount > 0 ? Math.round(globalAcadTotal / globalAcadCount) : '-';
-    // Calculate Teacher Compliance (Progres Pengisian)
     let assessedStudentsCount = 0;
     studentArr.forEach(s => {
-      // Consider a student assessed if they have at least 1 character score or 1 academic score
       const hasChar = allAssess && allAssess[s.id] && Object.values(allAssess[s.id]).some(v => v.score);
       const hasAcad = allAcad && allAcad[s.id] && Object.values(allAcad[s.id]).some(v => v.score);
       if (hasChar || hasAcad) assessedStudentsCount++;
@@ -88,7 +81,6 @@ const KepsekPages = {
     const complianceRate = studentArr.length > 0 ? Math.round((assessedStudentsCount / studentArr.length) * 100) : 0;
     const positiveObs = obsArr.filter(o => o.type === 'positive').length;
     const warningObs = obsArr.filter(o => o.type === 'needs_improvement').length;
-    // Build At-Risk Table HTML
     const atRiskHtml = atRiskStudents.length > 0 ? atRiskStudents.map(item => {
       const cls = classArr.find(c => c.id === item.student.classId);
       return `
@@ -100,7 +92,6 @@ const KepsekPages = {
         </tr>
       `;
     }).join('') : '<tr><td colspan="4" class="text-center text-muted">Bagus! Tidak ada siswa yang terdeteksi memerlukan perhatian khusus.</td></tr>';
-    // Stat cards
     container.innerHTML = `
       <section class="card-grid section-spacer">
         <div class="card stat-card">
@@ -123,7 +114,7 @@ const KepsekPages = {
 
       <section class="card-grid section-spacer">
         <div class="card card-accent-danger">
-          <h3 class="card-title section-spacer"><i class="ph ph-warning-circle" style="color:var(--danger)"></i> Daftar Siswa Perlu Perhatian Khusus</h3>
+          <h3 class="card-title section-spacer"><i class="ph ph-warning-circle" class="text-danger"></i> Daftar Siswa Perlu Perhatian Khusus</h3>
           <p class="text-muted soft-note section-spacer">Daftar siswa dengan rata-rata karakter di bawah 2.5 atau memiliki catatan observasi "Perlu Bimbingan".</p>
           <div class="table-responsive">
             <table class="table">
@@ -137,7 +128,7 @@ const KepsekPages = {
 
         <div class="card">
           <h3 class="card-title section-spacer">Rata-rata Karakter Sekolah — Sem ${sem}, ${year}</h3>
-          <div style="position:relative;width:100%;max-width:500px;margin:0 auto"><canvas id="chart-school"></canvas></div>
+          <div class="kepsek-chart-wrap"><canvas id="chart-school"></canvas></div>
         </div>
       </section>
 
@@ -153,7 +144,6 @@ const KepsekPages = {
         </div>
       </section>
     `;
-    // Chart.js — radar chart rata-rata per karakter
     const labels = charArr.map(c => c.name);
     const values = charArr.map(c => {
       const d = charAverages[c.id];
@@ -197,7 +187,6 @@ const KepsekPages = {
         }
       }
     });
-    // tabel per kelas
     const tbody = document.getElementById('class-recap-body');
     classArr.forEach(cls => {
       const clsStudents = studentArr.filter(s => s.classId === cls.id);
@@ -223,7 +212,6 @@ const KepsekPages = {
       tbody.appendChild(tr);
     });
   },
-  // ========== DETAIL KELAS ==========
   async renderClassDetail(container, classId) {
     const [classes, students, chars, settings] = await Promise.all([
       DB.getClasses(),
@@ -241,7 +229,6 @@ const KepsekPages = {
     const charArr = DB.toArray(chars).filter(c => c.active !== false).sort((a, b) => (a.order || 0) - (b.order || 0));
     const year = settings.currentAcademicYear;
     const sem = settings.currentSemester;
-    // ambil nilai setiap siswa
     const allScores = {};
     for (const s of studentArr) {
       allScores[s.id] = await DB.getAssessments(year, sem, s.id);
@@ -258,8 +245,7 @@ const KepsekPages = {
       2: 'badge-warning',
       1: 'badge-danger'
     };
-    // tabel siswa x karakter
-    const thChars = charArr.map(c => `<th style="text-align:center">${c.name}</th>`).join('');
+    const thChars = charArr.map(c => `<th class="text-center">${c.name}</th>`).join('');
     const rows = studentArr.map(s => {
       const scores = allScores[s.id] || {};
       let total = 0,
@@ -270,24 +256,23 @@ const KepsekPages = {
           total += sc;
           count++;
         }
-        return `<td style="text-align:center">${sc ? `<span class="badge ${scoreBadge[sc] || ''}">${sc}</span>` : '<span class="text-muted">—</span>'}</td>`;
+        return `<td class="text-center">${sc ? `<span class="badge ${scoreBadge[sc] || ''}">${sc}</span>` : '<span class="text-muted">—</span>'}</td>`;
       }).join('');
       const avg = count > 0 ? (total / count).toFixed(1) : '-';
-      return `<tr><td><strong>${s.name}</strong></td>${tds}<td style="text-align:center;font-weight:600">${avg}</td></tr>`;
+      return `<tr><td><strong>${s.name}</strong></td>${tds}<td class="text-center" style="font-weight:600">${avg}</td></tr>`;
     }).join('');
     container.innerHTML = `
-      <div style="margin-bottom:16px"><a href="#/dashboard" class="btn btn-outline"><i class="ph ph-arrow-left"></i> Kembali</a></div>
+      <div class="kepsek-back-btn"><a href="#/dashboard" class="btn btn-outline"><i class="ph ph-arrow-left"></i> Kembali</a></div>
       <div class="card">
         <div class="table-responsive">
           <table class="table">
-            <thead><tr><th>Siswa</th>${thChars}<th style="text-align:center">Rata-rata</th></tr></thead>
+            <thead><tr><th>Siswa</th>${thChars}<th class="text-center">Rata-rata</th></tr></thead>
             <tbody>${rows}</tbody>
           </table>
         </div>
       </div>
     `;
   },
-  // ========== LAPORAN KELAS ==========
   async renderReports(container) {
     Router.setTitle('Laporan per kelas', 'Pilih kelas untuk melihat laporan lengkap.');
     const [classes, students] = await Promise.all([DB.getClasses(), DB.getAllStudents()]);
@@ -296,11 +281,17 @@ const KepsekPages = {
     const cards = classArr.map(c => {
       const count = studentArr.filter(s => s.classId === c.id).length;
       return `
-        <div class="card class-card" onclick="window.location.hash='#/kepsek/class/${c.id}'">
+        <div class="card class-card" data-href="#/kepsek/class/${c.id}">
           <h3 class="card-title">${c.name}</h3>
           <p class="text-muted">${count} siswa</p>
         </div>`;
     }).join('');
     container.innerHTML = classArr.length ? `<div class="card-grid">${cards}</div>` : '<div class="card"><p class="text-muted">Belum ada data kelas.</p></div>';
+    container.querySelectorAll('.class-card').forEach(card => {
+      card.addEventListener('click', (e) => {
+        if (e.currentTarget.dataset.href) window.location.hash = e.currentTarget.dataset.href;
+      });
+    });
+    
   }
 };

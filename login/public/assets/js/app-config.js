@@ -45,10 +45,6 @@
     [ROLES.PERSONNEL]: '#/personnel',
     [ROLES.FACILITIES]: '#/facilities'
   });
-
-  // One policy for navigation, route guards, and explanatory UI.  An
-  // assignment describes a job title only; it must never grant a role more
-  // data than its base role and the RTDB rules allow.
   const MODULE_ACCESS = Object.freeze({
     finance: { roles: [ROLES.ADMIN, ROLES.KEPSEK], label: 'Keuangan', scope: 'rekap keuangan sekolah' },
     curriculum: { roles: [ROLES.ADMIN, ROLES.KEPSEK, ROLES.GURU], label: 'Kurikulum', scope: 'struktur dan rekap pembelajaran' },
@@ -248,6 +244,16 @@
     })
   });
 
+  
+  function escapeHtml(unsafe) {
+    if (unsafe == null) return '';
+    return String(unsafe)
+         .replace(/&/g, "&amp;")
+         .replace(/</g, "&lt;")
+         .replace(/>/g, "&gt;")
+         .replace(/"/g, "&quot;")
+         .replace(/'/g, "&#039;");
+  }
   function normalizeSettings(rawSettings = {}) {
     const source = rawSettings || {};
     const attendanceRules = source.attendanceRules || {};
@@ -312,9 +318,6 @@
         '#/personnel': { hash: '#/personnel', icon: 'ph-briefcase', text: 'Personalia' },
         '#/facilities': { hash: '#/facilities', icon: 'ph-building-office', text: 'Sarpras' }
       };
-      // A unit assignment is intentionally not an authorization override.
-      // Until a dedicated unit role is represented in Auth and RTDB Rules,
-      // only show a module when the base role is allowed to read it.
       const moduleKey = Object.keys(MANAGEMENT_ROUTE_MAP).find((key) => MANAGEMENT_ROUTE_MAP[key] === route);
       if (!moduleKey || !MODULE_ACCESS[moduleKey]?.roles.includes(role)) return [];
       return [config[route]];
@@ -373,6 +376,7 @@
     NAV_ITEMS,
     DEFAULT_SETTINGS,
     APP_DEFAULTS,
+    escapeHtml,
     normalizeSettings,
     normalizeAssignments,
     toArray,

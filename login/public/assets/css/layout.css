@@ -272,10 +272,6 @@
   }
 }
 
-.mobile-header {
-  display: flex
-}
-
 @media (min-width:1024px) {
   .mobile-header,
   .mobile-only {
