@@ -238,6 +238,7 @@
 
 .main-content {
   flex: 1;
+  min-width: 0;
   margin-left: var(--sidebar-width);
   min-height: 100vh;
   display: flex;
@@ -253,6 +254,7 @@
 
 .views-container {
   flex: 1;
+  min-width: 0;
   padding: 0 16px 18px
 }
 
