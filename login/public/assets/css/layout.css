@@ -296,11 +296,11 @@
   }
 
   .page-header {
-    padding: 16px 14px 12px
+    padding: 16px var(--page-gutter) 12px
   }
 
   .views-container {
-    padding: 0 14px 16px
+    padding: 0 var(--page-gutter) 16px
   }
 }
 
@@ -310,10 +310,10 @@
   }
 
   .page-header {
-    padding: 24px 28px 16px
+    padding: 20px var(--page-gutter) 14px
   }
 
   .views-container {
-    padding: 0 28px 28px
+    padding: 0 var(--page-gutter) 24px
   }
 }

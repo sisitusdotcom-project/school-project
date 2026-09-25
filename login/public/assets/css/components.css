@@ -12,7 +12,7 @@
   cursor: pointer;
   transition: var(--transition);
   white-space: nowrap;
-  min-height: 40px
+  min-height: var(--control-height)
 }
 .btn i {
   font-size: 18px
@@ -93,7 +93,8 @@
 .form-group select,
 .form-group textarea {
   width: 100%;
-  padding: 12px 16px;
+  min-height: var(--control-height);
+  padding: 9px 14px;
   font-family: 'Inter', sans-serif;
   font-size: 14px;
   color: var(--text-main);
@@ -153,7 +154,7 @@
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-radius: var(--radius-md);
-  padding: 14px;
+  padding: var(--card-padding);
   box-shadow: var(--shadow-sm);
   border: 1px solid var(--border);
 }
@@ -180,7 +181,7 @@
 .card-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 16px
+  gap: var(--content-gap)
 }
 .card-grid:has(> .stat-card) {
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -189,7 +190,7 @@
 .stats-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 12px
+  gap: var(--content-gap)
 }
 .stats-grid.compact {
   grid-template-columns: 1fr;
@@ -216,7 +217,7 @@
 .form-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 12px
+  gap: var(--content-gap)
 }
 .form-grid .form-group {
   margin-bottom: 0
@@ -264,7 +265,7 @@
 .toolbar-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: var(--content-gap);
   align-items: center;
   justify-content: space-between
 }
@@ -286,7 +287,7 @@
   flex: 1;
   flex-wrap: wrap;
   align-items: center;
-  gap: 12px;
+  gap: var(--content-gap);
   min-width: 0
 }
 .search-box {
@@ -306,7 +307,7 @@
 .toolbar-select,
 .compact-select {
   width: 100%;
-  height: 40px;
+  height: var(--control-height);
   padding: 0 12px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
@@ -374,7 +375,7 @@
   gap: 12px;
   align-items: center;
   margin-bottom: 16px;
-  padding: 12px 16px;
+  padding: var(--table-cell-padding);
   border-radius: var(--radius-md);
   background: var(--primary-light);
   color: var(--text-main)
@@ -657,7 +658,7 @@
   max-width: 500px;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
-  max-height: 90vh;
+  max-height: 86vh;
   display: flex;
   flex-direction: column;
   transform: scale(.95) translateY(10px);
@@ -670,7 +671,7 @@
   transform: scale(1) translateY(0)
 }
 .modal-header {
-  padding: 20px 24px;
+  padding: var(--modal-padding-y) var(--modal-padding-x);
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
@@ -681,11 +682,11 @@
   margin: 0
 }
 .modal-body {
-  padding: 24px;
+  padding: var(--modal-padding-y) var(--modal-padding-x);
   overflow-y: auto
 }
 .modal-footer {
-  padding: 16px 24px;
+  padding: 12px var(--modal-padding-x);
   border-top: 1px solid var(--border);
   display: flex;
   justify-content: flex-end;
@@ -936,12 +937,14 @@
 @media (max-width: 767px) {
   :root {
     --control-height: var(--control-height-compact);
+    --card-padding: 10px;
+    --table-cell-padding: 8px 10px;
+    --modal-padding-x: 14px;
+    --modal-padding-y: 10px;
+    --page-gutter: 14px;
     --space-section: 10px
   }
-  .card {
-    padding: 10px;
-    border-radius: 12px
-  }
+  .card { border-radius: 12px }
   .card-title { font-size: 15px }
   .card-header {
     gap: var(--space-compact);
@@ -980,7 +983,6 @@
   .form-group input,
   .form-group select,
   .form-group textarea {
-    min-height: var(--control-height);
     padding: 8px 12px;
     font-size: 13px
   }
@@ -997,7 +999,6 @@
   }
   .table th,
   .table td {
-    padding: 8px 10px;
     font-size: 13px
   }
   .modal-overlay {
@@ -1010,7 +1011,6 @@
   }
   .modal-header {
     min-height: 52px;
-    padding: 10px 14px
   }
   .modal-title { font-size: 16px }
   .modal-header .btn-icon {
@@ -1018,9 +1018,8 @@
     height: var(--control-height);
     font-size: 20px
   }
-  .modal-body { padding: 14px }
   .modal-footer {
-    padding: 10px 14px;
+    padding: 10px var(--modal-padding-x);
     padding-bottom: max(10px, env(safe-area-inset-bottom));
     gap: var(--space-compact)
   }
@@ -1036,10 +1035,9 @@
   }
 }
 @media (min-width: 768px) {
-  .card { padding: 18px }
   .card-grid:has(> .stat-card) {
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 14px
+    gap: var(--content-gap)
   }
   .stat-card { min-height: 94px }
   .stat-icon { width: 44px; height: 44px; font-size: 22px }
