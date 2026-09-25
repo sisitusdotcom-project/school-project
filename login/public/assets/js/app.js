@@ -182,7 +182,7 @@ const App = {
     const roleRoutes = Object.values(this.getManagementRouteConfig()).flat();
 
     roleRoutes.forEach(({ path, title, icon }) => {
-      Router.add(path, async (container) => {
+      Router.add(path, async (container, routeParams) => {
         const role = Auth.currentRole || AppConfig.ROLES.ADMIN;
         const permission = this.getManagementPermissionKey(path, 'view');
         const assignments = Auth.userData?.assignments || Auth.currentAssignments || [];
@@ -216,6 +216,11 @@ const App = {
           return;
         }
 
+        if (path === '#/admin/students/:id') {
+          await AdminPages.renderStudents(container, routeParams);
+          return;
+        }
+
         if (path === '#/admin/subjects') {
           await AdminPages.renderSubjects(container);
           return;
@@ -223,6 +228,16 @@ const App = {
 
         if (path === '#/admin/characters') {
           await AdminPages.renderCharacters(container);
+          return;
+        }
+
+        if (path === '#/admin/extracurriculars') {
+          await AdminPages.renderExtracurriculars(container);
+          return;
+        }
+
+        if (path === '#/admin/attendance') {
+          await AdminPages.renderAttendance(container);
           return;
         }
 
