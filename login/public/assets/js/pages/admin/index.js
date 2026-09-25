@@ -370,7 +370,7 @@ const AdminPages = {
               <div class="form-group"><label>Peran utama</label><select id="usr-role" required><option value="guru">Guru</option><option value="ortu">Orang Tua</option><option value="admin">Admin</option><option value="kepsek">Kepsek</option></select></div>
               <div class="form-group">
                 <label>Tugas / unit kerja</label>
-                <div class="checkbox-grid" id="usr-assignments-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                <div class="checkbox-grid" id="usr-assignments-group">
                   <label class="checkbox-card"><input type="checkbox" value="finance"> <span>Keuangan</span></label>
                   <label class="checkbox-card"><input type="checkbox" value="curriculum"> <span>Kurikulum</span></label>
                   <label class="checkbox-card"><input type="checkbox" value="studentAffairs"> <span>Kesiswaan</span></label>
@@ -822,18 +822,20 @@ const AdminPages = {
     };
 
     container.innerHTML = `
-      <div class="card" style="margin-bottom:16px">
-        <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:space-between">
-          <div class="search-box" style="flex:1; min-width:250px; position:relative">
-            <i class="ph ph-magnifying-glass" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-muted)"></i>
-            <input type="text" id="search-sub" placeholder="Cari mata pelajaran..." style="width:100%; padding-left:36px; height:40px; border-radius:8px; border:1px solid var(--border)">
+      <div class="card toolbar-panel">
+        <div class="toolbar-row">
+          <div class="toolbar-controls">
+            <div class="search-box">
+              <i class="ph ph-magnifying-glass"></i>
+              <input type="text" id="search-sub" placeholder="Cari mata pelajaran...">
+            </div>
           </div>
           <button class="btn btn-primary" id="btn-add-sub"><i class="ph ph-plus"></i> Tambah Mapel</button>
         </div>
       </div>
       <div class="card">
         <div class="table-responsive">
-          <table class="table"><thead><tr><th style="width:50px">No</th><th>Nama Mata Pelajaran</th><th>Kategori</th><th style="width:100px">Aksi</th></tr></thead>
+          <table class="table"><thead><tr><th class="table-col-sm">No</th><th>Nama Mata Pelajaran</th><th>Kategori</th><th class="table-col-md">Aksi</th></tr></thead>
           <tbody id="tbody-subjects"></tbody></table>
         </div>
       </div>
@@ -1115,7 +1117,7 @@ const AdminPages = {
           const modal = document.createElement('div');
           modal.className = 'modal-overlay active';
           modal.innerHTML = `
-            <div class="modal" style="max-width: 720px;">
+            <div class="modal modal-wide">
               <div class="modal-header">
                 <h3 class="modal-title">Bukti Presensi</h3>
                 <button class="btn-icon" type="button" data-close-proof="1"><i class="ph ph-x"></i></button>

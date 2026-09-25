@@ -25,7 +25,16 @@
   --radius-lg: 24px;
   --radius-full: 9999px;
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  --sidebar-width: 280px
+  --sidebar-width: 280px;
+  --control-height: 40px;
+  --control-height-compact: 36px;
+  --card-padding: 16px;
+  --content-gap: 12px;
+  --table-cell-padding: 10px 14px;
+  --modal-padding-x: 20px;
+  --modal-padding-y: 16px;
+  --space-compact: 8px;
+  --space-section: 12px
 }
 
 * {

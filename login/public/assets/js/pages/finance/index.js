@@ -71,7 +71,7 @@ const FinancePages = {
         </div>
       </section>
 
-      <div class="card-grid section-spacer" style="grid-template-columns: 1fr;">
+      <div class="card-grid section-spacer">
         <div class="card">
           <div class="card-header">
             <h3 class="card-title">Buku Kas (10 Transaksi Terakhir)</h3>
