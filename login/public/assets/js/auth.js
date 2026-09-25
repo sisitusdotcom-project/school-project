@@ -1,6 +1,7 @@
 const Auth = {
   currentUser: null,
   currentRole: null,
+  currentAssignments: [],
   userData: null,
 
   init() {
@@ -18,6 +19,7 @@ const Auth = {
 
           this.userData = userData;
           this.currentRole = userData.role;
+          this.currentAssignments = AppConfig.normalizeAssignments(userData.assignments || userData.unitRoles || []);
           this.updateProfileUI();
 
           const appShell = document.getElementById('app-shell');
@@ -40,6 +42,7 @@ const Auth = {
 
       this.currentUser = null;
       this.currentRole = null;
+      this.currentAssignments = [];
       this.userData = null;
 
       const appShell = document.getElementById('app-shell');
@@ -126,7 +129,7 @@ const Auth = {
     const avatarWrap = document.querySelector('.avatar');
 
     if (userName) userName.innerText = this.userData.name || 'Pengguna';
-    if (userRole) userRole.innerText = AppConfig.getRoleLabel(this.currentRole);
+    if (userRole) userRole.innerText = AppConfig.getRoleAssignmentLabel(this.userData || { role: this.currentRole });
 
     if (avatarWrap) {
       const photoUrl = this.userData.photoURL || '';
@@ -146,7 +149,7 @@ const Auth = {
     if (!nav) return;
 
     nav.innerHTML = '';
-    const links = AppConfig.getRoleNav(this.currentRole);
+    const links = AppConfig.getRoleNav(this.currentRole, this.userData?.assignments || this.currentAssignments || []);
 
     links.forEach((link) => {
       const item = document.createElement('a');

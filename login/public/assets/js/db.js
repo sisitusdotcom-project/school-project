@@ -263,6 +263,13 @@ const DB = {
   async getAllStudents() {
     return this._readCollection('students', {});
   },
+  async getStudentReferenceIndex() {
+    const students = this.toArray(await this.getAllStudents());
+    return students.reduce((index, student) => {
+      index[student.id] = student;
+      return index;
+    }, {});
+  },
   async getStudentsByClass(classId) {
     if (!isDBReady()) return {};
     const snap = await db.ref('students').orderByChild('classId').equalTo(classId).once('value');
@@ -359,6 +366,137 @@ const DB = {
     if (!isDBReady()) return;
     await db.ref(`extracurriculars/${id}`).remove();
   },
+  // --- FACILITIES / SARPRAS ---
+  async getFacilityAssets() {
+    return this._readCollection('facilities/assets', {});
+  },
+  async saveFacilityAsset(data, id = null) {
+    if (!isDBReady()) return null;
+    const normalized = {
+      name: data.name || 'Aset baru',
+      category: data.category || 'Umum',
+      condition: data.condition || 'Baik',
+      quantity: Number(data.quantity || 1),
+      room: data.room || '-',
+      status: data.status || 'Aktif',
+      notes: data.notes || '',
+      createdAt: data.createdAt || firebase.database.ServerValue.TIMESTAMP
+    };
+
+    const ref = id ? db.ref(`facilities/assets/${id}`) : db.ref('facilities/assets').push();
+    await ref.set(normalized);
+    return ref.key;
+  },
+  async getFacilityRooms() {
+    return this._readCollection('facilities/rooms', {});
+  },
+  async saveFacilityRoom(data, id = null) {
+    if (!isDBReady()) return null;
+    const normalized = {
+      name: data.name || 'Ruangan baru',
+      type: data.type || 'Kelas',
+      location: data.location || '-',
+      capacity: Number(data.capacity || 0),
+      status: data.status || 'Aktif',
+      notes: data.notes || '',
+      createdAt: data.createdAt || firebase.database.ServerValue.TIMESTAMP
+    };
+
+    const ref = id ? db.ref(`facilities/rooms/${id}`) : db.ref('facilities/rooms').push();
+    await ref.set(normalized);
+    return ref.key;
+  },
+  async getFacilityMaintenance() {
+    return this._readCollection('facilities/maintenance', {});
+  },
+  async saveFacilityMaintenance(data, id = null) {
+    if (!isDBReady()) return null;
+    const normalized = {
+      itemName: data.itemName || 'Barang',
+      type: data.type || 'Pemeliharaan',
+      date: data.date || new Date().toISOString().slice(0, 10),
+      description: data.description || '-',
+      status: data.status || 'Diajukan',
+      createdAt: data.createdAt || firebase.database.ServerValue.TIMESTAMP
+    };
+
+    const ref = id ? db.ref(`facilities/maintenance/${id}`) : db.ref('facilities/maintenance').push();
+    await ref.set(normalized);
+    return ref.key;
+  },
+  // --- PERSONNEL / STAFF ---
+  async getPersonnelDirectory() {
+    return this._readCollection('personnel/employees', {});
+  },
+  async savePersonnelMember(data, id = null) {
+    if (!isDBReady()) return null;
+    const normalized = {
+      name: data.name || 'Pegawai baru',
+      position: data.position || 'Staf',
+      department: data.department || 'Umum',
+      email: data.email || '',
+      phone: data.phone || '',
+      status: data.status || 'Aktif',
+      createdAt: data.createdAt || firebase.database.ServerValue.TIMESTAMP
+    };
+
+    const ref = id ? db.ref(`personnel/employees/${id}`) : db.ref('personnel/employees').push();
+    await ref.set(normalized);
+    return ref.key;
+  },
+  async getPersonnelAnnouncements() {
+    return this._readCollection('personnel/announcements', {});
+  },
+  async savePersonnelAnnouncement(data, id = null) {
+    if (!isDBReady()) return null;
+    const normalized = {
+      title: data.title || 'Pengumuman baru',
+      description: data.description || '',
+      date: data.date || new Date().toISOString().slice(0, 10),
+      createdAt: data.createdAt || firebase.database.ServerValue.TIMESTAMP
+    };
+
+    const ref = id ? db.ref(`personnel/announcements/${id}`) : db.ref('personnel/announcements').push();
+    await ref.set(normalized);
+    return ref.key;
+  },
+  // --- STUDENT AFFAIRS: ACHIEVEMENTS, VIOLATIONS ---
+  async getStudentAchievements() {
+    return this._readCollection('student_affairs/achievements', {});
+  },
+  async saveStudentAchievement(data, id = null) {
+    if (!isDBReady()) return null;
+    const normalized = {
+      studentId: data.studentId || '',
+      title: data.title || 'Prestasi Baru',
+      category: data.category || 'Umum',
+      description: data.description || '',
+      date: data.date || new Date().toISOString().slice(0, 10),
+      createdAt: data.createdAt || firebase.database.ServerValue.TIMESTAMP
+    };
+
+    const ref = id ? db.ref(`student_affairs/achievements/${id}`) : db.ref('student_affairs/achievements').push();
+    await ref.set(normalized);
+    return ref.key;
+  },
+  async getStudentViolations() {
+    return this._readCollection('student_affairs/violations', {});
+  },
+  async saveStudentViolation(data, id = null) {
+    if (!isDBReady()) return null;
+    const normalized = {
+      studentId: data.studentId || '',
+      title: data.title || 'Catatan Pelanggaran',
+      category: data.category || 'Kedisiplinan',
+      description: data.description || '',
+      date: data.date || new Date().toISOString().slice(0, 10),
+      createdAt: data.createdAt || firebase.database.ServerValue.TIMESTAMP
+    };
+
+    const ref = id ? db.ref(`student_affairs/violations/${id}`) : db.ref('student_affairs/violations').push();
+    await ref.set(normalized);
+    return ref.key;
+  },
   // --- RAPOR DATA PATH HELPER ---
   _raporPath(type, year, sem) {
     return `${type}/${year.replace('/', '-')}_${sem}`;
@@ -435,6 +573,69 @@ const DB = {
       ...data,
       updatedAt: firebase.database.ServerValue.TIMESTAMP
     });
+  },
+  // --- FINANCE ---
+  async getFinanceLedger() {
+    return this._readCollection('finance/ledger', {});
+  },
+  async getFinanceSummary() {
+    const entries = this.toArray(await this.getFinanceLedger());
+    const summary = entries.reduce((acc, item) => {
+      const amount = Number(item.amount || 0);
+      if (!item || !item.type) return acc;
+      if (item.type === 'income') acc.income += amount;
+      if (item.type === 'expense') acc.expense += amount;
+      acc.count += 1;
+      return acc;
+    }, { income: 0, expense: 0, count: 0 });
+
+    summary.net = summary.income - summary.expense;
+    return summary;
+  },
+  async saveFinanceEntry(data, id = null) {
+    if (!isDBReady()) return null;
+    const entry = {
+      id: id || data.id || null,
+      type: data.type || 'income',
+      category: data.category || 'Umum',
+      description: data.description || 'Transaksi baru',
+      amount: Number(data.amount || 0),
+      date: data.date || new Date().toISOString().slice(0, 10),
+      createdAt: data.createdAt || firebase.database.ServerValue.TIMESTAMP
+    };
+
+    const ref = id ? db.ref(`finance/ledger/${id}`) : db.ref('finance/ledger').push();
+    await ref.set(entry);
+    return ref.key;
+  },
+  async deleteFinanceEntry(id) {
+    if (!isDBReady() || !id) return;
+    await db.ref(`finance/ledger/${id}`).remove();
+  },
+  async getStudentBills() {
+    return this._readCollection('finance/student_bills', {});
+  },
+  async saveStudentBill(data, id = null) {
+    if (!isDBReady()) return null;
+    const normalized = {
+      studentId: data.studentId || '',
+      amount: Number(data.amount || 0),
+      dueDate: data.dueDate || new Date().toISOString().slice(0, 10),
+      status: data.status || 'pending',
+      note: data.note || '',
+      createdAt: data.createdAt || firebase.database.ServerValue.TIMESTAMP
+    };
+
+    const ref = id ? db.ref(`finance/student_bills/${id}`) : db.ref('finance/student_bills').push();
+    await ref.set(normalized);
+    return ref.key;
+  },
+  async markStudentBillPaid(id) {
+    if (!isDBReady() || !id) return;
+    const bills = await this.getStudentBills();
+    const bill = bills[id];
+    if (!bill) return;
+    await db.ref(`finance/student_bills/${id}/status`).set('paid');
   }
 };
 

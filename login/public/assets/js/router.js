@@ -29,6 +29,12 @@ const Router = {
     const container = document.getElementById('views-container');
     if (!container) return;
 
+    if (typeof App !== 'undefined' && !App.isRouteAllowed(hash, Auth.currentRole)) {
+      Router.setTitle('Akses ditolak', 'Halaman ini tidak termasuk dalam ranah akun Anda.');
+      container.innerHTML = '<div class="card"><div class="card-body"><h2 class="card-title">Akses ditolak</h2><p class="text-muted">Silakan gunakan menu yang tersedia untuk peran Anda.</p></div></div>';
+      return;
+    }
+
     document.querySelectorAll('.btn-nav').forEach((el) => {
       el.classList.toggle('active', el.getAttribute('href') === hash);
     });

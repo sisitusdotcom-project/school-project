@@ -3,25 +3,214 @@
     ADMIN: 'admin',
     GURU: 'guru',
     KEPSEK: 'kepsek',
-    ORTU: 'ortu'
+    ORTU: 'ortu',
+    FINANCE: 'finance',
+    CURRICULUM: 'curriculum',
+    STUDENT_AFFAIRS: 'studentAffairs',
+    PERSONNEL: 'personnel',
+    FACILITIES: 'facilities'
+  });
+
+  const UNIT_LABELS = Object.freeze({
+    [ROLES.FINANCE]: 'Keuangan',
+    [ROLES.CURRICULUM]: 'Kurikulum',
+    [ROLES.STUDENT_AFFAIRS]: 'Kesiswaan',
+    [ROLES.PERSONNEL]: 'Personalia',
+    [ROLES.FACILITIES]: 'Sarpras'
   });
 
   const ROLE_LABELS = Object.freeze({
     [ROLES.ADMIN]: 'Administrator',
     [ROLES.GURU]: 'Guru / Wali Kelas',
     [ROLES.KEPSEK]: 'Kepala Sekolah',
-    [ROLES.ORTU]: 'Orang Tua / Wali'
+    [ROLES.ORTU]: 'Orang Tua / Wali',
+    [ROLES.FINANCE]: 'Manajemen Keuangan',
+    [ROLES.CURRICULUM]: 'Manajemen Kurikulum',
+    [ROLES.STUDENT_AFFAIRS]: 'Manajemen Kesiswaan',
+    [ROLES.PERSONNEL]: 'Manajemen Personalia',
+    [ROLES.FACILITIES]: 'Manajemen Sarpras'
+  });
+
+  const ROLE_OPTIONS = Object.freeze({
+    [ROLES.ADMIN]: 'Admin',
+    [ROLES.GURU]: 'Guru',
+    [ROLES.KEPSEK]: 'Kepsek',
+    [ROLES.ORTU]: 'Orang Tua'
+  });
+
+  const MANAGEMENT_ROUTE_MAP = Object.freeze({
+    [ROLES.FINANCE]: '#/finance',
+    [ROLES.CURRICULUM]: '#/curriculum',
+    [ROLES.STUDENT_AFFAIRS]: '#/student-affairs',
+    [ROLES.PERSONNEL]: '#/personnel',
+    [ROLES.FACILITIES]: '#/facilities'
+  });
+
+  // One policy for navigation, route guards, and explanatory UI.  An
+  // assignment describes a job title only; it must never grant a role more
+  // data than its base role and the RTDB rules allow.
+  const MODULE_ACCESS = Object.freeze({
+    finance: { roles: [ROLES.ADMIN, ROLES.KEPSEK], label: 'Keuangan', scope: 'rekap keuangan sekolah' },
+    curriculum: { roles: [ROLES.ADMIN, ROLES.KEPSEK, ROLES.GURU], label: 'Kurikulum', scope: 'struktur dan rekap pembelajaran' },
+    studentAffairs: { roles: [ROLES.ADMIN, ROLES.KEPSEK, ROLES.GURU], label: 'Kesiswaan', scope: 'rekap siswa dan perkembangan kelas' },
+    personnel: { roles: [ROLES.ADMIN, ROLES.KEPSEK], label: 'Humas & Personalia', scope: 'rekap SDM dan komunikasi internal' },
+    facilities: { roles: [ROLES.ADMIN, ROLES.KEPSEK], label: 'Sarpras', scope: 'rekap aset, ruangan, dan pemeliharaan' }
+  });
+
+  const ROLE_CONTENT_MAP = Object.freeze({
+    [ROLES.ADMIN]: {
+      label: 'Admin',
+      scope: 'Penetapan tugas, pengaturan utama, dan pengelolaan akses sistem.',
+      features: [
+        'Penugasan per unit kerja',
+        'Pengelolaan pengguna dan hak akses',
+        'Master kelas dan siswa',
+        'Master mata pelajaran',
+        'Indikator karakter dan konfigurasi sekolah'
+      ],
+      notAllowed: [
+        'Mengisi operasional harian keuangan',
+        'Menangani pembelajaran guru setiap hari',
+        'Menjadi unit kesiswaan',
+        'Mengelola data sarpras sebagai pelaksana utama'
+      ]
+    },
+    [ROLES.KEPSEK]: {
+      label: 'Kepala Sekolah',
+      scope: 'Monitoring sekolah, evaluasi kinerja, dan keputusan strategis.',
+      features: [
+        'Dashboard sekolah',
+        'Laporan kelas dan rekap akademik',
+        'Monitoring kesiswaan',
+        'Review keuangan dan sarpras',
+        'Evaluasi personel dan kebijakan sekolah'
+      ],
+      notAllowed: [
+        'Input data harian operasional',
+        'Menjadi pelaksana kegiatan unit teknis',
+        'Mengambil alih tugas admin secara langsung'
+      ]
+    },
+    [ROLES.GURU]: {
+      label: 'Guru',
+      scope: 'Pembelajaran, penilaian, dan pemantauan perkembangan siswa di kelas.',
+      features: [
+        'Presensi guru',
+        'Absensi siswa',
+        'E-Rapor dan kelas',
+        'Nilai akademik',
+        'Riwayat observasi siswa'
+      ],
+      notAllowed: [
+        'Mengelola konfigurasi sekolah',
+        'Menetapkan tugas admin',
+        'Mengurus kas dan keuangan sekolah',
+        'Menjadi pengendali seluruh data siswa di semua unit'
+      ]
+    },
+    finance: {
+      label: 'Keuangan',
+      scope: 'Pemasukan, pengeluaran, kas, tagihan, dan laporan keuangan.',
+      features: [
+        'Ringkasan pemasukan dan pengeluaran',
+        'Tagihan siswa dan status pembayaran',
+        'Laporan keuangan sekolah',
+        'Approval dan monitoring anggaran'
+      ],
+      notAllowed: [
+        'Penyusunan struktur kurikulum',
+        'Mengelola data siswa harian',
+        'Menjadi dashboard admin umum'
+      ]
+    },
+    curriculum: {
+      label: 'Kurikulum',
+      scope: 'Perencanaan pembelajaran, mata pelajaran, dan evaluasi akademik.',
+      features: [
+        'Tahun ajaran dan semester',
+        'Master mata pelajaran',
+        'Rombel dan pembelajaran',
+        'Nilai dan e-rapor',
+        'Laporan kurikulum'
+      ],
+      notAllowed: [
+        'Menangani tagihan dan kas',
+        'Mengelola absensi pegawai',
+        'Menjadi satu-satunya sumber data siswa'
+      ]
+    },
+    studentAffairs: {
+      label: 'Kesiswaan',
+      scope: 'Data siswa, kelas, kedisiplinan, prestasi, dan perkembangan siswa.',
+      features: [
+        'Rekap siswa dan rombel',
+        'Absensi siswa',
+        'Prestasi dan observasi',
+        'Pelanggaran dan perkembangan',
+        'Laporan kesiswaan'
+      ],
+      notAllowed: [
+        'Membuat jadwal pelajaran',
+        'Mengurus kas sekolah',
+        'Mengolah data pegawai secara penuh'
+      ]
+    },
+    personnel: {
+      label: 'Personalia',
+      scope: 'Data pegawai, struktur organisasi, dan kebutuhan SDM sekolah.',
+      features: [
+        'Guru dan tenaga kependidikan',
+        'Jabatan dan struktur organisasi',
+        'Kehadiran pegawai',
+        'Laporan personalia dan humas'
+      ],
+      notAllowed: [
+        'Pengelolaan kurikulum harian',
+        'Pembayaran siswa',
+        'Rekap administrasi akademik pokok'
+      ]
+    },
+    facilities: {
+      label: 'Sarpras',
+      scope: 'Inventaris, ruangan, aset, dan maintenance sekolah.',
+      features: [
+        'Inventaris aset',
+        'Kondisi ruang dan fasilitas',
+        'Pemeliharaan dan kebutuhan sarpras',
+        'Laporan aset dan maintenance'
+      ],
+      notAllowed: [
+        'Mengelola penilaian guru',
+        'Mengatur data siswa',
+        'Menjadi pusat dashboard seluruh sekolah'
+      ]
+    },
+    [ROLES.ORTU]: {
+      label: 'Orang Tua / Wali',
+      scope: 'Pemantauan perkembangan dan kegiatan anak.',
+      features: [
+        'Perkembangan anak',
+        'Kehadiran dan kinerja siswa',
+        'Informasi rapor dan aktivitas sekolah'
+      ],
+      notAllowed: [
+        'Mengelola data pihak sekolah',
+        'Menerima akses operasional penuh',
+        'Mengelola data keuangan sekolah'
+      ]
+    }
   });
 
   const NAV_ITEMS = Object.freeze({
     [ROLES.ADMIN]: [
       { hash: '#/dashboard', icon: 'ph-squares-four', text: 'Dashboard' },
-      { hash: '#/admin/attendance', icon: 'ph-calendar-check', text: 'Rekapan Presensi' },
+      { hash: '#/admin/assignments', icon: 'ph-clipboard-check', text: 'Penugasan' },
       { hash: '#/admin/users', icon: 'ph-users', text: 'Pengguna' },
       { hash: '#/admin/classes', icon: 'ph-books', text: 'Kelas & Siswa' },
       { hash: '#/admin/subjects', icon: 'ph-book-bookmark', text: 'Mata Pelajaran' },
       { hash: '#/admin/extracurriculars', icon: 'ph-person-simple-run', text: 'Ekstrakurikuler' },
-      { hash: '#/admin/characters', icon: 'ph-star', text: 'Indikator Karakter' }
+      { hash: '#/admin/characters', icon: 'ph-star', text: 'Indikator Karakter' },
+      { hash: '#/admin/attendance', icon: 'ph-calendar-check', text: 'Rekap Presensi' }
     ],
     [ROLES.GURU]: [
       { hash: '#/dashboard', icon: 'ph-squares-four', text: 'Beranda' },
@@ -34,6 +223,11 @@
     ],
     [ROLES.KEPSEK]: [
       { hash: '#/dashboard', icon: 'ph-chart-pie', text: 'Dashboard Sekolah' },
+      { hash: '#/finance', icon: 'ph-wallet', text: 'Keuangan' },
+      { hash: '#/curriculum', icon: 'ph-books', text: 'Kurikulum' },
+      { hash: '#/student-affairs', icon: 'ph-users-three', text: 'Kesiswaan' },
+      { hash: '#/personnel', icon: 'ph-briefcase', text: 'Personalia' },
+      { hash: '#/facilities', icon: 'ph-building-office', text: 'Sarpras' },
       { hash: '#/kepsek/reports', icon: 'ph-file-text', text: 'Laporan Kelas' }
     ],
     [ROLES.ORTU]: [
@@ -77,12 +271,57 @@
     }));
   }
 
+  function normalizeAssignments(assignments = []) {
+    if (!Array.isArray(assignments)) {
+      if (assignments) return [String(assignments)];
+      return [];
+    }
+
+    return [...new Set(assignments
+      .filter(Boolean)
+      .map((item) => String(item).trim())
+      .filter(Boolean))];
+  }
+
   function getRoleLabel(role) {
     return ROLE_LABELS[role] || 'Pengguna';
   }
 
-  function getRoleNav(role) {
-    return NAV_ITEMS[role] || [];
+  function getRoleAssignments(user = {}) {
+    if (!user || typeof user !== 'object') return [];
+    return normalizeAssignments(user.assignments || user.unitRoles || user.roles || []);
+  }
+
+  function getRoleAssignmentLabel(user = {}) {
+    const assignments = getRoleAssignments(user);
+    if (!assignments.length) return getRoleLabel(user.role);
+    const unitLabels = assignments.map((item) => UNIT_LABELS[item] || getRoleLabel(item)).join(', ');
+    return `${getRoleLabel(user.role)} · ${unitLabels}`;
+  }
+
+  function getRoleNav(role, assignments = []) {
+    const baseNav = NAV_ITEMS[role] || [];
+    const unitAssignments = normalizeAssignments(assignments);
+    const unitNav = unitAssignments.flatMap((unit) => {
+      const route = MANAGEMENT_ROUTE_MAP[unit];
+      if (!route) return [];
+      const config = {
+        '#/finance': { hash: '#/finance', icon: 'ph-wallet', text: 'Keuangan' },
+        '#/curriculum': { hash: '#/curriculum', icon: 'ph-books', text: 'Kurikulum' },
+        '#/student-affairs': { hash: '#/student-affairs', icon: 'ph-users-three', text: 'Kesiswaan' },
+        '#/personnel': { hash: '#/personnel', icon: 'ph-briefcase', text: 'Personalia' },
+        '#/facilities': { hash: '#/facilities', icon: 'ph-building-office', text: 'Sarpras' }
+      };
+      // A unit assignment is intentionally not an authorization override.
+      // Until a dedicated unit role is represented in Auth and RTDB Rules,
+      // only show a module when the base role is allowed to read it.
+      const moduleKey = Object.keys(MANAGEMENT_ROUTE_MAP).find((key) => MANAGEMENT_ROUTE_MAP[key] === route);
+      if (!moduleKey || !MODULE_ACCESS[moduleKey]?.roles.includes(role)) return [];
+      return [config[route]];
+    }).filter(Boolean);
+
+    const merged = [...baseNav, ...unitNav];
+    return merged.filter((item, index, arr) => arr.findIndex((entry) => entry.hash === item.hash) === index);
   }
 
   function getRoleBadgeClass(role) {
@@ -127,12 +366,19 @@
   window.AppConfig = Object.freeze({
     ROLES,
     ROLE_LABELS,
+    UNIT_LABELS,
+    ROLE_OPTIONS,
+    ROLE_CONTENT_MAP,
+    MODULE_ACCESS,
     NAV_ITEMS,
     DEFAULT_SETTINGS,
     APP_DEFAULTS,
     normalizeSettings,
+    normalizeAssignments,
     toArray,
     getRoleLabel,
+    getRoleAssignments,
+    getRoleAssignmentLabel,
     getRoleNav,
     getRoleBadgeClass
   });

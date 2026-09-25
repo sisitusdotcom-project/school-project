@@ -304,6 +304,3 @@ const KepsekPages = {
     container.innerHTML = classArr.length ? `<div class="card-grid">${cards}</div>` : '<div class="card"><p class="text-muted">Belum ada data kelas.</p></div>';
   }
 };
-// Route registration
-Router.add('#/kepsek/reports', c => KepsekPages.renderReports(c));
-Router.add('#/kepsek/class/:id', (c, id) => KepsekPages.renderClassDetail(c, id));

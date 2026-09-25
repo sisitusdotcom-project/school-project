@@ -279,4 +279,3 @@ const OrtuPages = {
     parent.querySelector(`[data-target="tab-${tabName}-${studentId}"]`).classList.add('active');
   }
 };
-Router.add('#/ortu/dashboard', c => OrtuPages.renderDashboard(c));

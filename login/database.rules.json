@@ -1,9 +1,15 @@
 {
   "rules": {
+    ".write": false,
+
     "users": {
-      ".read": "auth != null",
+      ".read": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
       "$uid": {
-        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.uid === $uid)"
+        ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.uid === $uid)",
+        ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
+        "photoURL": {
+          ".write": "auth != null && auth.uid === $uid && newData.isString() && newData.val().length <= 2048"
+        }
       }
     },
     "settings": {
@@ -30,71 +36,71 @@
       ".indexOn": ["parentId", "classId"],
       ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru' || root.child('users').child(auth.uid).child('role').val() === 'kepsek' || (query.orderByChild == 'parentId' && query.equalTo == auth.uid))",
       "$studentId": {
-         ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru' || root.child('users').child(auth.uid).child('role').val() === 'kepsek' || data.child('parentId').val() === auth.uid)",
-         ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru')"
+        ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru' || root.child('users').child(auth.uid).child('role').val() === 'kepsek' || data.child('parentId').val() === auth.uid)",
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru')"
       }
     },
     "assessments": {
       ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru' || root.child('users').child(auth.uid).child('role').val() === 'kepsek')",
       "$year_sem": {
-         "$studentId": {
-            ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru' || root.child('users').child(auth.uid).child('role').val() === 'kepsek' || root.child('students').child($studentId).child('parentId').val() === auth.uid)",
-            ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru')"
-         }
+        "$studentId": {
+          ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru' || root.child('users').child(auth.uid).child('role').val() === 'kepsek' || root.child('students').child($studentId).child('parentId').val() === auth.uid)",
+          ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru')"
+        }
       }
     },
     "academic_grades": {
       ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru' || root.child('users').child(auth.uid).child('role').val() === 'kepsek')",
       "$year_sem": {
-         "$studentId": {
-            ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru' || root.child('users').child(auth.uid).child('role').val() === 'kepsek' || root.child('students').child($studentId).child('parentId').val() === auth.uid)",
-            ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru')"
-         }
+        "$studentId": {
+          ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru' || root.child('users').child(auth.uid).child('role').val() === 'kepsek' || root.child('students').child($studentId).child('parentId').val() === auth.uid)",
+          ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru')"
+        }
       }
     },
     "student_extracurriculars": {
       ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru' || root.child('users').child(auth.uid).child('role').val() === 'kepsek')",
       "$year_sem": {
-         "$studentId": {
-            ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru' || root.child('users').child(auth.uid).child('role').val() === 'kepsek' || root.child('students').child($studentId).child('parentId').val() === auth.uid)",
-            ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru')"
-         }
+        "$studentId": {
+          ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru' || root.child('users').child(auth.uid).child('role').val() === 'kepsek' || root.child('students').child($studentId).child('parentId').val() === auth.uid)",
+          ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru')"
+        }
       }
     },
     "cocurriculars": {
       ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru' || root.child('users').child(auth.uid).child('role').val() === 'kepsek')",
       "$year_sem": {
-         "$studentId": {
-            ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru' || root.child('users').child(auth.uid).child('role').val() === 'kepsek' || root.child('students').child($studentId).child('parentId').val() === auth.uid)",
-            ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru')"
-         }
+        "$studentId": {
+          ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru' || root.child('users').child(auth.uid).child('role').val() === 'kepsek' || root.child('students').child($studentId).child('parentId').val() === auth.uid)",
+          ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru')"
+        }
       }
     },
     "attendances": {
       ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru' || root.child('users').child(auth.uid).child('role').val() === 'kepsek')",
       "$year_sem": {
-         "$studentId": {
-            ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru' || root.child('users').child(auth.uid).child('role').val() === 'kepsek' || root.child('students').child($studentId).child('parentId').val() === auth.uid)",
-            ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru')"
-         }
+        "$studentId": {
+          ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru' || root.child('users').child(auth.uid).child('role').val() === 'kepsek' || root.child('students').child($studentId).child('parentId').val() === auth.uid)",
+          ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru')"
+        }
       }
     },
     "teacher_notes": {
       ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru' || root.child('users').child(auth.uid).child('role').val() === 'kepsek')",
       "$year_sem": {
-         "$studentId": {
-            ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru' || root.child('users').child(auth.uid).child('role').val() === 'kepsek' || root.child('students').child($studentId).child('parentId').val() === auth.uid)",
-            ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru')"
-         }
+        "$studentId": {
+          ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru' || root.child('users').child(auth.uid).child('role').val() === 'kepsek' || root.child('students').child($studentId).child('parentId').val() === auth.uid)",
+          ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru')"
+        }
       }
     },
     "parent_responses": {
       ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru' || root.child('users').child(auth.uid).child('role').val() === 'kepsek')",
       "$year_sem": {
-         "$studentId": {
-            ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru' || root.child('users').child(auth.uid).child('role').val() === 'kepsek' || root.child('students').child($studentId).child('parentId').val() === auth.uid)",
-            ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru' || root.child('students').child($studentId).child('parentId').val() === auth.uid)"
-         }
+        "$studentId": {
+          ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru' || root.child('users').child(auth.uid).child('role').val() === 'kepsek' || root.child('students').child($studentId).child('parentId').val() === auth.uid)",
+          ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru' || root.child('students').child($studentId).child('parentId').val() === auth.uid)"
+        }
       }
     },
     "observations": {
@@ -129,6 +135,79 @@
     "leave_requests": {
       ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru' || root.child('users').child(auth.uid).child('role').val() === 'kepsek')",
       ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru')"
+    },
+
+    "master": {
+      ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'kepsek' || root.child('users').child(auth.uid).child('role').val() === 'guru')",
+      ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
+      "students": {
+        ".indexOn": ["classId", "parentId"]
+      },
+      "classes": {
+        ".indexOn": ["teacherId"]
+      },
+      "teachers": {
+        ".indexOn": ["role", "status"]
+      },
+      "staff": {
+        ".indexOn": ["role", "status"]
+      }
+    },
+    "finance": {
+      ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'kepsek')",
+      ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
+      "payments": {
+        ".indexOn": ["studentId", "status", "dueDate"]
+      },
+      "student_bills": {
+        ".indexOn": ["studentId", "status", "dueDate"]
+      },
+      "ledger": {
+        ".indexOn": ["date", "type"]
+      }
+    },
+    "curriculum": {
+      ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'kepsek' || root.child('users').child(auth.uid).child('role').val() === 'guru')",
+      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru')",
+      "schedules": {
+        ".indexOn": ["classId", "day"]
+      },
+      "reports": {
+        ".indexOn": ["studentId", "academicYear"]
+      }
+    },
+    "student_affairs": {
+      ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'kepsek' || root.child('users').child(auth.uid).child('role').val() === 'guru')",
+      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru')",
+      "attendance": {
+        ".indexOn": ["studentId", "date"]
+      },
+      "violations": {
+        ".indexOn": ["studentId", "date"]
+      },
+      "achievements": {
+        ".indexOn": ["studentId", "year"]
+      }
+    },
+    "personnel": {
+      ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'kepsek' || root.child('users').child(auth.uid).child('role').val() === 'guru')",
+      ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
+      "attendance": {
+        ".indexOn": ["employeeId", "date"]
+      },
+      "leaveRequests": {
+        ".indexOn": ["employeeId", "status"]
+      }
+    },
+    "facilities": {
+      ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'kepsek')",
+      ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
+      "assets": {
+        ".indexOn": ["category", "status"]
+      },
+      "maintenance": {
+        ".indexOn": ["assetId", "status"]
+      }
     }
   }
 }

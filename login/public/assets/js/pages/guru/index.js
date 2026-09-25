@@ -1302,17 +1302,6 @@ const GuruPages = {
     };
   }
 };
-// Route registration
-Router.add('#/guru/classes', c => GuruPages.renderClasses(c));
-Router.add('#/guru/attendance', c => GuruPages.renderTeacherAttendance(c));
-Router.add('#/guru/student-attendance', c => GuruPages.renderStudentAttendance(c));
-Router.add('#/guru/student-attendance/:id', (c, id) => GuruPages.renderStudentAttendanceInput(c, id));
-Router.add('#/guru/assess/:id', (c, id) => GuruPages.renderAssessment(c, id));
-Router.add('#/guru/academic', c => GuruPages.renderAcademicGrades(c));
-Router.add('#/guru/additional', c => GuruPages.renderAdditionalData(c));
-Router.add('#/guru/observe/:id', (c, id) => GuruPages.renderObserveClass(c, id));
-Router.add('#/guru/observations', c => GuruPages.renderObservationHistory(c));
-Router.add('#/guru/ekskul/:id', (c, eksId) => GuruPages.renderEkskulInput(c, eksId));
 
 
 

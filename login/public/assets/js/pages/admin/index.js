@@ -1165,11 +1165,3 @@ const AdminPages = {
   // ========== HELPERS ==========
 
 };
-// Route registration
-Router.add('#/admin/attendance', c => AdminPages.renderAttendance(c));
-Router.add('#/admin/characters', c => AdminPages.renderCharacters(c));
-Router.add('#/admin/users', c => AdminPages.renderUsers(c));
-Router.add('#/admin/classes', c => AdminPages.renderClasses(c));
-Router.add('#/admin/subjects', c => AdminPages.renderSubjects(c));
-Router.add('#/admin/extracurriculars', c => AdminPages.renderExtracurriculars(c));
-Router.add('#/admin/students/:id', (c, classId) => AdminPages.renderStudents(c, classId));

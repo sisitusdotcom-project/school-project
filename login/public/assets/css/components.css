@@ -3,9 +3,9 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 10px 16px;
+  padding: 8px 12px;
   font-family: 'Inter', sans-serif;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   border: 1px solid #fff0;
   border-radius: var(--radius-sm);
@@ -94,15 +94,15 @@
 }
 
 .form-group {
-  margin-bottom: 20px
+  margin-bottom: 14px
 }
 
 .form-group label {
   display: block;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--text-main);
-  margin-bottom: 8px
+  margin-bottom: 6px
 }
 
 .form-group input,
@@ -172,9 +172,19 @@
 .card {
   background: var(--bg-card);
   border-radius: var(--radius-md);
-  padding: 20px;
+  padding: 16px;
   box-shadow: var(--shadow-sm);
   border: 1px solid var(--border)
+}
+
+.section-block {
+  margin-top: 14px
+}
+
+.card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px
 }
 
 .card-header {
@@ -196,6 +206,86 @@
   gap: 16px
 }
 
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px
+}
+
+.stats-grid.compact {
+  grid-template-columns: 1fr;
+  gap: 10px
+}
+
+.list-plain {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px
+}
+
+.list-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  background: var(--bg-body);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm)
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px
+}
+
+.form-grid .form-group {
+  margin-bottom: 0
+}
+
+.form-grid > div:last-child:not(.form-group) {
+  grid-column: 1 / -1
+}
+
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  position: relative
+}
+
+.table-wrap .table {
+  min-width: 620px
+}
+
+.table-wrap .table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--bg-body)
+}
+
+.text-success {
+  color: var(--success)
+}
+
+.text-warning {
+  color: var(--warning)
+}
+
+.text-danger {
+  color: var(--danger)
+}
+
+.text-right {
+  text-align: right
+}
+
 .section-spacer {
   margin-bottom: 24px
 }
@@ -214,6 +304,32 @@
   gap: 12px;
   align-items: center;
   justify-content: space-between
+}
+
+.toolbar-inline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 12px
+}
+
+.quick-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px
+}
+
+.list-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  background: var(--bg-body);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm)
 }
 
 .toolbar-controls {
@@ -535,7 +651,8 @@
 .table {
   width: 100%;
   border-collapse: collapse;
-  white-space: nowrap
+  white-space: nowrap;
+  table-layout: auto
 }
 
 .table th,
@@ -653,8 +770,40 @@
 
 .stat-card {
   display: flex;
-  align-items: center;
-  gap: 16px
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: linear-gradient(180deg, var(--bg-card), #f8fafc);
+  box-shadow: var(--shadow-sm);
+  min-height: 92px
+}
+
+.stat-card.primary {
+  background: linear-gradient(180deg, #eff6ff, #f8fbff);
+  border-color: rgba(59, 130, 246, 0.18)
+}
+
+.stat-card.success {
+  background: linear-gradient(180deg, #ecfdf5, #f8fffb);
+  border-color: rgba(16, 185, 129, 0.18)
+}
+
+.stat-card.warning {
+  background: linear-gradient(180deg, #fffbeb, #fffdf7);
+  border-color: rgba(245, 158, 11, 0.2)
+}
+
+.stat-card.danger {
+  background: linear-gradient(180deg, #fef2f2, #fff9f9);
+  border-color: rgba(239, 68, 68, 0.18)
+}
+
+.stat-card.info {
+  background: linear-gradient(180deg, #f3f4f6, #fafafa);
+  border-color: rgba(148, 163, 184, 0.22)
 }
 
 .stat-icon {
@@ -670,13 +819,18 @@
 
 .stat-value {
   font-family: 'Outfit', sans-serif;
-  font-size: 28px;
+  font-size: clamp(1.6rem, 2vw, 2rem);
   font-weight: 700;
-  line-height: 1.1
+  line-height: 1.1;
+  color: var(--text-main)
 }
 
 .stat-label {
-  font-size: 13px
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--text-muted)
 }
 
 .obs-list {
@@ -834,6 +988,58 @@
   }
 }
 
+@media (min-width: 480px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr))
+  }
+
+  .stats-grid.compact {
+    grid-template-columns: repeat(2, minmax(0, 1fr))
+  }
+}
+
+@media (min-width: 768px) {
+  .stats-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr))
+  }
+
+  .stats-grid.compact {
+    grid-template-columns: repeat(3, minmax(0, 1fr))
+  }
+
+  .form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr))
+  }
+}
+
+@media (max-width: 640px) {
+  .toolbar-inline {
+    flex-direction: column;
+    align-items: stretch
+  }
+
+  .toolbar-inline > * {
+    width: 100%
+  }
+
+  .quick-inline {
+    gap: 6px
+  }
+
+  .list-row {
+    flex-direction: column;
+    align-items: flex-start
+  }
+}
+
+@media (max-width: 480px) {
+  .quick-inline {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px
+  }
+}
+
 .text-primary {
   color: var(--primary)
 }
@@ -851,5 +1057,116 @@
 @media (min-width:1024px) {
   .card-grid:has(.stat-card) {
     grid-template-columns: repeat(4, 1fr)
+  }
+}
+
+/* Dense, touch-friendly dashboard treatment.  The stat cards are the only
+   grids intentionally made two columns on phones; content cards keep their
+   readable single-column flow. */
+.btn {
+  min-height: 40px
+}
+
+.card {
+  padding: 14px
+}
+
+.card-header {
+  gap: 10px;
+  margin-bottom: 12px
+}
+
+.section-block {
+  margin-top: 12px
+}
+
+.section-spacer {
+  margin-bottom: 14px
+}
+
+.card-grid:has(> .stat-card) {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px
+}
+
+.stat-card {
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  min-height: 76px;
+  padding: 12px
+}
+
+.stat-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  font-size: 20px
+}
+
+.stat-value {
+  font-size: clamp(1.35rem, 5vw, 1.9rem)
+}
+
+.stat-label {
+  font-size: 10px;
+  line-height: 1.25
+}
+
+@media (max-width: 479px) {
+  .card-title { font-size: 15px }
+  .card-body { gap: 10px }
+  .list-plain { gap: 8px }
+  .list-plain li { font-size: 13px }
+
+  .table th,
+  .table td {
+    padding: 10px 12px;
+    font-size: 13px
+  }
+
+  .modal-overlay {
+    align-items: flex-end;
+    padding: 0
+  }
+
+  .modal {
+    max-height: 92vh;
+    border-radius: 18px 18px 0 0
+  }
+
+  .modal-header,
+  .modal-body { padding: 16px }
+
+  .modal-footer {
+    padding: 12px 16px;
+    padding-bottom: max(12px, env(safe-area-inset-bottom))
+  }
+
+  .att-btn {
+    min-width: 38px;
+    min-height: 36px;
+    padding: 6px 9px !important
+  }
+}
+
+@media (min-width: 768px) {
+  .card { padding: 18px }
+
+  .card-grid:has(> .stat-card) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px
+  }
+
+  .stat-card { min-height: 94px }
+  .stat-icon { width: 44px; height: 44px; font-size: 22px }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important
   }
 }
