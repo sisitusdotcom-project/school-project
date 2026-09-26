@@ -1,85 +1,74 @@
-# Panduan Format Akun & Hak Akses (Cheat Sheet)
-
-Dokumen ini adalah ringkasan (*cheat sheet*) untuk mempermudah Anda mengingat format pembuatan dan *login* masing-masing akun, beserta hak akses (tugas) yang dimilikinya. Semua *password default* untuk akun baru adalah: **`Password123!`**
-
----
-
-## 1. 🎓 Siswa (Orang Tua / Wali)
-*Format Email:* `siswa[ID]@musada.sch.id`
-
-- **Siswa dengan NISN (Normal)**
-  - *ID yang dipakai:* NISN
-  - *Contoh Email:* `siswa3192042116@musada.sch.id`
-  - *Fitur Dasbor:* Perkembangan Anak, Rapor, dan Observasi.
-
-- **Siswa Tanpa NISN (Kosong / Tanda Strip)**
-  - *ID yang dipakai:* NIS (No. Induk)
-  - *Contoh Email:* `siswa0930@musada.sch.id`
-  - *Fitur Dasbor:* Sama seperti siswa normal.
-
----
-
-## 2. 👨‍🏫 Guru (Tenaga Pendidik Dasar)
-*Format Email:* `guru[namatanpagelar]@musada.sch.id`
-
-- **Guru Kelas / Wali Kelas**
-  - *Trigger di TSV:* Kolom Tugas Mengajar memuat "Guru Kelas"
-  - *Contoh Email:* `gurunurfadhillah@musada.sch.id`
-  - *Fitur Dasbor:* Presensi Guru, Absensi Siswa, E-Rapor (Kelas), Nilai Akademik.
-
-- **Guru Mata Pelajaran (PAI, PJOK, dll)**
-  - *Trigger di TSV:* Kolom Tugas Mengajar memuat "Guru PAI" / "Guru TIK"
-  - *Contoh Email:* `guruanggadwikurniawan@musada.sch.id`
-  - *Fitur Dasbor:* Presensi Guru, Input Nilai Akademik, Ekstrakurikuler (jika ada).
-
----
-
-## 3. 👔 Wakil Kepala (Waka / Admin Khusus)
-*Setiap Waka sejatinya adalah GURU, sehingga mereka mewarisi seluruh tab fitur Guru ditambah dengan tab manajemen ekstra.*
-
-- **Waka Kesiswaan** (Contoh: Bapak Furqon)
-  - *Trigger di TSV:* Kolom Tugas Tambahan memuat "Kesiswaan" / "Wakil Kepala"
-  - *Contoh Email:* `gurufurqon@musada.sch.id`
-  - *Fitur Ekstra:* Dasbor Kesiswaan, Data Seluruh Kelas & Siswa, Ekstrakurikuler, Rekap Presensi Sekolah.
-  
-- **Waka Keuangan**
-  - *Trigger di TSV:* Kolom Tugas Tambahan memuat "Keuangan"
-  - *Fitur Ekstra:* Dasbor Keuangan (Pembayaran, SPP, Tagihan).
-
-- **Waka Kurikulum**
-  - *Trigger di TSV:* Kolom Tugas Tambahan memuat "Kurikulum"
-  - *Fitur Ekstra:* Dasbor Kurikulum, Master Mata Pelajaran.
-
-- **Waka Humas & Personalia**
-  - *Trigger di TSV:* Kolom Tugas Tambahan memuat "Humas"
-  - *Fitur Ekstra:* Kelola Pengguna (Super Admin Semu), Dasbor Personalia, Penugasan Jabatan.
-
-- **Waka Sarpras**
-  - *Trigger di TSV:* Kolom Tugas Tambahan memuat "Sarana"
-  - *Fitur Ekstra:* Dasbor Sarana & Prasarana.
-
----
-
-## 4. 👑 Kepala Sekolah
-- *Trigger di TSV:* Kolom Jabatan memuat "Kepala Sekolah"
-- *Contoh Email:* `gurudhaniharsyahyadi@musada.sch.id`
-- *Fitur Dasbor:* **Murni Supervisi.** (Dasbor Kepala Sekolah, Grafik Sekolah, Laporan Kelas, Peringkat/Evaluasi). Tidak memiliki form *input* teknis.
-
----
-
-## 5. 💻 Tim IT / Operator (Sinkronisasi Data)
-- *Trigger di TSV:* Kolom Tugas Tambahan memuat "IT" (Contoh: Ibu Divia Arianti)
-- *Contoh Email:* `gurudiviaarianti@musada.sch.id`
-- *Fitur Ekstra:* **Sinkronisasi Data** (Bisa melihat tombol *Download* TSV dari Web).
-
----
-
-## 6. 👮 Tenaga Kependidikan (Staf Non-Guru)
-- *Trigger di TSV:* Tabel bagian `TENDIK` (Koperasi, Keamanan, Kebersihan, dll).
-- *Contoh Email:* `gurubrilianinda@musada.sch.id`
-- *Fitur Dasbor:* Hanya melihat "Beranda" / Halaman Selamat Datang dasar (Tidak melihat form Guru Kelas / Rapor).
-
----
-
-**Catatan Penamaan Unik (SSOT):**
-Semua huruf pada nama diubah menjadi *lowercase* (huruf kecil) dan seluruh karakter/spasi dibuang kecuali susunan nama paling depan (sebelum tanda koma pertama/gelar). Jika ada dua nama yang benar-benar persis sama, sistem berpotensi menganggapnya 1 orang yang sama. Pastikan penulisan nama di TSV konsisten.
+Panduan Akun & Hak Akses (Ringkasan)
+ 
+Dokumen ini memudahkan Anda mengingat cara membuat akun, alamat masuk, serta apa yang bisa diakses masing-masing peran.
+ 
+Kata sandi awal semua akun baru:  Password123! 
+ 
+ 
+ 
+🎓 1. Siswa / Orang Tua
+ 
+Format surel:  siswa[KodeID]@musada.sch.id 
+ 
+Jenis Siswa Kode yang Dipakai Contoh Alamat Surel Akses 
+Punya NISN NISN  siswa3192042116@musada.sch.id  Lihat perkembangan anak, rapor, dan laporan pengamatan 
+Belum punya NISN Nomor Induk Siswa (NIS)  siswa0930@musada.sch.id  Sama seperti di atas 
+ 
+ 
+ 
+👨‍🏫 2. Guru
+ 
+Format surel:  guru[namaasli]@musada.sch.id 
+ 
+Tulis nama tanpa gelar, semua huruf kecil, tanpa spasi atau tanda baca.
+ 
+Peran Cara Mengetahui di Data Contoh Alamat Surel Yang Bisa Diakses 
+Guru Kelas / Wali Kelas Kolom "Tugas Mengajar" tertulis "Guru Kelas"  gurunurfadhillah@musada.sch.id  Kehadiran guru & siswa, rapor kelas, masukkan nilai 
+Guru Mata Pelajaran Kolom "Tugas Mengajar" tertulis "Guru PAI", "Guru TIK", dll.  guruanggadwikurniawan@musada.sch.id  Kehadiran diri sendiri, masukkan nilai, kelola kegiatan ekstra jika ditugaskan 
+ 
+ 
+ 
+👔 3. Wakil Kepala Sekolah
+ 
+Semua Wakil Kepala tetap berstatus Guru — jadi mereka punya semua akses Guru ditambah hak tambahan di bawah ini:
+ 
+Bagian Cara Mengetahui di Data Akses Tambahan 
+Kesiswaan Kolom "Tugas Tambahan" tertulis "Kesiswaan" atau "Wakil Kepala" Lihat data seluruh siswa & kelas, kelola kegiatan ekstra, rekap kehadiran seluruh sekolah 
+Keuangan Kolom "Tugas Tambahan" tertulis "Keuangan" Catat & cek pembayaran, SPP, dan tagihan 
+Kurikulum Kolom "Tugas Tambahan" tertulis "Kurikulum" Atur daftar mata pelajaran & rencana pelajaran 
+Hubungan Masyarakat & Staf Kolom "Tugas Tambahan" tertulis "Humas" Buat & atur akun pengguna, data seluruh pegawai, penugasan jabatan 
+Sarana & Prasarana Kolom "Tugas Tambahan" tertulis "Sarana" Catat & pantau fasilitas sekolah 
+ 
+Contoh surel:  gurufurqon@musada.sch.id 
+ 
+ 
+ 
+👑 4. Kepala Sekolah
+ 
+- Cara mengenali: Kolom "Jabatan" tertulis "Kepala Sekolah"
+- Contoh surel:  gurudhaniharsyahyadi@musada.sch.id 
+- Akses: Melihat & memantau saja — laporan seluruh sekolah, grafik kemajuan, perbandingan kelas, penilaian kinerja. Tidak ada formulir untuk memasukkan data.
+ 
+ 
+ 
+💻 5. Tim IT / Operator Data
+ 
+- Cara mengenali: Kolom "Tugas Tambahan" tertulis "IT"
+- Contoh surel:  gurudiviaarianti@musada.sch.id 
+- Akses: Menyelaraskan data sekolah, bisa mengunduh berkas data mentah (format TSV) dari sistem
+ 
+ 
+ 
+👮 6. Staf Non-Pengajar
+ 
+- Cara mengenali: Tercantum di bagian daftar "TENDIK" (staf keamanan, kebersihan, koperasi, dll.)
+- Contoh surel:  gurubrilianinda@musada.sch.id 
+- Akses: Hanya halaman depan / beranda — tidak bisa melihat data nilai, kehadiran siswa, atau rapor
+ 
+ 
+ 
+📌 Catatan Penting Penulisan Nama
+ 
+- Semua nama ditulis huruf kecil semua, tanpa spasi, tanpa tanda baca, tanpa gelar.
+- Ambil nama bagian depan saja — sebelum tanda koma atau gelar pertama.
+- Jika ada dua orang dengan nama yang sama persis, sistem bisa menganggapnya satu orang. Pastikan penulisan nama di data selalu sama dan konsisten. ✅
