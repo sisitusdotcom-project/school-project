@@ -7,7 +7,16 @@ const App = {
       [AppConfig.ROLES.ORTU]: OrtuPages.renderDashboard
     };
 
-    return renderers[Auth.currentRole] || null;
+    return renderers[Auth.currentRole] || (async (container) => {
+      container.innerHTML = `
+        <div class="card section-block">
+          <div class="card-body text-center">
+            <h3 class="card-title">Selamat Datang</h3>
+            <p class="text-muted">Gunakan menu di samping untuk bernavigasi sesuai hak akses Anda.</p>
+          </div>
+        </div>
+      `;
+    });
   },
 
   getManagementPermissionKey(path, action = 'view') {
@@ -46,6 +55,9 @@ const App = {
       ],
       [AppConfig.ROLES.ORTU]: [
         { path: '#/ortu/dashboard', title: 'Perkembangan Anak', icon: 'ph-graduation-cap' }
+      ],
+      [AppConfig.ROLES.IT_ADMIN]: [
+        { path: '#/it-admin/dashboard', title: 'Sinkronisasi Data', icon: 'ph-database' }
       ]
     };
   },

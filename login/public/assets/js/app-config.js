@@ -222,6 +222,21 @@
     [ROLES.IT_ADMIN]: [
       { hash: '#/it-admin/dashboard', icon: 'ph-database', text: 'Sinkronisasi Data' }
     ],
+    [ROLES.PERSONNEL]: [
+      { hash: '#/dashboard', icon: 'ph-squares-four', text: 'Beranda' }
+    ],
+    [ROLES.FINANCE]: [
+      { hash: '#/dashboard', icon: 'ph-squares-four', text: 'Beranda' }
+    ],
+    [ROLES.STUDENT_AFFAIRS]: [
+      { hash: '#/dashboard', icon: 'ph-squares-four', text: 'Beranda' }
+    ],
+    [ROLES.CURRICULUM]: [
+      { hash: '#/dashboard', icon: 'ph-squares-four', text: 'Beranda' }
+    ],
+    [ROLES.FACILITIES]: [
+      { hash: '#/dashboard', icon: 'ph-squares-four', text: 'Beranda' }
+    ],
     'WAKA_HUMAS': [
       { hash: '#/admin/users', icon: 'ph-users', text: 'Kelola Pengguna' },
       { hash: '#/admin/assignments', icon: 'ph-clipboard-text', text: 'Penugasan' },
