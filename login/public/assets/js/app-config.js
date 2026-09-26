@@ -8,7 +8,8 @@
     CURRICULUM: 'curriculum',
     STUDENT_AFFAIRS: 'studentAffairs',
     PERSONNEL: 'personnel',
-    FACILITIES: 'facilities'
+    FACILITIES: 'facilities',
+    IT_ADMIN: 'it_admin'
   });
 
   const UNIT_LABELS = Object.freeze({
@@ -16,7 +17,8 @@
     [ROLES.CURRICULUM]: 'Kurikulum',
     [ROLES.STUDENT_AFFAIRS]: 'Kesiswaan',
     [ROLES.PERSONNEL]: 'Personalia',
-    [ROLES.FACILITIES]: 'Sarpras'
+    [ROLES.FACILITIES]: 'Sarpras',
+    [ROLES.IT_ADMIN]: 'IT Admin'
   });
 
   const ROLE_LABELS = Object.freeze({
@@ -199,14 +201,7 @@
 
   const NAV_ITEMS = Object.freeze({
     [ROLES.ADMIN]: [
-      { hash: '#/dashboard', icon: 'ph-squares-four', text: 'Dashboard' },
-      { hash: '#/admin/assignments', icon: 'ph-clipboard-text', text: 'Penugasan' },
-      { hash: '#/admin/users', icon: 'ph-users', text: 'Pengguna' },
-      { hash: '#/admin/classes', icon: 'ph-books', text: 'Kelas & Siswa' },
-      { hash: '#/admin/subjects', icon: 'ph-book-bookmark', text: 'Mata Pelajaran' },
-      { hash: '#/admin/extracurriculars', icon: 'ph-trophy', text: 'Ekstrakurikuler' },
-      { hash: '#/admin/characters', icon: 'ph-star', text: 'Indikator Karakter' },
-      { hash: '#/admin/attendance', icon: 'ph-calendar-check', text: 'Rekap Presensi' }
+      { hash: '#/dashboard', icon: 'ph-squares-four', text: 'Dashboard Sekolah' }
     ],
     [ROLES.GURU]: [
       { hash: '#/dashboard', icon: 'ph-squares-four', text: 'Beranda' },
@@ -218,16 +213,39 @@
       { hash: '#/guru/observations', icon: 'ph-note-pencil', text: 'Riwayat Observasi' }
     ],
     [ROLES.KEPSEK]: [
-      { hash: '#/dashboard', icon: 'ph-chart-pie', text: 'Dashboard Sekolah' },
-      { hash: '#/finance', icon: 'ph-wallet', text: 'Keuangan' },
-      { hash: '#/curriculum', icon: 'ph-books', text: 'Kurikulum' },
-      { hash: '#/student-affairs', icon: 'ph-users-three', text: 'Kesiswaan' },
-      { hash: '#/personnel', icon: 'ph-briefcase', text: 'Personalia' },
-      { hash: '#/facilities', icon: 'ph-building-office', text: 'Sarpras' },
+      { hash: '#/dashboard', icon: 'ph-chart-pie', text: 'Dashboard Kepala Sekolah' },
       { hash: '#/kepsek/reports', icon: 'ph-file-text', text: 'Laporan Kelas' }
     ],
     [ROLES.ORTU]: [
       { hash: '#/ortu/dashboard', icon: 'ph-graduation-cap', text: 'Perkembangan Anak' }
+    ],
+    [ROLES.IT_ADMIN]: [
+      { hash: '#/it-admin/dashboard', icon: 'ph-database', text: 'Sinkronisasi Data' }
+    ],
+    'WAKA_HUMAS': [
+      { hash: '#/admin/users', icon: 'ph-users', text: 'Kelola Pengguna' },
+      { hash: '#/admin/assignments', icon: 'ph-clipboard-text', text: 'Penugasan' },
+      { hash: '#/personnel', icon: 'ph-briefcase', text: 'Dashboard Personalia' }
+    ],
+    'WAKA_KESISWAAN': [
+      { hash: '#/student-affairs', icon: 'ph-users-three', text: 'Dashboard Kesiswaan' },
+      { hash: '#/admin/classes', icon: 'ph-books', text: 'Data Kelas & Siswa' },
+      { hash: '#/admin/extracurriculars', icon: 'ph-trophy', text: 'Ekstrakurikuler' },
+      { hash: '#/admin/characters', icon: 'ph-star', text: 'Indikator Karakter' },
+      { hash: '#/admin/attendance', icon: 'ph-calendar-check', text: 'Rekap Presensi Siswa' }
+    ],
+    'WAKA_KURIKULUM': [
+      { hash: '#/curriculum', icon: 'ph-books', text: 'Dashboard Kurikulum' },
+      { hash: '#/admin/subjects', icon: 'ph-book-bookmark', text: 'Mata Pelajaran' }
+    ],
+    'WAKA_KEUANGAN': [
+      { hash: '#/finance', icon: 'ph-wallet', text: 'Dashboard Keuangan' }
+    ],
+    'WAKA_SARPRAS': [
+      { hash: '#/facilities', icon: 'ph-building-office', text: 'Dashboard Sarpras' }
+    ],
+    'TIM_IT': [
+      { hash: '#/it-admin/dashboard', icon: 'ph-database', text: 'Sinkronisasi Data' }
     ]
   });
 

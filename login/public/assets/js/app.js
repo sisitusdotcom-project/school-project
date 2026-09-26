@@ -51,31 +51,22 @@ const App = {
   },
 
   isManagementRouteAllowed(path, role = Auth.currentRole) {
-    if (!role) return false;
-    const modules = {
-      '#/finance': 'finance',
-      '#/curriculum': 'curriculum',
-      '#/student-affairs': 'studentAffairs',
-      '#/personnel': 'personnel',
-      '#/facilities': 'facilities'
-    };
-    const module = modules[path];
-
-    if (!module) return false;
-    return window.PermissionManager
-      ? window.PermissionManager.canAccessModule(role, module)
-      : AppConfig.MODULE_ACCESS[module]?.roles.includes(role);
+    return this.isRouteAllowed(path, role);
   },
 
   isRouteAllowed(path, role = Auth.currentRole) {
+    if (!role) return false;
     if (path === '#/dashboard') return !!this.getDashboardRenderer();
-    if (this.isManagementRouteAllowed(path, role)) return true;
-
-    const allowedRoutes = this.getManagementRouteConfig()[role] || [];
-    return allowedRoutes.some(({ path: allowedPath }) => {
-      if (allowedPath === path) return true;
-      if (!allowedPath.includes('/:id')) return false;
-      return path.startsWith(allowedPath.replace('/:id', '/'));
+    
+    // Some static paths that any user with the correct base module can access
+    if (path.startsWith('#/admin/students/')) path = '#/admin/classes';
+    
+    const assignments = Auth.currentAssignments || [];
+    const navItems = AppConfig.getRoleNav(role, assignments);
+    
+    return navItems.some(nav => {
+      if (nav.hash === path) return true;
+      return false;
     });
   },
 
@@ -276,6 +267,14 @@ const App = {
 
         if (path === '#/ortu/dashboard') {
           await OrtuPages.renderDashboard(container);
+          return;
+        }
+
+        if (path === '#/it-admin/dashboard') {
+          if (typeof ITAdminPages !== 'undefined') {
+            await ITAdminPages.renderDashboard(container);
+          }
+          return;
         }
       });
     });

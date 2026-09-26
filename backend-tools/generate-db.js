@@ -131,7 +131,8 @@ for (let i = 0; i < guruLines.length; i++) {
   
   if (!name || name === 'Nama Jabatan Tugas Mengajar' || name === 'Nama Jabatan Tugas Tambahan') continue;
   
-  const uid = 'GURU_' + name.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase();
+  const baseName = name.split(',')[0].trim();
+  const uid = 'GURU_' + baseName.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase();
   
   if (!rtdb.users[uid]) {
     rtdb.users[uid] = {

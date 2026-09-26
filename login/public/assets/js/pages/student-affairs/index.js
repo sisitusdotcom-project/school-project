@@ -32,6 +32,21 @@ const StudentAffairsPages = {
 
       <div class="card section-block">
         <div class="card-body">
+          <h3 class="card-title">Ekspor Data Siswa</h3>
+          <p class="text-muted">Unduh data siswa lengkap beserta kelasnya (NIS, NISN, Nama, Kelas) untuk keperluan laporan kesiswaan.</p>
+          <div style="margin-top: 15px; display: flex; gap: 10px;">
+            <button id="btn-export-excel" class="btn btn-primary" style="display: flex; align-items: center; gap: 5px;">
+              <i class="ph ph-file-xls"></i> Export Excel
+            </button>
+            <button id="btn-export-pdf" class="btn btn-danger" style="display: flex; align-items: center; gap: 5px; background: #e74c3c; color: white;">
+              <i class="ph ph-file-pdf"></i> Export PDF
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card section-block">
+        <div class="card-body">
           <h3 class="card-title">Tugas kesiswaan</h3>
           <ul class="list-plain">
             <li>Role aktif: <strong>${role}</strong></li>
@@ -40,15 +55,55 @@ const StudentAffairsPages = {
           </ul>
         </div>
       </div>
-
-      <div class="card section-block">
-        <div class="card-body">
-          <h3 class="card-title">Rombel aktif</h3>
-          <ul class="list-plain">
-            ${classList.slice(0, 6).map((item) => `<li>${item.name || '-'}</li>`).join('') || '<li class="text-muted">Belum ada kelas.</li>'}
-          </ul>
-        </div>
-      </div>
     `;
+
+    // Ambil data siswa yg akan diekspor dan rapikan formatnya
+    const exportData = studentList.filter(s => s.role === 'ortu').map((s, index) => ({
+      No: index + 1,
+      NIS: s.nis || '-',
+      NISN: s.nisn || '-',
+      Nama: s.name || '-',
+      Kelas: s.className || '-'
+    }));
+
+    // Logika Export Excel
+    const btnExcel = container.querySelector('#btn-export-excel');
+    if (btnExcel) {
+      btnExcel.addEventListener('click', () => {
+        if (!window.XLSX) return alert('Library Excel belum dimuat.');
+        const ws = XLSX.utils.json_to_sheet(exportData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Data Siswa");
+        XLSX.writeFile(wb, "Laporan_Data_Siswa_Kesiswaan.xlsx");
+      });
+    }
+
+    // Logika Export PDF
+    const btnPdf = container.querySelector('#btn-export-pdf');
+    if (btnPdf) {
+      btnPdf.addEventListener('click', () => {
+        if (!window.jspdf || !window.jspdf.jsPDF) return alert('Library PDF belum dimuat.');
+        const doc = new window.jspdf.jsPDF();
+        
+        doc.setFontSize(16);
+        doc.text("Laporan Data Siswa Kesiswaan", 14, 15);
+        doc.setFontSize(10);
+        doc.text("Aplikasi Penilaian Karakter SD Muhammadiyah", 14, 22);
+
+        const tableColumn = ["No", "NIS", "NISN", "Nama", "Kelas"];
+        const tableRows = exportData.map(d => [d.No, d.NIS, d.NISN, d.Nama, d.Kelas]);
+
+        doc.autoTable({
+          head: [tableColumn],
+          body: tableRows,
+          startY: 30,
+          theme: 'grid',
+          styles: { fontSize: 9 },
+          headStyles: { fillColor: [41, 128, 185] }
+        });
+
+        doc.save("Laporan_Data_Siswa_Kesiswaan.pdf");
+      });
+    }
   }
 };
