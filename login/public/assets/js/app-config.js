@@ -343,22 +343,25 @@
   }
 
   function getRoleNav(role, assignments = []) {
-    const baseNav = NAV_ITEMS[role] || [];
+    // If a user has a teaching position or role guru, ensure they get Guru features
+    let effectiveRole = role;
+    if (role === ROLES.ADMIN && assignments.some(a => a.startsWith('GURU_') || a === 'WAKA_KESISWAAN' || a === 'WAKA_KURIKULUM' || a === 'WAKA_HUMAS' || a === 'WAKA_SARPRAS' || a === 'WAKA_KEUANGAN')) {
+      // Waka is also a Guru, so they get both Guru base tabs and Admin base dashboard
+      // However, we can just forcefully inject Guru tabs if they have teaching assignments
+    }
+
+    let baseNav = NAV_ITEMS[role] || [];
+    
+    // Auto-inject Guru tabs if they are Waka (who are inherently teachers) but their role was set to 'admin'
+    if (role === ROLES.ADMIN && assignments.length > 0) {
+       const guruTabs = NAV_ITEMS[ROLES.GURU] || [];
+       baseNav = [...baseNav, ...guruTabs];
+    }
+
     const unitAssignments = normalizeAssignments(assignments);
     const unitNav = unitAssignments.flatMap((unit) => {
-      const route = MANAGEMENT_ROUTE_MAP[unit];
-      if (!route) return [];
-      const config = {
-        '#/finance': { hash: '#/finance', icon: 'ph-wallet', text: 'Keuangan' },
-        '#/curriculum': { hash: '#/curriculum', icon: 'ph-books', text: 'Kurikulum' },
-        '#/student-affairs': { hash: '#/student-affairs', icon: 'ph-users-three', text: 'Kesiswaan' },
-        '#/personnel': { hash: '#/personnel', icon: 'ph-briefcase', text: 'Personalia' },
-        '#/facilities': { hash: '#/facilities', icon: 'ph-building-office', text: 'Sarpras' }
-      };
-      const moduleKey = Object.keys(MANAGEMENT_ROUTE_MAP).find((key) => MANAGEMENT_ROUTE_MAP[key] === route);
-      if (!moduleKey || !MODULE_ACCESS[moduleKey]?.roles.includes(role)) return [];
-      return [config[route]];
-    }).filter(Boolean);
+      return NAV_ITEMS[unit] || [];
+    });
 
     const merged = [...baseNav, ...unitNav];
     return merged.filter((item, index, arr) => arr.findIndex((entry) => entry.hash === item.hash) === index);
