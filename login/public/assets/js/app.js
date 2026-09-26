@@ -296,4 +296,16 @@ const App = {
 
 document.addEventListener('DOMContentLoaded', () => {
   App.init();
+
+  const splitWrapper = document.querySelector('.auth-split-wrapper');
+  if (splitWrapper) {
+    setInterval(() => {
+      if (window.innerWidth <= 991 && splitWrapper.scrollLeft === 0) {
+        splitWrapper.classList.add('nudge-swipe');
+        setTimeout(() => {
+          splitWrapper.classList.remove('nudge-swipe');
+        }, 600);
+      }
+    }, 4000);
+  }
 });

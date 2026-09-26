@@ -189,6 +189,10 @@
     -webkit-overflow-scrolling: touch;
     width: 100vw;
     scrollbar-width: none;
+    transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+  }
+  .auth-split-wrapper.nudge-swipe {
+    transform: translateX(-35px);
   }
   .auth-split-wrapper::-webkit-scrollbar {
     display: none;
@@ -249,36 +253,26 @@
   }
   .swipe-indicator {
     position: absolute;
-    bottom: 44px;
+    bottom: 75px;
     left: 50%;
     transform: translateX(-50%);
     width: auto;
-    background: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    padding: 8px 16px 8px 20px;
-    border-radius: 30px;
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 8px;
     color: #fff;
-    font-size: 11px;
-    font-weight: 600;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    font-size: 13px;
+    font-weight: 500;
+    opacity: 0.9;
   }
   .swipe-arrow {
     display: flex;
     align-items: center;
-    animation: swipeHint 3s ease-in-out infinite;
+    animation: swipeHint 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
   }
   .swipe-arrow i {
-    font-size: 14px;
-    margin-left: -6px;
-  }
-  .swipe-arrow i:first-child {
-    opacity: 0.4;
+    font-size: 18px;
   }
   .form-title-icon {
     font-size: 24px;
@@ -300,8 +294,8 @@
     font-size: 9px;
   }
   @keyframes swipeHint {
-    0%, 100% { transform: translateX(0); opacity: 0.6; }
-    50% { transform: translateX(6px); opacity: 1; }
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(-8px); }
   }
 }
 
