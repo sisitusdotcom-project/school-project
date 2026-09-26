@@ -271,7 +271,7 @@
   .swipe-arrow {
     display: flex;
     align-items: center;
-    animation: swipeHint 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    animation: swipeHint 3s ease-in-out infinite;
   }
   .swipe-arrow i {
     font-size: 14px;
@@ -300,8 +300,8 @@
     font-size: 9px;
   }
   @keyframes swipeHint {
-    0%, 100% { transform: translateX(0); }
-    50% { transform: translateX(6px); }
+    0%, 100% { transform: translateX(0); opacity: 0.6; }
+    50% { transform: translateX(6px); opacity: 1; }
   }
 }
 
