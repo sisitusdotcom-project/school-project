@@ -1062,13 +1062,6 @@
   .stat-card { min-height: 94px }
   .stat-icon { width: 44px; height: 44px; font-size: 22px }
 }
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    scroll-behavior: auto !important;
-    animation-duration: .01ms !important;
-    transition-duration: .01ms !important
-  }
-}
 .card > .text-muted:only-child,
 .card-body > .text-muted:only-child,
 td.text-muted[colspan],

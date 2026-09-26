@@ -44,6 +44,7 @@
   padding: 0;
   overflow-wrap: break-word;
   word-wrap: break-word;
+  -webkit-tap-highlight-color: transparent;
 }
 [class*="-grid"] > *, 
 .form-row > * {
