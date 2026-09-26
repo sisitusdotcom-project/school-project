@@ -301,7 +301,11 @@
   function getRoleAssignmentLabel(user = {}) {
     const assignments = getRoleAssignments(user);
     if (!assignments.length) return getRoleLabel(user.role);
-    const unitLabels = assignments.map((item) => UNIT_LABELS[item] || getRoleLabel(item)).join(', ');
+    const unitLabels = assignments.map((item) => {
+      if (UNIT_LABELS[item]) return UNIT_LABELS[item];
+      // Format dynamically for assignments like GURU_EKSTRA_HW -> Guru Ekstra Hw
+      return item.split('_').map(word => word.charAt(0) + word.slice(1).toLowerCase()).join(' ');
+    }).join(', ');
     return `${getRoleLabel(user.role)} · ${unitLabels}`;
   }
 

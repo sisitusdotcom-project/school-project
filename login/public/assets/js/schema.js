@@ -3,8 +3,6 @@
     master: {
       label: 'Master data sekolah',
       collections: {
-        students: 'master/students',
-        employees: 'master/employees',
         classes: 'master/classes',
         subjects: 'master/subjects',
         academicYears: 'master/academicYears',

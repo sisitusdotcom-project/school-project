@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,6 +19,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 </head>
+
 <body>
   <div id="app-loading" class="fullscreen-overlay">
     <div class="loader"></div>
@@ -34,7 +36,8 @@
             </div>
           </div>
           <h1 class="auth-visual-title">Sistem Manajemen Sekolah</h1>
-          <p class="auth-visual-subtitle">Portal terpadu untuk mengakses layanan akademik, administrasi, dan informasi sekolah secara mudah dan cepat.</p>
+          <p class="auth-visual-subtitle">Portal terpadu untuk mengakses layanan akademik, administrasi, dan informasi
+            sekolah secara mudah dan cepat.</p>
           <div class="auth-features-list">
             <div class="auth-feature-item">
               <i class="ph-fill ph-books"></i>
@@ -42,7 +45,7 @@
             </div>
             <div class="auth-feature-item">
               <i class="ph-fill ph-users"></i>
-              <span>Layanan administrasi guru dan siswa terpusat.</span>
+              <span>Layanan administrasi terpusat.</span>
             </div>
             <div class="auth-feature-item">
               <i class="ph-fill ph-wallet"></i>
@@ -50,7 +53,7 @@
             </div>
           </div>
         </div>
-        <div class="auth-visual-footer"> &copy; 2026 SD Muhammadiyah 1 Sedati. All rights reserved. </div>
+        <div class="auth-visual-footer"> &copy; 2026 SD Muhammadiyah 1 Sedati | All rights reserved. </div>
         <div class="swipe-indicator mobile-only">
           <span>Geser untuk login</span>
           <div class="swipe-arrow">
@@ -69,7 +72,7 @@
           </div>
           <form id="login-form">
             <div class="form-group"><label for="email">Email</label><input type="email" id="email"
-                placeholder="contoh: guru@sekolah.id" required></div>
+                placeholder="youremail@musada.sch.id" required></div>
             <div class="form-group"><label for="password">Password</label>
               <div class="password-wrapper"><input type="password" id="password" placeholder="Masukkan password"
                   required><button type="button" class="btn-toggle-password" id="toggle-password"
@@ -87,13 +90,14 @@
   </main>
   <div id="app-shell" class="hidden">
     <header class="mobile-header">
-      <div class="brand-logo-small"><i class="ph-fill ph-student"></i><span>SMS Musada</span></div><button class="btn-icon"
-        id="btn-menu-toggle" aria-label="Buka menu navigasi"><i class="ph ph-list"></i></button>
+      <div class="brand-logo-small"><i class="ph-fill ph-student"></i><span>SMS Musada</span></div><button
+        class="btn-icon" id="btn-menu-toggle" aria-label="Buka menu navigasi"><i class="ph ph-list"></i></button>
     </header>
     <aside id="sidebar" class="sidebar">
       <div class="sidebar-header">
         <div class="brand-logo-small"><i class="ph-fill ph-student"></i><span>SMS Musada</span></div><button
-          class="btn-icon mobile-only" id="btn-menu-close" aria-label="Tutup menu navigasi"><i class="ph ph-x"></i></button>
+          class="btn-icon mobile-only" id="btn-menu-close" aria-label="Tutup menu navigasi"><i
+            class="ph ph-x"></i></button>
       </div>
       <div class="user-profile-widget">
         <div class="avatar"><i class="ph ph-user"></i></div>
@@ -135,4 +139,5 @@
   <script src="assets/js/pages/kepsek/index.js"></script>
   <script src="assets/js/app.js"></script>
 </body>
+
 </html>

@@ -1,2 +1,7 @@
 # Folder untuk referensi struktur, fitur, dan integrasi sistem
 mysisi/
+
+# Secrets & Keys
+*-adminsdk-*.json
+serviceAccountKey.json
+node_modules/
