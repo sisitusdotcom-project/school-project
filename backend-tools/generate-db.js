@@ -45,7 +45,7 @@ for (let i = 0; i < linesSiswa.length; i++) {
       
       if (!nama || nama.toLowerCase() === 'nama' || !no.match(/^\d+$/)) continue; // skip headers
       
-      const cleanNisn = nisn ? nisn.replace(/\s+/g, '') : `TEMP_${noInduk || Date.now()}`;
+      const cleanNisn = nisn ? nisn.replace(/\s+/g, '') : (noInduk || Date.now());
       const uid = `SISWA_${cleanNisn}`;
       
       const classId = 'CLASS_' + currentClass.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase();
@@ -115,6 +115,11 @@ for (let i = 0; i < guruLines.length; i++) {
       name = parts[0];
       jabatan = "Guru";
       tugas = parts[1] || "";
+    } else if (restStr.includes(" Kepala Sekolah ")) {
+      const parts = restStr.split(" Kepala Sekolah ");
+      name = parts[0];
+      jabatan = "Kepala Sekolah";
+      tugas = parts[1] || "";
     } else if (restStr.includes(" Tenaga Kependidikan ")) {
       const parts = restStr.split(" Tenaga Kependidikan ");
       name = parts[0];
@@ -137,7 +142,7 @@ for (let i = 0; i < guruLines.length; i++) {
   if (!rtdb.users[uid]) {
     rtdb.users[uid] = {
       name: name,
-      role: jabatan === 'Tenaga Kependidikan' ? 'personnel' : 'guru',
+      role: jabatan === 'Tenaga Kependidikan' ? 'personnel' : (jabatan === 'Kepala Sekolah' ? 'kepsek' : 'guru'),
       jabatan: jabatan,
       assignments: [],
       isActive: true,
