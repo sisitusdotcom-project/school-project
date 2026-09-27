@@ -173,3 +173,23 @@ function initInfografisSliders() {
   });
 }
 window.initInfografisSliders = initInfografisSliders;
+
+document.addEventListener('click', function(e) {
+  var waBtn = e.target.closest('.btn-whatsapp-float');
+  if (waBtn) {
+    e.preventDefault();
+    var hour = new Date().getHours();
+    var greeting = 'Pagi';
+    if (hour >= 11 && hour < 15) {
+      greeting = 'Siang';
+    } else if (hour >= 15 && hour < 18) {
+      greeting = 'Sore';
+    } else if (hour >= 18 || hour < 4) {
+      greeting = 'Malam';
+    }
+    
+    var text = "_Assalamu'alaikum Warahmatullahi Wabarakatuh_\nSelamat " + greeting + " Musada!\n\n";
+    var url = 'https://wa.me/6285964399398?text=' + encodeURIComponent(text);
+    window.open(url, '_blank');
+  }
+});
