@@ -399,22 +399,11 @@
     z-index: 9999;
   }
 
-  .nav-container  .mobile-animation-logo {
-      display: flex;
-      justify-content: flex-end;
-      align-items: center;
-      flex-grow: 1;
-      padding: 10px 0 20px 0;
-      overflow: visible;
-  }
   
-  .nav-container .mobile-animation-logo-inner .biru-elegan {
-      -webkit-text-stroke: 0.6px #ffffff;
-  }
+  
+  
 
-  .nav-container .mobile-animation-logo-inner .merah {
-      -webkit-text-stroke: 0.3px #ffffff;
-  }
+  
 
 
 

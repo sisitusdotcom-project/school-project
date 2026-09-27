@@ -1,0 +1,233 @@
+/* Preloader sizing */
+#app-preloader .mobile-animation-logo-inner {
+    max-width: 450px;
+    width: 90%;
+    margin: 0 auto;
+}
+
+/* Sidebar sizing */
+.sidebar .mobile-animation-logo-inner,
+.sidebar-container .mobile-animation-logo-inner {
+    max-width: 100%; /* Let it fill the sidebar container */
+    width: 100%;
+    margin: 10px auto 25px; /* Added spacing below */
+}
+
+/* Mobile Nav sizing */
+.nav-container .mobile-animation-logo-inner {
+    max-width: 280px;
+    width: 100%;
+    margin: 15px auto 30px; /* Added spacing below */
+}
+
+/* General Wrapper */
+.mobile-animation-logo-inner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+svg.logo-svg {
+            width: 100%;
+            height: auto;
+            overflow: visible;
+            user-select: none
+        }
+
+        .main-logo {
+            opacity: 0;
+            transform-box: fill-box;
+            transform-origin: center bottom;
+            cursor: pointer;
+            animation: popElastic .7s cubic-bezier(.34, 1.56, .64, 1) 50ms forwards, idleFloat 3.6s ease-in-out 1.45s infinite;
+            transition: filter .2s ease
+        }
+
+        .main-logo:hover {
+            filter: brightness(1.05) drop-shadow(0 6px 8px rgba(0, 0, 0, .15))
+        }
+
+        .letter-shape {
+            stroke: #000;
+            stroke-width: 7.4;
+            stroke-linejoin: round;
+            stroke-linecap: round;
+            fill-rule: evenodd;
+            cursor: pointer;
+            opacity: 0;
+            transform-box: fill-box;
+            transform-origin: center bottom;
+            animation: popElastic .7s cubic-bezier(.34, 1.56, .64, 1) forwards, idleFloat 3.6s ease-in-out infinite;
+            transition: filter .2s ease
+        }
+
+        .letter-shape:hover {
+            filter: brightness(1.08) drop-shadow(0 6px 8px rgba(0, 0, 0, .15))
+        }
+
+        .char-sd-s {
+            animation-delay: .1s, 1.6s;
+            stroke-width: 8.4
+        }
+
+        .char-sd-d {
+            animation-delay: .22s, 1.75s;
+            stroke-width: 8.4
+        }
+
+        .char-m {
+            animation-delay: .36s, 1.9s
+        }
+
+        .char-u {
+            animation-delay: .46s, 2.05s
+        }
+
+        .char-s {
+            animation-delay: .56s, 2.2s
+        }
+
+        .char-a1 {
+            animation-delay: .66s, 2.35s
+        }
+
+        .char-d {
+            animation-delay: .76s, 2.5s
+        }
+
+        .char-a2 {
+            animation-delay: .86s, 2.65s
+        }
+
+        .trail-reveal {
+            fill: none;
+            stroke: #fff;
+            stroke-width: 14;
+            stroke-dasharray: 400;
+            stroke-dashoffset: 400;
+            animation: drawTrail .95s ease-in-out .35s forwards
+        }
+
+        .airplane {
+            opacity: 0;
+            transform-box: fill-box;
+            transform-origin: center;
+            animation: planeTakeoff 1s cubic-bezier(.22, 1, .36, 1) .55s forwards, planeGlide 3s ease-in-out 1.55s infinite
+        }
+
+        .sub-text {
+            font-family: Nunito, sans-serif;
+            font-weight: 900;
+            font-size: 33px;
+            fill: #243b82;
+            opacity: 0;
+            animation: slideInSub .7s ease-out 1.05s forwards
+        }
+
+        .tagline-text {
+            font-family: Nunito, sans-serif;
+            font-weight: 900;
+            font-size: 27.5px;
+            fill: #c12127;
+            letter-spacing: 5px;
+            opacity: 0;
+            animation: fadeUpTagline .75s ease-out 1.3s forwards
+        }
+
+        @keyframes popElastic {
+            0% {
+                opacity: 0;
+                transform: scale(.2) translateY(35px)
+            }
+
+            70% {
+                opacity: 1;
+                transform: scale(1.06) translateY(-4px)
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0)
+            }
+        }
+
+        @keyframes idleFloat {
+
+            0%,
+            100% {
+                transform: translateY(0)
+            }
+
+            50% {
+                transform: translateY(-4px)
+            }
+        }
+
+        @keyframes drawTrail {
+            to {
+                stroke-dashoffset: 0
+            }
+        }
+
+        @keyframes planeTakeoff {
+            0% {
+                opacity: 0;
+                transform: translate(-85px, 42px) scale(.45) rotate(12deg)
+            }
+
+            100% {
+                opacity: 1;
+                transform: translate(0, 0) scale(1) rotate(0)
+            }
+        }
+
+        @keyframes planeGlide {
+
+            0%,
+            100% {
+                transform: translate(0, 0) rotate(0)
+            }
+
+            50% {
+                transform: translate(5px, -5px) rotate(-2deg)
+            }
+        }
+
+        @keyframes slideInSub {
+            from {
+                opacity: 0;
+                transform: translateX(-20px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0)
+            }
+        }
+
+        @keyframes fadeUpTagline {
+            from {
+                opacity: 0;
+                transform: translateY(16px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+/* Mobile Nav Inverted Colors for Dark Blue Background */
+.nav-container .mobile-animation-logo-inner .sub-text {
+    fill: #80c6ff !important; /* Biru cerah (Bright Blue) */
+}
+
+/* Scroll trigger logic for Sidebar */
+.sidebar .sidebar-widget.animate-on-scroll:not(.is-visible) .main-logo,
+.sidebar .sidebar-widget.animate-on-scroll:not(.is-visible) .letter-shape,
+.sidebar .sidebar-widget.animate-on-scroll:not(.is-visible) .airplane,
+.sidebar .sidebar-widget.animate-on-scroll:not(.is-visible) .trail-reveal,
+.sidebar .sidebar-widget.animate-on-scroll:not(.is-visible) .sub-text,
+.sidebar .sidebar-widget.animate-on-scroll:not(.is-visible) .tagline-text {
+    animation-play-state: paused !important;
+}
