@@ -36,3 +36,17 @@
 .logo.wm-sc:hover {
   opacity: 1
 }
+
+.sintara-tech-link {
+  color: #81d4fa;
+  font-size: 0.75em;
+  font-style: italic;
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.sintara-tech-link:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
