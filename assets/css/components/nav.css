@@ -372,7 +372,8 @@
     font-size: .75rem;
     justify-content: flex-start
   }
-  .main-nav>ul>li.nav-login-item {
+  .main-nav>ul>li.nav-login-item,
+  .main-nav>ul>li.mobile-animation-logo {
     border-bottom: none;
     padding: 15px;
   }
