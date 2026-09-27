@@ -187,7 +187,7 @@ document.addEventListener('click', function(e) {
       greeting = 'Malam';
     }
     
-    var text = "_Assalamu'alaikum Warahmatullahi Wabarakatuh_\nSelamat " + greeting + " Musada!\n\n";
+    var text = "_Assalamu'alaikum Warahmatullahi Wabarakatuh_\nSelamat " + greeting + " Musada!\n\n ";
     waBtn.href = 'https://wa.me/6285964399398?text=' + encodeURIComponent(text);
     // Don't preventDefault, let the browser open the updated href naturally.
   }
