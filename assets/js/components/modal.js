@@ -36,3 +36,19 @@ document.addEventListener('keydown', (e) => {
     if(activeModals.length > 0) enableScroll();
   } 
 });
+
+document.addEventListener('submit', (e) => {
+  if (e.target.matches('.search-form-modal')) {
+    e.preventDefault();
+    const input = e.target.querySelector('input[name="q"]');
+    if (input && input.value.trim() !== '') {
+      const query = encodeURIComponent(input.value.trim());
+      window.open(`https://www.google.com/search?q=site:musada.sch.id+${query}`, '_blank');
+      
+      const activeModals = document.querySelectorAll('.modal-overlay.active');
+      activeModals.forEach(m => m.classList.remove('active'));
+      enableScroll();
+      input.value = '';
+    }
+  }
+});
