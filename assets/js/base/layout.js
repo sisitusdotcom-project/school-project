@@ -19,7 +19,8 @@ document.addEventListener('DOMContentLoaded', function () {
     if (typeof initSponsorsMarquee === 'function') { initSponsorsMarquee() }
     if (typeof initGallerySlider === 'function') { initGallerySlider() }
     if (typeof initInfografisSliders === 'function') { initInfografisSliders() }
-    var wmScript = document.createElement('script'); wmScript.src = '/' + 'assets/js/components/wm.js'; document.body.appendChild(wmScript)
+    var wmScript = document.createElement('script'); wmScript.src = '/' + 'assets/js/components/wm.js'; document.body.appendChild(wmScript);
+    var modalScript = document.createElement('script'); modalScript.src = '/assets/js/components/modal.js'; document.body.appendChild(modalScript);
     
     // Fade out preloader
     setTimeout(function() {

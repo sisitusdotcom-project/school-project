@@ -87,9 +87,21 @@
             </li>
           </ul>
         </nav>
-        <div class="nav-search d-desktop-only"><i class="ph-bold ph-magnifying-glass"></i></div>
+        <div class="nav-search d-desktop-only" id="nav-search-btn"><i class="ph-bold ph-magnifying-glass"></i></div>
       </div>
       <div class="header-border-strip"></div>
+    </div>
+  </div>
+
+  <div class="floating-search-btn" id="mobile-search-btn"><i class="ph-bold ph-magnifying-glass"></i></div>
+
+  <div class="modal-overlay" id="searchModal">
+    <div class="search-modal-container">
+      <button class="modal-close" id="closeSearchModalBtn"><i class="ph-bold ph-x"></i></button>
+      <form action="#" method="GET" class="search-form-modal">
+        <input type="text" name="q" placeholder="Masukan Kata Kunci" class="search-input-modal" required>
+        <button type="submit" class="search-btn-modal"><i class="ph-bold ph-magnifying-glass"></i></button>
+      </form>
     </div>
   </div>
 </header>

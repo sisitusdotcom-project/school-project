@@ -142,9 +142,14 @@
   padding-left: 140px
 }
 
+.main-nav {
+  flex: 1;
+}
+
 .main-nav>ul {
   display: flex;
-  align-items: center
+  align-items: center;
+  width: 100%;
 }
 
 .main-nav>ul>li {
@@ -163,8 +168,11 @@
   transition: background-color 0.2s
 }
 
+.main-nav>ul>li.nav-login-item {
+  margin-left: auto;
+}
+
 .main-nav>ul>li>a.nav-login-button {
-  margin-left: 30px;
   padding: 10px 20px;
   border-radius: 999px;
   background: var(--strip-yellow);
@@ -196,6 +204,10 @@
 .nav-search:hover {
   background-color: rgb(255 255 255 / .15);
   color: var(--strip-yellow)
+}
+
+.floating-search-btn {
+  display: none;
 }
 
 .main-nav ul li ul {
@@ -319,9 +331,34 @@
     margin-right: 2px
   }
 
-  .header-datetime,
-  .nav-search {
+  .header-datetime {
     display: none
+  }
+
+  .floating-search-btn {
+    position: fixed;
+    bottom: 130px;
+    right: 35px;
+    width: 35px;
+    height: 35px;
+    background-color: var(--strip-yellow);
+    color: var(--color-primary-blue);
+    border-radius: 6px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: none;
+    z-index: 998;
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  .floating-search-btn i {
+    margin: 0;
+    padding: 0;
+    line-height: 1;
+    display: flex;
   }
 
   .nav-outer-wrapper {
@@ -482,5 +519,44 @@
     background-color: transparent;
   }
 
+}
 
+/* Search Modal Styles */
+.search-modal-container {
+  width: 90%;
+  max-width: 600px;
+  position: relative;
+  z-index: 10001;
+}
+.search-form-modal {
+  display: flex;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+.search-input-modal {
+  flex: 1;
+  border: none;
+  padding: 15px 25px;
+  font-size: 1.1rem;
+  outline: none;
+  color: var(--color-neutral-dark);
+}
+.search-btn-modal {
+  background: #f1c84d;
+  border: none;
+  color: var(--color-primary-blue);
+  padding: 0 25px;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.search-btn-modal:hover { opacity: 0.9; }
+#closeSearchModalBtn {
+  position: absolute;
+  top: -45px;
+  right: -10px;
+  color: #fff;
+  font-size: 2rem;
+  background: none;
+  border: none;
+  cursor: pointer;
 }
