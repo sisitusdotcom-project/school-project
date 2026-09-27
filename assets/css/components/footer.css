@@ -53,6 +53,28 @@
   color: rgb(255 255 255 / .8)
 }
 
+.footer-install-button {
+  background: #2A9D8F;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 999px;
+  font-weight: 800;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.2s;
+  width: 100%;
+  justify-content: center;
+}
+
+.footer-install-button:hover {
+  background: #21867a;
+}
+
 .footer-sosmed {
   display: flex;
   gap: 10px;

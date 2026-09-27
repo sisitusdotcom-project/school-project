@@ -35,6 +35,50 @@ function initClearCache() {
 }
 window.initClearCache = initClearCache;
 
+let deferredPWAPrompt = null;
+window.addEventListener('beforeinstallprompt', function (e) {
+  e.preventDefault();
+  deferredPWAPrompt = e;
+});
+
+function initPWAInstall() {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').catch(function(err) {
+      console.log('Service Worker registration failed: ', err);
+    });
+  }
+
+  var installContainer = document.getElementById('pwa-install-container');
+  var installBtn = document.getElementById('pwa-install-btn');
+
+  var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  var isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+
+  // Jika sudah diinstal, sembunyikan tombolnya
+  if (isStandalone && installContainer) {
+    installContainer.style.display = 'none';
+  }
+
+  if (installBtn) {
+    installBtn.addEventListener('click', function () {
+      if (deferredPWAPrompt) {
+        deferredPWAPrompt.prompt();
+        deferredPWAPrompt.userChoice.then(function (choiceResult) {
+          if (choiceResult.outcome === 'accepted') {
+            if (installContainer) installContainer.style.display = 'none';
+          }
+          deferredPWAPrompt = null;
+        });
+      } else if (isIOS) {
+        alert("Apple memblokir pop-up otomatis. Instal manual iOS: Ketuk ikon 'Bagikan' ➜ pilih 'Tambah ke Layar Utama'.");
+      } else {
+        alert("Pop-up otomatis diblokir/tidak didukung browser. Instal manual: Buka menu browser (titik tiga) ➜ pilih 'Instal Aplikasi' atau 'Tambah ke Layar Utama'.");
+      }
+    });
+  }
+}
+window.initPWAInstall = initPWAInstall;
+
 function initNumberCounters() {
   var counters = document.querySelectorAll('.stat-number');
   if (counters.length === 0) return;

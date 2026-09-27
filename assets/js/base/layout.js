@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (typeof initBackToTop === 'function') { initBackToTop() }
     if (typeof initDarkMode === 'function') { initDarkMode() }
     if (typeof initClearCache === 'function') { initClearCache() }
+    if (typeof initPWAInstall === 'function') { initPWAInstall() }
     if (typeof initSponsorsMarquee === 'function') { initSponsorsMarquee() }
     if (typeof initGallerySlider === 'function') { initGallerySlider() }
     if (typeof initInfografisSliders === 'function') { initInfografisSliders() }
