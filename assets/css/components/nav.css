@@ -327,7 +327,7 @@
   }
   .nav-wrapper {
     padding-left: 0;
-    background-color: var(--color-primary-blue);
+    background-color: var(--color-header-bg);
     display: none;
     width: 100%;
     overflow-y: auto;
@@ -377,9 +377,9 @@
     padding: 15px;
   }
   .main-nav>ul>li>a.nav-login-button {
-    margin: 0 0 0 auto;
+    margin: 0 15px 0 auto;
     width: fit-content;
-    padding: 12px 30px;
+    padding: 8px 20px;
     justify-content: center;
     border-radius: 999px;
     font-size: 0.85rem;
@@ -439,6 +439,7 @@
 .search-form-modal {
   display: flex;
   box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  border-radius: 4px;
 }
 .search-input-modal {
   flex: 1;
@@ -447,6 +448,11 @@
   font-size: 1.1rem;
   outline: none;
   color: var(--color-neutral-dark);
+  border-radius: 4px 0 0 4px;
+}
+.search-input-modal:focus,
+.search-input-modal:focus-visible {
+  outline: none !important;
 }
 .search-btn-modal {
   background: #f1c84d;
@@ -456,6 +462,12 @@
   font-size: 1.5rem;
   cursor: pointer;
   transition: opacity 0.2s;
+  border-radius: 0 4px 4px 0;
+  outline: none;
+}
+.search-btn-modal:focus,
+.search-btn-modal:focus-visible {
+  outline: none !important;
 }
 .search-btn-modal:hover { opacity: 0.9; }
 #closeSearchModalBtn {
