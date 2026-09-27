@@ -70,7 +70,8 @@
   color: var(--color-primary-blue);
   font-size: 1.1rem
 }
-.dark-mode-toggle {
+.dark-mode-toggle,
+.clear-cache-toggle {
   margin-left: 20px;
   background: none;
   border: none;
@@ -100,10 +101,13 @@
   color: var(--strip-yellow);
   font-size: 0.95rem;
 }
-.mobile-nav-tools .dark-mode-toggle {
+.mobile-nav-tools .dark-mode-toggle,
+.mobile-nav-tools .clear-cache-toggle {
   margin-left: 0;
   font-size: 1.1rem;
   color: var(--color-white);
+  background: none;
+  border: none;
 }
 .nav-outer-wrapper {
   position: relative;

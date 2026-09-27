@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (typeof initNumberCounters === 'function') { initNumberCounters() }
     if (typeof initBackToTop === 'function') { initBackToTop() }
     if (typeof initDarkMode === 'function') { initDarkMode() }
+    if (typeof initClearCache === 'function') { initClearCache() }
     if (typeof initSponsorsMarquee === 'function') { initSponsorsMarquee() }
     if (typeof initGallerySlider === 'function') { initGallerySlider() }
     if (typeof initInfografisSliders === 'function') { initInfografisSliders() }

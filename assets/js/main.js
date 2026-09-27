@@ -20,6 +20,21 @@ window.initBackToTop = initBackToTop; function initDarkMode() {
 }
 window.initDarkMode = initDarkMode;
 
+function initClearCache() {
+  var clearBtns = document.querySelectorAll('.clear-cache-toggle');
+  clearBtns.forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      if(confirm('Bersihkan cache dan muat ulang?')) {
+        localStorage.clear();
+        sessionStorage.clear();
+        window.location.reload(true);
+      }
+    });
+  });
+}
+window.initClearCache = initClearCache;
+
 function initNumberCounters() {
   var counters = document.querySelectorAll('.stat-number');
   if (counters.length === 0) return;
