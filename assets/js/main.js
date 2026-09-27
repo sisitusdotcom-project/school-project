@@ -175,7 +175,7 @@ function initInfografisSliders() {
 window.initInfografisSliders = initInfografisSliders;
 
 document.addEventListener('click', function(e) {
-  var waBtn = e.target.closest('.btn-whatsapp-float');
+  var waBtn = e.target.closest('.btn-whatsapp-float') || e.target.closest('.footer-wa-link');
   if (waBtn) {
     var hour = new Date().getHours();
     var greeting = 'Pagi';
