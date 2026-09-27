@@ -164,8 +164,8 @@
 }
 
 .main-nav>ul>li>a.nav-login-button {
-  margin-left: 8px;
-  padding: 10px 16px;
+  margin-left: 30px;
+  padding: 10px 20px;
   border-radius: 999px;
   background: var(--strip-yellow);
   color: var(--color-header-bg);
@@ -413,6 +413,19 @@
     padding: 10px 15px;
     font-size: .75rem;
     justify-content: flex-start
+  }
+
+  .main-nav>ul>li.nav-login-item {
+    border-bottom: none;
+    padding: 15px;
+  }
+
+  .main-nav>ul>li>a.nav-login-button {
+    margin: 0;
+    padding: 12px;
+    justify-content: center;
+    border-radius: 999px;
+    font-size: 0.85rem;
   }
 
   .main-nav ul li ul {
