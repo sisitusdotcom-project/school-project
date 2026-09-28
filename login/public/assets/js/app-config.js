@@ -344,16 +344,11 @@
 
   function getRoleNav(role, assignments = []) {
     // If a user has a teaching position or role guru, ensure they get Guru features
-    let effectiveRole = role;
-    if (role === ROLES.ADMIN && assignments.some(a => a.startsWith('GURU_') || a === 'WAKA_KESISWAAN' || a === 'WAKA_KURIKULUM' || a === 'WAKA_HUMAS' || a === 'WAKA_SARPRAS' || a === 'WAKA_KEUANGAN')) {
-      // Waka is also a Guru, so they get both Guru base tabs and Admin base dashboard
-      // However, we can just forcefully inject Guru tabs if they have teaching assignments
-    }
-
     let baseNav = NAV_ITEMS[role] || [];
     
-    // Auto-inject Guru tabs if they are Waka (who are inherently teachers) but their role was set to 'admin'
-    if (role === ROLES.ADMIN && assignments.length > 0) {
+    // Auto-inject Guru tabs if they have teaching/waka assignments (who are inherently teachers) 
+    const hasTeachingAssignment = assignments.some(a => a.startsWith('GURU_') || a.startsWith('WAKA_'));
+    if (role !== ROLES.GURU && hasTeachingAssignment) {
        const guruTabs = NAV_ITEMS[ROLES.GURU] || [];
        baseNav = [...baseNav, ...guruTabs];
     }
