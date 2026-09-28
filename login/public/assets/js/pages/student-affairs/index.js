@@ -57,13 +57,32 @@ const StudentAffairsPages = {
       </div>
     `;
 
+    const classMap = {};
+    classList.forEach(c => { classMap[c.id] = c.name; });
+
     // Ambil data siswa yg akan diekspor dan rapikan formatnya
-    const exportData = studentList.filter(s => s.role === 'ortu').map((s, index) => ({
-      No: index + 1,
+    const exportData = studentList.map((s, index) => ({
       NIS: s.nis || '-',
       NISN: s.nisn || '-',
       Nama: s.name || '-',
-      Kelas: s.className || '-'
+      'L/P': s.gender || '-',
+      Kelas: classMap[s.classId] || s.classId || '-'
+    }));
+
+    exportData.sort((a, b) => {
+      if (a.Kelas === b.Kelas) {
+        return a.Nama.localeCompare(b.Nama);
+      }
+      return a.Kelas.localeCompare(b.Kelas);
+    });
+
+    const sortedExportData = exportData.map((s, index) => ({
+      No: index + 1,
+      NIS: s.NIS,
+      NISN: s.NISN,
+      Nama: s.Nama,
+      'L/P': s['L/P'],
+      Kelas: s.Kelas
     }));
 
     // Logika Export Excel
@@ -71,7 +90,7 @@ const StudentAffairsPages = {
     if (btnExcel) {
       btnExcel.addEventListener('click', () => {
         if (!window.XLSX) return alert('Library Excel belum dimuat.');
-        const ws = XLSX.utils.json_to_sheet(exportData);
+        const ws = XLSX.utils.json_to_sheet(sortedExportData);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Data Siswa");
         XLSX.writeFile(wb, "Laporan_Data_Siswa_Kesiswaan.xlsx");
@@ -90,8 +109,8 @@ const StudentAffairsPages = {
         doc.setFontSize(10);
         doc.text("Aplikasi Penilaian Karakter SD Muhammadiyah", 14, 22);
 
-        const tableColumn = ["No", "NIS", "NISN", "Nama", "Kelas"];
-        const tableRows = exportData.map(d => [d.No, d.NIS, d.NISN, d.Nama, d.Kelas]);
+        const tableColumn = ["No", "NIS", "NISN", "Nama", "L/P", "Kelas"];
+        const tableRows = sortedExportData.map(d => [d.No, d.NIS, d.NISN, d.Nama, d['L/P'], d.Kelas]);
 
         doc.autoTable({
           head: [tableColumn],

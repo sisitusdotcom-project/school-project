@@ -4,7 +4,13 @@ const App = {
       [AppConfig.ROLES.ADMIN]: AdminPages.renderDashboard,
       [AppConfig.ROLES.GURU]: GuruPages.renderDashboard,
       [AppConfig.ROLES.KEPSEK]: KepsekPages.renderDashboard,
-      [AppConfig.ROLES.ORTU]: OrtuPages.renderDashboard
+      [AppConfig.ROLES.ORTU]: OrtuPages.renderDashboard,
+      [AppConfig.ROLES.PERSONNEL]: PersonnelPages.renderDashboard,
+      [AppConfig.ROLES.FINANCE]: FinancePages.renderDashboard,
+      [AppConfig.ROLES.FACILITIES]: FacilitiesPages.renderDashboard,
+      [AppConfig.ROLES.CURRICULUM]: CurriculumPages.renderDashboard,
+      [AppConfig.ROLES.STUDENT_AFFAIRS]: StudentAffairsPages.renderDashboard,
+      [AppConfig.ROLES.IT_ADMIN]: ITAdminPages.renderDashboard
     };
 
     return renderers[Auth.currentRole] || (async (container) => {

@@ -37,7 +37,13 @@
     [ROLES.ADMIN]: 'Admin',
     [ROLES.GURU]: 'Guru',
     [ROLES.KEPSEK]: 'Kepsek',
-    [ROLES.ORTU]: 'Orang Tua'
+    [ROLES.ORTU]: 'Orang Tua',
+    [ROLES.PERSONNEL]: 'Tenaga Kependidikan',
+    [ROLES.IT_ADMIN]: 'IT Admin',
+    [ROLES.FINANCE]: 'Staf Keuangan',
+    [ROLES.FACILITIES]: 'Staf Sarpras',
+    [ROLES.CURRICULUM]: 'Staf Kurikulum',
+    [ROLES.STUDENT_AFFAIRS]: 'Staf Kesiswaan'
   });
 
 

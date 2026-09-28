@@ -339,10 +339,7 @@ const AdminPages = {
             </div>
             <select id="filter-role" class="toolbar-select">
               <option value="">Semua Peran</option>
-              <option value="admin">Admin</option>
-              <option value="guru">Guru</option>
-              <option value="kepsek">Kepsek</option>
-              <option value="ortu">Orang Tua</option>
+              ${Object.entries(AppConfig.ROLE_OPTIONS).map(([val, label]) => `<option value="${val}">${label}</option>`).join('')}
             </select>
           </div>
           <button class="btn btn-primary" id="btn-add-usr"><i class="ph ph-plus"></i> Tambah Pengguna</button>
@@ -367,17 +364,22 @@ const AdminPages = {
               <div class="form-group"><label>Email (opsional)</label><input type="email" id="usr-email"></div>
               <div class="form-group"><label>Username</label><input id="usr-username" required></div>
               <div class="form-group"><label>Password</label><input type="password" id="usr-password" required minlength="6"></div>
-              <div class="form-group"><label>Peran utama</label><select id="usr-role" required><option value="guru">Guru</option><option value="ortu">Orang Tua</option><option value="admin">Admin</option><option value="kepsek">Kepsek</option></select></div>
+              <div class="form-group"><label>Peran utama</label><select id="usr-role" required>
+                ${Object.entries(AppConfig.ROLE_OPTIONS).map(([val, label]) => `<option value="${val}">${label}</option>`).join('')}
+              </select></div>
               <div class="form-group">
                 <label>Tugas / unit kerja</label>
                 <div class="checkbox-grid" id="usr-assignments-group">
-                  <label class="checkbox-card"><input type="checkbox" value="finance"> <span>Keuangan</span></label>
-                  <label class="checkbox-card"><input type="checkbox" value="curriculum"> <span>Kurikulum</span></label>
-                  <label class="checkbox-card"><input type="checkbox" value="studentAffairs"> <span>Kesiswaan</span></label>
-                  <label class="checkbox-card"><input type="checkbox" value="personnel"> <span>Personalia</span></label>
-                  <label class="checkbox-card"><input type="checkbox" value="facilities"> <span>Sarpras</span></label>
+                  <label class="checkbox-card"><input type="checkbox" value="WAKA_KEUANGAN"> <span>Keuangan</span></label>
+                  <label class="checkbox-card"><input type="checkbox" value="WAKA_KURIKULUM"> <span>Kurikulum</span></label>
+                  <label class="checkbox-card"><input type="checkbox" value="WAKA_KESISWAAN"> <span>Kesiswaan</span></label>
+                  <label class="checkbox-card"><input type="checkbox" value="WAKA_HUMAS"> <span>Personalia</span></label>
+                  <label class="checkbox-card"><input type="checkbox" value="WAKA_SARPRAS"> <span>Sarpras</span></label>
+                  <label class="checkbox-card"><input type="checkbox" value="TIM_IT"> <span>IT/Sinkronisasi</span></label>
+                  <label class="checkbox-card"><input type="checkbox" value="TIM_UMMI"> <span>Koord. Ummi</span></label>
+                  <label class="checkbox-card"><input type="checkbox" value="TIM_B_INGGRIS"> <span>Koord. B. Inggris</span></label>
                 </div>
-                <small class="text-muted">Pilih satu atau lebih tugas tambahan. Guru bisa menyambi unit seperti keuangan, kesiswaan, atau kurikulum.</small>
+                <small class="text-muted">Pilih satu atau lebih penugasan tambahan.</small>
               </div>
             </div>
             <div class="modal-footer">
