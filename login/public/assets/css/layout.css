@@ -559,3 +559,6 @@
     padding: 0 var(--page-gutter) 24px
   }
 }
+
+.nav-section-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin: 1.5rem 1rem 0.5rem 1rem; }
+

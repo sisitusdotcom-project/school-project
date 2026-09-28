@@ -56,6 +56,23 @@ const App = {
         { path: '#/guru/additional', title: 'Data Tambahan Rapor', icon: 'ph-folder-plus' },
         { path: '#/guru/observations', title: 'Observasi', icon: 'ph-note-pencil' }
       ],
+      'GURU_EKSTRA': [
+        { path: '#/guru/ekstra/syllabus', title: 'Program Latihan', icon: 'ph-clipboard-text' },
+        { path: '#/guru/ekstra/attendance', title: 'Presensi Peserta', icon: 'ph-users-three' },
+        { path: '#/guru/extracurriculars', title: 'Nilai E-Rapor Ekskul', icon: 'ph-trophy' },
+        { path: '#/guru/ekstra/talents', title: 'Pemetaan Siswa Berbakat', icon: 'ph-star' }
+      ],
+      'KOORD_BTQ': [
+        { path: '#/guru/btq/koord/mapping', title: 'Pemetaan Rombel & Guru', icon: 'ph-users-three' },
+        { path: '#/guru/btq/koord/exams', title: 'Antrean Ujian Jilid', icon: 'ph-check-circle' },
+        { path: '#/guru/btq/koord/tasmi', title: 'Plotting Guru Tasmi\'', icon: 'ph-microphone-stage' }
+      ],
+      'TIM_BTQ': [
+        { path: '#/guru/btq/classes', title: 'Rombel BTQ Saya', icon: 'ph-chalkboard-teacher' },
+        { path: '#/guru/btq/progress', title: 'Jurnal Harian Jilid', icon: 'ph-book-open' },
+        { path: '#/guru/btq/tahfidz', title: 'Setoran Tahfidz', icon: 'ph-book-bookmark' },
+        { path: '#/guru/btq/tasmi', title: 'Ujian Tasmi\'', icon: 'ph-headphones' }
+      ],
       [AppConfig.ROLES.KEPSEK]: [
         { path: '#/kepsek/reports', title: 'Laporan Kelas', icon: 'ph-file-text' }
       ],
@@ -63,7 +80,88 @@ const App = {
         { path: '#/ortu/dashboard', title: 'Perkembangan Anak', icon: 'ph-graduation-cap' }
       ],
       [AppConfig.ROLES.IT_ADMIN]: [
-        { path: '#/it-admin/dashboard', title: 'Sinkronisasi Data', icon: 'ph-database' }
+        { path: '#/it-admin/dashboard', title: 'Dashboard IT', icon: 'ph-monitor' },
+        { path: '#/it-admin/sync', title: 'Sinkronisasi Dapodik', icon: 'ph-arrows-clockwise' },
+        { path: '#/it-admin/backup', title: 'Backup & Restore', icon: 'ph-cloud-arrow-down' },
+        { path: '#/it-admin/logs', title: 'Log Audit Sistem', icon: 'ph-scroll' },
+        { path: '#/it-admin/network', title: 'Infrastruktur Jaringan', icon: 'ph-wifi-high' },
+        { path: '#/it-admin/integration', title: 'Integrasi API & CBT', icon: 'ph-plugs' }
+      ],
+      [AppConfig.ROLES.CURRICULUM]: [
+        { path: '#/curriculum/schedules', title: 'Jadwal & Kalender', icon: 'ph-calendar' },
+        { path: '#/curriculum/syllabus', title: 'Perangkat & Modul', icon: 'ph-folder-open' },
+        { path: '#/curriculum/monitoring', title: 'Pemantauan KBM', icon: 'ph-eye' },
+        { path: '#/curriculum/evaluations', title: 'Sistem Penilaian', icon: 'ph-exam' },
+        { path: '#/curriculum/supervision', title: 'Supervisi Guru', icon: 'ph-chalkboard-teacher' }
+      ],
+      [AppConfig.ROLES.FINANCE]: [
+        { path: '#/finance/rkas', title: 'Penyusunan RKAS', icon: 'ph-chart-bar' },
+        { path: '#/finance/transactions', title: 'Penerimaan & Pengeluaran', icon: 'ph-arrows-left-right' },
+        { path: '#/finance/cashbook', title: 'Buku Kas Umum', icon: 'ph-book-open' },
+        { path: '#/finance/taxes', title: 'Administrasi Pajak', icon: 'ph-receipt' },
+        { path: '#/finance/archives', title: 'Arsip Bukti Transaksi', icon: 'ph-archive-box' },
+        { path: '#/finance/reports', title: 'LPJ & Sinkronisasi Kas', icon: 'ph-file-text' },
+        { path: '#/finance/transparency', title: 'Publikasi Anggaran', icon: 'ph-projector-screen' }
+      ],
+      [AppConfig.ROLES.STUDENT_AFFAIRS]: [
+        { path: '#/student-affairs/ppdb', title: 'PPDB & Mutasi', icon: 'ph-user-plus' },
+        { path: '#/student-affairs/mpls', title: 'Masa Pengenalan (MPLS)', icon: 'ph-flag-banner' },
+        { path: '#/student-affairs/rules', title: 'Tata Tertib & TPPK', icon: 'ph-gavel' },
+        { path: '#/student-affairs/achievements', title: 'Lomba & Penghargaan', icon: 'ph-medal' },
+        { path: '#/student-affairs/scholarships', title: 'Data Beasiswa & PIP', icon: 'ph-hand-coins' }
+      ],
+      [AppConfig.ROLES.PERSONNEL]: [
+        { path: '#/personnel/data', title: 'Data Kepegawaian', icon: 'ph-folder-user' },
+        { path: '#/personnel/attendance', title: 'Pantau Disiplin Guru', icon: 'ph-clock' },
+        { path: '#/personnel/evaluations', title: 'Penilaian Kinerja (PKG)', icon: 'ph-chart-line-up' },
+        { path: '#/personnel/training', title: 'Pelatihan & Kompetensi', icon: 'ph-certificate' },
+        { path: '#/personnel/welfare', title: 'Kesejahteraan Staf', icon: 'ph-heart' },
+        { path: '#/personnel/publications', title: 'Publikasi & Informasi', icon: 'ph-megaphone' },
+        { path: '#/personnel/complaints', title: 'Layanan Pengaduan', icon: 'ph-chats' },
+        { path: '#/personnel/partnerships', title: 'Kemitraan & MoU', icon: 'ph-handshake' },
+        { path: '#/personnel/events', title: 'Manajemen Acara', icon: 'ph-calendar-star' }
+      ],
+      [AppConfig.ROLES.FACILITIES]: [
+        { path: '#/facilities/inventory', title: 'Buku Inventaris', icon: 'ph-archive-box' },
+        { path: '#/facilities/dapodik', title: 'Data Sarpras Dapodik', icon: 'ph-cloud-arrow-up' },
+        { path: '#/facilities/planning', title: 'Analisis Kebutuhan', icon: 'ph-clipboard-text' },
+        { path: '#/facilities/rkas', title: 'Rencana Pengadaan', icon: 'ph-shopping-cart' },
+        { path: '#/facilities/maintenance', title: 'Perawatan Gedung', icon: 'ph-wrench' },
+        { path: '#/facilities/safety', title: 'Keamanan Area', icon: 'ph-shield-check' },
+        { path: '#/facilities/electronics', title: 'Elektronik & IT', icon: 'ph-desktop' },
+        { path: '#/facilities/loans', title: 'Peminjaman Fasilitas', icon: 'ph-hand-pointing' },
+        { path: '#/facilities/disposal', title: 'Penghapusan Aset', icon: 'ph-trash' }
+      ],
+      'TIM_B_INGGRIS': [
+        { path: '#/guru/english/classes', title: 'Rombel English Lab', icon: 'ph-chalkboard-teacher' },
+        { path: '#/guru/english/progress', title: 'Jurnal Progres Speaking', icon: 'ph-translate' }
+      ],
+      'STAFF_KOPERASI': [
+        { path: '#/staff/coop/sales', title: 'Kasir & Penjualan', icon: 'ph-cash-register' },
+        { path: '#/staff/coop/inventory', title: 'Stok Barang Koperasi', icon: 'ph-package' },
+        { path: '#/staff/coop/reports', title: 'Laporan Penjualan', icon: 'ph-file-text' }
+      ],
+      'STAFF_KEBERSIHAN': [
+        { path: '#/staff/cleaning/schedule', title: 'Jadwal Piket Area', icon: 'ph-calendar' },
+        { path: '#/staff/cleaning/logs', title: 'Checklist Kebersihan', icon: 'ph-broom' }
+      ],
+      'STAFF_PERTAMANAN': [
+        { path: '#/staff/garden/schedule', title: 'Jadwal Perawatan', icon: 'ph-calendar' },
+        { path: '#/staff/garden/logs', title: 'Log Penyiraman Taman', icon: 'ph-tree' }
+      ],
+      'STAFF_KEAMANAN': [
+        { path: '#/staff/security/guests', title: 'Buku Tamu Digital', icon: 'ph-address-book' },
+        { path: '#/staff/security/patrols', title: 'Log Patroli Keamanan', icon: 'ph-shield-check' },
+        { path: '#/staff/security/incidents', title: 'Laporan Kejadian', icon: 'ph-warning-octagon' }
+      ],
+      'STAFF_PERPUSTAKAAN': [
+        { path: '#/staff/library/books', title: 'Katalog Buku', icon: 'ph-books' },
+        { path: '#/staff/library/circulation', title: 'Peminjaman/Pengembalian', icon: 'ph-arrows-left-right' },
+        { path: '#/staff/library/members', title: 'Data Anggota', icon: 'ph-users' }
+      ],
+      'STAFF_PENGEMUDI': [
+        { path: '#/staff/transport/schedule', title: 'Jadwal Antar-Jemput', icon: 'ph-calendar' },
+        { path: '#/staff/transport/logs', title: 'Log Servis & BBM', icon: 'ph-car' }
       ]
     };
   },
@@ -105,16 +203,13 @@ const App = {
     if (backdrop) backdrop.addEventListener('click', toggleMenu);
 
     const dummyFeatures = [
-      { path: '#/guru/extracurriculars', title: 'Nilai Ekstrakurikuler', icon: 'ph-trophy', desc: 'Input nilai dan rekap kegiatan ekstrakurikuler siswa' },
       { path: '#/guru/ummi', title: 'Penilaian UMMI / Tahfidz', icon: 'ph-book-open-text', desc: 'Input progres dan penilaian metode UMMI / Tahfidz per siswa' },
       { path: '#/guru/english-lab', title: 'English Lab', icon: 'ph-translate', desc: 'Pencatatan kegiatan lab Bahasa Inggris dan progres siswa' },
       { path: '#/staff/coop', title: 'Kelola Koperasi', icon: 'ph-storefront', desc: 'Sistem manajemen inventaris dan penjualan koperasi sekolah' },
       { path: '#/staff/cleaning', title: 'Log Kebersihan & Fasilitas', icon: 'ph-broom', desc: 'Sistem pencatatan log kebersihan dan perawatan fasilitas/taman' },
       { path: '#/staff/security', title: 'Log Tamu & Keamanan', icon: 'ph-shield-check', desc: 'Pencatatan buku tamu digital dan log patroli keamanan' },
       { path: '#/staff/library', title: 'Sirkulasi Perpustakaan', icon: 'ph-books', desc: 'Sistem sirkulasi peminjaman dan pengembalian buku' },
-      { path: '#/staff/transport', title: 'Jadwal & Log Kendaraan', icon: 'ph-car', desc: 'Manajemen jadwal operasional dan log pemakaian kendaraan sekolah' },
-      { path: '#/finance/reports', title: 'Laporan Keuangan', icon: 'ph-file-text', desc: 'Modul cetak dan rekapitulasi laporan keuangan' },
-      { path: '#/facilities/inventory', title: 'Inventaris Barang', icon: 'ph-archive-box', desc: 'Modul pencatatan barang inventaris dan aset sekolah' }
+      { path: '#/staff/transport', title: 'Jadwal & Log Kendaraan', icon: 'ph-car', desc: 'Manajemen jadwal operasional dan log pemakaian kendaraan sekolah' }
     ];
 
     dummyFeatures.forEach(feature => {
@@ -308,10 +403,144 @@ const App = {
           return;
         }
 
-        if (path === '#/it-admin/dashboard') {
-          if (typeof ITAdminPages !== 'undefined') {
+        if (path.startsWith('#/it-admin/')) {
+          if (path === '#/it-admin/dashboard' && typeof ITAdminPages !== 'undefined' && ITAdminPages.renderDashboard) {
             await ITAdminPages.renderDashboard(container);
+          } else if (typeof ITAdminPages !== 'undefined' && ITAdminPages.renderPlaceholder) {
+            await ITAdminPages.renderPlaceholder(container, title, icon);
+          } else {
+            container.innerHTML = `
+              <div class="card section-block">
+                <div class="card-body">
+                  <h3 class="card-title"><i class="ph ${icon}"></i> ${title}</h3>
+                  <p class="text-muted">Modul ini sedang dalam tahap pengembangan (Coming Soon).</p>
+                </div>
+              </div>
+            `;
           }
+          return;
+        }
+
+        if (path.startsWith('#/curriculum/')) {
+          if (typeof CurriculumPages !== 'undefined' && CurriculumPages.renderPlaceholder) {
+            await CurriculumPages.renderPlaceholder(container, title, icon);
+          } else {
+            container.innerHTML = `
+              <div class="card section-block">
+                <div class="card-body">
+                  <h3 class="card-title"><i class="ph ${icon}"></i> ${title}</h3>
+                  <p class="text-muted">Modul ini sedang dalam tahap pengembangan (Coming Soon).</p>
+                </div>
+              </div>
+            `;
+          }
+          return;
+        }
+
+        if (path.startsWith('#/finance/')) {
+          if (typeof FinancePages !== 'undefined' && FinancePages.renderPlaceholder) {
+            await FinancePages.renderPlaceholder(container, title, icon);
+          } else {
+            container.innerHTML = `
+              <div class="card section-block">
+                <div class="card-body">
+                  <h3 class="card-title"><i class="ph ${icon}"></i> ${title}</h3>
+                  <p class="text-muted">Modul ini sedang dalam tahap pengembangan (Coming Soon).</p>
+                </div>
+              </div>
+            `;
+          }
+          return;
+        }
+
+        if (path.startsWith('#/student-affairs/')) {
+          if (typeof StudentAffairsPages !== 'undefined' && StudentAffairsPages.renderPlaceholder) {
+            await StudentAffairsPages.renderPlaceholder(container, title, icon);
+          } else {
+            container.innerHTML = `
+              <div class="card section-block">
+                <div class="card-body">
+                  <h3 class="card-title"><i class="ph ${icon}"></i> ${title}</h3>
+                  <p class="text-muted">Modul ini sedang dalam tahap pengembangan (Coming Soon).</p>
+                </div>
+              </div>
+            `;
+          }
+          return;
+        }
+
+        if (path.startsWith('#/personnel/')) {
+          if (typeof PersonnelPages !== 'undefined' && PersonnelPages.renderPlaceholder) {
+            await PersonnelPages.renderPlaceholder(container, title, icon);
+          } else {
+            container.innerHTML = `
+              <div class="card section-block">
+                <div class="card-body">
+                  <h3 class="card-title"><i class="ph ${icon}"></i> ${title}</h3>
+                  <p class="text-muted">Modul ini sedang dalam tahap pengembangan (Coming Soon).</p>
+                </div>
+              </div>
+            `;
+          }
+          return;
+        }
+
+        if (path.startsWith('#/facilities/')) {
+          if (typeof FacilitiesPages !== 'undefined' && FacilitiesPages.renderPlaceholder) {
+            await FacilitiesPages.renderPlaceholder(container, title, icon);
+          } else {
+            container.innerHTML = `
+              <div class="card section-block">
+                <div class="card-body">
+                  <h3 class="card-title"><i class="ph ${icon}"></i> ${title}</h3>
+                  <p class="text-muted">Modul ini sedang dalam tahap pengembangan (Coming Soon).</p>
+                </div>
+              </div>
+            `;
+          }
+          return;
+        }
+
+        if (path.startsWith('#/guru/ekstra/') || path === '#/guru/extracurriculars') {
+          if (typeof GuruPages !== 'undefined' && GuruPages.renderPlaceholder) {
+            await GuruPages.renderPlaceholder(container, title, icon);
+          } else {
+            container.innerHTML = `
+              <div class="card section-block">
+                <div class="card-body">
+                  <h3 class="card-title"><i class="ph ${icon}"></i> ${title}</h3>
+                  <p class="text-muted">Modul ini sedang dalam tahap pengembangan (Coming Soon).</p>
+                </div>
+              </div>
+            `;
+          }
+          return;
+        }
+
+        if (path.startsWith('#/guru/btq/')) {
+          if (typeof BTQPages !== 'undefined' && BTQPages.renderPlaceholder) {
+            await BTQPages.renderPlaceholder(container, title, icon);
+          } else {
+            container.innerHTML = `
+              <div class="card section-block">
+                <div class="card-body">
+                  <h3 class="card-title"><i class="ph ${icon}"></i> ${title}</h3>
+                  <p class="text-muted">Modul ini sedang dalam tahap pengembangan (Coming Soon).</p>
+                </div>
+              </div>
+            `;
+          }
+          return;
+        }
+        if (path.startsWith('#/guru/english/') || path.startsWith('#/staff/')) {
+          container.innerHTML = `
+            <div class="card section-block">
+              <div class="card-body">
+                <h3 class="card-title"><i class="ph ${icon}"></i> ${title}</h3>
+                <p class="text-muted">Modul ini sedang dalam tahap pengembangan (Coming Soon).</p>
+              </div>
+            </div>
+          `;
           return;
         }
       });

@@ -157,7 +157,17 @@ const Auth = {
     nav.innerHTML = '';
     const links = AppConfig.getRoleNav(this.currentRole, this.userData?.assignments || this.currentAssignments || []);
 
+    let currentGroup = null;
+
     links.forEach((link) => {
+      if (link.group && link.group !== currentGroup) {
+        const groupTitle = document.createElement('div');
+        groupTitle.className = 'nav-section-title';
+        groupTitle.innerText = link.group;
+        nav.appendChild(groupTitle);
+        currentGroup = link.group;
+      }
+
       const item = document.createElement('a');
       item.href = link.hash;
       item.className = 'btn-nav';
