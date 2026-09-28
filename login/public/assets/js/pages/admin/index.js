@@ -13,7 +13,7 @@ const AdminPages = {
     const classArr = DB.toArray(classes);
     const charArr = DB.toArray(chars);
     const studentArr = DB.toArray(students);
-    const guruCount = userArr.filter(u => u.role === AppConfig.ROLES.GURU).length;
+    const guruCount = userArr.filter(u => u.role === AppConfig.ROLES.GURU || AppConfig.getRoleAssignments(u).some(a => a.startsWith('GURU_') || a.startsWith('WAKA_'))).length;
     const ortuCount = userArr.filter(u => u.role === AppConfig.ROLES.ORTU).length;
 
     const summaryCards = [
@@ -444,7 +444,7 @@ const AdminPages = {
       DB.getSubjects()
     ]);
     const classArr = DB.toArray(classes);
-    const guruArr = DB.toArray(users).filter(u => u.role === AppConfig.ROLES.GURU);
+    const guruArr = DB.toArray(users).filter(u => u.role === AppConfig.ROLES.GURU || AppConfig.getRoleAssignments(u).some(a => a.startsWith('GURU_') || a.startsWith('WAKA_')));
     const subArr = DB.toArray(subjects).sort((a, b) => (a.order || 0) - (b.order || 0));
     const studentArr = DB.toArray(students);
     const rows = classArr.length ? classArr.map(c => {
@@ -910,7 +910,7 @@ const AdminPages = {
       DB.getExtracurriculars(),
       DB.getAllUsers()
     ]);
-    const guruArr = DB.toArray(users).filter(u => u.role === AppConfig.ROLES.GURU);
+    const guruArr = DB.toArray(users).filter(u => u.role === AppConfig.ROLES.GURU || AppConfig.getRoleAssignments(u).some(a => a.startsWith('GURU_') || a.startsWith('WAKA_')));
     const eksArr = DB.toArray(ekskuls).sort((a, b) => (a.order || 0) - (b.order || 0));
     const rows = eksArr.length ? eksArr.map(e => {
       const guru = guruArr.find(g => g.id === e.teacherId);
@@ -1015,7 +1015,7 @@ const AdminPages = {
     ]);
     const classArr = DB.toArray(classes);
     const studentArr = DB.toArray(students);
-    const teacherArr = DB.toArray(users).filter(u => u.role === AppConfig.ROLES.GURU);
+    const teacherArr = DB.toArray(users).filter(u => u.role === AppConfig.ROLES.GURU || AppConfig.getRoleAssignments(u).some(a => a.startsWith('GURU_') || a.startsWith('WAKA_')));
 
     const renderTeacherRows = (dateStr, teacherData, attendanceData) => teacherArr.map(g => {
       const att = attendanceData[g.id] || {};

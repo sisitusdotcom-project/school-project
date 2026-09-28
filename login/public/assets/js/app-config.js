@@ -204,13 +204,17 @@
       { hash: '#/dashboard', icon: 'ph-squares-four', text: 'Dashboard Sekolah' }
     ],
     [ROLES.GURU]: [
-      { hash: '#/dashboard', icon: 'ph-squares-four', text: 'Beranda' },
+      { hash: '#/dashboard', icon: 'ph-squares-four', text: 'Beranda' }
+    ],
+    'GURU_UMUM': [
       { hash: '#/guru/attendance', icon: 'ph-map-pin', text: 'Presensi Guru' },
+      { hash: '#/guru/academic', icon: 'ph-check-square', text: 'Nilai Akademik' },
+      { hash: '#/guru/observations', icon: 'ph-note-pencil', text: 'Riwayat Observasi' }
+    ],
+    'WALI_KELAS': [
       { hash: '#/guru/student-attendance', icon: 'ph-users-three', text: 'Absensi Siswa' },
       { hash: '#/guru/classes', icon: 'ph-chalkboard-teacher', text: 'E-Rapor (Kelas)' },
-      { hash: '#/guru/academic', icon: 'ph-check-square', text: 'Nilai Akademik' },
-      { hash: '#/guru/additional', icon: 'ph-folder-plus', text: 'Data Tambahan Rapor' },
-      { hash: '#/guru/observations', icon: 'ph-note-pencil', text: 'Riwayat Observasi' }
+      { hash: '#/guru/additional', icon: 'ph-folder-plus', text: 'Data Tambahan Rapor' }
     ],
     [ROLES.KEPSEK]: [
       { hash: '#/dashboard', icon: 'ph-chart-pie', text: 'Dashboard Kepala Sekolah' },
@@ -346,11 +350,17 @@
     // If a user has a teaching position or role guru, ensure they get Guru features
     let baseNav = NAV_ITEMS[role] || [];
     
-    // Auto-inject Guru tabs if they have teaching/waka assignments (who are inherently teachers) 
-    const hasTeachingAssignment = assignments.some(a => a.startsWith('GURU_') || a.startsWith('WAKA_'));
-    if (role !== ROLES.GURU && hasTeachingAssignment) {
-       const guruTabs = NAV_ITEMS[ROLES.GURU] || [];
+    const isGuru = role === ROLES.GURU || assignments.some(a => a.startsWith('GURU_') || a.startsWith('WAKA_'));
+    const isWaliKelas = assignments.some(a => a.startsWith('GURU_KELAS_'));
+
+    if (isGuru) {
+       const guruTabs = NAV_ITEMS['GURU_UMUM'] || [];
        baseNav = [...baseNav, ...guruTabs];
+    }
+    
+    if (isWaliKelas) {
+       const waliTabs = NAV_ITEMS['WALI_KELAS'] || [];
+       baseNav = [...baseNav, ...waliTabs];
     }
 
     const unitAssignments = normalizeAssignments(assignments);

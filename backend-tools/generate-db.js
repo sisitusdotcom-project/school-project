@@ -6,6 +6,7 @@ const guruTsv = fs.readFileSync('./data/data-guru.tsv', 'utf-8');
 const rtdb = {
   users: {},
   classes: {},
+  students: {},
   subjects: {},
   academicYears: {},
   semesters: {},
@@ -49,15 +50,22 @@ for (let i = 0; i < linesSiswa.length; i++) {
       let classId = 'CLASS_' + currentClass.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase();
       classId = classId.replace(/_+/g, '_');
 
-      // Save to users (acting as both Auth profile and Student Master Data for SSOT)
+      // Save to users (Ortu account for this student)
       rtdb.users[uid] = {
-        name: nama,
+        name: nama, // Temporarily using student's name as Ortu name
         role: 'ortu',
-        nisn: nisn || '',
-        no_induk: noInduk || '',
-        classId: classId,
         isActive: true,
         createdAt: Date.now()
+      };
+      
+      // Save to students collection (The actual students DB)
+      rtdb.students[uid] = {
+        name: nama,
+        nis: noInduk || '',
+        nisn: nisn || '',
+        classId: classId,
+        parentId: uid,
+        isActive: true
       };
       
       // Save to master/classes
