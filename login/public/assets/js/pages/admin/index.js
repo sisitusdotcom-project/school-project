@@ -13,7 +13,7 @@ const AdminPages = {
     const classArr = DB.toArray(classes);
     const charArr = DB.toArray(chars);
     const studentArr = DB.toArray(students);
-    const guruCount = userArr.filter(u => u.role === AppConfig.ROLES.GURU || AppConfig.getRoleAssignments(u).some(a => a.startsWith('GURU_') || a.startsWith('WAKA_'))).length;
+    const guruCount = userArr.filter(u => u.role === AppConfig.ROLES.GURU || AppConfig.getRoleAssignments(u).some(AppConfig.isTeachingAssignment)).length;
     const ortuCount = userArr.filter(u => u.role === AppConfig.ROLES.ORTU).length;
 
     const summaryCards = [
@@ -444,7 +444,8 @@ const AdminPages = {
       DB.getSubjects()
     ]);
     const classArr = DB.toArray(classes);
-    const guruArr = DB.toArray(users).filter(u => u.role === AppConfig.ROLES.GURU || AppConfig.getRoleAssignments(u).some(a => a.startsWith('GURU_') || a.startsWith('WAKA_')));
+    const isKurikulum = Auth.currentUser.role === AppConfig.ROLES.ADMIN || AppConfig.getRoleAssignments(Auth.currentUser).includes('WAKA_KURIKULUM');
+    const guruArr = DB.toArray(users).filter(u => u.role === AppConfig.ROLES.GURU || AppConfig.getRoleAssignments(u).some(AppConfig.isTeachingAssignment));
     const subArr = DB.toArray(subjects).sort((a, b) => (a.order || 0) - (b.order || 0));
     const studentArr = DB.toArray(students);
     const rows = classArr.length ? classArr.map(c => {
@@ -456,10 +457,10 @@ const AdminPages = {
           <td>${teacher ? teacher.name : '<span class="text-muted">Belum ditugaskan</span>'}</td>
           <td>${count} siswa</td>
           <td class="action-cell table-col-lg">
-            <button class="btn btn-outline btn-sm" data-mapel-cls="${c.id}" title="Atur Guru Mapel"><i class="ph ph-books"></i> Mapel</button>
-            <button class="btn btn-outline btn-sm" data-edit-cls="${c.id}" title="Edit Kelas"><i class="ph ph-pencil-simple"></i></button>
+            ${isKurikulum ? `<button class="btn btn-outline btn-sm" data-mapel-cls="${c.id}" title="Atur Guru Mapel"><i class="ph ph-books"></i> Mapel</button>` : ''}
+            ${isKurikulum ? `<button class="btn btn-outline btn-sm" data-edit-cls="${c.id}" title="Edit Kelas"><i class="ph ph-pencil-simple"></i></button>` : ''}
             <button class="btn btn-outline btn-sm" data-view-cls="${c.id}" title="Lihat Siswa"><i class="ph ph-eye"></i></button>
-            <button class="btn btn-danger btn-sm" data-del-cls="${c.id}" title="Hapus"><i class="ph ph-trash"></i></button>
+            ${isKurikulum ? `<button class="btn btn-danger btn-sm" data-del-cls="${c.id}" title="Hapus"><i class="ph ph-trash"></i></button>` : ''}
           </td>
         </tr>`;
     }).join('') : '<tr><td colspan="4" class="text-center text-muted">Belum ada kelas.</td></tr>';
@@ -479,7 +480,7 @@ const AdminPages = {
       <div class="card">
         <div class="card-header">
           <h3 class="card-title">Daftar kelas</h3>
-          <button class="btn btn-primary" id="btn-add-cls"><i class="ph ph-plus"></i> Tambah</button>
+          ${isKurikulum ? `<button class="btn btn-primary" id="btn-add-cls"><i class="ph ph-plus"></i> Tambah</button>` : ''}
         </div>
         <div class="table-responsive">
           <table class="table"><thead><tr><th>Nama Kelas</th><th>Wali Kelas</th><th>Jumlah Siswa</th><th style="width:220px">Aksi</th></tr></thead>
@@ -537,13 +538,16 @@ const AdminPages = {
       </div>
     `;
 
-    document.getElementById('btn-add-cls').onclick = () => {
-      document.getElementById('cls-modal-title').innerText = 'Tambah kelas';
-      document.getElementById('cls-id').value = '';
-      document.getElementById('cls-name').value = '';
-      document.getElementById('cls-teacher').value = '';
-      document.getElementById('modal-cls').classList.add('active');
-    };
+    const btnAddCls = document.getElementById('btn-add-cls');
+    if (btnAddCls) {
+      btnAddCls.onclick = () => {
+        document.getElementById('cls-modal-title').innerText = 'Tambah kelas';
+        document.getElementById('cls-id').value = '';
+        document.getElementById('cls-name').value = '';
+        document.getElementById('cls-teacher').value = '';
+        document.getElementById('modal-cls').classList.add('active');
+      };
+    }
     
     container.querySelectorAll('[data-edit-cls]').forEach(btn => {
       btn.onclick = () => {
@@ -910,7 +914,7 @@ const AdminPages = {
       DB.getExtracurriculars(),
       DB.getAllUsers()
     ]);
-    const guruArr = DB.toArray(users).filter(u => u.role === AppConfig.ROLES.GURU || AppConfig.getRoleAssignments(u).some(a => a.startsWith('GURU_') || a.startsWith('WAKA_')));
+    const guruArr = DB.toArray(users).filter(u => u.role === AppConfig.ROLES.GURU || AppConfig.getRoleAssignments(u).some(AppConfig.isTeachingAssignment));
     const eksArr = DB.toArray(ekskuls).sort((a, b) => (a.order || 0) - (b.order || 0));
     const rows = eksArr.length ? eksArr.map(e => {
       const guru = guruArr.find(g => g.id === e.teacherId);
@@ -1015,7 +1019,7 @@ const AdminPages = {
     ]);
     const classArr = DB.toArray(classes);
     const studentArr = DB.toArray(students);
-    const teacherArr = DB.toArray(users).filter(u => u.role === AppConfig.ROLES.GURU || AppConfig.getRoleAssignments(u).some(a => a.startsWith('GURU_') || a.startsWith('WAKA_')));
+    const teacherArr = DB.toArray(users).filter(u => u.role === AppConfig.ROLES.GURU || AppConfig.getRoleAssignments(u).some(AppConfig.isTeachingAssignment));
 
     const renderTeacherRows = (dateStr, teacherData, attendanceData) => teacherArr.map(g => {
       const att = attendanceData[g.id] || {};

@@ -40,13 +40,7 @@
     [ROLES.ORTU]: 'Orang Tua'
   });
 
-  const MANAGEMENT_ROUTE_MAP = Object.freeze({
-    [ROLES.FINANCE]: '#/finance',
-    [ROLES.CURRICULUM]: '#/curriculum',
-    [ROLES.STUDENT_AFFAIRS]: '#/student-affairs',
-    [ROLES.PERSONNEL]: '#/personnel',
-    [ROLES.FACILITIES]: '#/facilities'
-  });
+
   const MODULE_ACCESS = Object.freeze({
     finance: { roles: [ROLES.ADMIN, ROLES.KEPSEK], label: 'Keuangan', scope: 'rekap keuangan sekolah' },
     curriculum: { roles: [ROLES.ADMIN, ROLES.KEPSEK, ROLES.GURU], label: 'Kurikulum', scope: 'struktur dan rekap pembelajaran' },
@@ -218,7 +212,12 @@
     ],
     [ROLES.KEPSEK]: [
       { hash: '#/dashboard', icon: 'ph-chart-pie', text: 'Dashboard Kepala Sekolah' },
-      { hash: '#/kepsek/reports', icon: 'ph-file-text', text: 'Laporan Kelas' }
+      { hash: '#/kepsek/reports', icon: 'ph-file-text', text: 'Laporan Kelas' },
+      { hash: '#/curriculum', icon: 'ph-books', text: 'Monitoring Kurikulum' },
+      { hash: '#/student-affairs', icon: 'ph-users-three', text: 'Monitoring Kesiswaan' },
+      { hash: '#/finance', icon: 'ph-wallet', text: 'Monitoring Keuangan' },
+      { hash: '#/personnel', icon: 'ph-briefcase', text: 'Monitoring Personalia' },
+      { hash: '#/facilities', icon: 'ph-building-office', text: 'Monitoring Sarpras' }
     ],
     [ROLES.ORTU]: [
       { hash: '#/ortu/dashboard', icon: 'ph-graduation-cap', text: 'Perkembangan Anak' }
@@ -255,16 +254,46 @@
     ],
     'WAKA_KURIKULUM': [
       { hash: '#/curriculum', icon: 'ph-books', text: 'Dashboard Kurikulum' },
+      { hash: '#/admin/classes', icon: 'ph-users', text: 'Rombel & Kelas' },
       { hash: '#/admin/subjects', icon: 'ph-book-bookmark', text: 'Mata Pelajaran' }
     ],
     'WAKA_KEUANGAN': [
-      { hash: '#/finance', icon: 'ph-wallet', text: 'Dashboard Keuangan' }
+      { hash: '#/finance', icon: 'ph-wallet', text: 'Dashboard Keuangan' },
+      { hash: '#/finance/reports', icon: 'ph-file-text', text: 'Laporan Keuangan' }
     ],
     'WAKA_SARPRAS': [
-      { hash: '#/facilities', icon: 'ph-building-office', text: 'Dashboard Sarpras' }
+      { hash: '#/facilities', icon: 'ph-building-office', text: 'Dashboard Sarpras' },
+      { hash: '#/facilities/inventory', icon: 'ph-archive-box', text: 'Inventaris Barang' }
     ],
     'TIM_IT': [
       { hash: '#/it-admin/dashboard', icon: 'ph-database', text: 'Sinkronisasi Data' }
+    ],
+    'GURU_EKSTRA': [
+      { hash: '#/guru/extracurriculars', icon: 'ph-trophy', text: 'Nilai Ekstrakurikuler' }
+    ],
+    'TIM_UMMI': [
+      { hash: '#/guru/ummi', icon: 'ph-book-open-text', text: 'Penilaian UMMI / Tahfidz' }
+    ],
+    'TIM_B_INGGRIS': [
+      { hash: '#/guru/english-lab', icon: 'ph-translate', text: 'English Lab' }
+    ],
+    'STAFF_KOPERASI': [
+      { hash: '#/staff/coop', icon: 'ph-storefront', text: 'Kelola Koperasi' }
+    ],
+    'STAFF_KEBERSIHAN': [
+      { hash: '#/staff/cleaning', icon: 'ph-broom', text: 'Log Kebersihan' }
+    ],
+    'STAFF_PERTAMANAN': [
+      { hash: '#/staff/cleaning', icon: 'ph-tree', text: 'Perawatan Taman' }
+    ],
+    'STAFF_KEAMANAN': [
+      { hash: '#/staff/security', icon: 'ph-shield-check', text: 'Log Tamu & Keamanan' }
+    ],
+    'STAFF_PERPUSTAKAAN': [
+      { hash: '#/staff/library', icon: 'ph-books', text: 'Sirkulasi Perpustakaan' }
+    ],
+    'STAFF_PENGEMUDI': [
+      { hash: '#/staff/transport', icon: 'ph-car', text: 'Jadwal & Log Kendaraan' }
     ]
   });
 
@@ -346,28 +375,38 @@
     return `${getRoleLabel(user.role)} · ${unitLabels}`;
   }
 
+  const TEACHING_PREFIXES = ['GURU_', 'WAKA_', 'TIM_UMMI', 'TIM_B_INGGRIS'];
+
+  function isTeachingAssignment(a) {
+    return TEACHING_PREFIXES.some(prefix => a.startsWith(prefix));
+  }
+
   function getRoleNav(role, assignments = []) {
-    // If a user has a teaching position or role guru, ensure they get Guru features
-    let baseNav = NAV_ITEMS[role] || [];
-    
-    const isGuru = role === ROLES.GURU || assignments.some(a => a.startsWith('GURU_') || a.startsWith('WAKA_'));
+    let baseNav = [...(NAV_ITEMS[role] || [])];
+    const isGuru = role === ROLES.GURU || assignments.some(isTeachingAssignment);
     const isWaliKelas = assignments.some(a => a.startsWith('GURU_KELAS_'));
-
+    const isGuruEkstra = assignments.some(a => a.startsWith('GURU_EKSTRA_'));
+    const isTimUmmi = assignments.some(a => a === 'GURU_UMMI' || a === 'TIM_UMMI');
+    const isTimInggris = assignments.some(a => a === 'TIM_B_INGGRIS');
     if (isGuru) {
-       const guruTabs = NAV_ITEMS['GURU_UMUM'] || [];
-       baseNav = [...baseNav, ...guruTabs];
+      baseNav = [...baseNav, ...(NAV_ITEMS['GURU_UMUM'] || [])];
     }
-    
     if (isWaliKelas) {
-       const waliTabs = NAV_ITEMS['WALI_KELAS'] || [];
-       baseNav = [...baseNav, ...waliTabs];
+      baseNav = [...baseNav, ...(NAV_ITEMS['WALI_KELAS'] || [])];
     }
-
+    if (isGuruEkstra) {
+      baseNav = [...baseNav, ...(NAV_ITEMS['GURU_EKSTRA'] || [])];
+    }
+    if (isTimUmmi) {
+      baseNav = [...baseNav, ...(NAV_ITEMS['TIM_UMMI'] || [])];
+    }
+    if (isTimInggris) {
+      baseNav = [...baseNav, ...(NAV_ITEMS['TIM_B_INGGRIS'] || [])];
+    }
     const unitAssignments = normalizeAssignments(assignments);
     const unitNav = unitAssignments.flatMap((unit) => {
       return NAV_ITEMS[unit] || [];
     });
-
     const merged = [...baseNav, ...unitNav];
     return merged.filter((item, index, arr) => arr.findIndex((entry) => entry.hash === item.hash) === index);
   }
@@ -429,6 +468,7 @@
     getRoleAssignments,
     getRoleAssignmentLabel,
     getRoleNav,
-    getRoleBadgeClass
+    getRoleBadgeClass,
+    isTeachingAssignment
   });
 })();

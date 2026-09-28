@@ -98,6 +98,26 @@ const App = {
     if (closeButton) closeButton.addEventListener('click', toggleMenu);
     if (backdrop) backdrop.addEventListener('click', toggleMenu);
 
+    const dummyFeatures = [
+      { path: '#/guru/extracurriculars', title: 'Nilai Ekstrakurikuler', icon: 'ph-trophy', desc: 'Input nilai dan rekap kegiatan ekstrakurikuler siswa' },
+      { path: '#/guru/ummi', title: 'Penilaian UMMI / Tahfidz', icon: 'ph-book-open-text', desc: 'Input progres dan penilaian metode UMMI / Tahfidz per siswa' },
+      { path: '#/guru/english-lab', title: 'English Lab', icon: 'ph-translate', desc: 'Pencatatan kegiatan lab Bahasa Inggris dan progres siswa' },
+      { path: '#/staff/coop', title: 'Kelola Koperasi', icon: 'ph-storefront', desc: 'Sistem manajemen inventaris dan penjualan koperasi sekolah' },
+      { path: '#/staff/cleaning', title: 'Log Kebersihan & Fasilitas', icon: 'ph-broom', desc: 'Sistem pencatatan log kebersihan dan perawatan fasilitas/taman' },
+      { path: '#/staff/security', title: 'Log Tamu & Keamanan', icon: 'ph-shield-check', desc: 'Pencatatan buku tamu digital dan log patroli keamanan' },
+      { path: '#/staff/library', title: 'Sirkulasi Perpustakaan', icon: 'ph-books', desc: 'Sistem sirkulasi peminjaman dan pengembalian buku' },
+      { path: '#/staff/transport', title: 'Jadwal & Log Kendaraan', icon: 'ph-car', desc: 'Manajemen jadwal operasional dan log pemakaian kendaraan sekolah' },
+      { path: '#/finance/reports', title: 'Laporan Keuangan', icon: 'ph-file-text', desc: 'Modul cetak dan rekapitulasi laporan keuangan' },
+      { path: '#/facilities/inventory', title: 'Inventaris Barang', icon: 'ph-archive-box', desc: 'Modul pencatatan barang inventaris dan aset sekolah' }
+    ];
+
+    dummyFeatures.forEach(feature => {
+      Router.add(feature.path, async (container) => {
+        Router.setTitle(feature.title, feature.desc);
+        container.innerHTML = `<div class="card"><div class="card-body text-center" style="padding: 40px 20px;"><i class="ph ${feature.icon}" style="font-size: 48px; color: var(--border-color); margin-bottom: 20px;"></i><h3 style="margin-bottom: 10px">Modul ${feature.title}</h3><p class="text-muted">${feature.desc}.<br>Fitur ini (Tahap 2) sedang disiapkan oleh tim developer.</p></div></div>`;
+      });
+    });
+
     Router.init();
     Router.add('#/dashboard', async (container) => {
       const renderer = this.getDashboardRenderer();
