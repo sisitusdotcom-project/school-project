@@ -5,14 +5,12 @@ const guruTsv = fs.readFileSync('./data/data-guru.tsv', 'utf-8');
 
 const rtdb = {
   users: {},
-  master: {
-    classes: {},
-    subjects: {},
-    academicYears: {},
-    semesters: {},
-    rooms: {},
-    assets: {}
-  },
+  classes: {},
+  subjects: {},
+  academicYears: {},
+  semesters: {},
+  rooms: {},
+  assets: {},
   settings: {
     schoolName: "SD Muhammadiyah 1 Sedati",
     academicYear: "2026/2027",
@@ -48,8 +46,9 @@ for (let i = 0; i < linesSiswa.length; i++) {
       const cleanNisn = nisn ? nisn.replace(/\s+/g, '') : (noInduk || Date.now());
       const uid = `SISWA_${cleanNisn}`;
       
-      const classId = 'CLASS_' + currentClass.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase();
-      
+      let classId = 'CLASS_' + currentClass.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase();
+      classId = classId.replace(/_+/g, '_');
+
       // Save to users (acting as both Auth profile and Student Master Data for SSOT)
       rtdb.users[uid] = {
         name: nama,
@@ -62,13 +61,13 @@ for (let i = 0; i < linesSiswa.length; i++) {
       };
       
       // Save to master/classes
-      if (!rtdb.master.classes[classId]) {
-        rtdb.master.classes[classId] = {
+      if (!rtdb.classes[classId]) {
+        rtdb.classes[classId] = {
           name: currentClass,
           students: {}
         };
       }
-      rtdb.master.classes[classId].students[uid] = true;
+      rtdb.classes[classId].students[uid] = true;
     }
   }
 }
@@ -92,47 +91,11 @@ for (let i = 0; i < guruLines.length; i++) {
   }
 
   let cols = line.split('\t');
-  if (cols.length === 1) {
-    const match = line.match(/^(\d+)\s+(.+)$/);
-    if (!match) continue;
-    const no = match[1];
-    let rest = match[2];
-    cols = [no, rest];
-  }
-
-  const parseEmployeeLine = (restStr) => {
-    let name = "";
-    let jabatan = "";
-    let tugas = "";
-    
-    if (restStr.includes(" Guru Kelas ")) {
-      const parts = restStr.split(" Guru Kelas ");
-      name = parts[0];
-      jabatan = "Guru Kelas";
-      tugas = "Guru Kelas " + (parts[1] || "");
-    } else if (restStr.includes(" Guru ")) {
-      const parts = restStr.split(" Guru ");
-      name = parts[0];
-      jabatan = "Guru";
-      tugas = parts[1] || "";
-    } else if (restStr.includes(" Kepala Sekolah ")) {
-      const parts = restStr.split(" Kepala Sekolah ");
-      name = parts[0];
-      jabatan = "Kepala Sekolah";
-      tugas = parts[1] || "";
-    } else if (restStr.includes(" Tenaga Kependidikan ")) {
-      const parts = restStr.split(" Tenaga Kependidikan ");
-      name = parts[0];
-      jabatan = "Tenaga Kependidikan";
-      tugas = parts[1] || "";
-    } else {
-      name = restStr; // Fallback
-    }
-    
-    return { name, jabatan, tugas };
-  };
-
-  const { name, jabatan, tugas } = parseEmployeeLine(cols[1] || cols.slice(1).join(' '));
+  if (cols.length < 3) continue; // skip invalid lines
+  
+  let name = cols[1]?.trim();
+  let jabatan = cols[2]?.trim() || '';
+  let tugas = cols[3]?.trim() || '';
   
   if (!name || name === 'Nama Jabatan Tugas Mengajar' || name === 'Nama Jabatan Tugas Tambahan') continue;
   
@@ -151,69 +114,88 @@ for (let i = 0; i < guruLines.length; i++) {
   }
   
   const user = rtdb.users[uid];
-  let assignmentCode = '';
   
-  if (currentTable === 'MENGAJAR') {
-    if (tugas.includes('Guru Kelas')) {
-      const className = tugas.replace('Guru Kelas', '').trim();
-      assignmentCode = 'GURU_KELAS_' + className.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase();
-      
-      const classId = 'CLASS_' + className.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase();
-      if (!rtdb.master.classes[classId]) {
-        rtdb.master.classes[classId] = { name: className, students: {} };
-      }
-      rtdb.master.classes[classId].teacherId = uid;
-    } else if (tugas.includes('Guru PAI')) {
-      assignmentCode = 'GURU_MAPEL_PAI';
-    } else if (tugas.includes('Guru TIK')) {
-      assignmentCode = 'GURU_MAPEL_TIK';
-    } else if (tugas.includes('Bahasa Inggris')) {
-      assignmentCode = 'GURU_MAPEL_B_INGGRIS';
-    } else if (tugas.includes('Seni Budaya')) {
-      assignmentCode = 'GURU_MAPEL_SENI';
-    } else if (tugas.includes('PJOK')) {
-      assignmentCode = 'GURU_MAPEL_PJOK';
-    } else if (tugas.includes('Hizbul Wathan')) {
-      assignmentCode = 'GURU_EKSTRA_HW';
-    } else if (tugas.includes('Tapak Suci')) {
-      assignmentCode = 'GURU_EKSTRA_TS';
-    }
-  } else if (currentTable === 'TAMBAHAN') {
-    if (tugas.includes('Keuangan')) assignmentCode = 'WAKA_KEUANGAN';
-    else if (tugas.includes('Kesiswaan')) assignmentCode = 'WAKA_KESISWAAN';
-    else if (tugas.includes('Humas')) assignmentCode = 'WAKA_HUMAS';
-    else if (tugas.includes('Sarana')) assignmentCode = 'WAKA_SARPRAS';
-    else if (tugas.includes('Kurikulum')) assignmentCode = 'WAKA_KURIKULUM';
-    else if (tugas.includes('IT')) assignmentCode = 'TIM_IT';
-    else if (tugas.includes('UMMI')) assignmentCode = 'TIM_UMMI';
-    else if (tugas.includes('Bahasa Inggris')) assignmentCode = 'TIM_B_INGGRIS';
+  const tugasList = tugas.split(',').map(t => t.trim());
+  for (const t of tugasList) {
+    if (!t) continue;
     
-    if (tugas.includes('Wakil Kepala')) {
+    let assignmentCode = '';
+    
+    if (t.includes('Guru Kelas')) {
+      let className = t.replace(/Guru Kelas/g, '').trim();
+      assignmentCode = 'GURU_KELAS_' + className.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase();
+      const classId = 'CLASS_' + className.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase();
+      const cleanClassId = classId.replace(/_+/g, '_');
+      assignmentCode = assignmentCode.replace(/_+/g, '_');
+      
+      if (!rtdb.classes[cleanClassId]) {
+        rtdb.classes[cleanClassId] = { name: className, students: {} };
+      }
+      rtdb.classes[cleanClassId].teacherId = uid;
+    } else if (t.includes('Guru PAI')) {
+      assignmentCode = 'GURU_MAPEL_PAI';
+    } else if (t.includes('Guru TIK')) {
+      assignmentCode = 'GURU_MAPEL_TIK';
+    } else if (t.includes('Bahasa Inggris') && t.includes('Guru')) {
+      assignmentCode = 'GURU_MAPEL_B_INGGRIS';
+    } else if (t.includes('Seni Budaya')) {
+      assignmentCode = 'GURU_MAPEL_SENI';
+    } else if (t.includes('PJOK')) {
+      assignmentCode = 'GURU_MAPEL_PJOK';
+    } else if (t.includes('Hizbul Wathan')) {
+      assignmentCode = 'GURU_EKSTRA_HW';
+    } else if (t.includes('Tapak Suci')) {
+      assignmentCode = 'GURU_EKSTRA_TS';
+    } else if (t.includes('Keuangan')) {
+      assignmentCode = 'WAKA_KEUANGAN';
+    } else if (t.includes('Kesiswaan')) {
+      assignmentCode = 'WAKA_KESISWAAN';
+    } else if (t.includes('Humas')) {
+      assignmentCode = 'WAKA_HUMAS';
+    } else if (t.includes('Sarana')) {
+      assignmentCode = 'WAKA_SARPRAS';
+    } else if (t.includes('Kurikulum')) {
+      assignmentCode = 'WAKA_KURIKULUM';
+    } else if (t.includes('IT')) {
+      assignmentCode = 'TIM_IT';
+    } else if (t.includes('UMMI') && t.includes('Tim')) {
+      assignmentCode = 'TIM_UMMI';
+    } else if (t.includes('Bahasa Inggris') && t.includes('Tim')) {
+      assignmentCode = 'TIM_B_INGGRIS';
+    } else if (t.includes('UMMI') && t.includes('Guru')) {
+      assignmentCode = 'GURU_UMMI';
+    } else if (t.includes('Perpustakaan')) {
+      assignmentCode = 'STAFF_PERPUSTAKAAN';
+    } else if (t.includes('Kebersihan')) {
+      assignmentCode = 'STAFF_KEBERSIHAN';
+    } else if (t.includes('Pengemudi')) {
+      assignmentCode = 'STAFF_PENGEMUDI';
+    } else if (t.includes('Koperasi')) {
+      assignmentCode = 'STAFF_KOPERASI';
+    } else if (t.includes('Pertamanan')) {
+      assignmentCode = 'STAFF_PERTAMANAN';
+    } else if (t.includes('Keamanan')) {
+      assignmentCode = 'STAFF_KEAMANAN';
+    }
+    
+    // Elevate Role if necessary
+    if (t.includes('Wakil Kepala')) {
        user.role = 'admin';
-    } else if (tugas.includes('Staff Bidang Keuangan')) {
+    } else if (t.includes('Staff Bidang Keuangan')) {
        user.role = 'finance';
-    } else if (tugas.includes('Staff Bidang Kesiswaan')) {
+    } else if (t.includes('Staff Bidang Kesiswaan')) {
        user.role = 'studentAffairs';
-    } else if (tugas.includes('Staff Bidang Humas dan Personalia')) {
+    } else if (t.includes('Staff Bidang Humas dan Personalia')) {
        user.role = 'personnel';
-    } else if (tugas.includes('Staff Bidang Sarana Prasarana')) {
+    } else if (t.includes('Staff Bidang Sarana Prasarana')) {
        user.role = 'facilities';
-    } else if (tugas.includes('Staff Bidang Kurikulum')) {
+    } else if (t.includes('Staff Bidang Kurikulum')) {
        user.role = 'curriculum';
     }
-  } else if (currentTable === 'TENDIK') {
-    if (tugas.includes('Perpustakaan')) assignmentCode = 'STAFF_PERPUSTAKAAN';
-    else if (tugas.includes('Kebersihan')) assignmentCode = 'STAFF_KEBERSIHAN';
-    else if (tugas.includes('Pengemudi')) assignmentCode = 'STAFF_PENGEMUDI';
-    else if (tugas.includes('Koperasi')) assignmentCode = 'STAFF_KOPERASI';
-    else if (tugas.includes('Pertamanan')) assignmentCode = 'STAFF_PERTAMANAN';
-    else if (tugas.includes('Keamanan')) assignmentCode = 'STAFF_KEAMANAN';
-  } else if (currentTable === 'UMMI') {
-    assignmentCode = 'GURU_UMMI';
-  }
-  
-  if (assignmentCode && !user.assignments.includes(assignmentCode)) {
-    user.assignments.push(assignmentCode);
+    
+    if (assignmentCode && !user.assignments.includes(assignmentCode)) {
+      user.assignments.push(assignmentCode);
+    }
   }
 }
 
