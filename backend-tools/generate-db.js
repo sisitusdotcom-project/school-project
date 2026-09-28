@@ -26,23 +26,7 @@ const rtdb = {
     'SUB_KEMUHAMMADIYAHAN': {'name': 'Kemuhammadiyahan', 'order': 16, 'category': 'kekhasan'},
     'SUB_B_ARAB': {'name': 'Bahasa Arab', 'order': 17, 'category': 'kekhasan'}
   },
-    'SUB_FIQIH': {'name': 'Ibadah Syari\'ah/Fiqih', 'order': 2},
-    'SUB_ALQURAN_HADITS': {'name': 'Al Qur\'an Hadits', 'order': 3},
-    'SUB_TARIKH_ISLAM': {'name': 'Tarikh Islam', 'order': 4},
-    'SUB_PKN': {'name': 'Pendidikan Kewarganegaraan', 'order': 5},
-    'SUB_B_INDO': {'name': 'Bahasa Indonesia', 'order': 6},
-    'SUB_MTK': {'name': 'Matematika', 'order': 7},
-    'SUB_SAINS': {'name': 'Sains', 'order': 8},
-    'SUB_IPS': {'name': 'Ilmu Pengetahuan Sosial', 'order': 9},
-    'SUB_SBK': {'name': 'Seni Budaya dan Keterampilan', 'order': 10},
-    'SUB_PJOK': {'name': 'Pendidikan Jasmani, Olahraga & Kesehatan', 'order': 11},
-    'SUB_BTQ': {'name': 'Baca Tulis Qur\'an (BTQ)', 'order': 12},
-    'SUB_B_DAERAH': {'name': 'Bahasa Daerah', 'order': 13},
-    'SUB_B_INGGRIS': {'name': 'Bahasa Inggris', 'order': 14},
-    'SUB_TIK': {'name': 'TIK', 'order': 15},
-    'SUB_KEMUHAMMADIYAHAN': {'name': 'Kemuhammadiyahan', 'order': 16},
-    'SUB_B_ARAB': {'name': 'Bahasa Arab', 'order': 17}
-  },
+
   academicYears: {},
   semesters: {},
   rooms: {},
@@ -74,6 +58,7 @@ for (let i = 0; i < linesSiswa.length; i++) {
       const nisn = cols[2];
       const nama = cols[3];
       const kelas = cols[4] || currentClass;
+      const gender = cols[5]?.trim() || '';
       
       if (kelas) currentClass = kelas;
       
@@ -100,6 +85,7 @@ for (let i = 0; i < linesSiswa.length; i++) {
         nisn: nisn || '',
         classId: classId,
         parentId: uid,
+        gender: gender,
         isActive: true
       };
       
@@ -139,6 +125,7 @@ for (let i = 0; i < guruLines.length; i++) {
   let name = cols[1]?.trim();
   let jabatan = cols[2]?.trim() || '';
   let tugas = cols[3]?.trim() || '';
+  let gender = cols[4]?.trim() || '';
   
   if (!name || name === 'Nama Jabatan Tugas Mengajar' || name === 'Nama Jabatan Tugas Tambahan') continue;
   
@@ -150,6 +137,7 @@ for (let i = 0; i < guruLines.length; i++) {
       name: name,
       role: jabatan === 'Tenaga Kependidikan' ? 'personnel' : (jabatan === 'Kepala Sekolah' ? 'kepsek' : 'guru'),
       jabatan: jabatan,
+      gender: gender,
       assignments: [],
       isActive: true,
       createdAt: Date.now()

@@ -134,7 +134,7 @@ const Auth = {
     const userRole = document.getElementById('current-user-role');
     const avatarWrap = document.querySelector('.avatar');
 
-    if (userName) userName.innerText = this.userData.name || 'Pengguna';
+    if (userName) userName.innerText = AppConfig.formatUserName(this.userData);
     if (userRole) userRole.innerText = AppConfig.getRoleAssignmentLabel(this.userData || { role: this.currentRole });
 
     if (avatarWrap) {

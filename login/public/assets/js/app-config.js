@@ -359,6 +359,21 @@
     return ROLE_LABELS[role] || 'Pengguna';
   }
 
+  function formatUserName(user) {
+    if (!user) return 'Pengguna';
+    let name = user.name || 'Pengguna';
+    if (user.role === ROLES.ORTU) return name;
+    
+    if (user.gender) {
+      if (user.gender === 'L' && !name.toLowerCase().startsWith('ustadz')) {
+        name = `Ustadz ${name}`;
+      } else if (user.gender === 'P' && !name.toLowerCase().startsWith('ustadz')) {
+        name = `Ustadzah ${name}`;
+      }
+    }
+    return name;
+  }
+
   function getRoleAssignments(user = {}) {
     if (!user || typeof user !== 'object') return [];
     return normalizeAssignments(user.assignments || user.unitRoles || user.roles || []);
@@ -469,6 +484,7 @@
     getRoleAssignmentLabel,
     getRoleNav,
     getRoleBadgeClass,
-    isTeachingAssignment
+    isTeachingAssignment,
+    formatUserName
   });
 })();
