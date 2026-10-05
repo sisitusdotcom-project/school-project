@@ -54,7 +54,10 @@ const App = {
         { path: '#/guru/classes', title: 'E-Rapor', icon: 'ph-chalkboard-teacher' },
         { path: '#/guru/academic', title: 'Nilai Akademik', icon: 'ph-check-square' },
         { path: '#/guru/additional', title: 'Data Tambahan Rapor', icon: 'ph-folder-plus' },
-        { path: '#/guru/observations', title: 'Observasi', icon: 'ph-note-pencil' }
+        { path: '#/guru/observations', title: 'Observasi', icon: 'ph-note-pencil' },
+        { path: '#/guru/assess/:id', title: 'Penilaian Karakter', icon: 'ph-note-pencil' },
+        { path: '#/guru/observe/:id', title: 'Catatan Observasi', icon: 'ph-chat-text' },
+        { path: '#/guru/student-attendance/:id', title: 'Input Absensi Siswa', icon: 'ph-users-three' }
       ],
       'GURU_EKSTRA': [
         { path: '#/guru/ekstra/syllabus', title: 'Program Latihan', icon: 'ph-clipboard-text' },
@@ -62,16 +65,16 @@ const App = {
         { path: '#/guru/extracurriculars', title: 'Nilai E-Rapor Ekskul', icon: 'ph-trophy' },
         { path: '#/guru/ekstra/talents', title: 'Pemetaan Siswa Berbakat', icon: 'ph-star' }
       ],
-      'KOORD_BTQ': [
-        { path: '#/guru/btq/koord/mapping', title: 'Pemetaan Rombel & Guru', icon: 'ph-users-three' },
-        { path: '#/guru/btq/koord/exams', title: 'Antrean Ujian Jilid', icon: 'ph-check-circle' },
-        { path: '#/guru/btq/koord/tasmi', title: 'Plotting Guru Tasmi\'', icon: 'ph-microphone-stage' }
+      'KOORD_UMMI': [
+        { path: '#/guru/ummi/koord/mapping', title: 'Pemetaan Rombel & Guru', icon: 'ph-users-three' },
+        { path: '#/guru/ummi/koord/exams', title: 'Antrean Ujian Jilid', icon: 'ph-check-circle' },
+        { path: '#/guru/ummi/koord/tasmi', title: 'Plotting Guru Tasmi\'', icon: 'ph-microphone-stage' }
       ],
-      'TIM_BTQ': [
-        { path: '#/guru/btq/classes', title: 'Rombel BTQ Saya', icon: 'ph-chalkboard-teacher' },
-        { path: '#/guru/btq/progress', title: 'Jurnal Harian Jilid', icon: 'ph-book-open' },
-        { path: '#/guru/btq/tahfidz', title: 'Setoran Tahfidz', icon: 'ph-book-bookmark' },
-        { path: '#/guru/btq/tasmi', title: 'Ujian Tasmi\'', icon: 'ph-headphones' }
+      'TIM_UMMI': [
+        { path: '#/guru/ummi/classes', title: 'Rombel Ummi Saya', icon: 'ph-chalkboard-teacher' },
+        { path: '#/guru/ummi/progress', title: 'Jurnal Harian Jilid', icon: 'ph-book-open' },
+        { path: '#/guru/ummi/tahfidz', title: 'Setoran Tahfidz', icon: 'ph-book-bookmark' },
+        { path: '#/guru/ummi/tasmi', title: 'Ujian Tasmi\'', icon: 'ph-headphones' }
       ],
       [AppConfig.ROLES.KEPSEK]: [
         { path: '#/kepsek/reports', title: 'Laporan Kelas', icon: 'ph-file-text' }
@@ -112,7 +115,7 @@ const App = {
       ],
       [AppConfig.ROLES.PERSONNEL]: [
         { path: '#/personnel/data', title: 'Data Kepegawaian', icon: 'ph-folder-user' },
-        { path: '#/personnel/attendance', title: 'Pantau Disiplin Guru', icon: 'ph-clock' },
+
         { path: '#/personnel/evaluations', title: 'Penilaian Kinerja (PKG)', icon: 'ph-chart-line-up' },
         { path: '#/personnel/training', title: 'Pelatihan & Kompetensi', icon: 'ph-certificate' },
         { path: '#/personnel/welfare', title: 'Kesejahteraan Staf', icon: 'ph-heart' },
@@ -135,33 +138,6 @@ const App = {
       'TIM_B_INGGRIS': [
         { path: '#/guru/english/classes', title: 'Rombel English Lab', icon: 'ph-chalkboard-teacher' },
         { path: '#/guru/english/progress', title: 'Jurnal Progres Speaking', icon: 'ph-translate' }
-      ],
-      'STAFF_KOPERASI': [
-        { path: '#/staff/coop/sales', title: 'Kasir & Penjualan', icon: 'ph-cash-register' },
-        { path: '#/staff/coop/inventory', title: 'Stok Barang Koperasi', icon: 'ph-package' },
-        { path: '#/staff/coop/reports', title: 'Laporan Penjualan', icon: 'ph-file-text' }
-      ],
-      'STAFF_KEBERSIHAN': [
-        { path: '#/staff/cleaning/schedule', title: 'Jadwal Piket Area', icon: 'ph-calendar' },
-        { path: '#/staff/cleaning/logs', title: 'Checklist Kebersihan', icon: 'ph-broom' }
-      ],
-      'STAFF_PERTAMANAN': [
-        { path: '#/staff/garden/schedule', title: 'Jadwal Perawatan', icon: 'ph-calendar' },
-        { path: '#/staff/garden/logs', title: 'Log Penyiraman Taman', icon: 'ph-tree' }
-      ],
-      'STAFF_KEAMANAN': [
-        { path: '#/staff/security/guests', title: 'Buku Tamu Digital', icon: 'ph-address-book' },
-        { path: '#/staff/security/patrols', title: 'Log Patroli Keamanan', icon: 'ph-shield-check' },
-        { path: '#/staff/security/incidents', title: 'Laporan Kejadian', icon: 'ph-warning-octagon' }
-      ],
-      'STAFF_PERPUSTAKAAN': [
-        { path: '#/staff/library/books', title: 'Katalog Buku', icon: 'ph-books' },
-        { path: '#/staff/library/circulation', title: 'Peminjaman/Pengembalian', icon: 'ph-arrows-left-right' },
-        { path: '#/staff/library/members', title: 'Data Anggota', icon: 'ph-users' }
-      ],
-      'STAFF_PENGEMUDI': [
-        { path: '#/staff/transport/schedule', title: 'Jadwal Antar-Jemput', icon: 'ph-calendar' },
-        { path: '#/staff/transport/logs', title: 'Log Servis & BBM', icon: 'ph-car' }
       ]
     };
   },
@@ -176,6 +152,10 @@ const App = {
     
     // Some static paths that any user with the correct base module can access
     if (path.startsWith('#/admin/students/')) path = '#/admin/classes';
+    if (path.startsWith('#/guru/assess/')) path = '#/guru/classes';
+    if (path.startsWith('#/guru/observe/')) path = '#/guru/classes';
+    if (path.startsWith('#/guru/student-attendance/')) path = '#/guru/student-attendance';
+    if (path.startsWith('#/guru/classes/')) path = '#/guru/classes';
     
     const assignments = Auth.currentAssignments || [];
     const navItems = AppConfig.getRoleNav(role, assignments);
@@ -204,12 +184,7 @@ const App = {
 
     const dummyFeatures = [
       { path: '#/guru/ummi', title: 'Penilaian UMMI / Tahfidz', icon: 'ph-book-open-text', desc: 'Input progres dan penilaian metode UMMI / Tahfidz per siswa' },
-      { path: '#/guru/english-lab', title: 'English Lab', icon: 'ph-translate', desc: 'Pencatatan kegiatan lab Bahasa Inggris dan progres siswa' },
-      { path: '#/staff/coop', title: 'Kelola Koperasi', icon: 'ph-storefront', desc: 'Sistem manajemen inventaris dan penjualan koperasi sekolah' },
-      { path: '#/staff/cleaning', title: 'Log Kebersihan & Fasilitas', icon: 'ph-broom', desc: 'Sistem pencatatan log kebersihan dan perawatan fasilitas/taman' },
-      { path: '#/staff/security', title: 'Log Tamu & Keamanan', icon: 'ph-shield-check', desc: 'Pencatatan buku tamu digital dan log patroli keamanan' },
-      { path: '#/staff/library', title: 'Sirkulasi Perpustakaan', icon: 'ph-books', desc: 'Sistem sirkulasi peminjaman dan pengembalian buku' },
-      { path: '#/staff/transport', title: 'Jadwal & Log Kendaraan', icon: 'ph-car', desc: 'Manajemen jadwal operasional dan log pemakaian kendaraan sekolah' }
+      { path: '#/guru/english-lab', title: 'English Lab', icon: 'ph-translate', desc: 'Pencatatan kegiatan lab Bahasa Inggris dan progres siswa' }
     ];
 
     dummyFeatures.forEach(feature => {
@@ -393,6 +368,27 @@ const App = {
           return;
         }
 
+        if (path === '#/guru/assess/:id') {
+          if (typeof GuruPages !== 'undefined' && GuruPages.renderAssessment) {
+            await GuruPages.renderAssessment(container, routeParams);
+          }
+          return;
+        }
+
+        if (path === '#/guru/observe/:id') {
+          if (typeof GuruPages !== 'undefined' && GuruPages.renderObserveClass) {
+            await GuruPages.renderObserveClass(container, routeParams);
+          }
+          return;
+        }
+
+        if (path === '#/guru/student-attendance/:id') {
+          if (typeof GuruPages !== 'undefined' && GuruPages.renderStudentAttendanceInput) {
+            await GuruPages.renderStudentAttendanceInput(container, routeParams);
+          }
+          return;
+        }
+
         if (path === '#/kepsek/reports') {
           await KepsekPages.renderReports(container);
           return;
@@ -517,9 +513,9 @@ const App = {
           return;
         }
 
-        if (path.startsWith('#/guru/btq/')) {
-          if (typeof BTQPages !== 'undefined' && BTQPages.renderPlaceholder) {
-            await BTQPages.renderPlaceholder(container, title, icon);
+        if (path.startsWith('#/guru/ummi/')) {
+          if (typeof UMMIPages !== 'undefined' && UMMIPages.renderPlaceholder) {
+            await UMMIPages.renderPlaceholder(container, title, icon);
           } else {
             container.innerHTML = `
               <div class="card section-block">

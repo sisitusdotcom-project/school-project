@@ -246,12 +246,12 @@
     [ROLES.FACILITIES]: [
       { hash: '#/dashboard', icon: 'ph-squares-four', text: 'Beranda' }
     ],
-    'WAKA_HUMAS': [
+    'WAKA_HUMAS_PERSONALIA': [
       { hash: '#/personnel', icon: 'ph-briefcase', text: 'Dashboard Personalia', group: 'Personalia: Administrasi SDM' },
       { hash: '#/admin/users', icon: 'ph-users', text: 'Kelola Pengguna', group: 'Personalia: Administrasi SDM' },
       { hash: '#/admin/assignments', icon: 'ph-clipboard-text', text: 'Distribusi Penugasan', group: 'Personalia: Administrasi SDM' },
       { hash: '#/personnel/data', icon: 'ph-folder-user', text: 'Data Kepegawaian', group: 'Personalia: Administrasi SDM' },
-      { hash: '#/personnel/attendance', icon: 'ph-clock', text: 'Pantau Disiplin Guru', group: 'Personalia: Kinerja & Kesejahteraan' },
+      { hash: '#/admin/attendance', icon: 'ph-clock', text: 'Pantau Disiplin Guru', group: 'Personalia: Kinerja & Kesejahteraan' },
       { hash: '#/personnel/evaluations', icon: 'ph-chart-line-up', text: 'Penilaian Kinerja (PKG)', group: 'Personalia: Kinerja & Kesejahteraan' },
       { hash: '#/personnel/training', icon: 'ph-certificate', text: 'Pelatihan & Kompetensi', group: 'Personalia: Kinerja & Kesejahteraan' },
       { hash: '#/personnel/welfare', icon: 'ph-heart', text: 'Kesejahteraan Staf', group: 'Personalia: Kinerja & Kesejahteraan' },
@@ -317,47 +317,20 @@
       { hash: '#/guru/extracurriculars', icon: 'ph-trophy', text: 'Nilai E-Rapor Ekskul', group: 'Guru Ekskul: Evaluasi' },
       { hash: '#/guru/ekstra/talents', icon: 'ph-star', text: 'Pemetaan Siswa Berbakat', group: 'Guru Ekskul: Evaluasi' }
     ],
-    'KOORD_BTQ': [
-      { hash: '#/guru/btq/koord/mapping', icon: 'ph-users-three', text: 'Pemetaan Rombel & Guru', group: 'Koordinator BTQ' },
-      { hash: '#/guru/btq/koord/exams', icon: 'ph-check-circle', text: 'Antrean Ujian Jilid/Munaqosyah', group: 'Koordinator BTQ' },
-      { hash: '#/guru/btq/koord/tasmi', icon: 'ph-microphone-stage', text: 'Plotting Guru Tasmi\'', group: 'Koordinator BTQ' }
+    'KOORD_UMMI': [
+      { hash: '#/guru/ummi/koord/mapping', icon: 'ph-users-three', text: 'Pemetaan Rombel & Guru', group: 'Koordinator Ummi' },
+      { hash: '#/guru/ummi/koord/exams', icon: 'ph-check-circle', text: 'Antrean Ujian Jilid/Munaqosyah', group: 'Koordinator Ummi' },
+      { hash: '#/guru/ummi/koord/tasmi', icon: 'ph-microphone-stage', text: 'Plotting Guru Tasmi\'', group: 'Koordinator Ummi' }
     ],
-    'TIM_BTQ': [
-      { hash: '#/guru/btq/classes', icon: 'ph-chalkboard-teacher', text: 'Rombel BTQ Saya', group: 'Guru BTQ: Kelas & Capaian' },
-      { hash: '#/guru/btq/progress', icon: 'ph-book-open', text: 'Jurnal Harian Jilid', group: 'Guru BTQ: Kelas & Capaian' },
-      { hash: '#/guru/btq/tahfidz', icon: 'ph-book-bookmark', text: 'Setoran Tahfidz (Juz 30-1)', group: 'Guru BTQ: Tahfidz & Tasmi\'' },
-      { hash: '#/guru/btq/tasmi', icon: 'ph-headphones', text: 'Ujian Tasmi\' (Penguji)', group: 'Guru BTQ: Tahfidz & Tasmi\'' }
+    'TIM_UMMI': [
+      { hash: '#/guru/ummi/classes', icon: 'ph-chalkboard-teacher', text: 'Rombel Ummi Saya', group: 'Guru Ummi: Kelas & Capaian' },
+      { hash: '#/guru/ummi/progress', icon: 'ph-book-open', text: 'Jurnal Harian Jilid', group: 'Guru Ummi: Kelas & Capaian' },
+      { hash: '#/guru/ummi/tahfidz', icon: 'ph-book-bookmark', text: 'Setoran Tahfidz (Juz 30-1)', group: 'Guru Ummi: Tahfidz & Tasmi\'' },
+      { hash: '#/guru/ummi/tasmi', icon: 'ph-headphones', text: 'Ujian Tasmi\' (Penguji)', group: 'Guru Ummi: Tahfidz & Tasmi\'' }
     ],
     'TIM_B_INGGRIS': [
       { hash: '#/guru/english/classes', icon: 'ph-chalkboard-teacher', text: 'Rombel English Lab', group: 'English Lab' },
       { hash: '#/guru/english/progress', icon: 'ph-translate', text: 'Jurnal Progres Speaking', group: 'English Lab' }
-    ],
-    'STAFF_KOPERASI': [
-      { hash: '#/staff/coop/sales', icon: 'ph-cash-register', text: 'Kasir & Penjualan (POS)', group: 'Koperasi Sekolah' },
-      { hash: '#/staff/coop/inventory', icon: 'ph-package', text: 'Stok Barang Koperasi', group: 'Koperasi Sekolah' },
-      { hash: '#/staff/coop/reports', icon: 'ph-file-text', text: 'Laporan Penjualan', group: 'Koperasi Sekolah' }
-    ],
-    'STAFF_KEBERSIHAN': [
-      { hash: '#/staff/cleaning/schedule', icon: 'ph-calendar', text: 'Jadwal Piket Area', group: 'Tim Kebersihan' },
-      { hash: '#/staff/cleaning/logs', icon: 'ph-broom', text: 'Checklist Kebersihan', group: 'Tim Kebersihan' }
-    ],
-    'STAFF_PERTAMANAN': [
-      { hash: '#/staff/garden/schedule', icon: 'ph-calendar', text: 'Jadwal Perawatan', group: 'Tim Pertamanan' },
-      { hash: '#/staff/garden/logs', icon: 'ph-tree', text: 'Log Penyiraman Taman', group: 'Tim Pertamanan' }
-    ],
-    'STAFF_KEAMANAN': [
-      { hash: '#/staff/security/guests', icon: 'ph-address-book', text: 'Buku Tamu Digital', group: 'Tim Keamanan' },
-      { hash: '#/staff/security/patrols', icon: 'ph-shield-check', text: 'Log Patroli Keamanan', group: 'Tim Keamanan' },
-      { hash: '#/staff/security/incidents', icon: 'ph-warning-octagon', text: 'Laporan Kejadian', group: 'Tim Keamanan' }
-    ],
-    'STAFF_PERPUSTAKAAN': [
-      { hash: '#/staff/library/books', icon: 'ph-books', text: 'Katalog Buku', group: 'Perpustakaan' },
-      { hash: '#/staff/library/circulation', icon: 'ph-arrows-left-right', text: 'Peminjaman/Pengembalian', group: 'Perpustakaan' },
-      { hash: '#/staff/library/members', icon: 'ph-users', text: 'Data Anggota', group: 'Perpustakaan' }
-    ],
-    'STAFF_PENGEMUDI': [
-      { hash: '#/staff/transport/schedule', icon: 'ph-calendar', text: 'Jadwal Antar-Jemput', group: 'Transportasi' },
-      { hash: '#/staff/transport/logs', icon: 'ph-car', text: 'Log Servis & BBM', group: 'Transportasi' }
     ]
   });
 
@@ -465,7 +438,7 @@
     const isGuru = role === ROLES.GURU || assignments.some(isTeachingAssignment);
     const isWaliKelas = assignments.some(a => a.startsWith('GURU_KELAS_'));
     const isGuruEkstra = assignments.some(a => a.startsWith('GURU_EKSTRA_'));
-    const isTimUmmi = assignments.some(a => a === 'GURU_UMMI' || a === 'TIM_UMMI');
+    const isTimUmmi = assignments.some(a => a === 'GURU_UMMI' || a === 'TIM_UMMI' || a === 'KOORD_UMMI');
     const isTimInggris = assignments.some(a => a === 'TIM_B_INGGRIS');
     if (isGuru) {
       baseNav = [...baseNav, ...(NAV_ITEMS['GURU_UMUM'] || [])];

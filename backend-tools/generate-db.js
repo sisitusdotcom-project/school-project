@@ -64,7 +64,7 @@ for (let i = 0; i < linesSiswa.length; i++) {
       
       if (!nama || nama.toLowerCase() === 'nama' || !no.match(/^\d+$/)) continue; // skip headers
       
-      const cleanNisn = nisn ? nisn.replace(/\s+/g, '') : (noInduk || Date.now());
+      const cleanNisn = nisn ? nisn.replace(/\s+/g, '') : (noInduk || (Date.now() + '_' + no));
       const uid = `SISWA_${cleanNisn}`;
       
       let classId = 'CLASS_' + currentClass.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase();
@@ -103,31 +103,21 @@ for (let i = 0; i < linesSiswa.length; i++) {
 
 // 2. Process Guru & Employees
 const guruLines = guruTsv.split('\n').map(l => l.trim());
-let currentTable = null;
 
 for (let i = 0; i < guruLines.length; i++) {
   const line = guruLines[i];
-  if (!line) continue;
-  
-  if (line.startsWith('No\tNama\tJabatan\tTugas Mengajar') || line.startsWith('No Nama Jabatan Tugas Mengajar')) {
-    currentTable = 'MENGAJAR'; continue;
-  } else if (line.startsWith('No\tNama\tJabatan\tTugas Tambahan') || line.startsWith('No Nama Jabatan Tugas Tambahan')) {
-    currentTable = 'TAMBAHAN'; continue;
-  } else if (line.startsWith('No\tNama\tJabatan\tTugas') || line.startsWith('No Nama Jabatan Tugas')) {
-    currentTable = 'TENDIK'; continue;
-  } else if (line.startsWith('No\tNama\tJabatan') || line.startsWith('No Nama Jabatan')) {
-    currentTable = 'UMMI'; continue;
-  }
+  if (!line || line.startsWith('No\tNama')) continue;
 
   let cols = line.split('\t');
-  if (cols.length < 3) continue; // skip invalid lines
+  if (cols.length < 4) continue; // skip invalid lines
   
   let name = cols[1]?.trim();
   let jabatan = cols[2]?.trim() || '';
-  let tugas = cols[3]?.trim() || '';
-  let gender = cols[4]?.trim() || '';
+  let gender = cols[3]?.trim() || '';
+  let tugasMengajar = cols[4]?.trim() || '';
+  let tugasTambahan = cols[5]?.trim() || '';
   
-  if (!name || name === 'Nama Jabatan Tugas Mengajar' || name === 'Nama Jabatan Tugas Tambahan') continue;
+  if (!name || name.toLowerCase() === 'nama') continue;
   
   const baseName = name.split(',')[0].trim();
   const uid = 'GURU_' + baseName.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase();
@@ -146,82 +136,28 @@ for (let i = 0; i < guruLines.length; i++) {
   
   const user = rtdb.users[uid];
   
-  const tugasList = tugas.split(',').map(t => t.trim());
+  let combinedTugas = (tugasMengajar + ',' + tugasTambahan).replace(/-/g, '');
+  const tugasList = combinedTugas.split(',').map(t => t.trim());
   for (const t of tugasList) {
     if (!t) continue;
     
-    let assignmentCode = '';
+    let assignmentCode = t;
     
-    if (t.includes('Guru Kelas')) {
-      let className = t.replace(/Guru Kelas/g, '').trim();
-      assignmentCode = 'GURU_KELAS_' + className.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase();
-      const classId = 'CLASS_' + className.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase();
-      const cleanClassId = classId.replace(/_+/g, '_');
-      assignmentCode = assignmentCode.replace(/_+/g, '_');
+    if (t.startsWith('GURU_KELAS_')) {
+      const className = t.replace('GURU_KELAS_', '').replace(/_/g, ' ');
+      const classId = 'CLASS_' + t.replace('GURU_KELAS_', '');
       
-      if (!rtdb.classes[cleanClassId]) {
-        rtdb.classes[cleanClassId] = { name: className, students: {} };
+      if (!rtdb.classes[classId]) {
+        rtdb.classes[classId] = { name: className, students: {} };
       }
-      rtdb.classes[cleanClassId].teacherId = uid;
-    } else if (t.includes('Guru PAI')) {
-      assignmentCode = 'GURU_MAPEL_PAI';
-    } else if (t.includes('Guru TIK')) {
-      assignmentCode = 'GURU_MAPEL_TIK';
-    } else if (t.includes('Bahasa Inggris') && t.includes('Guru')) {
-      assignmentCode = 'GURU_MAPEL_B_INGGRIS';
-    } else if (t.includes('Seni Budaya')) {
-      assignmentCode = 'GURU_MAPEL_SENI';
-    } else if (t.includes('PJOK')) {
-      assignmentCode = 'GURU_MAPEL_PJOK';
-    } else if (t.includes('Hizbul Wathan')) {
-      assignmentCode = 'GURU_EKSTRA_HW';
-    } else if (t.includes('Tapak Suci')) {
-      assignmentCode = 'GURU_EKSTRA_TS';
-    } else if (t.includes('Keuangan')) {
-      assignmentCode = 'WAKA_KEUANGAN';
-    } else if (t.includes('Kesiswaan')) {
-      assignmentCode = 'WAKA_KESISWAAN';
-    } else if (t.includes('Humas')) {
-      assignmentCode = 'WAKA_HUMAS';
-    } else if (t.includes('Sarana')) {
-      assignmentCode = 'WAKA_SARPRAS';
-    } else if (t.includes('Kurikulum')) {
-      assignmentCode = 'WAKA_KURIKULUM';
-    } else if (t.includes('IT')) {
-      assignmentCode = 'TIM_IT';
-    } else if (t.includes('UMMI') && t.includes('Tim')) {
-      assignmentCode = 'TIM_UMMI';
-    } else if (t.includes('Bahasa Inggris') && t.includes('Tim')) {
-      assignmentCode = 'TIM_B_INGGRIS';
-    } else if (t.includes('UMMI') && t.includes('Guru')) {
-      assignmentCode = 'GURU_UMMI';
-    } else if (t.includes('Perpustakaan')) {
-      assignmentCode = 'STAFF_PERPUSTAKAAN';
-    } else if (t.includes('Kebersihan')) {
-      assignmentCode = 'STAFF_KEBERSIHAN';
-    } else if (t.includes('Pengemudi')) {
-      assignmentCode = 'STAFF_PENGEMUDI';
-    } else if (t.includes('Koperasi')) {
-      assignmentCode = 'STAFF_KOPERASI';
-    } else if (t.includes('Pertamanan')) {
-      assignmentCode = 'STAFF_PERTAMANAN';
-    } else if (t.includes('Keamanan')) {
-      assignmentCode = 'STAFF_KEAMANAN';
+      rtdb.classes[classId].teacherId = uid;
     }
     
-    // Elevate Role if necessary
-    if (t.includes('Wakil Kepala')) {
+    // Elevate Role if necessary based on code
+    if (t.startsWith('WAKA_')) {
        user.role = 'admin';
-    } else if (t.includes('Staff Bidang Keuangan')) {
-       user.role = 'finance';
-    } else if (t.includes('Staff Bidang Kesiswaan')) {
-       user.role = 'studentAffairs';
-    } else if (t.includes('Staff Bidang Humas dan Personalia')) {
-       user.role = 'personnel';
-    } else if (t.includes('Staff Bidang Sarana Prasarana')) {
-       user.role = 'facilities';
-    } else if (t.includes('Staff Bidang Kurikulum')) {
-       user.role = 'curriculum';
+    } else if (t === 'TIM_IT') {
+       user.role = 'it_admin';
     }
     
     if (assignmentCode && !user.assignments.includes(assignmentCode)) {

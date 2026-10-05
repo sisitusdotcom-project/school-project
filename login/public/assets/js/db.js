@@ -249,6 +249,19 @@ const DB = {
     if (!isDBReady()) return;
     await db.ref(`classes/${classId}/subjectTeachers`).set(subjectTeachers);
   },
+  async getUmmiClasses() {
+    return this._readCollection('ummi_classes', {});
+  },
+  async saveUmmiClass(id, data) {
+    if (!isDBReady()) return null;
+    const ref = id ? db.ref(`ummi_classes/${id}`) : db.ref('ummi_classes').push();
+    await ref.set(data);
+    return ref.key;
+  },
+  async deleteUmmiClass(id) {
+    if (!isDBReady()) return;
+    await db.ref(`ummi_classes/${id}`).remove();
+  },
   async getAllStudents() {
     return this._readCollection('students', {});
   },

@@ -35,17 +35,13 @@ const ITAdminPages = {
       const users = await DB.getAllUsers();
       const arr = DB.toArray(users).filter(u => u.role !== 'ortu' && u.role !== 'kepsek'); // guru, admin, etc
       
-      let tsvContent = "No\tNama\tJabatan\tTugas Mengajar\n";
-      arr.forEach((u, i) => {
-        tsvContent += `${i+1}\t${u.name || '-'}\tGuru\t${u.teachingRole || '-'}\n`;
-      });
+      // Sort by name
+      arr.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
       
-      tsvContent += "\n\nNo\tNama\tJabatan\tTugas Tambahan\n";
+      let tsvContent = "No\tNama\tJabatan\tJenis Kelamin\tTugas Mengajar\tTugas Tambahan\n";
       arr.forEach((u, i) => {
         const assignments = (u.assignments || []).join(', ');
-        if(assignments) {
-          tsvContent += `${i+1}\t${u.name || '-'}\tGuru\t${assignments}\n`;
-        }
+        tsvContent += `${i+1}\t${u.name || '-'}\t${u.jabatan || 'Guru'}\t${u.gender || '-'}\t${u.teachingRole || '-'}\t${assignments || '-'}\n`;
       });
       
       const blob = new Blob([tsvContent], { type: 'text/tab-separated-values;charset=utf-8;' });
@@ -58,12 +54,23 @@ const ITAdminPages = {
     });
 
     document.getElementById('btn-export-siswa-tsv').addEventListener('click', async () => {
-      const users = await DB.getAllUsers();
-      const arr = DB.toArray(users).filter(u => u.role === 'ortu');
+      const [studentsMap, classesMap] = await Promise.all([DB.getAllStudents(), DB.getClasses()]);
+      const students = DB.toArray(studentsMap);
       
-      let tsvContent = "NO\tNO INDUK\tNISN\tNAMA\tKELAS/ROMBEL\n";
-      arr.forEach((u, i) => {
-        tsvContent += `${i+1}\t${u.nis || ''}\t${u.nisn || ''}\t${u.name || '-'}\t${u.className || '-'}\n`;
+      // Sort by class name then student name
+      students.sort((a, b) => {
+        const classA = classesMap[a.classId] ? classesMap[a.classId].name : '';
+        const classB = classesMap[b.classId] ? classesMap[b.classId].name : '';
+        if (classA !== classB) return classA.localeCompare(classB);
+        const nameA = a.name || '';
+        const nameB = b.name || '';
+        return nameA.localeCompare(nameB);
+      });
+      
+      let tsvContent = "NO\tNO INDUK\tNISN\tNAMA\tKELAS/ROMBEL\tJENIS KELAMIN\n";
+      students.forEach((s, i) => {
+        const className = classesMap[s.classId] ? classesMap[s.classId].name : '-';
+        tsvContent += `${i+1}\t${s.nis || ''}\t${s.nisn || ''}\t${s.name || '-'}\t${className}\t${s.gender || '-'}\n`;
       });
       
       const blob = new Blob([tsvContent], { type: 'text/tab-separated-values;charset=utf-8;' });

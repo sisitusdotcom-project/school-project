@@ -330,7 +330,7 @@ const AdminPages = {
       DB.getSubjects()
     ]);
     const classArr = DB.toArray(classes);
-    const isKurikulum = Auth.currentUser.role === AppConfig.ROLES.ADMIN || AppConfig.getRoleAssignments(Auth.currentUser).includes('WAKA_KURIKULUM');
+    const isKurikulum = Auth.currentRole === AppConfig.ROLES.ADMIN || Auth.currentAssignments.includes('WAKA_KURIKULUM');
     const guruArr = DB.toArray(users).filter(u => u.role === AppConfig.ROLES.GURU || AppConfig.getRoleAssignments(u).some(AppConfig.isTeachingAssignment));
     const subArr = DB.toArray(subjects).sort((a, b) => (a.order || 0) - (b.order || 0));
     const studentArr = DB.toArray(students);
@@ -869,6 +869,13 @@ const AdminPages = {
             <div class="form-group">
               <label>Nama ekstrakurikuler</label>
               <input id="eks-name" required placeholder="Contoh: Hizbul Wathan (HW)">
+            </div>
+            <div class="form-group">
+              <label>Guru Pembina</label>
+              <select id="eks-teacher">
+                <option value="">-- Pilih Pembina (Opsional) --</option>
+                ${guruArr.map(g => `<option value="${g.id}">${AppConfig.escapeHtml(g.name)}</option>`).join('')}
+              </select>
             </div>
             <div class="form-group">
               <label>Urutan tampil</label>
