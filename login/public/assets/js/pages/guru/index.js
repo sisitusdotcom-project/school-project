@@ -172,7 +172,7 @@ const GuruPages = {
         <p class="text-muted" style="font-size:13px">Ketuk angka untuk memberi nilai: <strong>1</strong> (Perlu Bimbingan) — <strong>4</strong> (Sangat Baik). Nilai langsung tersimpan ke database.</p>
       </div>
       <div class="card-grid">${studentCards}</div>
-      ${this._obsModal(charArr)}
+      ${GuruPages._obsModal(charArr)}
     `;
     container.addEventListener('click', async (e) => {
       const btn = e.target.closest('.rating-btn');
@@ -263,7 +263,7 @@ const GuruPages = {
         note: document.getElementById('oq-note').value.trim(),
         date: today
       });
-      this.renderObserveClass(container, classId);
+      GuruPages.renderObserveClass(container, classId);
     };
   },
   async renderObservationHistory(container) {

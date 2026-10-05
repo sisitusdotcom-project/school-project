@@ -21,6 +21,7 @@ const Auth = {
           this.currentRole = userData.role;
           this.currentAssignments = AppConfig.normalizeAssignments(userData.assignments || userData.unitRoles || []);
           this.updateProfileUI();
+          if (userData.role === AppConfig.ROLES.ADMIN) DB.backfillUnitFlags().catch((err) => console.error(err));
 
           const appShell = document.getElementById('app-shell');
           const loginView = document.getElementById('login-view');

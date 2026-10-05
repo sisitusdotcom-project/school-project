@@ -39,7 +39,7 @@ const CurriculumPages = {
             <li>Role aktif: <strong>${role}</strong></li>
             <li>Mode: <strong>Ringkasan kurikulum</strong></li>
             <li>Admin mengelola master mapel; guru mengisi pembelajaran melalui fitur kelas dan e-rapor yang telah ada.</li>
-            <li>Pengaturan jadwal, kalender, dan program pembelajaran belum tersedia di dashboard ini.</li>
+            <li>Jadwal, perangkat ajar, pemantauan KBM, penilaian, dan supervisi dikelola melalui menu Kurikulum di samping.</li>
           </ul>
         </div>
       </div>

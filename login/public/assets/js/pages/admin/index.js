@@ -84,20 +84,20 @@ const AdminPages = {
           <tbody>${rows}</tbody></table>
         </div>
       </div>
-      ${this._charModal()}
+      ${AdminPages._charModal()}
     `;
-    document.getElementById('btn-add-char').onclick = () => this._openCharModal(null, charArr.length + 1);
+    document.getElementById('btn-add-char').onclick = () => AdminPages._openCharModal(null, charArr.length + 1);
     container.querySelectorAll('[data-edit-char]').forEach(btn => {
       btn.onclick = () => {
         const c = charArr.find(x => x.id === btn.dataset.editChar);
-        if (c) this._openCharModal(c);
+        if (c) AdminPages._openCharModal(c);
       };
     });
     container.querySelectorAll('[data-del-char]').forEach(btn => {
       btn.onclick = async () => {
         if (!confirm('Yakin hapus indikator ini?')) return;
         await DB.deleteCharacter(btn.dataset.delChar);
-        this.renderCharacters(container);
+        AdminPages.renderCharacters(container);
       };
     });
     document.getElementById('form-char').onsubmit = async (e) => {
@@ -109,7 +109,7 @@ const AdminPages = {
         active: document.getElementById('char-active').value === 'true'
       });
       App.closeModal('modal-char');
-      this.renderCharacters(container);
+      AdminPages.renderCharacters(container);
     };
   },
   _charModal() {
@@ -208,7 +208,7 @@ const AdminPages = {
         btn.onclick = async () => {
           if (!confirm('Yakin menghapus pengguna ini?')) return;
           await DB.deleteUser(btn.dataset.delUsr);
-          this.renderUsers(container);
+          AdminPages.renderUsers(container);
         };
       });
     };
@@ -223,7 +223,7 @@ const AdminPages = {
             </div>
             <select id="filter-role" class="toolbar-select">
               <option value="">Semua Peran</option>
-              ${Object.entries(AppConfig.ROLE_OPTIONS).map(([val, label]) => `<option value="${val}">${label}</option>`).join('')}
+              ${Object.entries(AppConfig.ROLE_LABELS).map(([val, label]) => `<option value="${val}">${label}</option>`).join('')}
             </select>
           </div>
           <button class="btn btn-primary" id="btn-add-usr"><i class="ph ph-plus"></i> Tambah Pengguna</button>
@@ -249,7 +249,7 @@ const AdminPages = {
               <div class="form-group"><label>Username</label><input id="usr-username" required></div>
               <div class="form-group"><label>Password</label><input type="password" id="usr-password" required minlength="6"></div>
               <div class="form-group"><label>Peran utama</label><select id="usr-role" required>
-                ${Object.entries(AppConfig.ROLE_OPTIONS).map(([val, label]) => `<option value="${val}">${label}</option>`).join('')}
+                ${Object.entries(AppConfig.ROLE_LABELS).map(([val, label]) => `<option value="${val}">${label}</option>`).join('')}
               </select></div>
               <div class="form-group">
                 <label>Tugas / unit kerja</label>
@@ -313,7 +313,7 @@ const AdminPages = {
       try {
         await DB.saveUser(id, data);
         App.closeModal('modal-usr');
-        this.renderUsers(container);
+        AdminPages.renderUsers(container);
       } catch (err) {
         alert(err.message || 'Gagal menyimpan');
         btn.disabled = false;
@@ -473,7 +473,7 @@ const AdminPages = {
         }
         if (!confirm('Yakin ingin menghapus kelas ini secara permanen?')) return;
         await DB.deleteClass(classId);
-        this.renderClasses(container);
+        AdminPages.renderClasses(container);
       };
     });
     
@@ -491,7 +491,7 @@ const AdminPages = {
         teacherId: document.getElementById('cls-teacher').value || null
       });
       App.closeModal('modal-cls');
-      this.renderClasses(container);
+      AdminPages.renderClasses(container);
     };
 
     document.getElementById('form-mapel').onsubmit = async (e) => {
@@ -508,7 +508,7 @@ const AdminPages = {
       
       await DB.saveClassSubjectTeachers(id, subjectTeachers);
       App.closeModal('modal-mapel');
-      this.renderClasses(container);
+      AdminPages.renderClasses(container);
     };
   },
   async renderStudents(container, classId) {
@@ -572,7 +572,7 @@ const AdminPages = {
         btn.onclick = async () => {
           if (!confirm('Yakin menghapus siswa ini?')) return;
           await DB.deleteStudent(btn.dataset.delStu);
-          this.renderStudents(container, classId);
+          AdminPages.renderStudents(container, classId);
         };
       });
     };
@@ -657,7 +657,7 @@ const AdminPages = {
         parentId: document.getElementById('stu-parent').value || null
       });
       App.closeModal('modal-stu');
-      this.renderStudents(container, classId);
+      AdminPages.renderStudents(container, classId);
     };
   },
   async renderSubjects(container) {
@@ -699,14 +699,14 @@ const AdminPages = {
       container.querySelectorAll('[data-edit-sub]').forEach(btn => {
         btn.onclick = () => {
           const s = subArr.find(x => x.id === btn.dataset.editSub);
-          if (s) this._openSubjectModal(s);
+          if (s) AdminPages._openSubjectModal(s);
         };
       });
       container.querySelectorAll('[data-del-sub]').forEach(btn => {
         btn.onclick = async () => {
           if (!confirm('Yakin menghapus mata pelajaran ini?')) return;
           await DB.deleteSubject(btn.dataset.delSub);
-          this.renderSubjects(container);
+          AdminPages.renderSubjects(container);
         };
       });
     };
@@ -729,13 +729,13 @@ const AdminPages = {
           <tbody id="tbody-subjects"></tbody></table>
         </div>
       </div>
-      ${this._subjectModal()}
+      ${AdminPages._subjectModal()}
     `;
     
     renderTable();
     document.getElementById('search-sub').addEventListener('input', renderTable);
 
-    document.getElementById('btn-add-sub').onclick = () => this._openSubjectModal(null, subArr.length + 1);
+    document.getElementById('btn-add-sub').onclick = () => AdminPages._openSubjectModal(null, subArr.length + 1);
     
     document.getElementById('form-sub').onsubmit = async (e) => {
       e.preventDefault();
@@ -746,7 +746,7 @@ const AdminPages = {
         order: parseInt(document.getElementById('sub-order').value) || 1
       });
       App.closeModal('modal-sub');
-      this.renderSubjects(container);
+      AdminPages.renderSubjects(container);
     };
   },
   _subjectModal() {
@@ -827,20 +827,20 @@ const AdminPages = {
           <tbody>${rows}</tbody></table>
         </div>
       </div>
-      ${this._extracurricularModal(guruArr)}
+      ${AdminPages._extracurricularModal(guruArr)}
     `;
-    document.getElementById('btn-add-eks').onclick = () => this._openExtracurricularModal(null, eksArr.length + 1);
+    document.getElementById('btn-add-eks').onclick = () => AdminPages._openExtracurricularModal(null, eksArr.length + 1);
     container.querySelectorAll('[data-edit-eks]').forEach(btn => {
       btn.onclick = () => {
         const e = eksArr.find(x => x.id === btn.dataset.editEks);
-        if (e) this._openExtracurricularModal(e);
+        if (e) AdminPages._openExtracurricularModal(e);
       };
     });
     container.querySelectorAll('[data-del-eks]').forEach(btn => {
       btn.onclick = async () => {
         if (!confirm('Yakin hapus ekstrakurikuler ini?')) return;
         await DB.deleteExtracurricular(btn.dataset.delEks);
-        this.renderExtracurriculars(container);
+        AdminPages.renderExtracurriculars(container);
       };
     });
     document.getElementById('form-eks').onsubmit = async (e) => {
@@ -852,7 +852,7 @@ const AdminPages = {
         teacherId: document.getElementById('eks-teacher').value || null
       });
       App.closeModal('modal-eks');
-      this.renderExtracurriculars(container);
+      AdminPages.renderExtracurriculars(container);
     };
   },
   _extracurricularModal(guruArr) {

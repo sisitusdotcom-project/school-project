@@ -1,7 +1,7 @@
 const UMMIPages = {
   async renderPlaceholder(container, title, icon) {
     if (location.hash === '#/guru/ummi/koord/mapping') {
-      await this.renderUmmiMapping(container);
+      await UMMIPages.renderUmmiMapping(container);
       return;
     }
     
@@ -148,7 +148,7 @@ const UMMIPages = {
         }
         if(!confirm(`Yakin ingin menghapus Rombel Ummi "${cls.name}"?`)) return;
         await DB.deleteUmmiClass(id);
-        this.renderUmmiMapping(container);
+        UMMIPages.renderUmmiMapping(container);
       };
     });
 
@@ -174,7 +174,7 @@ const UMMIPages = {
           await DB.saveUmmiClass(null, { ...data, students: {} });
         }
         App.closeModal('modal-ummi');
-        this.renderUmmiMapping(container);
+        UMMIPages.renderUmmiMapping(container);
       } catch (err) {
         alert(err.message || 'Terjadi kesalahan saat menyimpan');
         btnSave.disabled = false;

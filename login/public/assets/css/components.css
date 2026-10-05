@@ -1239,3 +1239,56 @@ td[colspan] > .text-muted {
     min-width: 500px; /* Make it slightly more compact on mobile if possible */
   }
 }
+.mk-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.mk-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.mk-filter {
+  min-width: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  font-size: 14px;
+}
+.mk-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 16px;
+}
+.mk-form-grid > * {
+  min-width: 0;
+}
+.mk-wide {
+  grid-column: 1 / -1;
+}
+.mk-count {
+  padding-top: 8px;
+  font-size: 13px;
+}
+.mk-row-muted td {
+  background: var(--bg-body);
+}
+@media (max-width: 767px) {
+  .mk-toolbar {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .mk-filter {
+    width: 100%;
+  }
+  .mk-form-grid {
+    grid-template-columns: 1fr;
+  }
+}

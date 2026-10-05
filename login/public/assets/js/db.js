@@ -8,10 +8,38 @@ const DB = {
     return this._read(path, fallback);
   },
 
+  _buildUnitFlags(assignments = []) {
+    const flags = {};
+    AppConfig.normalizeAssignments(assignments).forEach((item) => {
+      const key = item.replace(/[.$#\[\]\/]/g, '_');
+      flags[key] = true;
+      if (key.startsWith('GURU_EKSTRA_')) flags.GURU_EKSTRA = true;
+      if (key.startsWith('GURU_KELAS_')) flags.GURU_KELAS = true;
+    });
+    return flags;
+  },
+
   _sanitizeUserPayload(data = {}) {
     const safeData = { ...data };
     delete safeData.password;
+    if (Array.isArray(safeData.assignments)) {
+      const flags = this._buildUnitFlags(safeData.assignments);
+      safeData.unitFlags = Object.keys(flags).length ? flags : null;
+    }
     return safeData;
+  },
+
+  async backfillUnitFlags() {
+    if (!isDBReady() || !this._currentUserIsAdmin()) return;
+    const users = await this.getAllUsers();
+    const updates = {};
+    Object.entries(users || {}).forEach(([uid, user]) => {
+      const flags = this._buildUnitFlags(AppConfig.getRoleAssignments(user));
+      const current = user.unitFlags || {};
+      const same = JSON.stringify(Object.keys(flags).sort()) === JSON.stringify(Object.keys(current).sort());
+      if (!same) updates[`users/${uid}/unitFlags`] = Object.keys(flags).length ? flags : null;
+    });
+    if (Object.keys(updates).length) await db.ref().update(updates);
   },
 
   _currentUserIsAdmin() {

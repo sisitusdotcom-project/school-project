@@ -1,31 +1,13 @@
-const App = {
-  getDashboardRenderer() {
-    const renderers = {
-      [AppConfig.ROLES.ADMIN]: AdminPages.renderDashboard,
-      [AppConfig.ROLES.GURU]: GuruPages.renderDashboard,
-      [AppConfig.ROLES.KEPSEK]: KepsekPages.renderDashboard,
-      [AppConfig.ROLES.ORTU]: OrtuPages.renderDashboard,
-      [AppConfig.ROLES.PERSONNEL]: PersonnelPages.renderDashboard,
-      [AppConfig.ROLES.FINANCE]: FinancePages.renderDashboard,
-      [AppConfig.ROLES.FACILITIES]: FacilitiesPages.renderDashboard,
-      [AppConfig.ROLES.CURRICULUM]: CurriculumPages.renderDashboard,
-      [AppConfig.ROLES.STUDENT_AFFAIRS]: StudentAffairsPages.renderDashboard,
-      [AppConfig.ROLES.IT_ADMIN]: ITAdminPages.renderDashboard
-    };
+import re
 
-    return renderers[Auth.currentRole] || (async (container) => {
-      container.innerHTML = `
-        <div class="card section-block">
-          <div class="card-body text-center">
-            <h3 class="card-title">Selamat Datang</h3>
-            <p class="text-muted">Gunakan menu di samping untuk bernavigasi sesuai hak akses Anda.</p>
-          </div>
-        </div>
-      `;
-    });
-  },
+with open('e:/web-projects/MTSALITTIHADMLG.SCH.ID/login/public/assets/js/app.js', 'r', encoding='utf-8') as f:
+    content = f.read()
 
-  isRouteAllowed(path, role = Auth.currentRole) {
+# 1. Remove getManagementPermissionKey and getManagementRouteConfig
+content = re.sub(r'  getManagementPermissionKey.*?},\n\n  getManagementRouteConfig\(\) \{.*?\n  },\n\n' , '', content, flags=re.DOTALL)
+
+# 2. Refactor isRouteAllowed
+new_is_route_allowed = '''  isRouteAllowed(path, role = Auth.currentRole) {
     if (!role) return false;
     if (path === '#/dashboard') return !!this.getDashboardRenderer();
     
@@ -40,36 +22,17 @@ const App = {
     const navItems = AppConfig.getRoleNav(role, assignments);
     
     return navItems.some(nav => nav.hash === path);
-  },
+  },'''
+content = re.sub(r'  isManagementRouteAllowed.*?\n  },\n\n  isRouteAllowed\(path, role = Auth.currentRole\) \{.*?  },\n' , new_is_route_allowed + '\n', content, flags=re.DOTALL)
 
-  init() {
-    const menuButton = document.getElementById('btn-menu-toggle');
-    const closeButton = document.getElementById('btn-menu-close');
-    const sidebar = document.getElementById('sidebar');
-    const backdrop = document.getElementById('sidebar-backdrop');
+# 3. Refactor Router.add part in init()
+# Find the start of registerProtectedRoute
+start_idx = content.find('    const registerProtectedRoute =')
+# Find the end of roleRoutes loop
+end_idx = content.find('    Auth.init();')
 
-    const toggleMenu = () => {
-      if (!sidebar || !backdrop) return;
-      sidebar.classList.toggle('active');
-      backdrop.classList.toggle('active');
-    };
-
-    if (menuButton) menuButton.addEventListener('click', toggleMenu);
-    if (closeButton) closeButton.addEventListener('click', toggleMenu);
-    if (backdrop) backdrop.addEventListener('click', toggleMenu);
-
-    Router.init();
-    Router.add('#/dashboard', async (container) => {
-      const renderer = this.getDashboardRenderer();
-      if (renderer) {
-        await renderer.call(null, container);
-        return;
-      }
-
-      container.innerHTML = '<p class="text-center text-muted">Role tidak valid.</p>';
-    });
-
-    const allRoutes = new Set();
+if start_idx != -1 and end_idx != -1:
+    new_routing = '''    const allRoutes = new Set();
     Object.values(AppConfig.NAV_ITEMS).forEach(items => {
       items.forEach(item => {
         allRoutes.add(item.hash);
@@ -81,8 +44,6 @@ const App = {
 
     // Register all routes
     allRoutes.forEach(path => {
-      if (path === '#/dashboard') return;
-      
       Router.add(path, async (container, routeParams) => {
         const role = Auth.currentRole || AppConfig.ROLES.ADMIN;
         const hasAccess = this.isRouteAllowed(path, role);
@@ -100,7 +61,7 @@ const App = {
         }
 
         if (typeof ModuleKit !== 'undefined' && ModuleKit.has(path)) {
-          const config = ModuleKit.defs[path];
+          const config = ModuleKit.get(path);
           await ModuleKit.render(container, path, config.noun || 'Modul', config.icon || 'ph-cube');
           return;
         }
@@ -148,34 +109,8 @@ const App = {
           </div>
         `;
       });
-    });
+    });\n\n'''
+    content = content[:start_idx] + new_routing + content[end_idx:]
 
-    Auth.init();
-  },
-
-  openModal(id) {
-    const modal = document.getElementById(id);
-    if (modal) modal.classList.add('active');
-  },
-
-  closeModal(id) {
-    const modal = document.getElementById(id);
-    if (modal) modal.classList.remove('active');
-  }
-};
-
-document.addEventListener('DOMContentLoaded', () => {
-  App.init();
-
-  const splitWrapper = document.querySelector('.auth-split-wrapper');
-  if (splitWrapper) {
-    setInterval(() => {
-      if (window.innerWidth <= 991 && splitWrapper.scrollLeft === 0) {
-        splitWrapper.classList.add('nudge-swipe');
-        setTimeout(() => {
-          splitWrapper.classList.remove('nudge-swipe');
-        }, 600);
-      }
-    }, 4000);
-  }
-});
+with open('e:/web-projects/MTSALITTIHADMLG.SCH.ID/login/public/assets/js/app.js', 'w', encoding='utf-8') as f:
+    f.write(content)

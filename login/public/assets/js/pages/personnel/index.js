@@ -43,7 +43,7 @@ const PersonnelPages = {
             <li>Role aktif: <strong>${role}</strong></li>
             <li>Direktori pegawai adalah sumber rekap personel; akun sistem hanya untuk autentikasi dan akses.</li>
             <li>Kepala sekolah memantau efektivitas, bukan mengubah profil pegawai dari dashboard ini.</li>
-            <li>Dashboard ini belum membuka CRUD pegawai, cuti, dokumen, atau pengumuman.</li>
+            <li>Data pegawai, pelatihan, pengaduan, dan acara dikelola melalui menu Personalia di samping.</li>
           </ul>
         </div>
       </div>

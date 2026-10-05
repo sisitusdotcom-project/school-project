@@ -37,7 +37,7 @@ const FacilitiesPages = {
           <h3 class="card-title">Tugas sarpras</h3>
           <ul class="list-plain">
             <li>Data ruangan dan aset tidak disamakan dengan rombel akademik.</li>
-            <li>Dashboard ini hanya menyajikan rekap; input aset dan pemeliharaan belum dibuka.</li>
+            <li>Input aset, perawatan, dan pengadaan dikelola melalui menu Sarpras di samping.</li>
             <li>Kepala sekolah memantau kesiapan fasilitas untuk proses pembelajaran.</li>
           </ul>
         </div>
