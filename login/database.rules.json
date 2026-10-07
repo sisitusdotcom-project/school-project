@@ -4,8 +4,14 @@
     "users": {
       ".read": "auth != null",
       "$uid": {
-        ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.uid === $uid)",
-        ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'",
+        ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'it_admin' || auth.uid === $uid)",
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'it_admin' || auth.uid === $uid)",
+        "role": {
+          ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'it_admin')"
+        },
+        "assignments": {
+          ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'it_admin')"
+        },
         "photoURL": {
           ".write": "auth != null && auth.uid === $uid && newData.isString() && newData.val().length <= 2048"
         }
@@ -249,6 +255,11 @@
         ]
       }
     },
+    "guru": {
+      ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')",
+      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru')"
+    },
+
     "facilities": {
       ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')",
       ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'facilities')",
@@ -304,6 +315,22 @@
     "audit_logs": {
       ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'it_admin' || root.child('users').child(auth.uid).child('unitFlags').child('TIM_IT').val() === true)",
       ".write": "auth != null"
+    },
+    "spmb_registrations": {
+      ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'personnel' || root.child('users').child(auth.uid).child('role').val() === 'admin')",
+      ".write": "true"
+    },
+    "ekskul": {
+      ".read": "auth != null",
+      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'guruEkskul' || root.child('users').child(auth.uid).child('role').val() === 'admin')"
+    },
+    "tendik": {
+      ".read": "auth != null",
+      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'tendik' || root.child('users').child(auth.uid).child('role').val() === 'admin')"
+    },
+    "komite": {
+      ".read": "auth != null",
+      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'komite' || root.child('users').child(auth.uid).child('role').val() === 'admin')"
     }
   }
 }

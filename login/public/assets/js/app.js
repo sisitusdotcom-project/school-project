@@ -58,6 +58,44 @@ const App = {
     if (closeButton) closeButton.addEventListener('click', toggleMenu);
     if (backdrop) backdrop.addEventListener('click', toggleMenu);
 
+    const profileWidget = document.querySelector('.user-profile-widget');
+    if (profileWidget) {
+      profileWidget.style.cursor = 'pointer';
+      profileWidget.addEventListener('click', async () => {
+        const u = await DB.getUser(Auth.currentUser.uid);
+        if (!u) return;
+        document.getElementById('profile-email').value = Auth.currentUser.email || '';
+        document.getElementById('profile-password').value = '';
+        App.openModal('modal-profile');
+      });
+    }
+
+    const formProfile = document.getElementById('form-profile');
+    if (formProfile) {
+      formProfile.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = formProfile.querySelector('button[type="submit"]');
+        const email = document.getElementById('profile-email').value.trim();
+        const pwd = document.getElementById('profile-password').value;
+        
+        btn.disabled = true;
+        btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Menyimpan...';
+        
+        try {
+          // Update Firebase Auth if credentials change
+          await Auth.updateProfileCredentials(email, pwd);
+          
+          alert('Profil berhasil diperbarui!');
+          App.closeModal('modal-profile');
+        } catch (err) {
+          alert('Gagal memperbarui profil: ' + err.message);
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = 'Simpan Profil';
+        }
+      });
+    }
+
     Router.init();
     Router.add('#/dashboard', async (container) => {
       const renderer = this.getDashboardRenderer();
@@ -115,7 +153,8 @@ const App = {
           '#/admin/characters': typeof AdminPages !== 'undefined' ? AdminPages.renderCharacters : null,
           '#/admin/extracurriculars': typeof AdminPages !== 'undefined' ? AdminPages.renderExtracurriculars : null,
           '#/admin/attendance': typeof AdminPages !== 'undefined' ? AdminPages.renderAttendance : null,
-          '#/guru/attendance': typeof GuruPages !== 'undefined' ? GuruPages.renderTeacherAttendance : null,
+          '#/attendance': typeof GuruPages !== 'undefined' ? GuruPages.renderTeacherAttendance : null,
+          '#/guru/attendance': typeof GuruPages !== 'undefined' ? GuruPages.renderTeacherAttendance : null, // Backwards compatibility
           '#/guru/student-attendance': typeof GuruPages !== 'undefined' ? GuruPages.renderStudentAttendance : null,
           '#/guru/classes': typeof GuruPages !== 'undefined' ? GuruPages.renderClasses : null,
           '#/guru/academic': typeof GuruPages !== 'undefined' ? GuruPages.renderAcademicGrades : null,

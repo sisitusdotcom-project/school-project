@@ -162,15 +162,20 @@ const AdminPages = {
       const roleFilter = document.getElementById('filter-role')?.value || '';
       
       const filtered = userArr.filter(u => {
-        const matchSearch = (u.name || '').toLowerCase().includes(q) || (u.username || '').toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q);
+        const matchSearch = (u.name || '').toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q);
         const matchRole = roleFilter ? u.role === roleFilter : true;
         return matchSearch && matchRole;
       });
       
       const rows = filtered.length ? filtered.map(u => `
         <tr>
-          <td><strong>${AppConfig.escapeHtml(u.name)}</strong><br><small class="text-muted">${u.email || '-'}</small></td>
-          <td>${AppConfig.escapeHtml(u.username)}</td>
+          <td>
+            <strong>${AppConfig.escapeHtml(u.name)}</strong><br>
+            <small class="text-muted">
+              Email: ${u.email || '-'}<br>
+              <span style="opacity: 0.6">Default: ${u.id.toLowerCase().replace(/[^a-z0-9]/g, '')}@musada.sch.id</span>
+            </small>
+          </td>
           <td>
             <span class="badge ${AppConfig.getRoleBadgeClass(u.role)}">${u.role}</span>
             ${AppConfig.getRoleAssignments(u).length ? `<div class="mt-4"><small class="text-muted">${AppConfig.getRoleAssignments(u).map((item) => AppConfig.UNIT_LABELS[item] || item).join(', ')}</small></div>` : ''}
@@ -192,7 +197,6 @@ const AdminPages = {
           document.getElementById('usr-id').value = u.id;
           document.getElementById('usr-name').value = u.name;
           document.getElementById('usr-email').value = u.email || '';
-          document.getElementById('usr-username').value = u.username;
           document.getElementById('usr-password').value = '';
           document.getElementById('usr-password').placeholder = '(Kosongkan jika tidak diubah)';
           document.getElementById('usr-role').value = u.role;
@@ -219,7 +223,7 @@ const AdminPages = {
           <div class="toolbar-controls">
             <div class="search-box">
               <i class="ph ph-magnifying-glass"></i>
-              <input type="text" id="search-user" placeholder="Cari nama, username...">
+              <input type="text" id="search-user" placeholder="Cari nama, email...">
             </div>
             <select id="filter-role" class="toolbar-select">
               <option value="">Semua Peran</option>
@@ -231,7 +235,7 @@ const AdminPages = {
       </div>
       <div class="card">
         <div class="table-responsive">
-          <table class="table"><thead><tr><th>Nama / Email</th><th>Username</th><th>Peran</th><th class="table-col-md">Aksi</th></tr></thead>
+          <table class="table"><thead><tr><th>Nama / Email</th><th>Peran</th><th class="table-col-md">Aksi</th></tr></thead>
           <tbody id="tbody-users"></tbody></table>
         </div>
       </div>
@@ -246,7 +250,6 @@ const AdminPages = {
               <input type="hidden" id="usr-id">
               <div class="form-group"><label>Nama Lengkap</label><input id="usr-name" required></div>
               <div class="form-group"><label>Email (opsional)</label><input type="email" id="usr-email"></div>
-              <div class="form-group"><label>Username</label><input id="usr-username" required></div>
               <div class="form-group"><label>Password</label><input type="password" id="usr-password" required minlength="6"></div>
               <div class="form-group"><label>Peran utama</label><select id="usr-role" required>
                 ${Object.entries(AppConfig.ROLE_LABELS).map(([val, label]) => `<option value="${val}">${label}</option>`).join('')}
@@ -283,7 +286,6 @@ const AdminPages = {
       document.getElementById('usr-id').value = '';
       document.getElementById('usr-name').value = '';
       document.getElementById('usr-email').value = '';
-      document.getElementById('usr-username').value = '';
       document.getElementById('usr-password').value = '';
       document.getElementById('usr-password').placeholder = '';
       document.getElementById('usr-role').value = 'guru';
@@ -305,7 +307,6 @@ const AdminPages = {
       const data = {
         name: document.getElementById('usr-name').value.trim(),
         email: document.getElementById('usr-email').value.trim(),
-        username: document.getElementById('usr-username').value.trim(),
         role: document.getElementById('usr-role').value,
         assignments: assignments
       };

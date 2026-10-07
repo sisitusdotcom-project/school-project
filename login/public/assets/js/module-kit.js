@@ -332,38 +332,66 @@ const ModuleKit = {
     });
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const payload = {};
-      for (const f of def.fields) {
-        if (f.readonly) continue;
-        const el = form.querySelector(`#mk-f-${f.key}`);
-        if (f.type === 'multi') {
-          const chosen = {};
-          el.querySelectorAll('input[type="checkbox"]:checked').forEach((cb) => {
-            chosen[cb.value] = true;
-          });
-          if (f.required && !Object.keys(chosen).length) {
-            alert(`${f.label} wajib diisi.`);
-            return;
-          }
-          payload[f.key] = chosen;
-          continue;
-        }
-        let value = el.value.trim();
-        if (f.required && !value) {
-          alert(`${f.label} wajib diisi.`);
-          el.focus();
-          return;
-        }
-        if (f.type === 'number' || f.type === 'money') value = value === '' ? 0 : Number(value);
-        payload[f.key] = value;
-        if (f.ref) payload[`${f.key}Name`] = value ? ((refs[f.ref] || {})[value] || '') : '';
-      }
-      const ctx = refs.__ctx;
-      const derived = def.derive ? def.derive(payload, ctx) : {};
       const btn = form.querySelector('#mk-save');
       btn.disabled = true;
       btn.textContent = 'Menyimpan...';
+      const payload = {};
       try {
+        for (const f of def.fields) {
+          if (f.readonly) continue;
+          
+          if (f.type === 'file') {
+            const fileEl = form.querySelector(`#mk-f-${f.key}_file`);
+            const hiddenEl = form.querySelector(`#mk-f-${f.key}`);
+            let value = hiddenEl.value.trim();
+            if (fileEl && fileEl.files && fileEl.files[0]) {
+              btn.textContent = 'Mengunggah file...';
+              const file = fileEl.files[0];
+              const b64 = await new Promise((res, rej) => {
+                const r = new FileReader();
+                r.onload = () => res(r.result);
+                r.onerror = rej;
+                r.readAsDataURL(file);
+              });
+              const ext = file.name.split('.').pop();
+              const fileName = `${f.folderKey || 'uploads'}_${Date.now()}.${ext}`;
+              const up = await DriveBridge.uploadBase64({ fileName, mimeType: file.type, base64Data: b64, folderKey: f.folderKey || 'uploads' });
+              value = up.fileUrl;
+              hiddenEl.value = value;
+            }
+            if (f.required && !value) {
+              alert(`${f.label} wajib diunggah.`);
+              throw new Error('Validation failed');
+            }
+            payload[f.key] = value;
+            continue;
+          }
+
+          const el = form.querySelector(`#mk-f-${f.key}`);
+          if (f.type === 'multi') {
+            const chosen = {};
+            el.querySelectorAll('input[type="checkbox"]:checked').forEach((cb) => {
+              chosen[cb.value] = true;
+            });
+            if (f.required && !Object.keys(chosen).length) {
+              alert(`${f.label} wajib diisi.`);
+              throw new Error('Validation failed');
+            }
+            payload[f.key] = chosen;
+            continue;
+          }
+          let value = el.value.trim();
+          if (f.required && !value) {
+            alert(`${f.label} wajib diisi.`);
+            el.focus();
+            throw new Error('Validation failed');
+          }
+          if (f.type === 'number' || f.type === 'money') value = value === '' ? 0 : Number(value);
+          payload[f.key] = value;
+          if (f.ref) payload[`${f.key}Name`] = value ? ((refs[f.ref] || {})[value] || '') : '';
+        }
+        const ctx = refs.__ctx;
+        const derived = def.derive ? def.derive(payload, ctx) : {};
         const stamp = firebase.database.ServerValue.TIMESTAMP;
         let recordId = state.editing;
         if (state.editing) {
@@ -379,9 +407,12 @@ const ModuleKit = {
         state.rows = await loadRows();
         paint();
       } catch (error) {
-        console.error(error);
-        alert('Gagal menyimpan. Pastikan Anda memiliki akses untuk unit ini.');
+        if (error.message !== 'Validation failed') {
+          console.error(error);
+          alert('Gagal menyimpan atau mengunggah file. Pastikan Anda memiliki akses untuk unit ini.');
+        }
       } finally {
+        const btn = form.querySelector('#mk-save');
         btn.disabled = false;
         btn.textContent = 'Simpan';
       }
@@ -416,6 +447,9 @@ const ModuleKit = {
       control = `<select id="${id}"${req}${dis}>${field.required ? '' : '<option value="">-- Pilih --</option>'}${this.optionList(field).map((o) => `<option value="${this.esc(o.value)}">${this.esc(o.label)}</option>`).join('')}</select>`;
     } else if (field.type === 'textarea') {
       control = `<textarea id="${id}" rows="3"${req}${dis}></textarea>`;
+    } else if (field.type === 'file') {
+      control = `<input type="hidden" id="${id}"><input type="file" id="${id}_file" accept="${field.accept || '*/*'}">
+      <small class="text-muted d-block mt-1">Pilih file baru untuk mengunggah (maks 5MB).</small>`;
     } else {
       const type = ['number', 'money'].includes(field.type) ? 'number' : (['date', 'time'].includes(field.type) ? field.type : 'text');
       const min = type === 'number' ? ' min="0" step="any"' : '';

@@ -1,113 +1,434 @@
-# PETA FITUR DAN ROLE APLIKASI SEKOLAH
-**Terakhir Diperbarui:** September 2026
+# DOKUMENTASI SISTEM & KEBUTUHAN FITUR (SD MUHAMMADIYAH 1 SEDATI)
+Tahun Pelajaran 2026/2027
 
-Dokumen ini merangkum seluruh pemetaan peran (*Role*), hak akses, penugasan kelompok (*Group*), dan fitur modul yang ada di dalam sistem, baik yang sudah berfungsi (Tahap 1) maupun yang masih berupa *Placeholder/Coming Soon* (Tahap 2).
+Dokumen ini memuat daftar fitur yang benar-benar aktif (`[x]`) dan rencana fitur selanjutnya (`[ ]`). Dokumen ini menjadi sumber rujukan tunggal (Single Source of Truth) untuk *progress* pengembangan sistem.
 
----
+SD MUHAMMADIYAH 1 SEDATI
+TAHUN PELAJARAN 2026/2027
+KEPALA SEKOLAH
+Dhani Harsyahyadi, S.H.I.
+WAKA KEUANGAN
+Ainaini Ratna Noeri, M.Pd.
+STAF KEUANGAN
 
-## 1. MANAJEMEN SISTEM (ADMINISTRATOR)
-Bertugas memastikan ekosistem aplikasi dan struktur hierarki guru terhubung dengan benar.
-*   **Dashboard Admin** *(Tersedia)* - Ringkasan statistik dan akses.
-*   **Hak Akses & Penugasan** *(Tersedia)* - Menambahkan *role* (Guru, Kepsek, Ortu) dan menugaskan jabatan (Waka, Koordinator, Staff).
-*   **Data Master Pengguna** *(Tersedia)* - CRUD Akun Pengguna.
-*   **Manajemen Rombel & Mapel** *(Tersedia)* - Mengelola daftar Rombongan Belajar dan Mata Pelajaran.
-*   **Master Karakter** *(Tersedia)* - Indikator observasi siswa.
+### 1.	Asmaul Husna, S.Pd.
 
-## 2. TIM IT (OPERASIONAL & JARINGAN)
-Bertugas mengatur sistem data *backend* dan integrasi perangkat keras/lunak.
-*   **Dashboard IT** *(Coming Soon)* - Pantau performa *server* aplikasi.
-*   **Sinkronisasi Dapodik** *(Coming Soon)* - Tarik/dorong data siswa dan sarpras ke server Dapodik.
-*   **Backup & Restore Data** *(Coming Soon)* - Ekspor/impor data RTDB (Firebase).
-*   **Log Audit Sistem** *(Coming Soon)* - Jejak digital perubahan data oleh *user*.
-*   **Infrastruktur Jaringan & Integrasi API** *(Coming Soon)* - CCTV, CBT Ujian.
+### 2.	Intan Ayu P., S.Sos.
 
----
+### 3.	Brilianinda, S.Sos.
+WAKA KURIKULUM
+Roudlotul Millah, S.Pd., Gr.
+STAF KURIKULUM
 
-## 3. JAJARAN WAKIL KEPALA SEKOLAH (WAKA)
+### 1.	Deayu Icha R., S.Pd., Gr.
 
-### A. WAKA KURIKULUM (Perencanaan & KBM)
-*   **Pengaturan Umum Akademik** *(Tersedia)* - Ubah Tahun Ajaran & Semester (Global).
-*   **Perencanaan KBM** *(Coming Soon)* - RPP, Silabus, Alokasi Waktu.
-*   **Jadwal Pelajaran** *(Coming Soon)* - Plotting jam mengajar guru.
-*   **Kalender Akademik** *(Coming Soon)* - Agenda sekolah tahunan.
-*   **Evaluasi Akademik** *(Coming Soon)* - Bank Soal, UTS, UAS.
+### 2.	Muhammad Niam A., S.Pd.
 
-### B. WAKA KESISWAAN (Siswa & Karakter)
-*   **Buku Induk & PPDB** *(Coming Soon)* - Manajemen penerimaan siswa baru.
-*   **Peminatan & Ekstrakurikuler** *(Coming Soon)* - Plotting siswa ke kelas Ekskul.
-*   **Bimbingan & Konseling** *(Coming Soon)* - Catatan pelanggaran dan penghargaan siswa (Poin).
-*   **Beasiswa & Mutasi** *(Coming Soon)* - Laporan pindah/keluar/masuk.
+### 3.	Aprilia An'umillah, S.Pd.
 
-### C. WAKA KEUANGAN (Anggaran & BOSP)
-*   **RKAS (Rencana Anggaran)** *(Coming Soon)* - Integrasi ARKAS.
-*   **Penerimaan (SPP/BOS)** *(Coming Soon)* - Pemasukan siswa bulanan.
-*   **Pengeluaran & Belanja** *(Coming Soon)* - Buku Kas Umum (BKU).
-*   **Penggajian (Payroll)** *(Coming Soon)* - Honorarium guru & staf.
+### 4.	Naila Adiba, S.Pd.
+WAKA KESISWAAN
+Furqon, S.H.
+STAF KESISWAAN
 
-### D. HUMAS & PERSONALIA (Pegawai & Publikasi)
-*   **Pengaturan Jam & Tanggal Absensi** *(Tersedia)* - Pengaturan batas waktu Check-In / Check-Out.
-*   **Direktori Kepegawaian** *(Coming Soon)* - Data Guru/Staf.
-*   **Penilaian Kinerja (PKG)** *(Coming Soon)* - Evaluasi tahunan.
-*   **Agenda & Pengaduan** *(Coming Soon)* - Layanan masyarakat dan MoU Kemitraan.
+### 1.	Moh. Muzakki, S.Pd.
 
-### E. WAKA SARPRAS (Fasilitas & Aset)
-*   **Buku Inventaris** *(Coming Soon)* - Labeling barang dan jumlah aset.
-*   **Analisis & Pengadaan (RKAS Sarpras)** *(Coming Soon)* - Usulan pembelian barang.
-*   **Pemeliharaan Gedung** *(Coming Soon)* - Laporan kerusakan (AC, Meja, dll).
-*   **Peminjaman & Penghapusan** *(Coming Soon)* - Sirkulasi alat sekolah.
+### 2.	Nur Fadhilah, S.Pd., Gr.
 
----
+### 3.	Eka Dessy Pratiwi, S.Pd., Gr.
+WAKA HUMAS & PERSONALIA
+Angga Dkk, S.E., M.Pd., Gr.
+STAF HUMAS & PERSONALIA
 
-## 4. TENAGA PENDIDIK (GURU)
+### 1.	Andi Sugiyanto, S.E.
 
-### A. GURU MATA PELAJARAN (Umum)
-*   **Presensi Guru (Check-In)** *(Tersedia)* - Absensi berbasis koordinat/QR (Front-end ready).
-*   **Absensi Siswa** *(Tersedia)* - Input absensi harian kelas.
-*   **Input Nilai Akademik** *(Tersedia)* - Formatif, Sumatif.
-*   **Observasi Karakter** *(Tersedia)* - Input sikap sosial/spiritual.
-*   **E-Rapor** *(Tersedia)* - Cetak dan rekap nilai per kelas.
+### 2.	Siti Nadhiroh, S.Pd.
+WAKA SARANA PRASARANA
+Wahyu Mutida I., S.Pd., Gr.
+STAF SARANA PRASARANA
 
-### B. WALI KELAS
-*   *(Wali Kelas memiliki fitur turunan dari Guru)*
-*   **Ledger Kelas & Jurnal** *(Tersedia)* - Kontrol perkembangan nilai khusus di rombel yang ia pimpin.
+### 1.	Ahmad Tsalis N., S.Tr.T.
 
----
+### 2.	Vindy Aprilia, S.Pd.
 
-## 5. PROGRAM BTQ & TAHFIDZ
+### 3.	Divia Arianti, S.Pd., Gr.
 
-### A. KOORDINATOR BTQ
-*   **Pemetaan Rombel & Guru** *(Coming Soon)* - Pembagian siswa per jilid & guru pembimbingnya.
-*   **Antrean Ujian Jilid/Munaqosyah** *(Coming Soon)* - ACC & tes kenaikan jilid (Jilid 1-6, Ghorib, Tajwid).
-*   **Plotting Guru Tasmi'** *(Coming Soon)* - Menunjuk guru untuk mengetes hafalan anak.
 
-### B. TIM BTQ (Guru Pengajar)
-*   **Rombel BTQ Saya** *(Coming Soon)* - Lihat daftar siswa yang ditugaskan khusus.
-*   **Jurnal Harian Jilid** *(Coming Soon)* - Update progres "Sampai jilid/halaman berapa" & klik *Ajukan Ujian*.
-*   **Setoran Tahfidz (Juz 30-1)** *(Coming Soon)* - Catatan setoran surat (Validasi per-ayat).
-*   **Ujian Tasmi'** *(Coming Soon)* - Penilaian akhir bagi guru penguji Tasmi'.
+SD MUHAMMADIYAH 1 SEDATI
+TAHUN PELAJARAN 2026/2027
 
----
+## I. PEMBAGIAN AKUN DASHBOARD DIGITAL MUSADA
+Pembagian Dashboard Digital Musada berdasarkan kebutuhan pengguna:
 
-## 6. GURU EKSTRAKURIKULER & ENGLISH LAB
-*   **Program Latihan & Silabus Ekskul** *(Coming Soon)* - Rencana latihan per semester.
-*   **Presensi Ekskul** *(Coming Soon)* - Checklist absensi siswa yang ikut ekstrakurikuler.
-*   **Nilai E-Rapor Ekskul** *(Coming Soon)* - Input A/B/C dan Deskripsi singkat untuk rapor.
-*   **Pemetaan Siswa Berbakat** *(Coming Soon)* - Pemantauan anak potensial untuk lomba.
-*   **English Lab** *(Coming Soon)* - Rombel khusus bahasa Inggris & Jurnal Speaking/Listening.
+### 1.	Akun A – Kepala Sekolah
+Status: Sudah tersedia
 
----
+### 2.	Akun B – Wakil Kepala Sekolah dan Staf
+Jumlah: 5 akun
+Status: Sudah tersedia
 
-## 7. STAF OPERASIONAL (NON-AKADEMIK)
+### 3.	Akun C – Guru/Pendidik
+Jumlah: 29 akun
+Status: Sudah tersedia
 
-*   **KOPERASI:** Kasir Penjualan (POS), Stok Barang Koperasi, Laporan Penjualan *(Coming Soon)*.
-*   **PERPUSTAKAAN:** Katalog Buku, Sirkulasi (Pinjam/Kembali), Data Anggota *(Coming Soon)*.
-*   **KEAMANAN:** Buku Tamu Digital, Log Patroli, Laporan Insiden *(Coming Soon)*.
-*   **KEBERSIHAN:** Jadwal Piket Area, Checklist Kebersihan Harian *(Coming Soon)*.
-*   **PERTAMANAN:** Jadwal Perawatan, Log Penyiraman Taman *(Coming Soon)*.
-*   **PENGEMUDI:** Jadwal Antar-Jemput/Tugas Luar, Log Servis & BBM Kendaraan *(Coming Soon)*.
+### 4.	Akun D – Karyawan/Tenaga Kependidikan
+Jumlah: 10 akun
+Status: Sudah tersedia
 
----
+### 5.	Akun E – Guru BTQ Ummi
+Jumlah: 13 akun
+Status: Sudah tersedia
+6.	Akun F – Guru Ekstrakurikuler
+Jumlah: 14 akun
+Status: Belum tersedia
+Catatan: Belum ada informasi detail terkait jenis ekstrakurikuler dan pembina.
+7.	Akun G – Komite Sekolah
+Jumlah: 1 akun
+Status: Belum tersedia
+Catatan: Belum ada informasi detail terkait struktur dan data Komite Sekolah.
+8.	Akun H – Orang Tua/Wali Murid
+Jumlah: 380 akun
+Status: Sudah tersedia.
 
-## 8. KEPALA SEKOLAH & ORANG TUA
-*   **Kepala Sekolah:** Dashboard Pantau Akademik, Laporan Kelas *(Tersedia)*.
-*   **Orang Tua:** Dashboard Perkembangan Anak (Nilai, Absensi, Tahfidz, Keuangan) *(Coming Soon / Tahap Integrasi)*.
+## II. RINCIAN TUGAS DAN KEBUTUHAN FITUR PERANGKAT SEKOLAH
+
+### A. KEPALA SEKOLAH
+
+### 1.	Rekapan Laporan
+Status: Sebagian sudah tersedia.
+
+### 2.	Integrasi Dashboard
+Seluruh laporan dan data dari setiap bagian terintegrasi ke dalam Dashboard Kepala Sekolah.
+
+### B. WAKIL KEPALA SEKOLAH (WAKA)
+
+### 1.	HUMAS & PERSONALIA
+
+**a. Menyusun, mengoordinasikan, dan mengevaluasi personalia guru dan karyawan sekolah.**
+Fitur:
+- [x]	Data pegawai. *(Menu: Kelola Pengguna & Data Kepegawaian)*
+- [x]	Kisi-kisi/data kepegawaian. *(Terakomodasi di profil user & database pegawai)*
+Akses: Staf & Waka
+
+
+**b. Mengatur dan mengevaluasi kedisiplinan guru dan tenaga kependidikan.**
+Fitur:
+- [x]	Rekap dan riwayat kehadiran harian sekolah. *(Menu: Pantau Disiplin Guru)*
+- [x]	Rekap dan riwayat kehadiran tugas khusus. *(Tercakup dalam filter riwayat absensi)*
+- [x]	Rekap dan riwayat izin kehadiran. *(Tercakup di Pantau Disiplin Guru)*
+- [x]	Pengaturan keterlambatan kehadiran. *(Ada di Dashboard Personalia: Pengaturan Jam)*
+- [x]	Pengaturan koordinat lokasi. *(Tercakup di backend/app-config)*
+- [x]	Pengaturan waktu presensi. *(Dashboard Personalia)*
+Akses: Waka Only
+
+
+**c. Menyusun, membantu, dan mengevaluasi kualitas, jenjang karier, serta kepangkatan guru dan tenaga kependidikan.**
+Fitur:
+- [ ]	Penilaian kinerja berdasarkan kapasitas, kapabilitas, dan kualitas guru/karyawan. *(Menu: Penilaian Kinerja PKG)* 
+- [ ]	Penilaian aspek Persyarikatan. *(Ada di instrumen PKG)* 
+- [ ]	Upload dokumen pendukung. *(Menu: Pelatihan & Kompetensi, bisa upload sertifikat)* 
+Akses: Waka Only
+
+
+**d. Mengelola hubungan dan kerja sama dengan pihak eksternal, seperti sekolah mitra, masyarakat, pemerintah negeri/swasta, dan lembaga sosial.**
+Fitur:
+- [ ]	Upload dokumen surat masuk. *(Menu: Dokumen Kerja Sama)* 
+- [ ]	Upload dokumen surat keluar. *(Menu: Dokumen Kerja Sama)* 
+- [ ]	MoU. *(Menu: Kemitraan & MoU)* 
+- [ ]	SK. *(Tercakup di Dokumen)* 
+- [ ]	Piagam. *(Tercakup di Dokumen)* 
+- [ ]	Surat kuasa. *(Tercakup di Dokumen)* 
+- [x]	Dokumen terkait lainnya. *(Semua terintegrasi dengan upload ke Google Drive)*
+Akses: Staf & Waka
+
+
+**e. Menjalin sinergi dengan Komite, Paguyuban, Iwama, dan Musada.**
+Fitur:
+- [ ]	Laporan keuangan Komite. *(Diberikan lewat role spesifik KOMITE yang memiliki menu Keuangan Paguyuban & Komite, bisa diakses jika waka merangkap)* 
+- [x]	Integrasi dengan bagian Keuangan. *(Tersedia melalui mapping multi-assignment)*
+Akses: Staf & Waka.
+
+
+**f. Menyusun, mengoordinasikan, dan mengevaluasi kegiatan SPMB.**
+Fitur:
+- [ ]	Halaman pendaftaran. *(spmb.html yang mem-push data via REST API)* 
+- [ ]	Ringkasan data pendaftar. *(Menu: Manajemen SPMB di Dashboard)* 
+- [ ]	QR Code SPMB. *(Tersedia di halaman publik/landing page)* 
+- [ ]	Pengaturan formulir pendaftaran. *(Terintegrasi melalui form di spmb.html)* 
+- [ ]	Pengaturan pembayaran. *(Di dalam Manajemen SPMB)* 
+- [ ]	Riwayat pembayaran. *(Di dalam Manajemen SPMB)* 
+Akses: Waka Only
+
+### 2.	KEUANGAN
+
+**a. Mengoordinasikan dan mengevaluasi laporan anggaran setiap agenda/kegiatan sekolah.**
+Fitur:
+- [ ]	Upload proposal kegiatan. *(Menu: Persetujuan Proposal)* 
+- [ ]	Persetujuan (ACC/Non-ACC). *(Menu: Persetujuan Proposal)* 
+- [ ]	Evaluasi anggaran. *(Menu: LPJ & Sinkronisasi Kas)* 
+Terhubung dengan: Kepala Sekolah.
+
+**b. Menerima, menyaring, dan mengidentifikasi calon siswa penerima beasiswa dan keringanan biaya pendidikan.**
+Fitur:
+- [ ]	Pengajuan keringanan biaya. *(Menu: Pengajuan Beasiswa)* 
+- [ ]	Kriteria Yatim, Dhuafa, Persyarikatan, Non-Persyarikatan. *(Ada di form Pengajuan Beasiswa)* 
+- [ ]	Upload bukti/dokumen pengajuan. *(Fitur upload pada Pengajuan Beasiswa)* 
+Terhubung dengan: Kepala Sekolah.
+
+**c. Membuat laporan keuangan harian, bulanan, dan tahunan.**
+Fitur:
+- [ ]	Menggunakan dashboard keuangan yang sudah tersedia. *(Menu: Penerimaan & Pengeluaran, BKU, Dashboard)* 
+Terhubung dengan: Ortu Siswa
+
+**d. Mendata dan menagih tunggakan siswa setiap akhir bulan.**
+Fitur:
+- [ ]	Menggunakan dashboard keuangan yang sudah tersedia. *(Menu: Penerimaan & Pengeluaran)* 
+Terhubung dengan: Ortu Siswa
+
+**e. Menghitung penggajian guru.**
+Fitur:
+- [ ]	Menu Penghitungan Gaji. *(Menu: Penghitungan Gaji)* 
+Terhubung dengan: Humas & Personalia.
+
+**f. Perpajakan.**
+Perubahan:
+- [ ]	Menu Perpajakan yang sekarang tidak relevan, tolong diganti menjadi Menu Laporan BOS. *(Sudah diganti di sidebar menjadi Laporan BOS)* 
+Terhubung dengan: Kepala sekolah
+
+### 3.	KURIKULUM
+
+**a. Merencanakan dan menyusun kalender akademik.**
+Intrakurikuler:
+- [ ]	Jadwal pelajaran murid. *(Menu: Jadwal Pelajaran & Kalender)* 
+Terhubung/dibagikan kepada: Guru dan Orang Tua/Wali Murid.
+- [ ]	Jadwal pelajaran guru. *(Menu: Jadwal Pelajaran & Kalender)* 
+Terhubung/dibagikan kepada: Guru.
+Kokurikuler:
+- [ ]	Jadwal pembiasaan. *(Tercakup di Kalender Akademik)* 
+Dibagikan kepada: Guru dan Orang Tua/Wali Murid sebagai pengumuman.
+- [ ]	Jadwal Mini Project. *(Tercakup di Kalender Akademik)* 
+Dibagikan kepada: Guru dan Orang Tua/Wali Murid sebagai pengumuman.
+- [ ]	Jadwal Pentas Budaya. *(Tercakup di Kalender Akademik)* 
+Dibagikan kepada: Guru dan Orang Tua/Wali Murid sebagai pengumuman.
+- [ ]	Jadwal Outing Class. *(Tercakup di Kalender Akademik)* 
+Dibagikan kepada: Guru dan Orang Tua/Wali Murid sebagai pengumuman.
+
+**b. Menjaga kualitas pembelajaran.**
+Fitur:
+- [ ]	Jurnal pembelajaran guru. *(Menu: Jurnal Pembelajaran)* 
+- [ ]	Prota. *(Modul Ajar - Tahap 2 / Coming Soon)* 
+- [ ]	Prosem.  *(Menu: Perangkat & Modul Ajar)* 
+- [ ]	RPP.  *(Menu: Perangkat & Modul Ajar)* 
+- [ ]	Tombol ACC/Non-ACC. *(Fitur status Diverifikasi di Perangkat & Modul Ajar)* 
+Terhubung dengan: Guru.
+Fitur tambahan:
+- [ ]	Jadwal supervisi. *(Menu: Supervisi Guru)* 
+Dibagikan kepada: Guru.
+- [ ]	Bank materi dan media pembelajaran. *(Modul ajar terintegrasi)* 
+Dibagikan kepada: Guru.
+
+**c. Mengatur dan mengevaluasi pembelajaran.**
+Fitur:
+- [ ]	Bank soal. *(Menu: Bank Soal)* 
+Terhubung dengan: Guru.
+- [x]	Database nilai: *(Menu: Database Nilai & Sistem Penilaian)*
+  - [x] Nilai Harian.
+  - [x] Nilai Tengah Semester.
+  - [x] Nilai Akhir Semester.
+Terhubung dengan: Guru.
+
+### 4.	KESISWAAN
+
+**a. Menyusun dan mengoordinasikan administrasi murid.**
+Fitur:
+- [x]	Data murid lengkap. *(Menu: Dashboard Kesiswaan)*
+- [ ]	Kenaikan kelas. *(Manajemen status siswa terintegrasi di sistem pusat)* 
+- [ ]	Perpindahan/mutasi murid. *(Menu: PPDB & Mutasi)* 
+- [ ]	Data alumni. *(Menu: PPDB & Mutasi)* 
+- [x]	Rekap dan riwayat kehadiran murid. *(Menu: Pantau Kehadiran Siswa)*
+- [x]	Pengaturan absensi murid. *(Pengaturan global melalui Dashboard)*
+
+**b. Mengoordinasikan program pembinaan dan bimbingan konseling siswa.**
+Fitur:
+- [ ]	Data pelanggaran murid. *(Menu: Tata Tertib & TPPK)* 
+- [ ]	Data prestasi murid. *(Menu: Lomba & Penghargaan)* 
+- [x]	Data hasil observasi wali kelas. *(Diakses via Indikator Karakter & Sikap)*
+- [x]	Rekap dan penilaian karakter murid. *(Menu: Indikator Karakter & Sikap)*
+- [x]	Data observasi wali kelas. *(Diakses via Indikator Karakter & Sikap)*
+
+**c. Mengoordinasikan prestasi murid dalam perlombaan dan ekstrakurikuler.**
+Fitur:
+- [ ]	Jadwal ekstrakurikuler. *(Menu: Ekstrakurikuler)* 
+- [ ]	Jadwal guru mengajar. *(Menu: Ekstrakurikuler)* 
+- [ ]	Jurnal pembelajaran. *(Melalui role GURU_EKSTRA: Program Latihan)* 
+- [ ]	Presensi murid. *(Melalui role GURU_EKSTRA: Presensi Peserta)* 
+Terhubung dengan: Seluruh Guru Ekstrakurikuler.
+- [ ]	Penilaian. *(Melalui role GURU_EKSTRA: Nilai E-Rapor Ekskul)* 
+
+### 5.	SARANA DAN PRASARANA (SARPRAS)
+
+**a. Menyusun, mengoordinasikan, dan mendayagunakan sarana dan prasarana sekolah.**
+Fitur:
+- [ ]	Kontrol fasilitas sarana: *(Menu: Perawatan Gedung & Sanitasi, Pengecekan Keamanan Area)* 
+  - [ ] Kebersihan. 
+  - [ ] Keamanan. 
+  - [ ] Keindahan. 
+  - [ ] Air minum. 
+  - [ ] Antar-jemput. 
+- [ ]	Kontrol pemeliharaan prasarana: *(Menu: Pemeliharaan Elektronik & IT, Perawatan Gedung)* 
+  - [ ] AC. 
+  - [ ] Barang elektronik. 
+  - [ ] Gedung sekolah. 
+  - [ ] Sarana/prasarana lainnya. 
+
+**b. Mengadakan, menjaga, dan mendokumentasikan aset sekolah.**
+Fitur:
+- [ ]	Daftar aset. *(Menu: Buku Inventaris (Aset))* 
+- [ ]	Kode aset bergerak. *(Tercakup di form inventaris)* 
+- [ ]	Kode aset tidak bergerak. *(Tercakup di form inventaris)* 
+- [ ]	Nilai penyusutan. *(Kolom perhitungan nilai di inventaris)* 
+- [ ]	Taksiran nominal. *(Kolom harga di inventaris)* 
+
+## III. KEBUTUHAN FITUR AKUN GURU WALI KELAS
+
+### A. GURU WALI KELAS
+- [x]	1. Absensi murid. *(Menu: Absensi Siswa)*
+- [x]	2. Penilaian karakter murid dan catatan yang memerlukan bimbingan. *(Menu: Riwayat Observasi / E-Rapor)*
+Terhubung dengan: Kesiswaan dan Kepala Sekolah.
+- [ ]	3. Pengumuman. *(Dikelola terpusat oleh Personalia, Wali Kelas komunikasi via Dashboard / Catatan)* 
+- [x]	4. Rapor murid. *(Menu: E-Rapor Kelas)*
+Komponen:
+  - [ ]	Nilai akhir STS 1. 
+  - [ ]	SAS. 
+  - [ ]	STS. 
+  - [ ]	ASAJ. 
+  - [x]	Penilaian karakter.
+
+
+## IV. KEBUTUHAN FITUR GURU PENDAMPING / GURU MAPEL / GURU UMUM / GURU DASAR
+
+### A. Presensi harian
+- [x]	Riwayat presensi. *(Menu: Riwayat Presensi Guru)*
+- [x]	Rekap absensi bulanan. *(Terhubung ke Dashboard Personalia)*
+Terhubung dengan: Humas & Personalia.
+
+### B. Penilaian akademik
+- [ ]	Penilaian Harian (PH). *(Fitur Formatif - Tahap 2 / Coming Soon)*
+- [ ]	STS 1. 
+- [ ]	SAS. 
+- [ ]	STS. 
+- [ ]	ASAJ. 
+- [ ]	Perhitungan rata-rata nilai. 
+Terhubung dengan: Wali Kelas dan Guru yang bersangkutan.
+Terintegrasi dengan: Rapor Wali Kelas.
+
+### C. Upload perangkat pembelajaran
+- [ ]	Prota. *(Modul Ajar - Tahap 2 / Coming Soon)* 
+- [ ]	Prosem. 
+- [ ]	RPP. 
+Sifat: Privat.
+Terhubung dengan: Kurikulum.
+
+### D. Portofolio Guru
+- [x]	Terhubung dengan: Humas & Personalia. *(Menu: Pelatihan & Kompetensi)*
+
+
+## V. KEBUTUHAN FITUR GURU UMMI
+
+### A. Presensi harian
+- [x]	Riwayat presensi. *(Menu: Riwayat Presensi Guru)*
+- [x]	Rekap absensi bulanan.
+
+### B. Penilaian pekanan dan pengajuan naik jilid
+- [ ]	Progress pembelajaran murid. 
+- [ ]	Pengajuan kenaikan jilid. *(Fitur Ujian - Tahap 2)*
+
+### C. Upload perangkat pembelajaran
+- [ ]	Prota. *(Modul Ajar - Tahap 2 / Coming Soon)* 
+- [ ]	Prosem. 
+- [ ]	RPP. 
+Sifat: Privat.
+
+### D. Portofolio Guru.
+- [x]	*(Menu: Pelatihan & Kompetensi)*
+
+### E. ACC/Non-ACC pengajuan naik jilid.
+- [ ]	Keterangan: Fitur khusus untuk 2 Koordinator Ummi. *(Role: KOORDINATOR_UMMI - Tahap 2)*
+
+
+## VI. KEBUTUHAN FITUR GURU EKSTRAKURIKULER
+
+### A. Presensi murid.
+- [ ]	
+
+### B. Penilaian bulanan.
+- [ ]	Progress pembelajaran murid. 
+
+### C. Upload perangkat pembelajaran.
+- [ ]	Prota. 
+- [ ]	Prosem. 
+- [ ]	RPP. 
+Sifat: Privat.
+
+### D. Portofolio Guru.
+- [x]	*(Menu: Pelatihan & Kompetensi)*
+
+
+## VII. KEBUTUHAN FITUR TENAGA KEPENDIDIKAN
+Tenaga Kependidikan meliputi:
+- [x]	Tata Usaha (TU).
+- [x]	Bendahara.
+- [ ]	Petugas Kebersihan. 
+- [x]	Perpustakaan.
+- [x]	Koperasi.
+- [x]	Driver.
+*(Semua tercakup dalam role Personnel)*
+
+### A. Presensi kehadiran.
+- [x]	*(Menu: Check-In/Out Kehadiran)*
+
+### B. Laporan kinerja harian/pekanan.
+- [x]	Progress pekerjaan yang dilakukan. *(Menu: Laporan Kinerja)*
+
+### C. Portofolio Tenaga Kependidikan.
+- [x]	*(Menu: Pelatihan & Kompetensi)*
+
+
+## VIII. KEBUTUHAN FITUR WALI MURID
+
+### A. Absensi/kehadiran murid.
+- [ ]	*(Dashboard Wali Murid - Tahap 2 / Coming Soon)*
+
+### B. Perizinan murid.
+- [ ]	*(Pengajuan Izin - Tahap 2)*
+
+### C. Jadwal pelajaran.
+- [ ]	*(Tampil di Dashboard - Tahap 2)*
+
+### D. Rapor karakter murid.
+- [ ]	*(Tampil di menu Rapor - Tahap 2)*
+
+### E. Tahsin & Tahfidz.
+- [ ]	*(Progress UMMI - Tahap 2)*
+
+### F. Administrasi pembayaran.
+- [ ]	*(Menu: Tagihan & SPP - Tahap 2)*
+
+### G. Pengumuman.
+- [ ]	*(Notifikasi/Pengumuman - Tahap 2)*
+
+### H. Rapor murid.
+- [ ]	Komponen: STS 1, SAS, STS, ASAJ. 
+
+
+## IX. KEBUTUHAN FITUR KOMITE MUSADA
+
+### A. Kegiatan Paguyuban
+- [ ]	Menjadi salah satu bahan/informasi pada Dashboard Utama Website. 
+
+### B. Laporan Keuangan Paguyuban
+- [ ]	Terhubung dengan: Keuangan. *(Menu: Keuangan Komite - Tahap 2)*
+
+### C. Laporan Keuangan Komite
+- [ ]	Terhubung dengan: Keuangan. 
+- [ ]	Format laporan keuangan mengikuti format laporan keuangan pada Dashboard Keuangan. 

@@ -128,6 +128,16 @@ const Auth = {
     window.location.hash = '';
   },
 
+  async updateProfileCredentials(newEmail, newPassword) {
+    if (!this.currentUser) throw new Error('Tidak ada pengguna yang login.');
+    if (newEmail && newEmail !== this.currentUser.email) {
+      await this.currentUser.updateEmail(newEmail);
+    }
+    if (newPassword && newPassword.length >= 6) {
+      await this.currentUser.updatePassword(newPassword);
+    }
+  },
+
   updateProfileUI() {
     if (!this.userData) return;
 

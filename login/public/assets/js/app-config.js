@@ -9,7 +9,10 @@
     STUDENT_AFFAIRS: 'studentAffairs',
     PERSONNEL: 'personnel',
     FACILITIES: 'facilities',
-    IT_ADMIN: 'it_admin'
+    IT_ADMIN: 'it_admin',
+    GURU_EKSKUL: 'guruEkskul',
+    KOMITE: 'komite',
+    TENDIK: 'tendik'
   });
 
   const UNIT_LABELS = Object.freeze({
@@ -31,19 +34,25 @@
     [ROLES.STUDENT_AFFAIRS]: 'Kesiswaan',
     [ROLES.PERSONNEL]: 'Personalia',
     [ROLES.FACILITIES]: 'Sarpras',
-    [ROLES.IT_ADMIN]: 'IT Admin'
+    [ROLES.IT_ADMIN]: 'IT Admin',
+    [ROLES.GURU_EKSKUL]: 'Guru Ekstrakurikuler',
+    [ROLES.KOMITE]: 'Komite Sekolah',
+    [ROLES.TENDIK]: 'Tenaga Kependidikan'
   });
 
   const NAV_ITEMS = Object.freeze({
     [ROLES.ADMIN]: [
-      { hash: '#/dashboard', icon: 'ph-squares-four', text: 'Dashboard Sekolah' }
+      { hash: '#/dashboard', icon: 'ph-squares-four', text: 'Dashboard Sekolah' },
+      { hash: '#/attendance', icon: 'ph-map-pin', text: 'Presensi Kehadiran' }
     ],
     [ROLES.GURU]: [
       { hash: '#/dashboard', icon: 'ph-squares-four', text: 'Beranda' }
     ],
     'GURU_UMUM': [
-      { hash: '#/guru/attendance', icon: 'ph-map-pin', text: 'Presensi Guru', group: 'Tugas Utama Guru' },
+      { hash: '#/attendance', icon: 'ph-map-pin', text: 'Presensi Kehadiran', group: 'Tugas Utama' },
       { hash: '#/guru/academic', icon: 'ph-check-square', text: 'Nilai Akademik', group: 'Tugas Utama Guru' },
+      { hash: '#/curriculum/syllabus', icon: 'ph-folder-arrow-up', text: 'Upload Perangkat Ajar', group: 'Tugas Utama Guru' },
+      { hash: '#/guru/portfolio', icon: 'ph-folder', text: 'Portofolio Guru', group: 'Tugas Utama Guru' },
       { hash: '#/guru/observations', icon: 'ph-note-pencil', text: 'Riwayat Observasi', group: 'Tugas Utama Guru' }
     ],
     'WALI_KELAS': [
@@ -53,12 +62,30 @@
     ],
     [ROLES.KEPSEK]: [
       { hash: '#/dashboard', icon: 'ph-chart-pie', text: 'Dashboard Kepala Sekolah' },
+      { hash: '#/attendance', icon: 'ph-map-pin', text: 'Presensi Kehadiran' },
       { hash: '#/kepsek/reports', icon: 'ph-file-text', text: 'Laporan Kelas' },
       { hash: '#/curriculum', icon: 'ph-books', text: 'Monitoring Kurikulum' },
       { hash: '#/student-affairs', icon: 'ph-users-three', text: 'Monitoring Kesiswaan' },
       { hash: '#/finance', icon: 'ph-wallet', text: 'Monitoring Keuangan' },
       { hash: '#/personnel', icon: 'ph-briefcase', text: 'Monitoring Personalia' },
       { hash: '#/facilities', icon: 'ph-building-office', text: 'Monitoring Sarpras' }
+    ],
+    [ROLES.TENDIK]: [
+      { hash: '#/attendance', icon: 'ph-map-pin', text: 'Presensi Kehadiran' },
+      { hash: '#/tendik/performance', icon: 'ph-clipboard-text', text: 'Laporan Kinerja' },
+      { hash: '#/tendik/portfolio', icon: 'ph-folder', text: 'Portofolio' }
+    ],
+    [ROLES.GURU_EKSKUL]: [
+      { hash: '#/attendance', icon: 'ph-map-pin', text: 'Presensi Kehadiran' },
+      { hash: '#/ekskul/student-attendance', icon: 'ph-users', text: 'Presensi Murid' },
+      { hash: '#/ekskul/grades', icon: 'ph-star', text: 'Penilaian Bulanan' },
+      { hash: '#/ekskul/documents', icon: 'ph-folder-arrow-up', text: 'Upload Perangkat' },
+      { hash: '#/ekskul/portfolio', icon: 'ph-folder-user', text: 'Portofolio' }
+    ],
+    [ROLES.KOMITE]: [
+      { hash: '#/komite/activities', icon: 'ph-users-three', text: 'Kegiatan Paguyuban' },
+      { hash: '#/komite/finance-paguyuban', icon: 'ph-wallet', text: 'Keuangan Paguyuban' },
+      { hash: '#/komite/finance-komite', icon: 'ph-wallet', text: 'Keuangan Komite' }
     ],
     [ROLES.ORTU]: [
       { hash: '#/ortu/dashboard', icon: 'ph-graduation-cap', text: 'Perkembangan Anak' }
@@ -67,19 +94,24 @@
       { hash: '#/it-admin/dashboard', icon: 'ph-database', text: 'Sinkronisasi Data' }
     ],
     [ROLES.PERSONNEL]: [
-      { hash: '#/dashboard', icon: 'ph-squares-four', text: 'Beranda' }
+      { hash: '#/dashboard', icon: 'ph-squares-four', text: 'Beranda' },
+      { hash: '#/attendance', icon: 'ph-map-pin', text: 'Presensi Kehadiran' }
     ],
     [ROLES.FINANCE]: [
-      { hash: '#/dashboard', icon: 'ph-squares-four', text: 'Beranda' }
+      { hash: '#/dashboard', icon: 'ph-squares-four', text: 'Beranda' },
+      { hash: '#/attendance', icon: 'ph-map-pin', text: 'Presensi Kehadiran' }
     ],
     [ROLES.STUDENT_AFFAIRS]: [
-      { hash: '#/dashboard', icon: 'ph-squares-four', text: 'Beranda' }
+      { hash: '#/dashboard', icon: 'ph-squares-four', text: 'Beranda' },
+      { hash: '#/attendance', icon: 'ph-map-pin', text: 'Presensi Kehadiran' }
     ],
     [ROLES.CURRICULUM]: [
-      { hash: '#/dashboard', icon: 'ph-squares-four', text: 'Beranda' }
+      { hash: '#/dashboard', icon: 'ph-squares-four', text: 'Beranda' },
+      { hash: '#/attendance', icon: 'ph-map-pin', text: 'Presensi Kehadiran' }
     ],
     [ROLES.FACILITIES]: [
-      { hash: '#/dashboard', icon: 'ph-squares-four', text: 'Beranda' }
+      { hash: '#/dashboard', icon: 'ph-squares-four', text: 'Beranda' },
+      { hash: '#/attendance', icon: 'ph-map-pin', text: 'Presensi Kehadiran' }
     ],
     'WAKA_HUMAS_PERSONALIA': [
       { hash: '#/personnel', icon: 'ph-briefcase', text: 'Dashboard Personalia', group: 'Personalia: Administrasi SDM' },
@@ -92,6 +124,8 @@
       { hash: '#/personnel/welfare', icon: 'ph-heart', text: 'Kesejahteraan Staf', group: 'Personalia: Kinerja & Kesejahteraan' },
       { hash: '#/personnel/publications', icon: 'ph-megaphone', text: 'Publikasi & Informasi', group: 'Humas: Komunikasi Publik' },
       { hash: '#/personnel/complaints', icon: 'ph-chats', text: 'Layanan Pengaduan', group: 'Humas: Komunikasi Publik' },
+      { hash: '#/personnel/documents', icon: 'ph-folder', text: 'Dokumen Kerja Sama', group: 'Humas: Dokumen & SPMB' },
+      { hash: '#/personnel/spmb', icon: 'ph-users', text: 'Manajemen SPMB', group: 'Humas: Dokumen & SPMB' },
       { hash: '#/personnel/partnerships', icon: 'ph-handshake', text: 'Kemitraan & MoU', group: 'Humas: Kemitraan & Acara' },
       { hash: '#/personnel/events', icon: 'ph-calendar-star', text: 'Manajemen Acara', group: 'Humas: Kemitraan & Acara' }
     ],
@@ -113,6 +147,10 @@
       { hash: '#/curriculum/schedules', icon: 'ph-calendar', text: 'Jadwal Pelajaran & Kalender', group: 'Kurikulum: Perencanaan' },
       { hash: '#/curriculum/syllabus', icon: 'ph-folder-open', text: 'Perangkat & Modul Ajar', group: 'Kurikulum: Pelaksanaan KBM' },
       { hash: '#/curriculum/monitoring', icon: 'ph-eye', text: 'Pemantauan KBM', group: 'Kurikulum: Pelaksanaan KBM' },
+      { hash: '#/curriculum/questions', icon: 'ph-file-code', text: 'Bank Soal', group: 'Kurikulum: Pelaksanaan KBM' },
+      { hash: '#/curriculum/journals', icon: 'ph-notebook', text: 'Jurnal Pembelajaran', group: 'Kurikulum: Pelaksanaan KBM' },
+      { hash: '#/admin/attendance', icon: 'ph-clock', text: 'Pantau Kehadiran', group: 'Kurikulum: Pelaksanaan KBM' },
+      { hash: '#/curriculum/grades', icon: 'ph-exam', text: 'Database Nilai', group: 'Kurikulum: Supervisi & Evaluasi' },
       { hash: '#/curriculum/evaluations', icon: 'ph-exam', text: 'Sistem Penilaian', group: 'Kurikulum: Supervisi & Evaluasi' },
       { hash: '#/curriculum/supervision', icon: 'ph-chalkboard-teacher', text: 'Supervisi Guru', group: 'Kurikulum: Supervisi & Evaluasi' }
     ],
@@ -121,10 +159,13 @@
       { hash: '#/finance/rkas', icon: 'ph-chart-bar', text: 'Penyusunan RKAS', group: 'Keuangan: Perencanaan' },
       { hash: '#/finance/transactions', icon: 'ph-arrows-left-right', text: 'Penerimaan & Pengeluaran', group: 'Keuangan: Pembukuan' },
       { hash: '#/finance/cashbook', icon: 'ph-book-open', text: 'Buku Kas Umum (BKU)', group: 'Keuangan: Pembukuan' },
-      { hash: '#/finance/taxes', icon: 'ph-receipt', text: 'Administrasi Pajak', group: 'Keuangan: Perpajakan & Arsip' },
-      { hash: '#/finance/archives', icon: 'ph-archive-box', text: 'Arsip Bukti Transaksi', group: 'Keuangan: Perpajakan & Arsip' },
-      { hash: '#/finance/reports', icon: 'ph-file-text', text: 'LPJ & Sinkronisasi Kas', group: 'Keuangan: Pelaporan' },
-      { hash: '#/finance/transparency', icon: 'ph-projector-screen', text: 'Publikasi Anggaran', group: 'Keuangan: Pelaporan' }
+      { hash: '#/finance/bos', icon: 'ph-receipt', text: 'Laporan BOS', group: 'Keuangan: BOS & Beasiswa' },
+      { hash: '#/finance/scholarships', icon: 'ph-hand-coins', text: 'Pengajuan Beasiswa', group: 'Keuangan: BOS & Beasiswa' },
+      { hash: '#/finance/salaries', icon: 'ph-money', text: 'Penghitungan Gaji', group: 'Keuangan: Penggajian & Proposal' },
+      { hash: '#/finance/proposals', icon: 'ph-file-text', text: 'Persetujuan Proposal', group: 'Keuangan: Penggajian & Proposal' },
+      { hash: '#/finance/archives', icon: 'ph-archive-box', text: 'Arsip Bukti Transaksi', group: 'Keuangan: Dokumen & Laporan' },
+      { hash: '#/finance/reports', icon: 'ph-file-text', text: 'LPJ & Sinkronisasi Kas', group: 'Keuangan: Dokumen & Laporan' },
+      { hash: '#/finance/transparency', icon: 'ph-projector-screen', text: 'Publikasi Anggaran', group: 'Keuangan: Dokumen & Laporan' }
     ],
     'WAKA_SARPRAS': [
       { hash: '#/facilities', icon: 'ph-building-office', text: 'Dashboard Sarpras', group: 'Sarpras: Inventarisasi' },
@@ -140,6 +181,7 @@
     ],
     'TIM_IT': [
       { hash: '#/it-admin/dashboard', icon: 'ph-monitor', text: 'Dashboard IT', group: 'IT & Sistem: Operasional' },
+      { hash: '#/admin/users', icon: 'ph-users', text: 'Kelola Pengguna', group: 'IT & Sistem: Operasional' },
       { hash: '#/it-admin/sync', icon: 'ph-arrows-clockwise', text: 'Sinkronisasi Dapodik', group: 'IT & Sistem: Operasional' },
       { hash: '#/it-admin/backup', icon: 'ph-cloud-arrow-down', text: 'Backup & Restore Data', group: 'IT & Sistem: Basis Data' },
       { hash: '#/it-admin/logs', icon: 'ph-scroll', text: 'Log Audit Sistem', group: 'IT & Sistem: Basis Data' },
@@ -290,6 +332,11 @@
     if (isTimInggris) {
       baseNav = [...baseNav, ...(NAV_ITEMS['TIM_B_INGGRIS'] || [])];
     }
+    if (role === ROLES.PERSONNEL) baseNav = [...baseNav, ...(NAV_ITEMS['WAKA_HUMAS_PERSONALIA'] || [])];
+    if (role === ROLES.FINANCE) baseNav = [...baseNav, ...(NAV_ITEMS['WAKA_KEUANGAN'] || [])];
+    if (role === ROLES.CURRICULUM) baseNav = [...baseNav, ...(NAV_ITEMS['WAKA_KURIKULUM'] || [])];
+    if (role === ROLES.STUDENT_AFFAIRS) baseNav = [...baseNav, ...(NAV_ITEMS['WAKA_KESISWAAN'] || [])];
+    if (role === ROLES.FACILITIES) baseNav = [...baseNav, ...(NAV_ITEMS['WAKA_SARPRAS'] || [])];
     const unitAssignments = normalizeAssignments(assignments);
     const unitNav = unitAssignments.flatMap((unit) => {
       return NAV_ITEMS[unit] || [];

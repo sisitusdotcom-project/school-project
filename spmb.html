@@ -357,11 +357,38 @@
           return;
         }
 
-        alert('Data pendaftaran berhasil dikirim. Silakan tunggu konfirmasi dari pihak sekolah.');
-        spmbForm.reset();
-        if (penyakitLainnya) {
-          penyakitLainnya.style.display = 'none';
+        const btnSubmit = spmbForm.querySelector('button[type="submit"]');
+        if (btnSubmit) {
+          btnSubmit.disabled = true;
+          btnSubmit.textContent = 'Memproses...';
         }
+
+        const formData = new FormData(spmbForm);
+        const payload = Object.fromEntries(formData.entries());
+        payload.status = 'Mendaftar';
+        payload.timestamp = Date.now();
+
+        // Push data to Firebase via REST API
+        fetch('https://musada-sd-default-rtdb.firebaseio.com/spmb_registrations.json', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        }).then(res => {
+          if(!res.ok) throw new Error('Gagal menyimpan data');
+          alert('Data pendaftaran berhasil dikirim. Silakan tunggu konfirmasi dari pihak sekolah.');
+          spmbForm.reset();
+          if (penyakitLainnya) penyakitLainnya.style.display = 'none';
+        }).catch(err => {
+          console.error(err);
+          alert('Terjadi kesalahan saat mengirim pendaftaran. Silakan coba lagi.');
+        }).finally(() => {
+          if (btnSubmit) {
+            btnSubmit.disabled = false;
+            btnSubmit.textContent = 'Kirim Pendaftaran';
+          }
+        });
       });
     }
 

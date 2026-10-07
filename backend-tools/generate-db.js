@@ -120,7 +120,7 @@ for (let i = 0; i < guruLines.length; i++) {
   if (!name || name.toLowerCase() === 'nama') continue;
   
   const baseName = name.split(',')[0].trim();
-  const uid = 'GURU_' + baseName.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase();
+  const uid = 'GTK_' + baseName.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase();
   
   if (!rtdb.users[uid]) {
     rtdb.users[uid] = {
