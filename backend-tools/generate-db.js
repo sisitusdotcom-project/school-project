@@ -1,8 +1,6 @@
 const fs = require('fs');
-
 const siswaTsv = fs.readFileSync('./data/data-siswa.tsv', 'utf-8');
 const guruTsv = fs.readFileSync('./data/data-guru.tsv', 'utf-8');
-
 const rtdb = {
   users: {},
   classes: {},
@@ -26,7 +24,6 @@ const rtdb = {
     'SUB_KEMUHAMMADIYAHAN': {'name': 'Kemuhammadiyahan', 'order': 16, 'category': 'kekhasan'},
     'SUB_B_ARAB': {'name': 'Bahasa Arab', 'order': 17, 'category': 'kekhasan'}
   },
-
   academicYears: {},
   semesters: {},
   rooms: {},
@@ -37,19 +34,15 @@ const rtdb = {
     semester: "Ganjil"
   }
 };
-
-// 1. Process Siswa
 let currentClass = "";
 const linesSiswa = siswaTsv.split('\n').map(l => l.trim());
 let isParsingStudents = false;
-
 for (let i = 0; i < linesSiswa.length; i++) {
   const line = linesSiswa[i];
-  if (line.startsWith('NO\tNO INDUK\tNISN') || line.startsWith('NO\tNO INDUK\tNISN')) {
+  if (line.startsWith('NO\tNO INDUK\tNISN')) {
     isParsingStudents = true;
     continue;
   }
-  
   if (isParsingStudents && line) {
     const cols = line.split('\t');
     if (cols.length >= 4) {
@@ -59,26 +52,18 @@ for (let i = 0; i < linesSiswa.length; i++) {
       const nama = cols[3];
       const kelas = cols[4] || currentClass;
       const gender = cols[5]?.trim() || '';
-      
       if (kelas) currentClass = kelas;
-      
-      if (!nama || nama.toLowerCase() === 'nama' || !no.match(/^\d+$/)) continue; // skip headers
-      
+      if (!nama || nama.toLowerCase() === 'nama' || !no.match(/^\d+$/)) continue;
       const cleanNisn = nisn ? nisn.replace(/\s+/g, '') : (noInduk || (Date.now() + '_' + no));
       const uid = `SISWA_${cleanNisn}`;
-      
       let classId = 'CLASS_' + currentClass.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase();
       classId = classId.replace(/_+/g, '_');
-
-      // Save to users (Ortu account for this student)
       rtdb.users[uid] = {
-        name: nama, // Temporarily using student's name as Ortu name
+        name: nama,
         role: 'ortu',
         isActive: true,
         createdAt: Date.now()
       };
-      
-      // Save to students collection (The actual students DB)
       rtdb.students[uid] = {
         name: nama,
         nis: noInduk || '',
@@ -88,8 +73,6 @@ for (let i = 0; i < linesSiswa.length; i++) {
         gender: gender,
         isActive: true
       };
-      
-      // Save to master/classes
       if (!rtdb.classes[classId]) {
         rtdb.classes[classId] = {
           name: currentClass,
@@ -100,71 +83,56 @@ for (let i = 0; i < linesSiswa.length; i++) {
     }
   }
 }
-
-// 2. Process Guru & Employees
 const guruLines = guruTsv.split('\n').map(l => l.trim());
-
 for (let i = 0; i < guruLines.length; i++) {
   const line = guruLines[i];
   if (!line || line.startsWith('No\tNama')) continue;
-
   let cols = line.split('\t');
-  if (cols.length < 4) continue; // skip invalid lines
-  
+  if (cols.length < 4) continue;
   let name = cols[1]?.trim();
   let jabatan = cols[2]?.trim() || '';
   let gender = cols[3]?.trim() || '';
   let tugasMengajar = cols[4]?.trim() || '';
   let tugasTambahan = cols[5]?.trim() || '';
-  
   if (!name || name.toLowerCase() === 'nama') continue;
-  
   const baseName = name.split(',')[0].trim();
   const uid = 'GTK_' + baseName.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase();
-  
   if (!rtdb.users[uid]) {
     rtdb.users[uid] = {
       name: name,
       role: jabatan === 'Tenaga Kependidikan' ? 'personnel' : (jabatan === 'Kepala Sekolah' ? 'kepsek' : 'guru'),
       jabatan: jabatan,
       gender: gender,
+      teachingRole: (tugasMengajar && tugasMengajar !== '-') ? tugasMengajar : '',
       assignments: [],
       isActive: true,
       createdAt: Date.now()
     };
   }
-  
   const user = rtdb.users[uid];
-  
-  let combinedTugas = (tugasMengajar + ',' + tugasTambahan).replace(/-/g, '');
-  const tugasList = combinedTugas.split(',').map(t => t.trim());
+  const allTugas = [tugasMengajar, tugasTambahan].filter(t => t && t !== '-').join(', ');
+  const tugasList = allTugas.split(',').map(t => t.trim()).filter(Boolean);
   for (const t of tugasList) {
     if (!t) continue;
-    
     let assignmentCode = t;
-    
     if (t.startsWith('GURU_KELAS_')) {
       const className = t.replace('GURU_KELAS_', '').replace(/_/g, ' ');
       const classId = 'CLASS_' + t.replace('GURU_KELAS_', '');
-      
       if (!rtdb.classes[classId]) {
         rtdb.classes[classId] = { name: className, students: {} };
       }
       rtdb.classes[classId].teacherId = uid;
     }
-    
-    // Elevate Role if necessary based on code
     if (t.startsWith('WAKA_')) {
-       user.role = 'admin';
+      user.role = 'admin';
     } else if (t === 'TIM_IT') {
-       user.role = 'it_admin';
+      user.role = 'it_admin';
     }
-    
-    if (assignmentCode && !user.assignments.includes(assignmentCode)) {
+    const isCode = /^(GURU_|WAKA_|TIM_|KOORD_|STAF_|SUB_)/.test(t);
+    if (isCode && !user.assignments.includes(assignmentCode)) {
       user.assignments.push(assignmentCode);
     }
   }
 }
-
 fs.writeFileSync('./data/musada-sd-default-rtdb-export.json', JSON.stringify(rtdb, null, 2));
 console.log('Successfully generated ./data/musada-sd-default-rtdb-export.json, Teachers:', Object.values(rtdb.users).filter(u => u.role !== 'ortu').length, 'Students:', Object.values(rtdb.users).filter(u => u.role === 'ortu').length);
