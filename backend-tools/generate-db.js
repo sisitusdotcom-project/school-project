@@ -123,16 +123,27 @@ for (let i = 0; i < guruLines.length; i++) {
       }
       rtdb.classes[classId].teacherId = uid;
     }
-    if (t.startsWith('WAKA_')) {
-      user.role = 'admin';
-    } else if (t === 'TIM_IT') {
-      user.role = 'it_admin';
-    }
     const isCode = /^(GURU_|WAKA_|TIM_|KOORD_|STAF_|SUB_)/.test(t);
     if (isCode && !user.assignments.includes(assignmentCode)) {
       user.assignments.push(assignmentCode);
     }
   }
+  if (user.assignments.length) {
+    user.unitFlags = {};
+    user.assignments.forEach(a => {
+      user.unitFlags[a] = true;
+    });
+  }
 }
+rtdb.users['ADMIN'] = {
+  name: 'Administrator Sistem',
+  role: 'admin',
+  jabatan: 'Administrator',
+  gender: 'L',
+  teachingRole: '',
+  assignments: ['TIM_IT'],
+  isActive: true,
+  createdAt: Date.now()
+};
 fs.writeFileSync('./data/musada-sd-default-rtdb-export.json', JSON.stringify(rtdb, null, 2));
 console.log('Successfully generated ./data/musada-sd-default-rtdb-export.json, Teachers:', Object.values(rtdb.users).filter(u => u.role !== 'ortu').length, 'Students:', Object.values(rtdb.users).filter(u => u.role === 'ortu').length);

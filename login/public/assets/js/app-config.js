@@ -14,13 +14,14 @@
     KOMITE: 'komite',
     TENDIK: 'tendik'
   });
+  const PRIMARY_ROLES = Object.freeze({
+    [ROLES.GURU]: 'Guru / Pendidik',
+    [ROLES.TENDIK]: 'Tenaga Kependidikan',
+    [ROLES.KEPSEK]: 'Kepala Sekolah',
+    [ROLES.ADMIN]: 'Administrator Sistem',
+    [ROLES.ORTU]: 'Orang Tua / Wali'
+  });
   const UNIT_LABELS = Object.freeze({
-    [ROLES.FINANCE]: 'Keuangan',
-    [ROLES.CURRICULUM]: 'Kurikulum',
-    [ROLES.STUDENT_AFFAIRS]: 'Kesiswaan',
-    [ROLES.PERSONNEL]: 'Humas & Personalia',
-    [ROLES.FACILITIES]: 'Sarpras',
-    [ROLES.IT_ADMIN]: 'IT Admin',
     'WAKA_HUMAS_PERSONALIA': 'Waka Humas & Personalia',
     'STAF_HUMAS_PERSONALIA': 'Staf Humas & Personalia',
     'WAKA_KEUANGAN': 'Waka Keuangan',
@@ -31,10 +32,29 @@
     'STAF_KESISWAAN': 'Staf Kesiswaan',
     'WAKA_SARPRAS': 'Waka Sarpras',
     'STAF_SARPRAS': 'Staf Sarpras',
-    'TIM_IT': 'Tim IT',
+    'TIM_IT': 'Tim IT & Sistem',
     'KOORD_UMMI': 'Koordinator Ummi',
-    'TIM_UMMI': 'Tim Ummi',
-    'TIM_B_INGGRIS': 'Tim B. Inggris'
+    'TIM_UMMI': 'Guru / Tim Ummi',
+    'TIM_B_INGGRIS': 'Tim English Lab',
+    'GURU_EKSTRA_BADMINTON': 'Ekskul Badminton',
+    'GURU_EKSTRA_COOKING': 'Ekskul Cooking',
+    'GURU_EKSTRA_HAND_CRAFT': 'Ekskul Hand Craft',
+    'GURU_EKSTRA_HW': 'Pembina HW',
+    'GURU_EKSTRA_JAHIT_SULAM': 'Ekskul Jahit & Sulam',
+    'GURU_EKSTRA_LUKIS': 'Ekskul Lukis',
+    'GURU_EKSTRA_PANAHAN_PUTRA': 'Ekskul Panahan Putra',
+    'GURU_EKSTRA_PANAHAN_PUTRI': 'Ekskul Panahan Putri',
+    'GURU_EKSTRA_RENANG': 'Ekskul Renang',
+    'GURU_EKSTRA_SEMPOA': 'Ekskul Sempoa',
+    'GURU_EKSTRA_STORY_TELLING': 'Ekskul Story Telling',
+    'GURU_EKSTRA_TAHFIDZ_CAMP': 'Pembina Tahfidz Camp',
+    'GURU_EKSTRA_TARI': 'Ekskul Tari',
+    'GURU_EKSTRA_TS': 'Pembina Tapak Suci',
+    'GURU_MAPEL_PAI': 'Guru Mapel PAI',
+    'GURU_MAPEL_PJOK': 'Guru Mapel PJOK',
+    'GURU_MAPEL_B_INGGRIS': 'Guru Mapel B. Inggris',
+    'GURU_MAPEL_SENI': 'Guru Mapel Seni',
+    'GURU_MAPEL_TIK': 'Guru Mapel TIK'
   });
   const ROLE_LABELS = Object.freeze({
     [ROLES.ADMIN]: 'Administrator',
@@ -68,6 +88,7 @@
     ],
     'WALI_KELAS': [
       { hash: '#/guru/student-attendance', icon: 'ph-users-three', text: 'Absensi Siswa', group: 'Tupoksi Wali Kelas' },
+      { hash: '#/student-affairs/leaves', icon: 'ph-calendar-x', text: 'Perizinan Siswa Sakit/Izin', group: 'Tupoksi Wali Kelas' },
       { hash: '#/guru/classes', icon: 'ph-chalkboard-teacher', text: 'E-Rapor (Kelas)', group: 'Tupoksi Wali Kelas' },
       { hash: '#/guru/additional', icon: 'ph-folder-plus', text: 'Data Tambahan Rapor', group: 'Tupoksi Wali Kelas' }
     ],
@@ -88,10 +109,10 @@
     ],
     [ROLES.GURU_EKSKUL]: [
       { hash: '#/attendance', icon: 'ph-map-pin', text: 'Presensi Kehadiran' },
-      { hash: '#/ekskul/student-attendance', icon: 'ph-users', text: 'Presensi Murid' },
-      { hash: '#/ekskul/grades', icon: 'ph-star', text: 'Penilaian Bulanan' },
-      { hash: '#/ekskul/documents', icon: 'ph-folder-arrow-up', text: 'Upload Perangkat' },
-      { hash: '#/ekskul/portfolio', icon: 'ph-folder-user', text: 'Portofolio' }
+      { hash: '#/guru/ekstra/syllabus', icon: 'ph-clipboard-text', text: 'Program Latihan' },
+      { hash: '#/guru/ekstra/attendance', icon: 'ph-users-three', text: 'Presensi Peserta' },
+      { hash: '#/guru/extracurriculars', icon: 'ph-trophy', text: 'Nilai E-Rapor Ekskul' },
+      { hash: '#/guru/ekstra/talents', icon: 'ph-star', text: 'Pemetaan Siswa Berbakat' }
     ],
     [ROLES.KOMITE]: [
       { hash: '#/komite/activities', icon: 'ph-users-three', text: 'Kegiatan Paguyuban' },
@@ -99,7 +120,9 @@
       { hash: '#/komite/finance-komite', icon: 'ph-wallet', text: 'Keuangan Komite' }
     ],
     [ROLES.ORTU]: [
-      { hash: '#/ortu/dashboard', icon: 'ph-graduation-cap', text: 'Perkembangan Anak' }
+      { hash: '#/ortu/dashboard', icon: 'ph-graduation-cap', text: 'Perkembangan Anak' },
+      { hash: '#/student-affairs/leaves', icon: 'ph-calendar-x', text: 'Permohonan Izin / Sakit' },
+      { hash: '#/finance/student-bills', icon: 'ph-receipt', text: 'Riwayat Tagihan SPP' }
     ],
     [ROLES.IT_ADMIN]: [
       { hash: '#/it-admin/dashboard', icon: 'ph-database', text: 'Sinkronisasi Data' }
@@ -137,8 +160,7 @@
       { hash: '#/personnel/complaints', icon: 'ph-chats', text: 'Layanan Pengaduan', group: 'Humas & Personalia: Komunikasi Publik & Aduan' },
       { hash: '#/personnel/documents', icon: 'ph-folder', text: 'Dokumen Kerja Sama', group: 'Humas & Personalia: Kemitraan & Dokumen' },
       { hash: '#/personnel/partnerships', icon: 'ph-handshake', text: 'Kemitraan & MoU', group: 'Humas & Personalia: Kemitraan & Dokumen' },
-      { hash: '#/personnel/events', icon: 'ph-calendar-star', text: 'Manajemen Acara', group: 'Humas & Personalia: Kemitraan & Dokumen' },
-      { hash: '#/personnel/spmb', icon: 'ph-users', text: 'Manajemen SPMB', group: 'Humas & Personalia: Penerimaan Siswa (SPMB)' }
+      { hash: '#/personnel/events', icon: 'ph-calendar-star', text: 'Manajemen Acara', group: 'Humas & Personalia: Kemitraan & Dokumen' }
     ],
     'STAF_HUMAS_PERSONALIA': [
       { hash: '#/personnel', icon: 'ph-briefcase', text: 'Dashboard Humas & Personalia', group: 'Humas & Personalia: Administrasi SDM' },
@@ -153,23 +175,27 @@
     ],
     'WAKA_KESISWAAN': [
       { hash: '#/student-affairs', icon: 'ph-users-three', text: 'Dashboard Kesiswaan', group: 'Kesiswaan: Umum' },
-      { hash: '#/student-affairs/ppdb', icon: 'ph-user-plus', text: 'PPDB & Mutasi', group: 'Kesiswaan: PPDB & Transisi' },
+      { hash: '#/student-affairs/ppdb', icon: 'ph-user-plus', text: 'Penerimaan Siswa Baru (SPMB / PPDB)', group: 'Kesiswaan: PPDB & Transisi' },
       { hash: '#/student-affairs/mpls', icon: 'ph-flag-banner', text: 'Masa Pengenalan (MPLS)', group: 'Kesiswaan: PPDB & Transisi' },
       { hash: '#/admin/characters', icon: 'ph-star', text: 'Indikator Karakter & Sikap', group: 'Kesiswaan: Karakter & Disiplin' },
       { hash: '#/student-affairs/rules', icon: 'ph-gavel', text: 'Tata Tertib & TPPK', group: 'Kesiswaan: Karakter & Disiplin' },
+      { hash: '#/student-affairs/leaves', icon: 'ph-calendar-x', text: 'Perizinan Siswa Sakit/Izin', group: 'Kesiswaan: Karakter & Disiplin' },
       { hash: '#/admin/extracurriculars', icon: 'ph-trophy', text: 'Ekstrakurikuler', group: 'Kesiswaan: Bakat & Prestasi' },
       { hash: '#/student-affairs/achievements', icon: 'ph-medal', text: 'Lomba & Penghargaan', group: 'Kesiswaan: Bakat & Prestasi' },
       { hash: '#/admin/attendance', icon: 'ph-calendar-check', text: 'Pantau Kehadiran Siswa', group: 'Kesiswaan: Administrasi' },
-      { hash: '#/student-affairs/scholarships', icon: 'ph-hand-coins', text: 'Data Beasiswa & PIP', group: 'Kesiswaan: Administrasi' }
+      { hash: '#/student-affairs/scholarships', icon: 'ph-hand-coins', text: 'Data Beasiswa & PIP', group: 'Kesiswaan: Administrasi' },
+      { hash: '#/student-affairs/alumni', icon: 'ph-graduation-cap', text: 'Penelusuran Alumni', group: 'Kesiswaan: Administrasi' }
     ],
     'STAF_KESISWAAN': [
       { hash: '#/student-affairs', icon: 'ph-users-three', text: 'Dashboard Kesiswaan', group: 'Kesiswaan: Umum' },
-      { hash: '#/student-affairs/ppdb', icon: 'ph-user-plus', text: 'PPDB & Mutasi', group: 'Kesiswaan: PPDB & Transisi' },
+      { hash: '#/student-affairs/ppdb', icon: 'ph-user-plus', text: 'Penerimaan Siswa Baru (SPMB / PPDB)', group: 'Kesiswaan: PPDB & Transisi' },
       { hash: '#/student-affairs/mpls', icon: 'ph-flag-banner', text: 'Masa Pengenalan (MPLS)', group: 'Kesiswaan: PPDB & Transisi' },
       { hash: '#/admin/characters', icon: 'ph-star', text: 'Indikator Karakter & Sikap', group: 'Kesiswaan: Karakter & Disiplin' },
       { hash: '#/student-affairs/rules', icon: 'ph-gavel', text: 'Tata Tertib & TPPK', group: 'Kesiswaan: Karakter & Disiplin' },
+      { hash: '#/student-affairs/leaves', icon: 'ph-calendar-x', text: 'Perizinan Siswa Sakit/Izin', group: 'Kesiswaan: Karakter & Disiplin' },
       { hash: '#/student-affairs/achievements', icon: 'ph-medal', text: 'Lomba & Penghargaan', group: 'Kesiswaan: Bakat & Prestasi' },
-      { hash: '#/student-affairs/scholarships', icon: 'ph-hand-coins', text: 'Data Beasiswa & PIP', group: 'Kesiswaan: Administrasi' }
+      { hash: '#/student-affairs/scholarships', icon: 'ph-hand-coins', text: 'Data Beasiswa & PIP', group: 'Kesiswaan: Administrasi' },
+      { hash: '#/student-affairs/alumni', icon: 'ph-graduation-cap', text: 'Penelusuran Alumni', group: 'Kesiswaan: Administrasi' }
     ],
     'WAKA_KURIKULUM': [
       { hash: '#/curriculum', icon: 'ph-books', text: 'Dashboard Kurikulum', group: 'Kurikulum: Umum' },
@@ -200,7 +226,8 @@
       { hash: '#/finance/transactions', icon: 'ph-arrows-left-right', text: 'Penerimaan & Pengeluaran', group: 'Keuangan: Pembukuan' },
       { hash: '#/finance/cashbook', icon: 'ph-book-open', text: 'Buku Kas Umum (BKU)', group: 'Keuangan: Pembukuan' },
       { hash: '#/finance/bos', icon: 'ph-receipt', text: 'Laporan BOS', group: 'Keuangan: BOS & Beasiswa' },
-      { hash: '#/finance/scholarships', icon: 'ph-hand-coins', text: 'Pengajuan Beasiswa', group: 'Keuangan: BOS & Beasiswa' },
+      { hash: '#/finance/scholarships', icon: 'ph-hand-coins', text: 'Pencairan Beasiswa & SPP', group: 'Keuangan: BOS & Beasiswa' },
+      { hash: '#/finance/student-bills', icon: 'ph-receipt', text: 'Tagihan & SPP Siswa', group: 'Keuangan: BOS & Beasiswa' },
       { hash: '#/finance/salaries', icon: 'ph-money', text: 'Penghitungan Gaji', group: 'Keuangan: Penggajian & Proposal' },
       { hash: '#/finance/proposals', icon: 'ph-file-text', text: 'Persetujuan Proposal', group: 'Keuangan: Penggajian & Proposal' },
       { hash: '#/finance/archives', icon: 'ph-archive-box', text: 'Arsip Bukti Transaksi', group: 'Keuangan: Dokumen & Laporan' },
@@ -212,7 +239,8 @@
       { hash: '#/finance/transactions', icon: 'ph-arrows-left-right', text: 'Penerimaan & Pengeluaran', group: 'Keuangan: Pembukuan' },
       { hash: '#/finance/cashbook', icon: 'ph-book-open', text: 'Buku Kas Umum (BKU)', group: 'Keuangan: Pembukuan' },
       { hash: '#/finance/bos', icon: 'ph-receipt', text: 'Laporan BOS', group: 'Keuangan: BOS & Beasiswa' },
-      { hash: '#/finance/scholarships', icon: 'ph-hand-coins', text: 'Pengajuan Beasiswa', group: 'Keuangan: BOS & Beasiswa' },
+      { hash: '#/finance/scholarships', icon: 'ph-hand-coins', text: 'Pencairan Beasiswa & SPP', group: 'Keuangan: BOS & Beasiswa' },
+      { hash: '#/finance/student-bills', icon: 'ph-receipt', text: 'Tagihan & SPP Siswa', group: 'Keuangan: BOS & Beasiswa' },
       { hash: '#/finance/archives', icon: 'ph-archive-box', text: 'Arsip Bukti Transaksi', group: 'Keuangan: Dokumen & Laporan' },
       { hash: '#/finance/reports', icon: 'ph-file-text', text: 'LPJ & Sinkronisasi Kas', group: 'Keuangan: Dokumen & Laporan' }
     ],
@@ -389,16 +417,28 @@
   function getRoleBadgeClass(role) {
     switch (role) {
       case ROLES.ADMIN:
-        return 'badge-primary';
-      case ROLES.GURU:
-        return 'badge-warning';
+        return 'badge-danger';
       case ROLES.KEPSEK:
+        return 'badge-warning';
+      case ROLES.GURU:
         return 'badge-success';
+      case ROLES.TENDIK:
+        return 'badge-primary';
       case ROLES.ORTU:
         return 'badge-outline';
       default:
         return 'badge-outline';
     }
+  }
+  function getAssignmentBadgeClass(assignment) {
+    if (!assignment) return 'badge-outline';
+    if (assignment.startsWith('WAKA_')) return 'badge-primary';
+    if (assignment.startsWith('KOORD_')) return 'badge-warning';
+    if (assignment.startsWith('TIM_')) return 'badge-success';
+    if (assignment.startsWith('STAF_')) return 'badge-outline';
+    if (assignment.startsWith('GURU_KELAS_')) return 'badge-outline';
+    if (assignment.startsWith('GURU_EKSTRA_')) return 'badge-outline';
+    return 'badge-outline';
   }
   const APP_DEFAULTS = Object.freeze({
     googleDriveUploadUrl: 'https://script.google.com/macros/s/AKfycbwHNSb34p_FcX_dTQuw87viaZ9joh2rT3KdtMLBVvwpocWzyF3HICPUPRfPuy63LDsNsw/exec',
@@ -423,6 +463,7 @@
   });
   window.AppConfig = Object.freeze({
     ROLES,
+    PRIMARY_ROLES,
     ROLE_LABELS,
     UNIT_LABELS,
     NAV_ITEMS,
@@ -437,6 +478,7 @@
     getRoleAssignmentLabel,
     getRoleNav,
     getRoleBadgeClass,
+    getAssignmentBadgeClass,
     isTeachingAssignment,
     formatUserName
   });

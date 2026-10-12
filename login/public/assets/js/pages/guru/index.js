@@ -3,7 +3,6 @@ const ATTENDANCE_GEOFENCE = window.APP_ATTENDANCE_GEOFENCE || {
   lng: null,
   radiusMeters: null
 };
-
 const GuruPages = {
   async renderDashboard(container) {
     Router.setTitle('Beranda', 'Selamat datang di Dasbor Digital Sekolah.');
@@ -23,7 +22,6 @@ const GuruPages = {
         attClass = 'badge-success';
       }
     }
-
     container.innerHTML = `
       <div class="card hero-panel">
         <div class="hero-panel__inner">
@@ -37,7 +35,6 @@ const GuruPages = {
           </div>
         </div>
       </div>
-
       <section class="card-grid section-spacer">
         <div class="card stat-card">
           <div class="stat-icon stat-icon--success"><i class="ph ph-map-pin"></i></div>
@@ -52,23 +49,57 @@ const GuruPages = {
           <div><p class="stat-value">${classArr.length}</p><p class="stat-label text-muted">Kelas terlibat</p></div>
         </div>
       </section>
-
-      <h3 class="card-title">Aksi Cepat</h3>
-      <div class="quick-grid section-spacer">
-        <div class="card quick-action quick-action--success" onclick="window.location.hash='#/guru/attendance'">
-          <div class="quick-action-icon"><i class="ph ph-map-pin"></i></div>
-          <h4 class="quick-action-title">Presensi Saya</h4>
+      <section class="card section-spacer">
+        <div class="card-header">
+          <h3 class="card-title"><i class="ph ph-lightning"></i> Aksi Cepat Guru</h3>
         </div>
-        <div class="card quick-action quick-action--info" onclick="window.location.hash='#/guru/student-attendance'">
-          <div class="quick-action-icon"><i class="ph ph-users-three"></i></div>
-          <h4 class="quick-action-title">Absensi Siswa</h4>
+        <div class="card-body">
+          <div class="quick-nav-grid">
+            <a href="#/attendance" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-map-pin"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Presensi Saya</div>
+                <div class="quick-nav-desc">Catat presensi GPS masuk / pulang</div>
+              </div>
+            </a>
+            <a href="#/guru/academic" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-check-square"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Nilai Akademik</div>
+                <div class="quick-nav-desc">Input nilai mapel yang diampu</div>
+              </div>
+            </a>
+            <a href="#/curriculum/syllabus" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-folder-arrow-up"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Perangkat Ajar</div>
+                <div class="quick-nav-desc">Unggah modul ajar & RPP</div>
+              </div>
+            </a>
+            <a href="#/guru/portfolio" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-folder"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Portofolio Guru</div>
+                <div class="quick-nav-desc">Dokumentasi karya & sertifikat</div>
+              </div>
+            </a>
+            <a href="#/guru/student-attendance" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-users-three"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Absensi Siswa</div>
+                <div class="quick-nav-desc">Presensi harian santri kelas</div>
+              </div>
+            </a>
+            <a href="#/guru/classes" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-chalkboard-teacher"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">E-Rapor Kelas</div>
+                <div class="quick-nav-desc">Pengisian lembar capaian rapor</div>
+              </div>
+            </a>
+          </div>
         </div>
-        <div class="card quick-action quick-action--danger" onclick="window.location.hash='#/guru/classes'">
-          <div class="quick-action-icon"><i class="ph ph-star"></i></div>
-          <h4 class="quick-action-title">E-Rapor</h4>
-        </div>
-      </div>
-
+      </section>
       <div class="card panel-callout">
         <h3 class="card-title info-banner"><i class="ph ph-megaphone"></i> Papan Informasi</h3>
         <p class="text-muted soft-note">Validasi lokasi dilakukan oleh server secara aman. Browser tidak menyimpan koordinat sekolah untuk keperluan validasi presensi.</p>
@@ -88,15 +119,15 @@ const GuruPages = {
       const isWali = c.teacherId === Auth.currentUser.uid;
       const count = studentArr.filter(s => s.classId === c.id).length;
       return `
-        <div class="card class-card" onclick="window.location.hash='#/guru/assess/${c.id}'">
+        <div class="card class-card">
           <div class="card-header">
             <h3 class="card-title">${AppConfig.escapeHtml(c.name)}</h3>
             ${isWali ? '<span class="badge badge-primary">Wali Kelas</span>' : '<span class="badge badge-success">Guru Mapel</span>'}
           </div>
           <p class="text-muted">${count} siswa terdaftar</p>
           <div class="card-actions">
-            <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();window.location.hash='#/guru/assess/${c.id}'"><i class="ph ph-note-pencil"></i> Nilai Karakter</button>
-            <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();window.location.hash='#/guru/observe/${c.id}'"><i class="ph ph-chat-text"></i> Catatan</button>
+            <a href="#/guru/assess/${c.id}" class="btn btn-primary btn-sm"><i class="ph ph-note-pencil"></i> Nilai Karakter</a>
+            <a href="#/guru/observe/${c.id}" class="btn btn-outline btn-sm"><i class="ph ph-chat-text"></i> Catatan</a>
           </div>
         </div>`;
     }).join('');
@@ -156,10 +187,10 @@ const GuruPages = {
           <div class="card-header">
             <h3 class="card-title" style="font-size:15px">${AppConfig.escapeHtml(s.name)}</h3>
             <div style="display:flex; gap:6px;">
-              <button class="btn btn-outline btn-sm" onclick="window.open('print.html?id=${s.id}', '_blank')">
+              <a href="print.html?id=${s.id}" target="_blank" class="btn btn-outline btn-sm">
                 <i class="ph ph-printer"></i> Cetak
-              </button>
-              <button class="btn btn-outline btn-sm" onclick="GuruPages._openObsModal('${s.id}','${s.name.replace(/'/g, "\\'")}')">
+              </a>
+              <button type="button" class="btn btn-outline btn-sm btn-open-obs" data-obs-id="${s.id}" data-obs-name="${AppConfig.escapeHtml(s.name)}">
                 <i class="ph ph-chat-text"></i> Catatan
               </button>
             </div>
@@ -175,6 +206,11 @@ const GuruPages = {
       ${GuruPages._obsModal(charArr)}
     `;
     container.addEventListener('click', async (e) => {
+      const obsBtn = e.target.closest('.btn-open-obs');
+      if (obsBtn) {
+        GuruPages._openObsModal(obsBtn.dataset.obsId, obsBtn.dataset.obsName);
+        return;
+      }
       const btn = e.target.closest('.rating-btn');
       if (!btn) return;
       const {
@@ -188,7 +224,6 @@ const GuruPages = {
       try {
         await DB.saveAssessment(year, sem, stu, char, score, Auth.currentUser.uid);
       } catch (err) {
-        
       }
     });
   },
@@ -226,7 +261,6 @@ const GuruPages = {
     }).join('') : '<p class="text-muted" style="padding:12px 0">Belum ada catatan observasi.</p>';
     container.innerHTML = `
       <div style="margin-bottom:16px"><a href="#/guru/classes" class="btn btn-outline"><i class="ph ph-arrow-left"></i> Kembali</a></div>
-
       <div class="card" style="margin-bottom:20px">
         <h3 class="card-title" style="margin-bottom:16px">Tambah catatan cepat</h3>
         <form id="form-obs-quick">
@@ -243,7 +277,6 @@ const GuruPages = {
           <button type="submit" class="btn btn-primary"><i class="ph ph-paper-plane-tilt"></i> Simpan</button>
         </form>
       </div>
-
       <div class="card">
         <h3 class="card-title" style="margin-bottom:12px">Riwayat catatan terbaru</h3>
         <div class="obs-list">${obsRows}</div>
@@ -299,13 +332,11 @@ const GuruPages = {
     Router.setTitle('Nilai Akademik', 'Input nilai akhir dan capaian kompetensi siswa.');
     const uid = Auth.currentUser.uid; const [classArr, subjects, settings] = await Promise.all([DB.getClassesForTeacher(uid), DB.getSubjects(), DB.getSettings()]);
     const subArr = DB.toArray(subjects).sort((a, b) => (a.order || 0) - (b.order || 0));
-    
     if (!classArr.length || !subArr.length) {
       container.innerHTML = `<div class="card"><p class="text-muted">Data kelas atau mata pelajaran belum tersedia untuk Anda.</p></div>`;
       return;
     }
     const classOpts = classArr.map(c => `<option value="${c.id}">${AppConfig.escapeHtml(c.name)}</option>`).join('');
-    
     container.innerHTML = `
       <div class="card" style="margin-bottom:20px">
         <form id="filter-academic" class="inline-form" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
@@ -327,7 +358,6 @@ const GuruPages = {
       </div>
       <div id="academic-container"></div>
     `;
-
     document.getElementById('ac-class').addEventListener('change', (e) => {
       const classId = e.target.value;
       const subSelect = document.getElementById('ac-subject');
@@ -336,10 +366,8 @@ const GuruPages = {
         subSelect.disabled = true;
         return;
       }
-      
       const cls = classArr.find(c => c.id === classId);
       const isWali = cls.teacherId === uid;
-      
       let availableSubjects = [];
       if (isWali) {
         availableSubjects = subArr;
@@ -347,13 +375,11 @@ const GuruPages = {
         const mySubjectIds = Object.keys(cls.subjectTeachers || {}).filter(subId => cls.subjectTeachers[subId] === uid);
         availableSubjects = subArr.filter(s => mySubjectIds.includes(s.id));
       }
-      
       availableSubjects.forEach(s => {
         subSelect.innerHTML += `<option value="${s.id}">${AppConfig.escapeHtml(s.name)}</option>`;
       });
       subSelect.disabled = availableSubjects.length === 0;
     });
-
     document.getElementById('filter-academic').onsubmit = async (e) => {
       e.preventDefault();
       const classId = document.getElementById('ac-class').value;
@@ -425,7 +451,6 @@ const GuruPages = {
             btn.innerHTML = '<i class="ph ph-floppy-disk"></i> Simpan Semua Nilai';
           }, 2000);
         } catch (err) {
-          
           alert('Gagal menyimpan nilai.');
           btn.disabled = false;
           btn.innerHTML = '<i class="ph ph-floppy-disk"></i> Simpan Semua Nilai';
@@ -497,12 +522,15 @@ const GuruPages = {
         formContainer.innerHTML = '<div class="loader" style="margin: 20px auto"></div>';
         const year = settings.currentAcademicYear;
         const sem = settings.currentSemester;
-        const [cocu, stuEks, att, note] = await Promise.all([
+        const [cocu, stuEks, att, note, snapAch] = await Promise.all([
           DB.getCocurricular(year, sem, studentId),
           DB.getStudentExtracurriculars(year, sem, studentId),
           DB.getAttendance(year, sem, studentId),
-          DB.getTeacherNote(year, sem, studentId)
+          DB.getTeacherNote(year, sem, studentId),
+          db.ref('student_affairs/achievements').orderByChild('studentId').equalTo(studentId).once('value')
         ]);
+        const achList = [];
+        snapAch.forEach(c => { achList.push({ id: c.key, ...c.val() }); });
         const eksList = eksArr.map(e => {
           const selected = stuEks && stuEks[e.id];
           return `
@@ -522,12 +550,10 @@ const GuruPages = {
               <textarea id="add-cocu" rows="3" placeholder="Contoh: Ananda mandiri dan aktif dalam kegiatan sekolah...">${cocu ? (cocu.description || '') : ''}</textarea>
             </div>
           </div>
-
           <div class="card" style="margin-bottom:20px">
             <h3 class="card-title" style="margin-bottom:16px">Ekstrakurikuler</h3>
             ${eksArr.length ? eksList : '<p class="text-muted">Belum ada master ekstrakurikuler.</p>'}
           </div>
-
           <div class="card" style="margin-bottom:20px">
             <h3 class="card-title" style="margin-bottom:16px">Ketidakhadiran (Hari)</h3>
             <div style="display:flex; gap:12px; flex-wrap:wrap">
@@ -545,14 +571,24 @@ const GuruPages = {
               </div>
             </div>
           </div>
-
+          <div class="card" style="margin-bottom:20px">
+            <h3 class="card-title" style="margin-bottom:16px"><i class="ph ph-trophy"></i> Prestasi Siswa (Terintegrasi Kesiswaan)</h3>
+            ${achList.length ? `
+              <div class="alert alert-info" style="margin-bottom:0">
+                <p style="margin:0 0 6px 0"><strong>Tercatat ${achList.length} Prestasi di Kesiswaan:</strong></p>
+                <ul style="margin:0 0 8px 16px; padding:0">
+                  ${achList.map(a => `<li><strong>${AppConfig.escapeHtml(a.title || a.competition || 'Prestasi')}</strong> — Juara ${AppConfig.escapeHtml(a.rank || '-')} (${AppConfig.escapeHtml(a.level || '-')})</li>`).join('')}
+                </ul>
+                <button type="button" class="btn btn-sm btn-outline" id="btn-copy-ach"><i class="ph ph-copy"></i> Sisipkan ke Catatan Rapor</button>
+              </div>
+            ` : '<p class="text-muted" style="margin:0">Belum ada catatan prestasi dari Kesiswaan untuk siswa ini.</p>'}
+          </div>
           <div class="card" style="margin-bottom:20px">
             <h3 class="card-title" style="margin-bottom:16px">Catatan Wali Kelas</h3>
             <div class="form-group">
               <textarea id="add-note" rows="3" placeholder="Contoh: Ananda anak yang santun, aktif dalam ibadah berjamaah...">${note ? (note.note || '') : ''}</textarea>
             </div>
           </div>
-
           <button id="btn-save-additional" class="btn btn-primary" style="width:100%; margin-bottom:40px"><i class="ph ph-floppy-disk"></i> Simpan Data Tambahan</button>
         `;
         document.querySelectorAll('.chk-eks').forEach(chk => {
@@ -561,6 +597,15 @@ const GuruPages = {
             txt.style.display = e.target.checked ? 'block' : 'none';
           };
         });
+        const copyAchBtn = document.getElementById('btn-copy-ach');
+        if (copyAchBtn) {
+          copyAchBtn.onclick = () => {
+            const achText = achList.map(a => `${a.title || a.competition || 'Prestasi'} (Juara ${a.rank || '-'}, Tingkat ${a.level || '-'})`).join('; ');
+            const noteArea = document.getElementById('add-note');
+            const prefix = noteArea.value.trim() ? noteArea.value.trim() + '\n\nPrestasi yang diraih: ' : 'Prestasi yang diraih: ';
+            noteArea.value = prefix + achText;
+          };
+        }
         document.getElementById('btn-save-additional').onclick = async (e) => {
           const btn = e.target;
           btn.disabled = true;
@@ -600,7 +645,6 @@ const GuruPages = {
               btn.innerHTML = '<i class="ph ph-floppy-disk"></i> Simpan Data Tambahan';
             }, 2000);
           } catch (err) {
-            
             alert('Gagal menyimpan data.');
             btn.disabled = false;
             btn.innerHTML = '<i class="ph ph-floppy-disk"></i> Simpan Data Tambahan';
@@ -616,7 +660,7 @@ const GuruPages = {
       <div class="modal">
         <div class="modal-header">
           <h3 class="modal-title" id="obs-title">Catatan perilaku</h3>
-          <button class="btn-icon" onclick="App.closeModal('modal-obs')"><i class="ph ph-x"></i></button>
+          <button class="btn-icon" data-close-modal="modal-obs""><i class="ph ph-x"></i></button>
         </div>
         <form id="form-obs-modal">
           <input type="hidden" id="obs-stu-id">
@@ -628,7 +672,7 @@ const GuruPages = {
             <div class="form-group"><label>Catatan</label><textarea id="obs-note" rows="3" placeholder="Contoh: Mengerjakan tugas tepat waktu tanpa diingatkan."></textarea></div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-outline" onclick="App.closeModal('modal-obs')">Batal</button>
+            <button type="button" class="btn btn-outline" data-close-modal="modal-obs"">Batal</button>
             <button type="submit" class="btn btn-primary">Simpan</button>
           </div>
         </form>
@@ -664,18 +708,14 @@ const GuruPages = {
       DB.getClasses(),
       DB.getSettings()
     ]);
-    
     const eks = ekskuls[eksId];
     if (!eks || eks.teacherId !== Auth.currentUser.uid) {
       container.innerHTML = '<div class="card"><p class="error-text">Ekstrakurikuler tidak ditemukan atau Anda tidak memiliki akses.</p></div>';
       return;
     }
-    
     Router.setTitle(`Nilai Ekskul: ${AppConfig.escapeHtml(eks.name)}`, 'Pilih kelas untuk menginput nilai siswa.');
-    
     const classArr = DB.toArray(classes);
     const classOpts = classArr.map(c => `<option value="${c.id}">${AppConfig.escapeHtml(c.name)}</option>`).join('');
-    
     container.innerHTML = `
       <div style="margin-bottom:16px"><a href="#/dashboard" class="btn btn-outline"><i class="ph ph-arrow-left"></i> Kembali</a></div>
       <div class="card" style="margin-bottom:20px">
@@ -692,32 +732,25 @@ const GuruPages = {
       </div>
       <div id="eks-container"></div>
     `;
-    
     document.getElementById('filter-eks').onsubmit = async (e) => {
       e.preventDefault();
       const classId = document.getElementById('eks-class').value;
       if (!classId) return;
-      
       const eksCont = document.getElementById('eks-container');
       eksCont.innerHTML = '<div class="loader" style="margin: 20px auto"></div>';
-      
       const students = await DB.getStudentsByClass(classId);
       const studentArr = DB.toArray(students).sort((a, b) => a.name.localeCompare(b.name));
-      
       if (!studentArr.length) {
         eksCont.innerHTML = `<div class="card"><p class="text-muted">Belum ada siswa di kelas ini.</p></div>`;
         return;
       }
-      
       const year = settings.currentAcademicYear;
       const sem = settings.currentSemester;
-      
       const sEksData = {};
       for (const s of studentArr) {
         const dt = await DB.getStudentExtracurriculars(year, sem, s.id);
         sEksData[s.id] = dt[eks.id] || { score: '', description: '' };
       }
-      
       const rows = studentArr.map((s, idx) => `
         <div class="card" style="margin-bottom: 12px; padding: 12px;">
           <h4 style="margin-top:0; margin-bottom:12px; font-size:15px">${idx + 1}. ${AppConfig.escapeHtml(s.name)}</h4>
@@ -739,7 +772,6 @@ const GuruPages = {
           </div>
         </div>
       `).join('');
-      
       eksCont.innerHTML = `
         <form id="form-save-eks">
           ${rows}
@@ -748,22 +780,18 @@ const GuruPages = {
           </div>
         </form>
       `;
-      
       document.getElementById('form-save-eks').onsubmit = async (ev) => {
         ev.preventDefault();
         const btn = ev.target.querySelector('button[type="submit"]');
         btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Menyimpan...';
         btn.disabled = true;
-        
         try {
           const scores = document.querySelectorAll('.input-score');
           const descs = document.querySelectorAll('.input-desc');
-          
           for (let i = 0; i < scores.length; i++) {
             const stu = scores[i].dataset.stu;
             const score = scores[i].value;
             const desc = descs[i].value;
-            
             if (score || desc) {
               await DB.saveStudentExtracurricular(year, sem, stu, eks.id, { score, description: desc });
             } else {
@@ -789,12 +817,10 @@ const GuruPages = {
         </div>
         <h3 id="geo-status-title" style="margin: 0 0 8px 0;">Mencari Lokasi...</h3>
         <p id="geo-status-text" class="text-muted" style="margin: 0 0 24px 0; font-size: 14px;">Mohon tunggu dan pastikan posisi Anda aktif.</p>
-        
         <div style="display: flex; gap: 12px; justify-content: center;">
           <button id="btn-checkin" class="btn btn-primary" disabled><i class="ph ph-sign-in"></i> Presensi Datang</button>
           <button id="btn-checkout" class="btn btn-outline" disabled><i class="ph ph-sign-out"></i> Presensi Pulang</button>
         </div>
-
         <div id="proof-panel" style="margin-top: 20px; border: 1px solid #E5E7EB; border-radius: 12px; padding: 14px; text-align: left; display: none;">
           <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 10px;">
             <strong style="font-size: 13px;">Bukti Foto Kehadiran dari Kamera</strong>
@@ -814,7 +840,6 @@ const GuruPages = {
         </div>
       </div>
     `;
-
     const statusIcon = document.getElementById('geo-status-icon');
     const statusTitle = document.getElementById('geo-status-title');
     const statusText = document.getElementById('geo-status-text');
@@ -827,10 +852,8 @@ const GuruPages = {
     const proofPreview = document.getElementById('attendance-proof-preview');
     const proofStatus = document.getElementById('proof-status');
     const proofWrapper = document.getElementById('attendance-proof-wrapper');
-
     let cameraStream = null;
     let capturedProofDataUrl = null;
-
     const stopCamera = () => {
       if (cameraStream) {
         cameraStream.getTracks().forEach((track) => track.stop());
@@ -840,13 +863,11 @@ const GuruPages = {
         cameraVideo.srcObject = null;
       }
     };
-
     const startCamera = async () => {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         alert('Browser Anda tidak mendukung akses kamera.');
         return false;
       }
-
       try {
         if (cameraStream) return true;
         cameraStream = await navigator.mediaDevices.getUserMedia({
@@ -866,7 +887,6 @@ const GuruPages = {
         return false;
       }
     };
-
     const compressImageDataUrl = async (dataUrl, maxWidth = 1600, quality = 0.82) => {
       return new Promise((resolve, reject) => {
         const img = new Image();
@@ -883,20 +903,17 @@ const GuruPages = {
         img.src = dataUrl;
       });
     };
-
     const captureCameraProof = async () => {
       if (!cameraVideo || !cameraVideo.videoWidth || !cameraVideo.videoHeight) {
         alert('Kamera belum siap. Silakan tunggu sebentar lalu coba lagi.');
         return;
       }
-
       try {
         const canvas = document.createElement('canvas');
         canvas.width = cameraVideo.videoWidth;
         canvas.height = cameraVideo.videoHeight;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(cameraVideo, 0, 0, canvas.width, canvas.height);
-
         const snapshot = canvas.toDataURL('image/jpeg', 0.82);
         const compressed = await compressImageDataUrl(snapshot, 1600, 0.82);
         capturedProofDataUrl = compressed;
@@ -910,7 +927,6 @@ const GuruPages = {
         alert('Gagal mengambil foto dari kamera. Silakan coba lagi.');
       }
     };
-
     cameraCaptureBtn.addEventListener('click', async () => {
       const started = await startCamera();
       if (!started || !cameraVideo) return;
@@ -932,7 +948,6 @@ const GuruPages = {
         alert('Gagal mengakses kamera. Silakan coba lagi.');
       }
     });
-
     const today = new Date();
     const dateStr = today.toISOString().slice(0, 10);
     const teacherId = Auth.currentUser.uid;
@@ -944,7 +959,6 @@ const GuruPages = {
         const proofMarkup = myAtt.proof_url
           ? `<div style="margin-top: 12px;"><img src="${DriveBridge.normalizeDriveImageUrl(myAtt.proof_url, 'w300', '')}" alt="Bukti presensi" style="width: 100%; max-height: 180px; object-fit: cover; border-radius: 10px; border: 1px solid #E5E7EB;"></div>`
           : '';
-
         histContainer.innerHTML = `
           <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #E5E7EB; padding-bottom: 8px; margin-bottom: 8px;">
             <span class="text-muted" style="font-size: 13px;">Datang</span>
@@ -972,7 +986,6 @@ const GuruPages = {
     const maxRadius = Number(ATTENDANCE_GEOFENCE?.radiusMeters ?? 0);
     const maxAccuracy = 200;
     const hasLocalGeofence = Number.isFinite(schoolLat) && Number.isFinite(schoolLng) && Number.isFinite(maxRadius) && maxRadius > 0;
-
     const getDistance = (lat1, lon1, lat2, lon2) => {
       const R = 6371e3;
       const p1 = lat1 * Math.PI / 180;
@@ -983,15 +996,12 @@ const GuruPages = {
       const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
       return R * c;
     };
-
     let currentLocation = null;
     let currentAccuracy = null;
     let watchId = null;
-
     const acceptPosition = (latitude, longitude, accuracy, distance) => {
       currentAccuracy = Number(accuracy || 0);
       currentLocation = { lat: latitude, lng: longitude };
-
       if (!hasLocalGeofence) {
         const posisiReady = currentAccuracy <= maxAccuracy;
         if (posisiReady) {
@@ -1013,7 +1023,6 @@ const GuruPages = {
           }
           return true;
         }
-
         statusIcon.style.background = '#FEF3C7'; statusIcon.style.color = '#F59E0B';
         statusIcon.innerHTML = '<i class="ph ph-warning" style="font-size: 32px;"></i>';
         statusTitle.innerText = 'Posisi Belum Cukup Akurat';
@@ -1022,10 +1031,8 @@ const GuruPages = {
         btnCheckout.disabled = true;
         return false;
       }
-
       const adjustedDistance = Math.max(0, distance - accuracy);
       const isInside = adjustedDistance <= maxRadius && accuracy <= maxAccuracy;
-
       if (isInside) {
         statusIcon.style.background = '#D1FAE5'; statusIcon.style.color = '#10B981';
         statusIcon.innerHTML = '<i class="ph ph-check-circle" style="font-size: 32px;"></i>';
@@ -1045,7 +1052,6 @@ const GuruPages = {
         }
         return true;
       }
-
       statusIcon.style.background = '#FEF3C7'; statusIcon.style.color = '#F59E0B';
       statusIcon.innerHTML = '<i class="ph ph-warning" style="font-size: 32px;"></i>';
       statusTitle.innerText = "Posisi Belum Valid";
@@ -1054,7 +1060,6 @@ const GuruPages = {
       btnCheckout.disabled = true;
       return false;
     };
-
     if (!navigator.geolocation) {
       statusIcon.style.background = '#FEE2E2'; statusIcon.style.color = '#EF4444';
       statusIcon.innerHTML = '<i class="ph ph-warning-circle" style="font-size: 32px;"></i>';
@@ -1062,7 +1067,6 @@ const GuruPages = {
       statusText.innerText = "Perangkat Anda tidak mendukung fitur lokasi.";
       return;
     }
-
     const onGeoSuccess = (position) => {
       const { latitude, longitude, accuracy } = position.coords;
       const distance = hasLocalGeofence ? getDistance(schoolLat, schoolLng, latitude, longitude) : 0;
@@ -1072,7 +1076,6 @@ const GuruPages = {
         statusText.innerText = `Jarak Anda sekitar ${Math.round(distance)} m dari sekolah dan akurasi posisi ${Math.round(accuracy)} m. Harap bergerak ke area yang lebih dekat atau tunggu posisi lebih stabil.`;
       }
     };
-
     const onGeoError = (error) => {
       statusIcon.style.background = '#FEE2E2'; statusIcon.style.color = '#EF4444';
       statusIcon.innerHTML = '<i class="ph ph-warning-circle" style="font-size: 32px;"></i>';
@@ -1080,13 +1083,11 @@ const GuruPages = {
       statusText.innerText = "Izinkan akses posisi pada browser untuk melakukan presensi.";
       console.error('Geolocation error:', error);
     };
-
     watchId = navigator.geolocation.watchPosition(onGeoSuccess, onGeoError, {
       enableHighAccuracy: true,
       timeout: 15000,
       maximumAge: 0
     });
-
     const handlePresensi = async (type) => {
       if (!currentLocation) return;
       const btn = type === 'in' ? btnCheckin : btnCheckout;
@@ -1094,10 +1095,8 @@ const GuruPages = {
         alert('Harap ambil foto bukti kehadiran dari kamera sebelum presensi disimpan.');
         return;
       }
-
       btn.disabled = true;
       btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Memproses...';
-
       try {
         const compressedProof = await compressImageDataUrl(capturedProofDataUrl, 1600, 0.82);
         const result = await DB.submitTeacherAttendanceToWorker({
@@ -1108,14 +1107,11 @@ const GuruPages = {
           location: currentLocation,
           accuracy: currentAccuracy
         });
-
         const payload = type === 'in'
           ? { time_in: result.serverTimestamp ? new Date(result.serverTimestamp).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }), location_in: result.location || currentLocation }
           : { time_out: result.serverTimestamp ? new Date(result.serverTimestamp).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }), location_out: result.location || currentLocation };
-
         if (result.proof_url) payload.proof_url = result.proof_url;
         if (result.record && Object.keys(result.record).length) Object.assign(payload, result.record);
-
         await DB.saveTeacherAttendance(dateStr, teacherId, payload);
         alert('Presensi berhasil dicatat.');
         capturedProofDataUrl = null;
@@ -1132,7 +1128,6 @@ const GuruPages = {
         btn.innerHTML = type === 'in' ? '<i class="ph ph-sign-in"></i> Presensi Datang' : '<i class="ph ph-sign-out"></i> Presensi Pulang';
       }
     };
-
     btnCheckin.onclick = () => handlePresensi('in');
     btnCheckout.onclick = () => handlePresensi('out');
   },
@@ -1140,14 +1135,12 @@ const GuruPages = {
     Router.setTitle('Absensi Siswa', 'Pilih kelas untuk mengabsen siswa hari ini.');
     const classes = await DB.getClasses();
     const classArr = DB.toArray(classes).filter(c => c.teacherId === Auth.currentUser.uid);
-    
     if (!classArr.length) {
       container.innerHTML = `<div class="card"><p class="text-muted">Anda belum ditugaskan sebagai wali kelas.</p></div>`;
       return;
     }
-    
     const cards = classArr.map(c => `
-      <div class="card class-card" style="cursor: pointer; display: flex; align-items: center; justify-content: space-between;" onclick="window.location.hash='#/guru/student-attendance/${c.id}'">
+      <a href="#/guru/student-attendance/${c.id}" class="card class-card" style="display: flex; align-items: center; justify-content: space-between; text-decoration: none; color: inherit;">
         <div>
           <h3 class="card-title" style="margin: 0 0 4px 0;">${AppConfig.escapeHtml(c.name)}</h3>
           <p class="text-muted" style="margin: 0; font-size: 13px;">Input Absensi Kelas</p>
@@ -1157,7 +1150,6 @@ const GuruPages = {
     `).join('');
     container.innerHTML = `<div class="card-grid">${cards}</div>`;
   },
-
   async renderStudentAttendanceInput(container, classId) {
     const classes = await DB.getClasses();
     const cls = classes[classId];
@@ -1165,23 +1157,17 @@ const GuruPages = {
       container.innerHTML = '<div class="card"><p class="error-text">Kelas tidak ditemukan.</p></div>';
       return;
     }
-
     const today = new Date();
     const dateStr = today.toISOString().slice(0, 10);
     const dateDisplay = today.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-    
     Router.setTitle(`Absensi ${AppConfig.escapeHtml(cls.name)}`, dateDisplay);
-    
     const studentData = await DB.getStudentsByClass(classId);
     const studentArr = DB.toArray(studentData).sort((a, b) => a.name.localeCompare(b.name));
-    
     if (!studentArr.length) {
       container.innerHTML = `<div class="card"><p class="text-muted">Belum ada siswa di kelas ini.</p></div>`;
       return;
     }
-
     const attData = await DB.getDailyStudentAttendance(dateStr, classId);
-
     const rows = studentArr.map((s, idx) => {
       const currentAtt = attData[s.id] || 'H'; // Default Hadir
       return `
@@ -1207,7 +1193,6 @@ const GuruPages = {
         .att-btn.active-a { background: #EF4444; color: white !important; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
       </style>
     `;
-
     container.innerHTML = `
       ${style}
       <div style="margin-bottom:16px"><a href="#/guru/student-attendance" class="btn btn-outline"><i class="ph ph-arrow-left"></i> Kembali</a></div>
@@ -1233,12 +1218,10 @@ const GuruPages = {
         e.target.classList.add(`active-${val.toLowerCase()}`);
       }
     });
-
     document.getElementById('btn-save-att').onclick = async (e) => {
       const btn = e.target;
       btn.disabled = true;
       btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Menyimpan...';
-      
       const payload = {};
       document.querySelectorAll('.att-toggle-group').forEach(group => {
         const stuId = group.dataset.stu;
@@ -1247,7 +1230,6 @@ const GuruPages = {
           payload[stuId] = activeBtn.dataset.val;
         }
       });
-
       try {
         await DB.saveDailyStudentAttendance(dateStr, classId, payload);
         btn.innerHTML = '<i class="ph ph-check"></i> Berhasil Disimpan';
@@ -1267,4 +1249,3 @@ const GuruPages = {
     };
   }
 };
-

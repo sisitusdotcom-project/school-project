@@ -19,7 +19,50 @@ const ModuleKit = {
     student: () => DB.getAllStudents(),
     class: () => DB.getClasses(),
     subject: () => DB.getSubjects(),
-    user: () => DB.getAllUsers(),
+    user: async () => {
+      const users = await DB.getAllUsers();
+      const out = {};
+      Object.entries(users || {}).forEach(([id, u]) => {
+        if (u && u.role !== 'ortu') out[id] = u;
+      });
+      return out;
+    },
+    teacher: async () => {
+      const users = await DB.getAllUsers();
+      const out = {};
+      Object.entries(users || {}).forEach(([id, u]) => {
+        if (u && (u.role === 'guru' || u.role === 'admin' || u.role === 'kepsek')) out[id] = u;
+      });
+      return out;
+    },
+    employee: async () => {
+      const users = await DB.getAllUsers();
+      const out = {};
+      Object.entries(users || {}).forEach(([id, u]) => {
+        if (u && u.role !== 'ortu') out[id] = u;
+      });
+      return out;
+    },
+    approvedScholarshipStudent: async () => {
+      const [scholarships, allStudents] = await Promise.all([
+        ModuleKit.fetchObject('student_affairs/scholarships'),
+        DB.getAllStudents()
+      ]);
+      const out = {};
+      Object.values(scholarships || {}).forEach((s) => {
+        if (s && s.studentId && (s.status === 'Disetujui' || s.status === 'Dicairkan')) {
+          const stu = (allStudents || {})[s.studentId];
+          const name = stu ? (stu.name || s.studentId) : s.studentId;
+          out[s.studentId] = { name: `${name} (${s.program || 'Beasiswa'} - Terverifikasi Kesiswaan)` };
+        }
+      });
+      if (!Object.keys(out).length) {
+        Object.entries(allStudents || {}).forEach(([id, s]) => {
+          if (s) out[id] = s;
+        });
+      }
+      return out;
+    },
     asset: () => DB.getFacilityAssets(),
     ekskul: () => DB.getExtracurriculars(),
     ummiClass: (ctx) => ModuleKit.scopedClasses('ummi_classes', 'teacherId', ctx, 'KOORD_UMMI'),
@@ -40,7 +83,7 @@ const ModuleKit = {
     return this.isPrivileged(def) || (def.seeAllUnits || []).some((u) => this.hasUnit(u));
   },
   isPrivileged() {
-    return Auth.currentRole === AppConfig.ROLES.ADMIN;
+    return Auth.currentRole === AppConfig.ROLES.ADMIN || (Auth.currentAssignments || []).some((a) => a.startsWith('WAKA_') || a === 'TIM_IT');
   },
   canWrite(def) {
     const role = Auth.currentRole;

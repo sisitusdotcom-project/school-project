@@ -1,63 +1,95 @@
 const ITAdminPages = {
   async renderDashboard(container) {
-    Router.setTitle('Sinkronisasi Data (IT)', 'Ekspor data master dari database aktif ke format TSV.');
-    
+    Router.setTitle('IT & Sistem', 'Pusat telemetri infrastruktur teknologi, sinkronisasi data master, dan pemeliharaan server.');
     container.innerHTML = `
-      <div class="card section-block">
+      <section class="card section-spacer">
+        <div class="card-header">
+          <h3 class="card-title"><i class="ph ph-database"></i> Panel Ekspor & Sinkronisasi Master Data</h3>
+        </div>
         <div class="card-body">
-          <h3 class="card-title"><i class="ph ph-database"></i> Panel Sinkronisasi SSOT</h3>
-          <p class="text-muted">Gunakan menu ini untuk menarik (export) data Guru dan Siswa terbaru yang sudah diedit oleh Personalia/Kesiswaan, ke dalam format TSV baku. File hasil unduhan wajib Anda timpa ke dalam folder <strong>backend-tools/data/</strong> agar Terminal Node.js tetap sinkron dengan perubahan terbaru di web.</p>
-          
-          <div style="margin-top: 20px; display: flex; gap: 15px; flex-wrap: wrap;">
-            <button id="btn-export-guru-tsv" class="btn btn-primary" style="display: flex; align-items: center; gap: 8px;">
+          <p class="text-muted">Tarik salinan data terbaru dari database produksi ke format berkas TSV untuk arsip luring atau sinkronisasi CLI.</p>
+          <div class="button-group section-spacer">
+            <button id="btn-export-guru-tsv" class="btn btn-primary">
               <i class="ph ph-download-simple"></i> Unduh data-guru.tsv
             </button>
-            <button id="btn-export-siswa-tsv" class="btn btn-primary" style="display: flex; align-items: center; gap: 8px;">
+            <button id="btn-export-siswa-tsv" class="btn btn-primary">
               <i class="ph ph-download-simple"></i> Unduh data-siswa.tsv
             </button>
           </div>
         </div>
-      </div>
-      
-      <div class="card section-block">
-        <div class="card-body">
-          <h3 class="card-title">Instruksi Tim IT</h3>
-          <ul class="list-plain">
-            <li><strong>Langkah 1:</strong> Unduh file TSV melalui tombol di atas.</li>
-            <li><strong>Langkah 2:</strong> Pindahkan file yang diunduh ke folder <code>backend-tools/data/</code>, ganti file yang lama.</li>
-            <li><strong>Langkah 3:</strong> Jika ada murid/guru baru yang mendaftar, jalankan script <code>node generate-db.js</code> dan <code>node import-auth-admin.js</code> di terminal.</li>
-          </ul>
+      </section>
+      <section class="card section-spacer">
+        <div class="card-header">
+          <h3 class="card-title"><i class="ph ph-navigation-arrow"></i> Menu Operasional IT & Infrastruktur</h3>
         </div>
-      </div>
+        <div class="card-body">
+          <div class="quick-nav-grid">
+            <a href="#/admin/users" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-users-three"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Kelola Pengguna</div>
+                <div class="quick-nav-desc">Akun login & hak akses</div>
+              </div>
+            </a>
+            <a href="#/it-admin/sync" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-arrows-clockwise"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Sinkronisasi Dapodik</div>
+                <div class="quick-nav-desc">Integrasi Kemendikbud & EMIS</div>
+              </div>
+            </a>
+            <a href="#/it-admin/backup" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-cloud-arrow-down"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Backup & Restore</div>
+                <div class="quick-nav-desc">Snapshot basis data berkala</div>
+              </div>
+            </a>
+            <a href="#/it-admin/logs" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-shield-check"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Log Audit Sistem</div>
+                <div class="quick-nav-desc">Jejak aktivitas & forensik</div>
+              </div>
+            </a>
+            <a href="#/it-admin/network" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-wifi-high"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Infrastruktur Jaringan</div>
+                <div class="quick-nav-desc">Mikrotik, switch & AP WiFi</div>
+              </div>
+            </a>
+            <a href="#/it-admin/integration" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-plugs-connected"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Integrasi API & CBT</div>
+                <div class="quick-nav-desc">Gateway WhatsApp & webhook</div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </section>
     `;
-
     document.getElementById('btn-export-guru-tsv').addEventListener('click', async () => {
       const users = await DB.getAllUsers();
-      const arr = DB.toArray(users).filter(u => u.role !== 'ortu' && u.role !== 'kepsek'); // guru, admin, etc
-      
-      // Sort by name
+      const arr = DB.toArray(users).filter((u) => u.role !== 'ortu' && u.role !== 'kepsek');
       arr.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-      
-      let tsvContent = "No\tNama\tJabatan\tJenis Kelamin\tTugas Mengajar\tTugas Tambahan\n";
+      let tsvContent = 'No\tNama\tJabatan\tJenis Kelamin\tTugas Mengajar\tTugas Tambahan\n';
       arr.forEach((u, i) => {
         const assignments = (u.assignments || []).join(', ');
-        tsvContent += `${i+1}\t${u.name || '-'}\t${u.jabatan || 'Guru'}\t${u.gender || '-'}\t${u.teachingRole || '-'}\t${assignments || '-'}\n`;
+        tsvContent += `${i + 1}\t${u.name || '-'}\t${u.jabatan || 'Guru'}\t${u.gender || '-'}\t${u.teachingRole || '-'}\t${assignments || '-'}\n`;
       });
-      
       const blob = new Blob([tsvContent], { type: 'text/tab-separated-values;charset=utf-8;' });
-      const link = document.createElement("a");
+      const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
-      link.setAttribute("download", "data-guru.tsv");
+      link.setAttribute('download', 'data-guru.tsv');
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
     });
-
     document.getElementById('btn-export-siswa-tsv').addEventListener('click', async () => {
       const [studentsMap, classesMap] = await Promise.all([DB.getAllStudents(), DB.getClasses()]);
       const students = DB.toArray(studentsMap);
-      
-      // Sort by class name then student name
       students.sort((a, b) => {
         const classA = classesMap[a.classId] ? classesMap[a.classId].name : '';
         const classB = classesMap[b.classId] ? classesMap[b.classId].name : '';
@@ -66,17 +98,15 @@ const ITAdminPages = {
         const nameB = b.name || '';
         return nameA.localeCompare(nameB);
       });
-      
-      let tsvContent = "NO\tNO INDUK\tNISN\tNAMA\tKELAS/ROMBEL\tJENIS KELAMIN\n";
+      let tsvContent = 'NO\tNO INDUK\tNISN\tNAMA\tKELAS/ROMBEL\tJENIS KELAMIN\n';
       students.forEach((s, i) => {
         const className = classesMap[s.classId] ? classesMap[s.classId].name : '-';
-        tsvContent += `${i+1}\t${s.nis || ''}\t${s.nisn || ''}\t${s.name || '-'}\t${className}\t${s.gender || '-'}\n`;
+        tsvContent += `${i + 1}\t${s.nis || ''}\t${s.nisn || ''}\t${s.name || '-'}\t${className}\t${s.gender || '-'}\n`;
       });
-      
       const blob = new Blob([tsvContent], { type: 'text/tab-separated-values;charset=utf-8;' });
-      const link = document.createElement("a");
+      const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
-      link.setAttribute("download", "data-siswa.tsv");
+      link.setAttribute('download', 'data-siswa.tsv');
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

@@ -4,7 +4,6 @@ const UMMIPages = {
       await UMMIPages.renderUmmiMapping(container);
       return;
     }
-    
     container.innerHTML = `
       <div class="card section-block">
         <div class="card-body">
@@ -14,23 +13,17 @@ const UMMIPages = {
       </div>
     `;
   },
-
   async renderUmmiMapping(container) {
     Router.setTitle('Pemetaan Rombel & Guru Ummi', 'Atur pembagian kelas Jilid/Al-Quran dan guru pengampunya.');
-    
-    // Fetch necessary data
     const [ummiClasses, users] = await Promise.all([
       DB.getUmmiClasses(),
       DB.getAllUsers()
     ]);
-    
     const classArr = DB.toArray(ummiClasses);
-    // Find teachers who have GURU_UMMI, TIM_UMMI, or KOORD_UMMI
     const guruUmmi = DB.toArray(users).filter(u => {
       const assignments = AppConfig.getRoleAssignments(u);
       return assignments.includes('GURU_UMMI') || assignments.includes('TIM_UMMI') || assignments.includes('KOORD_UMMI');
     });
-
     const rows = classArr.length ? classArr.map(c => {
       const teacher = guruUmmi.find(g => g.id === c.teacherId);
       const studentCount = Object.keys(c.students || {}).length;
@@ -46,9 +39,7 @@ const UMMIPages = {
         </tr>
       `;
     }).join('') : '<tr><td colspan="4" class="text-center text-muted">Belum ada Rombel Ummi.</td></tr>';
-
     const guruOptions = guruUmmi.map(g => `<option value="${g.id}">${AppConfig.escapeHtml(g.name)}</option>`).join('');
-
     container.innerHTML = `
       <div class="card">
         <div class="card-header">
@@ -69,13 +60,12 @@ const UMMIPages = {
           </table>
         </div>
       </div>
-
       <!-- Modal Tambah/Edit Rombel Ummi -->
       <div class="modal-overlay" id="modal-ummi">
         <div class="modal">
           <div class="modal-header">
             <h3 class="modal-title" id="ummi-modal-title">Tambah Rombel Ummi</h3>
-            <button class="btn-icon" onclick="App.closeModal('modal-ummi')"><i class="ph ph-x"></i></button>
+            <button class="btn-icon" data-close-modal="modal-ummi"><i class="ph ph-x"></i></button>
           </div>
           <form id="form-ummi">
             <div class="modal-body">
@@ -108,21 +98,19 @@ const UMMIPages = {
               </div>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-outline" onclick="App.closeModal('modal-ummi')">Batal</button>
+              <button type="button" class="btn btn-outline" data-close-modal="modal-ummi">Batal</button>
               <button type="submit" class="btn btn-primary" id="btn-save-ummi">Simpan</button>
             </div>
           </form>
         </div>
       </div>
     `;
-
     document.getElementById('btn-add-ummi').onclick = () => {
       document.getElementById('ummi-modal-title').innerText = 'Tambah Rombel Ummi';
       document.getElementById('form-ummi').reset();
       document.getElementById('ummi-id').value = '';
       App.openModal('modal-ummi');
     };
-
     container.querySelectorAll('[data-edit-ummi]').forEach(btn => {
       btn.onclick = () => {
         const id = btn.dataset.editUmmi;
@@ -136,7 +124,6 @@ const UMMIPages = {
         App.openModal('modal-ummi');
       };
     });
-
     container.querySelectorAll('[data-del-ummi]').forEach(btn => {
       btn.onclick = async () => {
         const id = btn.dataset.delUmmi;
@@ -151,7 +138,6 @@ const UMMIPages = {
         UMMIPages.renderUmmiMapping(container);
       };
     });
-
     document.getElementById('form-ummi').onsubmit = async (e) => {
       e.preventDefault();
       const id = document.getElementById('ummi-id').value;
@@ -161,11 +147,9 @@ const UMMIPages = {
         teacherId: document.getElementById('ummi-teacher').value
       };
       if(!data.name || !data.level || !data.teacherId) return;
-      
       const btnSave = document.getElementById('btn-save-ummi');
       btnSave.disabled = true;
       btnSave.innerText = 'Menyimpan...';
-
       try {
         if(id) {
           const existing = classArr.find(c => c.id === id);

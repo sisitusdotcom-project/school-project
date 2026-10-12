@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,7 +18,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 </head>
-
 <body>
   <div id="app-loading" class="fullscreen-overlay">
     <div class="loader"></div>
@@ -119,12 +117,11 @@
       <div id="views-container" class="views-container"></div>
     </main>
   </div>
-
   <div class="modal-overlay" id="modal-profile">
     <div class="modal">
       <div class="modal-header">
         <h3 class="modal-title">Profil Saya</h3>
-        <button class="btn-icon" onclick="App.closeModal('modal-profile')"><i class="ph ph-x"></i></button>
+        <button class="btn-icon" data-close-modal="modal-profile"><i class="ph ph-x"></i></button>
       </div>
       <form id="form-profile">
         <div class="modal-body">
@@ -139,7 +136,7 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-outline" onclick="App.closeModal('modal-profile')">Batal</button>
+          <button type="button" class="btn btn-outline" data-close-modal="modal-profile">Batal</button>
           <button type="submit" class="btn btn-primary">Simpan Profil</button>
         </div>
       </form>
@@ -152,6 +149,7 @@
   <script src="assets/js/db.js"></script>
   <script src="assets/js/auth.js"></script>
   <script src="assets/js/router.js"></script>
+  <script src="assets/js/feature-guides.js"></script>
   <script src="assets/js/module-kit.js"></script>
   <script src="assets/js/module-defs.js"></script>
   <script src="assets/js/pages/admin/assignments.js"></script>
@@ -167,11 +165,9 @@
   <script src="assets/js/pages/kepsek/index.js"></script>
   <script src="assets/js/pages/guru/ummi.js"></script>
   <script src="assets/js/app.js"></script>
-
   <!-- Export Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 </body>
-
 </html>

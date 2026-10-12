@@ -3,18 +3,15 @@ const FinancePages = {
     const role = Auth.currentRole || AppConfig.ROLES.ADMIN;
     const isReadOnly = role !== AppConfig.ROLES.ADMIN;
     Router.setTitle('Keuangan', 'Ringkasan kas, tagihan, dan laporan sekolah.');
-
     const [summary, billsData, ledgerData, studentIndex] = await Promise.all([
       DB.getFinanceSummary(),
       DB.getStudentBills(),
       DB.getFinanceLedger(),
       DB.getStudentReferenceIndex()
     ]);
-
     const bills = DB.toArray(billsData);
     const ledger = DB.toArray(ledgerData).sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
     const pendingBills = bills.filter((bill) => bill.status !== 'paid').length;
-
     const billRows = bills.map((bill) => `
       <tr>
         <td>${AppConfig.escapeHtml(studentIndex[bill.studentId]?.name || 'Siswa tidak ditemukan')}</td>
@@ -31,7 +28,6 @@ const FinancePages = {
         </td>` : ''}
       </tr>
     `).join('') || `<tr><td colspan="${isReadOnly ? '4' : '5'}" class="text-muted">Belum ada tagihan.</td></tr>`;
-
     const ledgerRows = ledger.slice(0, 10).map((entry) => `
       <tr>
         <td>${AppConfig.escapeHtml(entry.date || '-')}</td>
@@ -48,9 +44,7 @@ const FinancePages = {
         </td>` : ''}
       </tr>
     `).join('') || `<tr><td colspan="${isReadOnly ? '4' : '5'}" class="text-muted">Belum ada transaksi.</td></tr>`;
-
     const studentsOpts = Object.keys(studentIndex).map(id => `<option value="${id}">${AppConfig.escapeHtml(studentIndex[id].name)}</option>`).join('');
-
     container.innerHTML = `
       <section class="card-grid section-spacer">
         <div class="card stat-card">
@@ -70,7 +64,6 @@ const FinancePages = {
           <div><p class="stat-value">${pendingBills}</p><p class="stat-label text-muted">Tagihan tertunda</p></div>
         </div>
       </section>
-
       <div class="card-grid section-spacer">
         <div class="card">
           <div class="card-header">
@@ -86,7 +79,6 @@ const FinancePages = {
             </table>
           </div>
         </div>
-
         <div class="card">
           <div class="card-header">
             <h3 class="card-title">Daftar Tagihan Siswa</h3>
@@ -102,13 +94,11 @@ const FinancePages = {
           </div>
         </div>
       </div>
-
-      
       <div class="modal-overlay" id="modal-ledger">
         <div class="modal">
           <div class="modal-header">
             <h3 class="modal-title">Transaksi Kas Baru</h3>
-            <button class="btn-icon" onclick="App.closeModal('modal-ledger')"><i class="ph ph-x"></i></button>
+            <button class="btn-icon" data-close-modal="modal-ledger"><i class="ph ph-x"></i></button>
           </div>
           <form id="form-ledger">
             <div class="modal-body">
@@ -133,19 +123,17 @@ const FinancePages = {
               </div>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-outline" onclick="App.closeModal('modal-ledger')">Batal</button>
+              <button type="button" class="btn btn-outline" data-close-modal="modal-ledger">Batal</button>
               <button type="submit" class="btn btn-primary">Simpan Transaksi</button>
             </div>
           </form>
         </div>
       </div>
-
-      
       <div class="modal-overlay" id="modal-bill">
         <div class="modal">
           <div class="modal-header">
             <h3 class="modal-title">Buat Tagihan Baru</h3>
-            <button class="btn-icon" onclick="App.closeModal('modal-bill')"><i class="ph ph-x"></i></button>
+            <button class="btn-icon" data-close-modal="modal-bill"><i class="ph ph-x"></i></button>
           </div>
           <form id="form-bill">
             <div class="modal-body">
@@ -170,25 +158,22 @@ const FinancePages = {
               </div>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-outline" onclick="App.closeModal('modal-bill')">Batal</button>
+              <button type="button" class="btn btn-outline" data-close-modal="modal-bill">Batal</button>
               <button type="submit" class="btn btn-primary">Buat Tagihan</button>
             </div>
           </form>
         </div>
       </div>
     `;
-
     if (!isReadOnly) {
       document.getElementById('btn-add-ledger').addEventListener('click', () => {
         document.getElementById('ledger-date').value = new Date().toISOString().slice(0, 10);
         App.openModal('modal-ledger');
       });
-
       document.getElementById('btn-add-bill').addEventListener('click', () => {
         document.getElementById('bill-date').value = new Date().toISOString().slice(0, 10);
         App.openModal('modal-bill');
       });
-
       document.getElementById('form-ledger').addEventListener('submit', async (e) => {
         e.preventDefault();
         const btn = e.target.querySelector('button[type="submit"]');
@@ -203,7 +188,6 @@ const FinancePages = {
         App.closeModal('modal-ledger');
         FinancePages.renderDashboard(container);
       });
-
       document.getElementById('form-bill').addEventListener('submit', async (e) => {
         e.preventDefault();
         const btn = e.target.querySelector('button[type="submit"]');
@@ -219,7 +203,6 @@ const FinancePages = {
         App.closeModal('modal-bill');
         FinancePages.renderDashboard(container);
       });
-
       container.querySelectorAll('[data-pay-bill]').forEach(btn => {
         btn.addEventListener('click', async (e) => {
           if (!confirm('Tandai tagihan ini lunas?')) return;
@@ -228,7 +211,6 @@ const FinancePages = {
           FinancePages.renderDashboard(container);
         });
       });
-
       container.querySelectorAll('[data-del-ledger]').forEach(btn => {
         btn.addEventListener('click', async (e) => {
           if (!confirm('Yakin ingin menghapus transaksi ini?')) return;

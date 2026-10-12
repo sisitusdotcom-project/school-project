@@ -2,13 +2,11 @@
             size: 210mm 330mm;
             margin: 10mm 12mm;
         }
-
         * {
             box-sizing: border-box;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
         }
-
         body {
             font-family: 'Arial', sans-serif;
             font-size: 9.5pt;
@@ -17,7 +15,6 @@
             margin: 0;
             padding: 20px;
         }
-
         .page {
             width: 210mm;
             min-height: 330mm;
@@ -27,19 +24,16 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
             position: relative;
         }
-
         table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 12px;
             page-break-inside: auto;
         }
-
         tr {
             page-break-inside: avoid;
             page-break-after: auto;
         }
-
         th,
         td {
             border: 1px solid #000;
@@ -47,18 +41,15 @@
             font-size: 9pt;
             vertical-align: middle;
         }
-
         .identity-table {
             margin-bottom: 12px;
         }
-
         .identity-table td {
             border: none;
             padding: 2px 4px;
             vertical-align: top;
             font-size: 9.5pt;
         }
-
         table.data-table th {
             background-color: #b0b0b0 !important;
             color: #000;
@@ -66,24 +57,20 @@
             text-align: center;
             font-size: 9.5pt;
         }
-
         .sub-subject td:nth-child(1) {
             padding-left: 12px;
             color: #333333;
         }
-
         .capaian-box p {
             margin: 0;
             padding: 2px 0;
             line-height: 1.25;
         }
-
         .capaian-box p:first-child {
             margin-bottom: 2px;
             padding-bottom: 3px;
             border-bottom: 1px dashed #aaa;
         }
-
         .section-header {
             background-color: #b0b0b0 !important;
             font-weight: bold;
@@ -94,7 +81,6 @@
             page-break-after: avoid;
             page-break-inside: avoid;
         }
-
         .content-box {
             border: 1px solid #000;
             border-top: none;
@@ -104,36 +90,30 @@
             margin-bottom: 12px;
             page-break-inside: avoid;
         }
-
         .text-center {
             text-align: center;
         }
-
         .flex-row {
             display: table;
             width: 100%;
             margin-bottom: 12px;
             page-break-inside: avoid;
         }
-
         .flex-col-left {
             display: table-cell;
             width: 45%;
             vertical-align: top;
             padding-right: 8px;
         }
-
         .flex-col-right {
             display: table-cell;
             width: 55%;
             vertical-align: top;
             padding-left: 8px;
         }
-
         .attendance-table {
             margin-bottom: 0;
         }
-
         .attendance-table th {
             background-color: #b0b0b0 !important;
             color: #000;
@@ -142,11 +122,9 @@
             font-size: 9.5pt;
             padding: 4px;
         }
-
         .attendance-table td {
             padding: 5px 6px;
         }
-
         .signature-table {
             width: 100%;
             margin-top: 15px;
@@ -154,7 +132,6 @@
             border-collapse: collapse;
             page-break-inside: avoid;
         }
-
         .signature-table td {
             border: none;
             text-align: center;
@@ -163,11 +140,9 @@
             font-size: 9pt;
             padding: 0;
         }
-
         .signature-space {
             height: 50px;
         }
-
         .print-actions {
             position: fixed;
             top: 20px;
@@ -176,7 +151,6 @@
             gap: 10px;
             z-index: 1000;
         }
-
         .btn-action {
             background-color: #2e7d32;
             color: white;
@@ -189,37 +163,30 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             font-family: inherit;
         }
-
         .btn-action:hover {
             background-color: #1b5e20;
         }
-
         .btn-close {
             background-color: #64748b;
         }
-
         .btn-close:hover {
             background-color: #475569;
         }
-
         @media print {
             * {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
-
             body {
                 background-color: #fff;
                 padding: 0;
             }
-
             .page {
                 box-shadow: none;
                 margin: 0;
                 padding: 0;
                 width: 100%;
             }
-
             .print-actions {
                 display: none;
             }

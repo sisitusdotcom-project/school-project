@@ -12,7 +12,6 @@ const App = {
       [AppConfig.ROLES.STUDENT_AFFAIRS]: StudentAffairsPages.renderDashboard,
       [AppConfig.ROLES.IT_ADMIN]: ITAdminPages.renderDashboard
     };
-
     return renderers[Auth.currentRole] || (async (container) => {
       container.innerHTML = `
         <div class="card section-block">
@@ -24,40 +23,57 @@ const App = {
       `;
     });
   },
-
-  isRouteAllowed(path, role = Auth.currentRole) {
+  isRouteAllowed(rawPath, role = Auth.currentRole) {
     if (!role) return false;
+    let path = rawPath || '#/dashboard';
+    if (path === '#/guru/attendance') path = '#/attendance';
     if (path === '#/dashboard') return !!this.getDashboardRenderer();
-    
-    // Some static paths that any user with the correct base module can access
+    if (role === AppConfig.ROLES.ADMIN) return true;
+    if (path === '#/attendance' && role !== AppConfig.ROLES.ORTU) return true;
     if (path.startsWith('#/admin/students/')) path = '#/admin/classes';
     if (path.startsWith('#/guru/assess/')) path = '#/guru/classes';
     if (path.startsWith('#/guru/observe/')) path = '#/guru/classes';
     if (path.startsWith('#/guru/student-attendance/')) path = '#/guru/student-attendance';
     if (path.startsWith('#/guru/classes/')) path = '#/guru/classes';
-    
     const assignments = Auth.currentAssignments || [];
+    if (role === AppConfig.ROLES.GURU) {
+      const guruAllowed = [
+        '#/attendance',
+        '#/guru/academic',
+        '#/curriculum/syllabus',
+        '#/guru/portfolio',
+        '#/guru/observations',
+        '#/guru/student-attendance',
+        '#/guru/classes',
+        '#/guru/additional',
+        '#/student-affairs/leaves'
+      ];
+      if (guruAllowed.includes(path)) return true;
+    }
+    if (role === AppConfig.ROLES.KEPSEK) {
+      const kepsekPrefixes = ['#/dashboard', '#/attendance', '#/kepsek/', '#/curriculum', '#/student-affairs', '#/finance', '#/personnel', '#/facilities'];
+      if (kepsekPrefixes.some(p => path === p || path.startsWith(p + '/'))) return true;
+    }
+    if (role === AppConfig.ROLES.TENDIK) {
+      const tendikAllowed = ['#/attendance', '#/tendik/performance', '#/tendik/portfolio'];
+      if (tendikAllowed.includes(path)) return true;
+    }
     const navItems = AppConfig.getRoleNav(role, assignments);
-    
     return navItems.some(nav => nav.hash === path);
   },
-
   init() {
     const menuButton = document.getElementById('btn-menu-toggle');
     const closeButton = document.getElementById('btn-menu-close');
     const sidebar = document.getElementById('sidebar');
     const backdrop = document.getElementById('sidebar-backdrop');
-
     const toggleMenu = () => {
       if (!sidebar || !backdrop) return;
       sidebar.classList.toggle('active');
       backdrop.classList.toggle('active');
     };
-
     if (menuButton) menuButton.addEventListener('click', toggleMenu);
     if (closeButton) closeButton.addEventListener('click', toggleMenu);
     if (backdrop) backdrop.addEventListener('click', toggleMenu);
-
     const profileWidget = document.querySelector('.user-profile-widget');
     if (profileWidget) {
       profileWidget.style.cursor = 'pointer';
@@ -69,7 +85,6 @@ const App = {
         App.openModal('modal-profile');
       });
     }
-
     const formProfile = document.getElementById('form-profile');
     if (formProfile) {
       formProfile.addEventListener('submit', async (e) => {
@@ -77,14 +92,10 @@ const App = {
         const btn = formProfile.querySelector('button[type="submit"]');
         const email = document.getElementById('profile-email').value.trim();
         const pwd = document.getElementById('profile-password').value;
-        
         btn.disabled = true;
         btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Menyimpan...';
-        
         try {
-          // Update Firebase Auth if credentials change
           await Auth.updateProfileCredentials(email, pwd);
-          
           alert('Profil berhasil diperbarui!');
           App.closeModal('modal-profile');
         } catch (err) {
@@ -95,7 +106,6 @@ const App = {
         }
       });
     }
-
     Router.init();
     Router.add('#/dashboard', async (container) => {
       const renderer = this.getDashboardRenderer();
@@ -103,28 +113,20 @@ const App = {
         await renderer.call(null, container);
         return;
       }
-
       container.innerHTML = '<p class="text-center text-muted">Role tidak valid.</p>';
     });
-
     const allRoutes = new Set();
     Object.values(AppConfig.NAV_ITEMS).forEach(items => {
       items.forEach(item => {
         allRoutes.add(item.hash);
       });
     });
-    
-    // Add dynamic routes manually
     ['#/admin/students/:id', '#/guru/assess/:id', '#/guru/observe/:id', '#/guru/student-attendance/:id'].forEach(r => allRoutes.add(r));
-
-    // Register all routes
     allRoutes.forEach(path => {
       if (path === '#/dashboard') return;
-      
       Router.add(path, async (container, routeParams) => {
         const role = Auth.currentRole || AppConfig.ROLES.ADMIN;
         const hasAccess = this.isRouteAllowed(path, role);
-
         if (!hasAccess) {
           container.innerHTML = `
             <div class="card">
@@ -136,14 +138,11 @@ const App = {
           `;
           return;
         }
-
         if (typeof ModuleKit !== 'undefined' && ModuleKit.has(path)) {
           const config = ModuleKit.defs[path];
           await ModuleKit.render(container, path, config.noun || 'Modul', config.icon || 'ph-cube');
           return;
         }
-
-        // Custom renderers
         const renderers = {
           '#/admin/assignments': window.AdminAssignmentsModule?.render,
           '#/admin/users': typeof AdminPages !== 'undefined' ? AdminPages.renderUsers : null,
@@ -154,7 +153,7 @@ const App = {
           '#/admin/extracurriculars': typeof AdminPages !== 'undefined' ? AdminPages.renderExtracurriculars : null,
           '#/admin/attendance': typeof AdminPages !== 'undefined' ? AdminPages.renderAttendance : null,
           '#/attendance': typeof GuruPages !== 'undefined' ? GuruPages.renderTeacherAttendance : null,
-          '#/guru/attendance': typeof GuruPages !== 'undefined' ? GuruPages.renderTeacherAttendance : null, // Backwards compatibility
+          '#/guru/attendance': typeof GuruPages !== 'undefined' ? GuruPages.renderTeacherAttendance : null,
           '#/guru/student-attendance': typeof GuruPages !== 'undefined' ? GuruPages.renderStudentAttendance : null,
           '#/guru/classes': typeof GuruPages !== 'undefined' ? GuruPages.renderClasses : null,
           '#/guru/academic': typeof GuruPages !== 'undefined' ? GuruPages.renderAcademicGrades : null,
@@ -172,12 +171,10 @@ const App = {
           '#/facilities': typeof FacilitiesPages !== 'undefined' ? FacilitiesPages.renderDashboard : null,
           '#/it-admin/dashboard': typeof ITAdminPages !== 'undefined' ? ITAdminPages.renderDashboard : null
         };
-
         if (renderers[path]) {
           await renderers[path](container, routeParams);
           return;
         }
-
         container.innerHTML = `
           <div class="card section-block">
             <div class="card-body">
@@ -188,24 +185,25 @@ const App = {
         `;
       });
     });
-
     Auth.init();
   },
-
   openModal(id) {
     const modal = document.getElementById(id);
     if (modal) modal.classList.add('active');
   },
-
   closeModal(id) {
     const modal = document.getElementById(id);
     if (modal) modal.classList.remove('active');
   }
 };
-
+document.addEventListener('click', (e) => {
+  const closeBtn = e.target.closest('[data-close-modal]');
+  if (closeBtn) {
+    App.closeModal(closeBtn.dataset.closeModal);
+  }
+});
 document.addEventListener('DOMContentLoaded', () => {
   App.init();
-
   const splitWrapper = document.querySelector('.auth-split-wrapper');
   if (splitWrapper) {
     setInterval(() => {

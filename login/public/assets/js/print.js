@@ -194,7 +194,6 @@ async function generateReport(studentId, container) {
         <button class="btn-action" id="btn-do-print">🖨️ Cetak Rapor (F4)</button>
       </div>
       <div class="page">
-          
           <table class="identity-table">
               <tr>
                   <td style="width: 15%;">Nama Murid</td>
@@ -221,8 +220,6 @@ async function generateReport(studentId, container) {
                   <td>: <span>${year}</span></td>
               </tr>
           </table>
-
-          
           <table class="data-table">
               <thead>
                   <tr>
@@ -236,14 +233,10 @@ async function generateReport(studentId, container) {
                   ${tableHtml || '<tr><td colspan="4" class="text-center text-muted">Belum ada nilai akademik</td></tr>'}
               </tbody>
           </table>
-
-          
           <div class="section-header">Kokurikuler</div>
           <div class="content-box">
             ${cocu && cocu.description ? cocu.description.replace(/\\n/g, '<br>') : '-'}
           </div>
-
-          
           <table class="data-table">
               <thead>
                   <tr>
@@ -256,8 +249,6 @@ async function generateReport(studentId, container) {
                   ${eksHtml}
               </tbody>
           </table>
-
-          
           <div class="flex-row">
               <div class="flex-col-left">
                   <table class="attendance-table">
@@ -289,14 +280,10 @@ async function generateReport(studentId, container) {
                   </div>
               </div>
           </div>
-
-          
           <div class="section-header">Tanggapan Orang Tua/Wali Murid</div>
           <div class="content-box" style="min-height: 50px;">
             ${parentResp && parentResp.response ? parentResp.response.replace(/\\n/g, '<br>') : '-'}
           </div>
-
-          
           <table class="signature-table">
               <tr>
                   <td>
@@ -319,17 +306,13 @@ async function generateReport(studentId, container) {
               </tr>
           </table>
       </div>
-      
       ${lampiranHtml}
     `;
-  
       const btnClose = document.getElementById('btn-close-print');
       if (btnClose) btnClose.addEventListener('click', () => window.close());
       const btnPrint = document.getElementById('btn-do-print');
       if (btnPrint) btnPrint.addEventListener('click', () => window.print());
-      
     } catch (err) {
-    
     container.innerHTML = '<p style="text-align:center; padding:50px; color:red;">Terjadi kesalahan: ' + err.message + '</p>';
   }
 }

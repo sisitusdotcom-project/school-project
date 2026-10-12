@@ -4,13 +4,13 @@
     "users": {
       ".read": "auth != null",
       "$uid": {
-        ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'it_admin' || auth.uid === $uid)",
-        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'it_admin' || auth.uid === $uid)",
+        ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('unitFlags').child('TIM_IT').val() === true || root.child('users').child(auth.uid).child('unitFlags').child('WAKA_HUMAS_PERSONALIA').val() === true || auth.uid === $uid)",
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('unitFlags').child('TIM_IT').val() === true || root.child('users').child(auth.uid).child('unitFlags').child('WAKA_HUMAS_PERSONALIA').val() === true || auth.uid === $uid)",
         "role": {
-          ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'it_admin')"
+          ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('unitFlags').child('TIM_IT').val() === true || root.child('users').child(auth.uid).child('unitFlags').child('WAKA_HUMAS_PERSONALIA').val() === true)"
         },
         "assignments": {
-          ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'it_admin')"
+          ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('unitFlags').child('TIM_IT').val() === true || root.child('users').child(auth.uid).child('unitFlags').child('WAKA_HUMAS_PERSONALIA').val() === true)"
         },
         "photoURL": {
           ".write": "auth != null && auth.uid === $uid && newData.isString() && newData.val().length <= 2048"
@@ -35,7 +35,7 @@
     },
     "classes": {
       ".read": "auth != null",
-      ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'"
+      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('unitFlags').child('WAKA_KURIKULUM').val() === true)"
     },
     "ummi_classes": {
       ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')",
@@ -179,7 +179,7 @@
     },
     "finance": {
       ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')",
-      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'finance')",
+      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')",
       "payments": {
         ".indexOn": [
           "studentId",
@@ -192,7 +192,8 @@
           "studentId",
           "status",
           "dueDate"
-        ]
+        ],
+        ".read": "auth != null"
       },
       "ledger": {
         ".indexOn": [
@@ -203,7 +204,7 @@
     },
     "curriculum": {
       ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')",
-      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'curriculum' || root.child('users').child(auth.uid).child('role').val() === 'guru')",
+      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')",
       "schedules": {
         ".indexOn": [
           "classId",
@@ -219,7 +220,7 @@
     },
     "student_affairs": {
       ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')",
-      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'studentAffairs' || root.child('users').child(auth.uid).child('role').val() === 'guru')",
+      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')",
       "attendance": {
         ".indexOn": [
           "studentId",
@@ -237,11 +238,28 @@
           "studentId",
           "year"
         ]
+      },
+      "leaves": {
+        ".read": "auth != null",
+        ".write": "auth != null",
+        ".indexOn": [
+          "studentId",
+          "startDate",
+          "status"
+        ]
+      },
+      "alumni": {
+        ".read": "auth != null",
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')",
+        ".indexOn": [
+          "graduationYear",
+          "nisn"
+        ]
       }
     },
     "personnel": {
       ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')",
-      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'personnel')",
+      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')",
       "attendance": {
         ".indexOn": [
           "employeeId",
@@ -259,10 +277,9 @@
       ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')",
       ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru')"
     },
-
     "facilities": {
       ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')",
-      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'facilities')",
+      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')",
       "assets": {
         ".indexOn": [
           "category",
@@ -309,28 +326,32 @@
       ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru')"
     },
     "it_admin": {
-      ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'it_admin' || root.child('users').child(auth.uid).child('unitFlags').child('TIM_IT').val() === true)",
-      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'it_admin' || root.child('users').child(auth.uid).child('unitFlags').child('TIM_IT').val() === true)"
+      ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')",
+      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')"
     },
     "audit_logs": {
-      ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'it_admin' || root.child('users').child(auth.uid).child('unitFlags').child('TIM_IT').val() === true)",
+      ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')",
       ".write": "auth != null"
     },
     "spmb_registrations": {
-      ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'personnel' || root.child('users').child(auth.uid).child('role').val() === 'admin')",
+      ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')",
       ".write": "true"
     },
     "ekskul": {
-      ".read": "auth != null",
-      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'guruEkskul' || root.child('users').child(auth.uid).child('role').val() === 'admin')"
+      ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')",
+      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')"
     },
     "tendik": {
-      ".read": "auth != null",
-      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'tendik' || root.child('users').child(auth.uid).child('role').val() === 'admin')"
+      ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')",
+      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')"
     },
     "komite": {
-      ".read": "auth != null",
-      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'komite' || root.child('users').child(auth.uid).child('role').val() === 'admin')"
+      ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')",
+      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')"
+    },
+    "student_promotions": {
+      ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')",
+      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('unitFlags').child('WAKA_KURIKULUM').val() === true)"
     }
   }
 }

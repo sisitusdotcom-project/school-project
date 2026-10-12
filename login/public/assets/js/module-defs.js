@@ -40,51 +40,60 @@
       ]
     },
     '#/finance/scholarships': {
-      node: 'finance/scholarships', noun: 'Pengajuan Beasiswa', writeRoles: FI, dateField: 'date', statusField: 'status', badges,
-      subtitle: 'Menerima dan menyaring calon siswa penerima beasiswa.',
+      node: 'finance/scholarships', noun: 'Pencairan Beasiswa & SPP', writeRoles: FI, dateField: 'date', statusField: 'status', badges,
+      subtitle: 'Realisasi pencairan dana beasiswa dan pemotongan SPP bagi siswa yang disetujui Kesiswaan.',
       summary: [
-        { label: 'Total Pengajuan', icon: 'ph-users', tone: 'primary' },
-        { label: 'Disetujui', icon: 'ph-check-circle', tone: 'success', where: { status: 'Disetujui' } }
+        { label: 'Total Pencairan', icon: 'ph-hand-coins', tone: 'primary' },
+        { label: 'Dicairkan', icon: 'ph-check-circle', tone: 'success', where: { status: 'Dicairkan' } },
+        { label: 'Total Nominal', icon: 'ph-wallet', tone: 'warning', sum: 'amount', money: true }
       ],
       fields: [
-        date('date', 'Tanggal Pengajuan', { required: true }),
-        ref('studentId', 'Siswa', 'student', { required: true }),
-        sel('criteria', 'Kriteria', ['Yatim', 'Dhuafa', 'Persyarikatan', 'Non-Persyarikatan', 'Prestasi'], { required: true }),
-        file('document', 'Bukti / Dokumen Pendukung', 'scholarships'),
-        sel('status', 'Status', ['Diajukan', 'Disetujui', 'Ditolak'], { required: true }),
+        date('date', 'Tanggal Pencairan', { required: true }),
+        ref('studentId', 'Siswa Penerima (Disetujui Kesiswaan)', 'approvedScholarshipStudent', { required: true }),
+        sel('source', 'Sumber Dana', ['PIP Kemdikbud', 'Beasiswa Yayasan/Lazismu', 'Beasiswa Prestasi', 'Subsidi Silang'], { required: true }),
+        money('amount', 'Nominal Dicairkan', { required: true }),
+        sel('disbursementType', 'Bentuk Realisasi', ['Pembebasan SPP', 'Uang Saku/Tunai', 'Bantuan Seragam/Buku', 'Transfer Bank'], { required: true }),
+        sel('status', 'Status Pencairan', ['Diproses', 'Dicairkan', 'Tertunda'], { required: true }),
+        file('proof', 'Bukti Kuitansi / Transfer', 'scholarship_proofs'),
         area('notes', 'Catatan')
       ]
     },
     '#/finance/salaries': {
-      node: 'finance/salaries', noun: 'Penghitungan Gaji', writeRoles: FI, dateField: 'month',
-      subtitle: 'Perhitungan gaji guru dan tenaga kependidikan.',
+      node: 'finance/salaries', noun: 'Penghitungan Gaji GTK', writeRoles: FI, dateField: 'month', statusField: 'status', badges,
+      subtitle: 'Perhitungan gaji pokok, tunjangan fungsional/wali kelas, jam mengajar, dan potongan kasbon GTK.',
       summary: [
-        { label: 'Total Gaji Disalurkan', icon: 'ph-money', tone: 'success', sum: 'total', money: true }
+        { label: 'Total Gaji Disalurkan', icon: 'ph-money', tone: 'success', sum: 'netSalary', money: true },
+        { label: 'Terbayar', icon: 'ph-check-circle', tone: 'success', where: { status: ['Ditransfer Bank', 'Dibayarkan Tunai'] } }
       ],
       fields: [
-        date('month', 'Bulan (Pilih tanggal apa saja di bulan tersebut)', { required: true }),
-        ref('teacherId', 'Pegawai', 'teacher', { required: true }),
+        date('month', 'Bulan Periode', { required: true }),
+        ref('employeeId', 'Pegawai GTK', 'employee', { required: true }),
         money('basicSalary', 'Gaji Pokok', { required: true }),
-        money('allowance', 'Tunjangan'),
-        money('deduction', 'Potongan'),
-        money('total', 'Total Gaji Terbayar', { readonly: true }),
-        file('slip', 'Slip Gaji (Opsional)', 'salaries')
+        money('functionalAllowance', 'Tunjangan Fungsional/Wali Kelas'),
+        money('teachingAllowance', 'Tunjangan Jam Mengajar'),
+        money('deductions', 'Potongan (Kasbon/Koperasi/Infaq)'),
+        money('netSalary', 'Gaji Bersih Diterima', { readonly: true }),
+        sel('status', 'Status Pembayaran', ['Draft', 'Disetujui Kepala Sekolah', 'Ditransfer Bank', 'Dibayarkan Tunai'], { required: true }),
+        file('slip', 'Slip Gaji (PDF/Scan)', 'salaries')
       ],
-      derive: (p) => ({ total: (p.basicSalary || 0) + (p.allowance || 0) - (p.deduction || 0) })
+      derive: (p) => ({ netSalary: (Number(p.basicSalary) || 0) + (Number(p.functionalAllowance) || 0) + (Number(p.teachingAllowance) || 0) - (Number(p.deductions) || 0) })
     },
-    '#/finance/proposals': { wakaOnly: true,
-      node: 'finance/proposals', noun: 'Persetujuan Proposal', writeRoles: FI, dateField: 'date', statusField: 'status', badges,
-      subtitle: 'Evaluasi anggaran tiap agenda kegiatan sekolah.',
+    '#/finance/proposals': {
+      node: 'finance/proposals', noun: 'Persetujuan Proposal Kegiatan', writeRoles: [R.FINANCE, R.ADMIN], dateField: 'date', statusField: 'status', badges,
+      subtitle: 'Evaluasi pengajuan anggaran tiap agenda kegiatan dari unit kerja sekolah.',
       summary: [
         { label: 'Total Proposal', icon: 'ph-file-text', tone: 'primary' },
-        { label: 'Disetujui', icon: 'ph-check-circle', tone: 'success', where: { status: 'Disetujui' } }
+        { label: 'Disetujui', icon: 'ph-check-circle', tone: 'success', where: { status: 'Disetujui Waka Keuangan' } }
       ],
       fields: [
         date('date', 'Tanggal Pengajuan', { required: true }),
-        t('title', 'Nama Kegiatan', { required: true }),
+        t('title', 'Nama Kegiatan / Proposal', { required: true }),
+        sel('unit', 'Unit Pengaju', ['Kesiswaan', 'Kurikulum', 'Sarpras', 'Humas & Personalia', 'Program Ummi', 'Ekstrakurikuler'], { required: true }),
+        t('pic', 'Penanggung Jawab (PIC)', { required: true }),
         money('budget', 'Anggaran Diajukan', { required: true }),
-        file('document', 'Proposal Kegiatan', 'proposals', { required: true }),
-        sel('status', 'Status', ['Diajukan', 'Disetujui', 'Non-ACC'], { required: true }),
+        money('approvedBudget', 'Anggaran Disetujui'),
+        file('document', 'Dokumen Proposal (PDF)', 'proposals', { required: true }),
+        sel('status', 'Status Persetujuan', ['Diajukan', 'Disetujui Waka Keuangan', 'Disetujui Kepala Sekolah', 'Ditolak', 'Perlu Revisi'], { required: true }),
         area('notes', 'Catatan / Evaluasi Anggaran')
       ]
     },
@@ -103,23 +112,6 @@
         area('description', 'Keterangan')
       ]
     },
-    '#/personnel/spmb': { wakaOnly: true,
-      node: 'spmb_registrations', noun: 'Manajemen SPMB', writeRoles: PE, dateField: 'timestamp', statusField: 'status', badges,
-      subtitle: 'Data pendaftar siswa baru (SPMB).',
-      summary: [
-        { label: 'Total Pendaftar', icon: 'ph-users', tone: 'primary' },
-        { label: 'Diterima', icon: 'ph-check-circle', tone: 'success', where: { status: 'Diterima' } }
-      ],
-      fields: [
-        t('nama_lengkap', 'Nama Lengkap', { required: true }),
-        t('nisn', 'NISN / NIK'),
-        t('asal_sekolah', 'Asal Sekolah'),
-        t('no_whatsapp', 'No WhatsApp'),
-        sel('status', 'Status Pendaftaran', ['Mendaftar', 'Seleksi', 'Diterima', 'Ditolak'], { required: true }),
-        file('bukti_transfer', 'Bukti Transfer Pendaftaran', 'spmb_transfer'),
-        area('catatan', 'Catatan Panitia')
-      ]
-    },
     '#/curriculum/questions': {
       node: 'curriculum/questions', noun: 'Bank Soal', writeRoles: CU,
       subtitle: 'Kumpulan soal untuk bahan evaluasi.',
@@ -134,8 +126,8 @@
         area('description', 'Deskripsi')
       ]
     },
-    '#/curriculum/journals': {
-      node: 'curriculum/journals', noun: 'Jurnal Pembelajaran', writeRoles: CU, dateField: 'date',
+    '#/curriculum/journals': { own: true,
+      node: 'curriculum/journals', noun: 'Jurnal Pembelajaran', writeRoles: [R.CURRICULUM, R.GURU], dateField: 'date', units: ['GURU_UMUM', 'WALI_KELAS'],
       subtitle: 'Pemantauan jurnal mengajar harian guru.',
       summary: [
         { label: 'Total Jurnal', icon: 'ph-notebook', tone: 'primary' }
@@ -162,45 +154,6 @@
         file('document', 'File Rekap Nilai', 'grades', { required: true })
       ]
     },
-    '#/ekskul/student-attendance': {
-      node: 'ekskul/attendance', noun: 'Presensi Murid Ekskul', writeRoles: ['guru_ekskul'], dateField: 'date',
-      subtitle: 'Kehadiran siswa pada kegiatan ekstrakurikuler.',
-      fields: [
-        date('date', 'Tanggal', { required: true }),
-        t('ekskulName', 'Nama Ekstrakurikuler', { required: true }),
-        sel('grade', 'Kelas', ['1', '2', '3', '4', '5', '6'], { required: true }),
-        area('attendanceData', 'Data Kehadiran (Nama Siswa)')
-      ]
-    },
-    '#/ekskul/grades': {
-      node: 'ekskul/grades', noun: 'Penilaian Bulanan', writeRoles: ['guru_ekskul'], dateField: 'month',
-      subtitle: 'Progress pembelajaran murid ekstrakurikuler.',
-      fields: [
-        date('month', 'Bulan', { required: true }),
-        t('ekskulName', 'Nama Ekstrakurikuler', { required: true }),
-        file('document', 'File Rekap Nilai', 'ekskul_grades')
-      ]
-    },
-    '#/ekskul/documents': {
-      node: 'ekskul/documents', noun: 'Upload Perangkat', writeRoles: ['guru_ekskul'], dateField: 'date',
-      subtitle: 'Perangkat pembelajaran Prota, Prosem, RPP.',
-      fields: [
-        date('date', 'Tanggal Upload', { required: true }),
-        t('ekskulName', 'Nama Ekstrakurikuler', { required: true }),
-        sel('type', 'Jenis Perangkat', ['Prota', 'Prosem', 'RPP'], { required: true }),
-        file('document', 'File Dokumen', 'ekskul_docs', { required: true })
-      ]
-    },
-    '#/ekskul/portfolio': {
-      node: 'ekskul/portfolio', noun: 'Portofolio Guru Ekskul', writeRoles: ['guru_ekskul'], dateField: 'date',
-      subtitle: 'Karya dan dokumentasi kegiatan ekstrakurikuler.',
-      fields: [
-        date('date', 'Tanggal', { required: true }),
-        t('title', 'Judul Portofolio', { required: true }),
-        file('document', 'File/Foto/Video', 'ekskul_portfolio', { required: true }),
-        area('description', 'Keterangan')
-      ]
-    },
     '#/tendik/performance': {
       node: 'tendik/performance', noun: 'Laporan Kinerja', writeRoles: ['tendik'], dateField: 'date',
       subtitle: 'Progress pekerjaan harian/pekanan.',
@@ -219,7 +172,7 @@
         file('document', 'Dokumen Pendukung', 'tendik_portfolio', { required: true })
       ]
     },
-    '#/guru/portfolio': {
+    '#/guru/portfolio': { own: true,
       node: 'guru/portfolio', noun: 'Portofolio Guru', writeRoles: ['guru'], dateField: 'date',
       subtitle: 'Dokumen pencapaian dan rekam jejak guru.',
       fields: [
@@ -276,9 +229,10 @@
         t('title', 'Pelanggaran / Kasus', { required: true }),
         sel('category', 'Kategori', ['Kedisiplinan', 'Kerapian', 'Kehadiran', 'Bullying / Kekerasan (TPPK)', 'Lainnya'], { required: true }),
         sel('severity', 'Tingkat', ['Ringan', 'Sedang', 'Berat'], { required: true }),
-        sel('status', 'Status', ['Dilaporkan', 'Ditindaklanjuti', 'Selesai'], { required: true }),
-        area('description', 'Kronologi'),
-        area('action', 'Tindak Lanjut')
+        sel('status', 'Status Kasus', ['Dilaporkan', 'Ditindaklanjuti', 'Selesai Pembinaan'], { required: true }),
+        sel('actionFollowUp', 'Bentuk Pembinaan', ['Peringatan Lisan', 'Surat Peringatan (SP1)', 'Panggilan Orang Tua', 'Konseling Guru BK', 'Selesai Pembinaan'], { required: true }),
+        area('description', 'Kronologi Kejadian', { required: true }),
+        area('action', 'Catatan Tindak Lanjut & Kesepakatan')
       ]
     },
     '#/student-affairs/achievements': {
@@ -319,40 +273,44 @@
     },
     '#/student-affairs/mpls': {
       node: 'student_affairs/mpls', noun: 'Kegiatan MPLS', writeRoles: SA, dateField: 'date', statusField: 'status', badges: { ...badges, Direncanakan: 'warning', Berjalan: 'warning' },
-      subtitle: 'Perencanaan dan pelaksanaan Masa Pengenalan Lingkungan Sekolah.',
+      subtitle: 'Perencanaan dan pelaksanaan Masa Pengenalan Lingkungan Sekolah serta pembagian gugus siswa baru.',
       summary: [
         { label: 'Total Kegiatan', icon: 'ph-flag-banner', tone: 'primary' },
         { label: 'Selesai', icon: 'ph-check-circle', tone: 'success', where: { status: 'Selesai' } },
         { label: 'Total Peserta', icon: 'ph-users-three', tone: 'warning', sum: 'participants' }
       ],
       fields: [
-        date('date', 'Tanggal', { required: true }),
-        t('title', 'Kegiatan', { required: true }),
-        t('location', 'Tempat'),
-        t('pic', 'Penanggung Jawab'),
-        num('participants', 'Peserta'),
-        sel('status', 'Status', ['Direncanakan', 'Berjalan', 'Selesai'], { required: true }),
-        area('description', 'Deskripsi')
+        date('date', 'Tanggal Kegiatan', { required: true }),
+        t('title', 'Nama Kegiatan / Agenda', { required: true }),
+        sel('gugus', 'Gugus Siswa Baru', ['Semua Gugus', 'Gugus 1 (Abu Bakar)', 'Gugus 2 (Umar bin Khattab)', 'Gugus 3 (Utsman bin Affan)', 'Gugus 4 (Ali bin Abi Thalib)'], { required: true }),
+        ref('mentorId', 'Guru Pendamping / Pemateri', 'teacher'),
+        t('location', 'Tempat / Ruangan'),
+        num('participants', 'Jumlah Siswa'),
+        sel('status', 'Status Pelaksanaan', ['Direncanakan', 'Berjalan', 'Selesai'], { required: true }),
+        area('description', 'Deskripsi & Sasaran Pembelajaran')
       ]
     },
     '#/student-affairs/ppdb': {
-      node: 'student_affairs/ppdb', noun: 'PPDB & Mutasi', writeRoles: SA, dateField: 'date', statusField: 'status', badges: { ...badges, Mendaftar: 'warning', 'Daftar Ulang': 'success' },
-      subtitle: 'Pendaftar peserta didik baru dan mutasi siswa.',
-      derive: (p) => ({ year: year(p.date) }),
+      node: 'spmb_registrations', noun: 'Penerimaan Siswa Baru (SPMB / PPDB)', writeRoles: SA, dateField: 'timestamp', statusField: 'status',
+      badges: { ...badges, Mendaftar: 'warning', Seleksi: 'primary', Diterima: 'success', Ditolak: 'danger' },
+      subtitle: 'Data pendaftar siswa baru online (SPMB) dan mutasi siswa.',
       summary: [
-        { label: 'Total Pendaftar', icon: 'ph-user-plus', tone: 'primary' },
-        { label: 'Diterima', icon: 'ph-check-circle', tone: 'success', where: { status: ['Diterima', 'Daftar Ulang'] } },
-        { label: 'Mutasi', icon: 'ph-arrows-left-right', tone: 'warning', where: { type: ['Mutasi Masuk', 'Mutasi Keluar'] } }
+        { label: 'Total Pendaftar', icon: 'ph-users', tone: 'primary' },
+        { label: 'Diterima', icon: 'ph-check-circle', tone: 'success', where: { status: 'Diterima' } },
+        { label: 'Dalam Seleksi', icon: 'ph-hourglass', tone: 'warning', where: { status: ['Mendaftar', 'Seleksi'] } }
       ],
       fields: [
-        date('date', 'Tanggal Daftar', { required: true }),
-        t('name', 'Nama Calon Siswa', { required: true }),
-        sel('type', 'Jenis', ['Baru', 'Mutasi Masuk', 'Mutasi Keluar'], { required: true }),
-        t('parentName', 'Nama Orang Tua / Wali'),
-        t('phone', 'No. HP'),
-        t('originSchool', 'Asal Sekolah'),
-        sel('status', 'Status', ['Mendaftar', 'Diterima', 'Daftar Ulang', 'Ditolak'], { required: true }),
-        area('note', 'Catatan')
+        t('nama_lengkap', 'Nama Calon Siswa', { required: true }),
+        sel('jenis_kelamin', 'Jenis Kelamin', ['Laki-laki', 'Perempuan']),
+        t('nik', 'NIK (16 Digit)'),
+        t('nisn', 'NISN'),
+        t('sekolah_asal', 'Sekolah Asal'),
+        t('nama_ibu', 'Nama Orang Tua / Wali'),
+        t('wa_orangtua', 'No. WhatsApp / HP', { required: true }),
+        t('email_orangtua', 'Email Orang Tua'),
+        sel('status', 'Status Pendaftaran', ['Mendaftar', 'Seleksi', 'Diterima', 'Ditolak'], { required: true }),
+        file('bukti_transfer', 'Bukti Transfer Pendaftaran', 'spmb_transfer'),
+        area('catatan', 'Catatan Panitia / Seleksi')
       ]
     },
     '#/personnel/data': {
@@ -377,24 +335,35 @@
     },
     '#/personnel/evaluations': { wakaOnly: true,
       node: 'personnel/evaluations', noun: 'Penilaian Kinerja (PKG)', writeRoles: PE, dateField: 'date', statusField: 'predicate', badges: { 'Sangat Baik': 'success', Baik: 'success', Cukup: 'warning', Kurang: 'danger' },
-      subtitle: 'Penilaian kinerja guru dan tenaga kependidikan per periode.',
+      subtitle: 'Evaluasi kinerja tahunan kompetensi pedagogik, kepribadian, dan profesional guru.',
+      derive: (p) => {
+        const ped = Number(p.pedagogicScore) || 0;
+        const per = Number(p.personalityScore) || 0;
+        const pro = Number(p.professionalScore) || 0;
+        const avg = Math.round((ped + per + pro) / 3);
+        const pred = avg >= 85 ? 'Sangat Baik' : (avg >= 70 ? 'Baik' : (avg >= 55 ? 'Cukup' : 'Kurang'));
+        return { score: avg, predicate: pred };
+      },
       summary: [
         { label: 'Total Penilaian', icon: 'ph-chart-line-up', tone: 'primary' },
         { label: 'Sangat Baik', icon: 'ph-star', tone: 'success', where: { predicate: 'Sangat Baik' } },
         { label: 'Perlu Pembinaan', icon: 'ph-warning', tone: 'danger', where: { predicate: ['Cukup', 'Kurang'] } }
       ],
       fields: [
-        date('date', 'Tanggal', { required: true }),
-        ref('employeeId', 'Pegawai', 'user', { required: true }),
-        t('period', 'Periode', { required: true }),
-        num('score', 'Skor (0-100)', { required: true }),
-        sel('predicate', 'Predikat', ['Sangat Baik', 'Baik', 'Cukup', 'Kurang'], { required: true }),
-        area('note', 'Catatan & Rencana Pengembangan')
+        date('date', 'Tanggal Penilaian', { required: true }),
+        ref('employeeId', 'Pegawai GTK', 'employee', { required: true }),
+        t('period', 'Periode Penilaian', { required: true }),
+        num('pedagogicScore', 'Kompetensi Pedagogik (0-100)', { required: true }),
+        num('personalityScore', 'Kompetensi Kepribadian & Sosial (0-100)', { required: true }),
+        num('professionalScore', 'Kompetensi Profesional (0-100)', { required: true }),
+        num('score', 'Skor Rata-rata PKG', { readonly: true }),
+        sel('predicate', 'Predikat Akhir', ['Sangat Baik', 'Baik', 'Cukup', 'Kurang'], { readonly: true }),
+        area('note', 'Catatan & Rencana Pengembangan Keprofesian')
       ]
     },
-    '#/personnel/training': {
-      node: 'personnel/training', noun: 'Pelatihan & Kompetensi', writeRoles: PE, dateField: 'date', statusField: 'status', badges,
-      subtitle: 'Riwayat pelatihan, workshop, dan sertifikasi pegawai.',
+    '#/personnel/training': { own: true,
+      node: 'personnel/training', noun: 'Pelatihan & Kompetensi', writeRoles: [R.PERSONNEL, R.GURU, R.TENDIK], dateField: 'date', statusField: 'status', badges,
+      subtitle: 'Riwayat pelatihan, workshop, dan sertifikasi kompetensi pegawai GTK.',
       summary: [
         { label: 'Total Pelatihan', icon: 'ph-certificate', tone: 'primary' },
         { label: 'Total Jam', icon: 'ph-clock', tone: 'warning', sum: 'hours' },
@@ -402,7 +371,7 @@
       ],
       fields: [
         date('date', 'Tanggal', { required: true }),
-        ref('employeeId', 'Pegawai', 'user', { required: true }),
+        ref('employeeId', 'Pegawai', 'employee', { required: true }),
         t('title', 'Nama Pelatihan', { required: true }),
         t('organizer', 'Penyelenggara'),
         num('hours', 'Jam Pelajaran'),
@@ -412,19 +381,40 @@
       ]
     },
     '#/personnel/welfare': {
-      node: 'personnel/welfare', noun: 'Kesejahteraan Staf', writeRoles: PE, dateField: 'date',
-      subtitle: 'Tunjangan, bantuan, dan apresiasi untuk pegawai.',
+      node: 'personnel/welfare', noun: 'Kesejahteraan Staf', writeRoles: PE, dateField: 'date', statusField: 'status', badges,
+      subtitle: 'Penetapan hak tunjangan sosial, apresiasi, santunan duka/sakit, dan persalinan pegawai.',
       summary: [
         { label: 'Total Catatan', icon: 'ph-heart', tone: 'primary' },
-        { label: 'Total Nominal', icon: 'ph-wallet', tone: 'success', sum: 'amount', money: true }
+        { label: 'Total Nominal', icon: 'ph-wallet', tone: 'success', sum: 'amount', money: true },
+        { label: 'Disetujui', icon: 'ph-check-circle', tone: 'success', where: { status: 'Disetujui Waka' } }
       ],
       fields: [
-        date('date', 'Tanggal', { required: true }),
-        ref('employeeId', 'Pegawai', 'user', { required: true }),
-        sel('type', 'Jenis', ['Tunjangan', 'Bantuan Sakit', 'Santunan', 'Apresiasi', 'Lainnya'], { required: true }),
-        money('amount', 'Nominal'),
-        area('note', 'Keterangan')
-      ]
+        date('date', 'Tanggal SK / Pengajuan', { required: true }),
+        ref('employeeId', 'Pegawai GTK', 'employee', { required: true }),
+        sel('type', 'Jenis Kesejahteraan', ['Santunan Sakit', 'Santunan Duka', 'Bantuan Persalinan', 'Apresiasi Prestasi', 'Tunjangan Hari Raya', 'Lainnya'], { required: true }),
+        money('amount', 'Nominal Bantuan', { required: true }),
+        sel('status', 'Status Persetujuan', ['Diajukan', 'Disetujui Waka', 'Dicairkan Keuangan', 'Ditolak'], { required: true }),
+        file('document', 'Berkas Pendukung / Surat Dokter', 'welfare_docs'),
+        area('note', 'Keterangan / Alasan')
+      ],
+      after: async (p, ctx, id) => {
+        if (p.status === 'Dicairkan Keuangan' && p.amount > 0) {
+          const empName = p.employeeIdName || p.employeeId || 'Pegawai';
+          const ledgerRef = db.ref('finance/ledger').push();
+          await ledgerRef.set({
+            date: p.date || new Date().toISOString().slice(0, 10),
+            type: 'expense',
+            category: 'Honor',
+            refNo: `WLF-${id ? id.slice(-6) : Date.now()}`,
+            description: `Realisasi Kesejahteraan Pegawai: ${p.type || 'Tunjangan'} (${empName})`,
+            amount: Number(p.amount) || 0,
+            method: 'Transfer',
+            createdAt: firebase.database.ServerValue.TIMESTAMP,
+            sourceModule: 'personnel/welfare',
+            sourceId: id
+          });
+        }
+      }
     },
     '#/personnel/publications': {
       node: 'personnel/announcements', noun: 'Publikasi & Informasi', writeRoles: PE, dateField: 'date', statusField: 'audience', badges: {},
@@ -701,24 +691,6 @@
         sel('status', 'Status', ['Draft', 'Revisi', 'Disetujui'], { required: true, default: 'Draft' })
       ]
     },
-    '#/finance/taxes': {
-      node: 'finance/taxes', noun: 'Administrasi Pajak', writeRoles: FI, dateField: 'date', statusField: 'status', badges,
-      subtitle: 'Pencatatan pemotongan dan penyetoran pajak.',
-      summary: [
-        { label: 'Total Catatan', icon: 'ph-receipt', tone: 'primary' },
-        { label: 'Belum Disetor', icon: 'ph-warning', tone: 'danger', where: { status: 'Belum Disetor' }, sum: 'amount', money: true },
-        { label: 'Disetor', icon: 'ph-check-circle', tone: 'success', where: { status: 'Disetor' }, sum: 'amount', money: true }
-      ],
-      fields: [
-        date('date', 'Tanggal', { required: true }),
-        sel('taxType', 'Jenis Pajak', ['PPh 21', 'PPh 22', 'PPh 23', 'PPN'], { required: true }),
-        money('basis', 'Dasar Pengenaan'),
-        money('amount', 'Nilai Pajak', { required: true }),
-        t('billingCode', 'Kode Billing'),
-        sel('status', 'Status', ['Belum Disetor', 'Disetor'], { required: true, default: 'Belum Disetor' }),
-        area('note', 'Catatan')
-      ]
-    },
     '#/finance/archives': {
       node: 'finance/archives', noun: 'Arsip Bukti Transaksi', writeRoles: FI, dateField: 'date',
       subtitle: 'Register dokumen bukti transaksi dengan tautan berkas.',
@@ -783,25 +755,27 @@
         time('endTime', 'Selesai', { required: true }),
         ref('classId', 'Kelas', 'class', { required: true }),
         ref('subjectId', 'Mata Pelajaran', 'subject', { required: true }),
-        ref('teacherId', 'Guru', 'user', { required: true })
+        ref('teacherId', 'Guru', 'teacher', { required: true })
       ]
     },
-    '#/curriculum/syllabus': {
-      node: 'curriculum/documents', noun: 'Perangkat & Modul Ajar', writeRoles: CU, statusField: 'status', badges,
-      subtitle: 'Pengumpulan dan verifikasi perangkat pembelajaran guru.',
+    '#/curriculum/syllabus': { own: true,
+      node: 'curriculum/documents', noun: 'Perangkat & Modul Ajar', writeRoles: [R.CURRICULUM, R.GURU], statusField: 'status', badges: { ...badges, 'Diajukan': 'warning', 'Disetujui (ACC)': 'success', 'Perlu Revisi': 'danger', 'Draft': 'neutral' }, units: ['GURU_UMUM', 'WALI_KELAS'],
+      subtitle: 'Pengumpulan, telaah, dan verifikasi perangkat pembelajaran guru oleh Kurikulum.',
       summary: [
         { label: 'Total Dokumen', icon: 'ph-folder-open', tone: 'primary' },
-        { label: 'Diverifikasi', icon: 'ph-check-circle', tone: 'success', where: { status: 'Diverifikasi' } },
-        { label: 'Belum Diunggah', icon: 'ph-warning', tone: 'danger', where: { status: 'Belum' } }
+        { label: 'Menunggu ACC', icon: 'ph-hourglass', tone: 'warning', where: { status: 'Diajukan' } },
+        { label: 'Disetujui (ACC)', icon: 'ph-check-circle', tone: 'success', where: { status: 'Disetujui (ACC)' } },
+        { label: 'Perlu Revisi', icon: 'ph-warning-octagon', tone: 'danger', where: { status: 'Perlu Revisi' } }
       ],
       fields: [
-        ref('teacherId', 'Guru', 'user', { required: true }),
-        ref('subjectId', 'Mata Pelajaran', 'subject'),
-        sel('docType', 'Jenis', ['Modul Ajar', 'ATP', 'Prota', 'Promes', 'Silabus'], { required: true }),
-        t('semester', 'Semester / Tahun Ajaran'),
-        sel('status', 'Status', ['Belum', 'Diunggah', 'Diverifikasi'], { required: true, default: 'Belum' }),
-        link('fileUrl', 'Tautan Berkas'),
-        area('note', 'Catatan')
+        ref('teacherId', 'Guru Pengunggah', 'teacher', { required: true }),
+        ref('subjectId', 'Mata Pelajaran', 'subject', { required: true }),
+        sel('docType', 'Jenis Perangkat', ['Modul Ajar / RPP', 'Alur Tujuan Pembelajaran (ATP)', 'Program Tahunan (Prota)', 'Program Semester (Promes)', 'Silabus'], { required: true }),
+        t('semester', 'Semester / Tahun Ajaran', { required: true }),
+        sel('status', 'Status Verifikasi Kurikulum', ['Draft', 'Diajukan', 'Disetujui (ACC)', 'Perlu Revisi'], { required: true, default: 'Diajukan' }),
+        link('fileUrl', 'Tautan Berkas Modul (Drive/PDF)', { required: true }),
+        area('note', 'Catatan Guru / Materi Pokok'),
+        area('reviewerFeedback', 'Catatan Peninjau / Revisi Kurikulum')
       ]
     },
     '#/curriculum/monitoring': {
@@ -814,7 +788,7 @@
       ],
       fields: [
         date('date', 'Tanggal', { required: true }),
-        ref('teacherId', 'Guru', 'user', { required: true }),
+        ref('teacherId', 'Guru', 'teacher', { required: true }),
         ref('classId', 'Kelas', 'class'),
         ref('subjectId', 'Mata Pelajaran', 'subject'),
         sel('result', 'Hasil', ['Sesuai', 'Perlu Pembinaan'], { required: true }),
@@ -845,7 +819,7 @@
       ],
       fields: [
         date('date', 'Tanggal', { required: true }),
-        ref('teacherId', 'Guru', 'user', { required: true }),
+        ref('teacherId', 'Guru', 'teacher', { required: true }),
         ref('classId', 'Kelas', 'class'),
         num('score', 'Skor (0-100)'),
         sel('status', 'Status', ['Terjadwal', 'Selesai'], { required: true, default: 'Terjadwal' }),
@@ -919,7 +893,7 @@
       fields: [
         t('name', 'Nama Kelompok', { required: true }),
         sel('level', 'Level / Jilid', ['Pra-TK', 'Jilid 1', 'Jilid 2', 'Jilid 3', 'Jilid 4', 'Jilid 5', 'Jilid 6', 'Al-Quran', 'Ghorib', 'Tajwid'], { required: true }),
-        ref('teacherId', 'Guru Pengampu', 'user', { required: true }),
+        ref('teacherId', 'Guru Pengampu', 'teacher', { required: true }),
         ref('students', 'Daftar Siswa', 'student', { type: 'multi' })
       ]
     },
@@ -934,7 +908,7 @@
         date('date', 'Tanggal Ujian', { required: true }),
         ref('studentId', 'Siswa', 'ummiStudent', { required: true }),
         sel('level', 'Level Ujian', ['Jilid 1', 'Jilid 2', 'Jilid 3', 'Jilid 4', 'Jilid 5', 'Jilid 6', 'Al-Quran', 'Ghorib', 'Tajwid', 'Munaqosyah'], { required: true }),
-        ref('examiner', 'Penguji', 'user', { required: true }),
+        ref('examiner', 'Penguji', 'teacher', { required: true }),
         sel('status', 'Status', ['Antre', 'Lulus', 'Mengulang'], { required: true, default: 'Antre' }),
         t('score', 'Nilai / Keterangan')
       ]
@@ -949,7 +923,7 @@
         date('date', 'Tanggal', { required: true }),
         ref('studentId', 'Siswa', 'ummiStudent', { required: true }),
         t('juz', 'Juz yang Diujikan', { required: true }),
-        ref('examiner', 'Penguji (Penyimak)', 'user', { required: true }),
+        ref('examiner', 'Penguji (Penyimak)', 'teacher', { required: true }),
         time('time', 'Pukul')
       ]
     },
@@ -1087,6 +1061,65 @@
         sel('status', 'Status', ['Aktif', 'Nonaktif'], { required: true, default: 'Aktif' }),
         area('notes', 'Deskripsi Integrasi')
       ]
-    }
+    },
+    '#/student-affairs/alumni': {
+      node: 'student_affairs/alumni', noun: 'Penelusuran Alumni', writeRoles: SA, dateField: 'graduationYear',
+      subtitle: 'Tracer study data kelulusan siswa dan kelanjutan studi ke jenjang SMP/MTs.',
+      summary: [
+        { label: 'Total Alumni', icon: 'ph-graduation-cap', tone: 'primary' },
+        { label: 'Pesantren / MTs', icon: 'ph-mosque', tone: 'success', where: { schoolType: 'Pesantren / MTs' } },
+        { label: 'SMP', icon: 'ph-buildings', tone: 'warning', where: { schoolType: 'SMP' } }
+      ],
+      fields: [
+        t('graduationYear', 'Tahun Lulus', { required: true }),
+        t('name', 'Nama Lengkap Alumni', { required: true }),
+        sel('gender', 'Jenis Kelamin', ['Laki-laki', 'Perempuan'], { required: true }),
+        t('nisn', 'NISN'),
+        t('destinationSchool', 'Sekolah Lanjutan', { required: true }),
+        sel('schoolType', 'Jenis Sekolah Lanjutan', ['SMP', 'Pesantren / MTs', 'Luar Kota / Internasional'], { required: true }),
+        sel('entryTrack', 'Jalur Masuk', ['Zonasi', 'Prestasi Akademik / Non-Akademik', 'Afirmasi / KETM', 'Tes Masuk Mandiri']),
+        t('phone', 'No. WhatsApp / HP'),
+        area('achievements', 'Prestasi Saat di SD / Sekolah Lanjutan'),
+        area('note', 'Catatan / Alamat')
+      ]
+    },
+    '#/student-affairs/leaves': {
+      node: 'student_affairs/leaves', noun: 'Perizinan Siswa', writeRoles: [R.STUDENT_AFFAIRS, R.GURU], dateField: 'startDate', statusField: 'status', badges: { Disetujui: 'success', Diajukan: 'warning', Ditolak: 'danger' },
+      subtitle: 'Pengajuan dan verifikasi surat izin sakit dan dispensasi siswa.',
+      summary: [
+        { label: 'Total Pengajuan', icon: 'ph-calendar-x', tone: 'primary' },
+        { label: 'Sakit', icon: 'ph-first-aid', tone: 'danger', where: { type: 'Sakit' } },
+        { label: 'Disetujui', icon: 'ph-check-circle', tone: 'success', where: { status: 'Disetujui' } }
+      ],
+      fields: [
+        date('startDate', 'Mulai Tanggal', { required: true }),
+        date('endDate', 'Sampai Tanggal', { required: true }),
+        ref('studentId', 'Siswa', 'student', { required: true }),
+        sel('type', 'Jenis Perizinan', ['Sakit', 'Izin Keluarga', 'Dispensasi Lomba / Acara'], { required: true }),
+        file('document', 'Foto Surat Dokter / Surat Izin Ortu', 'student_leaves'),
+        sel('status', 'Status Persetujuan', ['Diajukan', 'Disetujui', 'Ditolak'], { required: true }),
+        area('reason', 'Alasan / Keterangan', { required: true })
+      ]
+    },
+    '#/finance/student-bills': {
+      node: 'finance/student_bills', noun: 'Tagihan & SPP Siswa', writeRoles: FI, dateField: 'paymentDate', statusField: 'status', badges: { Lunas: 'success', 'Bebas Beasiswa': 'primary', 'Belum Lunas': 'danger' },
+      subtitle: 'Monitoring iuran bulanan SPP dan status pelunasan pembayaran siswa.',
+      summary: [
+        { label: 'Total Tagihan', icon: 'ph-receipt', tone: 'primary' },
+        { label: 'Lunas', icon: 'ph-check-circle', tone: 'success', where: { status: 'Lunas' } },
+        { label: 'Belum Lunas', icon: 'ph-warning', tone: 'danger', where: { status: 'Belum Lunas' } },
+        { label: 'Bebas Beasiswa', icon: 'ph-hand-coins', tone: 'primary', where: { status: 'Bebas Beasiswa' } }
+      ],
+      fields: [
+        t('academicYear', 'Tahun Ajaran', { required: true }),
+        sel('month', 'Bulan Tagihan', ['Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni'], { required: true }),
+        ref('studentId', 'Siswa', 'student', { required: true }),
+        money('amount', 'Nominal SPP', { required: true }),
+        sel('status', 'Status Pelunasan', ['Belum Lunas', 'Lunas', 'Bebas Beasiswa'], { required: true }),
+        date('paymentDate', 'Tanggal Pelunasan'),
+        file('receipt', 'Bukti Pembayaran / Struk', 'spp_receipts'),
+        area('note', 'Catatan')
+      ]
+    },
   });
 })();

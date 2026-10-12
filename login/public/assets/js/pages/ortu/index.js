@@ -109,7 +109,6 @@ const OrtuPages = {
       `;
       html += `
         <section class="student-report" >
-          
           <div class="card student-report-profile">
             <div>
               <h3 >${AppConfig.escapeHtml(student.name)}</h3>
@@ -120,15 +119,11 @@ const OrtuPages = {
               <div>${avg}<span class="avg-max">/4</span></div>
             </div>
           </div>
-
-          
           <div class="tabs student-report-tabs">
             <button class="btn btn-tab active" data-target="tab-karakter-${student.id}" data-student="${student.id}" data-tab="karakter"><i class="ph ph-star"></i> Karakter</button>
             <button class="btn btn-tab" data-target="tab-akademik-${student.id}" data-student="${student.id}" data-tab="akademik"><i class="ph ph-books"></i> Akademik</button>
             <button class="btn btn-tab" data-target="tab-lain-${student.id}" data-student="${student.id}" data-tab="lain"><i class="ph ph-info"></i> Lainnya</button>
           </div>
-
-          
           <div id="tab-karakter-${student.id}" class="tab-content active">
             <div class="card-grid ortu-grid">
               <div class="card ortu-inner-card">
@@ -147,8 +142,6 @@ const OrtuPages = {
               </div>
             </div>
           </div>
-
-          
           <div id="tab-akademik-${student.id}" class="tab-content hidden">
             <div class="card ortu-inner-card">
               <h3 class="card-title ortu-inner-title">Nilai Capaian Kompetensi (Akademik)</h3>
@@ -160,8 +153,6 @@ const OrtuPages = {
               </div>
             </div>
           </div>
-
-          
           <div id="tab-lain-${student.id}" class="tab-content hidden">
             <div class="card-grid ortu-grid">
               <div class="card ortu-inner-card">
@@ -184,8 +175,6 @@ const OrtuPages = {
               </div>
             </div>
           </div>
-
-          
           <div class="card parent-response-card">
             <h3 class="card-title ortu-inner-title">Tanggapan Orang Tua / Wali</h3>
             <div class="form-group" >
@@ -197,7 +186,6 @@ const OrtuPages = {
       `;
     }
     container.innerHTML = html;
-    
     container.querySelectorAll('.btn-tab').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const studentId = e.currentTarget.dataset.student;

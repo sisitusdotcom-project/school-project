@@ -32,13 +32,68 @@ const AdminPages = {
       </section>
       <section class="card section-spacer">
         <div class="card-header">
-          <h3 class="card-title">Peran admin saat ini</h3>
+          <h3 class="card-title"><i class="ph ph-navigation-arrow"></i> Menu Operasional Administrator Sistem</h3>
         </div>
-        <ul class="list-plain">
-          <li>Menetapkan role utama akun: admin, guru, kepsek, orang tua.</li>
-          <li>Menentukan penugasan unit kerja: keuangan, kurikulum, kesiswaan, humas & personalia, dan sarpras.</li>
-          <li>Memastikan tiap unit punya pemilik tugas dan tidak saling menimpa operasional.</li>
-        </ul>
+        <div class="card-body">
+          <div class="quick-nav-grid">
+            <a href="#/admin/users" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-users-three"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Kelola Pengguna</div>
+                <div class="quick-nav-desc">Akun login, reset sandi & peran</div>
+              </div>
+            </a>
+            <a href="#/admin/assignments" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-tree-structure"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Distribusi Penugasan</div>
+                <div class="quick-nav-desc">Plotting Waka, Staf & Tim Unit</div>
+              </div>
+            </a>
+            <a href="#/attendance" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-map-pin"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Presensi Kehadiran</div>
+                <div class="quick-nav-desc">Presensi GPS mandiri staf/admin</div>
+              </div>
+            </a>
+            <a href="#/admin/attendance" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-clock-user"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Pantau Disiplin Guru</div>
+                <div class="quick-nav-desc">Monitoring presensi harian GTK</div>
+              </div>
+            </a>
+            <a href="#/admin/classes" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-chalkboard"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Pembagian Rombel</div>
+                <div class="quick-nav-desc">Daftar kelas & penugasan wali</div>
+              </div>
+            </a>
+            <a href="#/admin/subjects" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-book-open"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Pemetaan Mapel & Guru</div>
+                <div class="quick-nav-desc">Distribusi guru pengampu mapel</div>
+              </div>
+            </a>
+            <a href="#/admin/characters" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-star"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Indikator Karakter</div>
+                <div class="quick-nav-desc">Rubrik adab & sikap santri</div>
+              </div>
+            </a>
+            <a href="#/it-admin/backup" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-cloud-arrow-down"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Backup & Restore</div>
+                <div class="quick-nav-desc">Pencadangan database sistem</div>
+              </div>
+            </a>
+          </div>
+        </div>
       </section>
       <section class="card section-spacer">
         <div class="card-header">
@@ -113,7 +168,7 @@ const AdminPages = {
       <div class="modal">
         <div class="modal-header">
           <h3 class="modal-title" id="char-modal-title">Tambah indikator</h3>
-          <button class="btn-icon" onclick="App.closeModal('modal-char')"><i class="ph ph-x"></i></button>
+          <button class="btn-icon" data-close-modal="modal-char"><i class="ph ph-x"></i></button>
         </div>
         <form id="form-char">
           <div class="modal-body">
@@ -132,7 +187,7 @@ const AdminPages = {
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-outline" onclick="App.closeModal('modal-char')">Batal</button>
+            <button type="button" class="btn btn-outline" data-close-modal="modal-char">Batal</button>
             <button type="submit" class="btn btn-primary">Simpan</button>
           </div>
         </form>
@@ -165,12 +220,19 @@ const AdminPages = {
             <strong>${AppConfig.escapeHtml(u.name)}</strong><br>
             <small class="text-muted">
               Email: ${u.email || '-'}<br>
-              <span style="opacity: 0.6">Default: ${u.id.toLowerCase().replace(/[^a-z0-9]/g, '')}@musada.sch.id</span>
+              <span class="user-id-subtext">Default: ${u.id.toLowerCase().replace(/[^a-z0-9]/g, '')}@musada.sch.id</span>
             </small>
+            ${u.teachingRole ? `<div class="mt-4"><small class="text-muted"><i class="ph ph-book-open"></i> ${AppConfig.escapeHtml(u.teachingRole)}</small></div>` : ''}
           </td>
           <td>
-            <span class="badge ${AppConfig.getRoleBadgeClass(u.role)}">${u.role}</span>
-            ${AppConfig.getRoleAssignments(u).length ? `<div class="mt-4"><small class="text-muted">${AppConfig.getRoleAssignments(u).map((item) => AppConfig.UNIT_LABELS[item] || item).join(', ')}</small></div>` : ''}
+            <div class="user-badges-container">
+              <span class="badge ${AppConfig.getRoleBadgeClass(u.role)}">${AppConfig.PRIMARY_ROLES[u.role] || u.role}</span>
+              ${AppConfig.getRoleAssignments(u).map((item) => {
+                const label = AppConfig.UNIT_LABELS[item] || (item.startsWith('GURU_KELAS_') ? ('Wali Kelas ' + item.replace('GURU_KELAS_', '').replace(/_/g, ' ')) : item);
+                const badgeClass = AppConfig.getAssignmentBadgeClass ? AppConfig.getAssignmentBadgeClass(item) : 'badge-outline';
+                return `<span class="badge ${badgeClass}">${AppConfig.escapeHtml(label)}</span>`;
+              }).join('')}
+            </div>
           </td>
           <td class="action-cell">
             <button class="btn btn-outline btn-sm" data-edit-usr="${u.id}"><i class="ph ph-pencil-simple"></i></button>
@@ -217,7 +279,7 @@ const AdminPages = {
             </div>
             <select id="filter-role" class="toolbar-select">
               <option value="">Semua Peran</option>
-              ${Object.entries(AppConfig.ROLE_LABELS).map(([val, label]) => `<option value="${val}">${label}</option>`).join('')}
+              ${Object.entries(AppConfig.PRIMARY_ROLES).map(([val, label]) => `<option value="${val}">${label}</option>`).join('')}
             </select>
           </div>
           <button class="btn btn-primary" id="btn-add-usr"><i class="ph ph-plus"></i> Tambah Pengguna</button>
@@ -233,7 +295,7 @@ const AdminPages = {
         <div class="modal">
           <div class="modal-header">
             <h3 class="modal-title" id="usr-modal-title">Tambah pengguna</h3>
-            <button class="btn-icon" onclick="App.closeModal('modal-usr')"><i class="ph ph-x"></i></button>
+            <button class="btn-icon" data-close-modal="modal-usr"><i class="ph ph-x"></i></button>
           </div>
           <form id="form-usr">
             <div class="modal-body">
@@ -242,31 +304,63 @@ const AdminPages = {
               <div class="form-group"><label>Email (opsional)</label><input type="email" id="usr-email"></div>
               <div class="form-group"><label>Password</label><input type="password" id="usr-password" required minlength="6"></div>
               <div class="form-group"><label>Peran utama</label><select id="usr-role" required>
-                ${Object.entries(AppConfig.ROLE_LABELS).map(([val, label]) => `<option value="${val}">${label}</option>`).join('')}
+                ${Object.entries(AppConfig.PRIMARY_ROLES).map(([val, label]) => `<option value="${val}">${label}</option>`).join('')}
               </select></div>
               <div class="form-group">
-                <label>Tugas / unit kerja</label>
-                <div class="checkbox-grid" id="usr-assignments-group">
-                  <label class="checkbox-card"><input type="checkbox" value="WAKA_HUMAS_PERSONALIA"> <span>Waka Humas & Personalia</span></label>
-                  <label class="checkbox-card"><input type="checkbox" value="STAF_HUMAS_PERSONALIA"> <span>Staf Humas & Personalia</span></label>
-                  <label class="checkbox-card"><input type="checkbox" value="WAKA_KEUANGAN"> <span>Waka Keuangan</span></label>
-                  <label class="checkbox-card"><input type="checkbox" value="STAF_KEUANGAN"> <span>Staf Keuangan</span></label>
-                  <label class="checkbox-card"><input type="checkbox" value="WAKA_KURIKULUM"> <span>Waka Kurikulum</span></label>
-                  <label class="checkbox-card"><input type="checkbox" value="STAF_KURIKULUM"> <span>Staf Kurikulum</span></label>
-                  <label class="checkbox-card"><input type="checkbox" value="WAKA_KESISWAAN"> <span>Waka Kesiswaan</span></label>
-                  <label class="checkbox-card"><input type="checkbox" value="STAF_KESISWAAN"> <span>Staf Kesiswaan</span></label>
-                  <label class="checkbox-card"><input type="checkbox" value="WAKA_SARPRAS"> <span>Waka Sarpras</span></label>
-                  <label class="checkbox-card"><input type="checkbox" value="STAF_SARPRAS"> <span>Staf Sarpras</span></label>
-                  <label class="checkbox-card"><input type="checkbox" value="TIM_IT"> <span>Tim IT</span></label>
-                  <label class="checkbox-card"><input type="checkbox" value="KOORD_UMMI"> <span>Koord. Ummi</span></label>
-                  <label class="checkbox-card"><input type="checkbox" value="TIM_UMMI"> <span>Tim Ummi</span></label>
-                  <label class="checkbox-card"><input type="checkbox" value="TIM_B_INGGRIS"> <span>Tim B. Inggris</span></label>
+                <label>Tugas / unit kerja tambahan</label>
+                <div id="usr-assignments-group">
+                  <div class="assignment-section-label">Pimpinan / Waka</div>
+                  <div class="checkbox-grid">
+                    <label class="checkbox-card"><input type="checkbox" value="WAKA_KURIKULUM"> <span>Waka Kurikulum</span></label>
+                    <label class="checkbox-card"><input type="checkbox" value="WAKA_KESISWAAN"> <span>Waka Kesiswaan</span></label>
+                    <label class="checkbox-card"><input type="checkbox" value="WAKA_SARPRAS"> <span>Waka Sarpras</span></label>
+                    <label class="checkbox-card"><input type="checkbox" value="WAKA_HUMAS_PERSONALIA"> <span>Waka Humas & Personalia</span></label>
+                    <label class="checkbox-card"><input type="checkbox" value="WAKA_KEUANGAN"> <span>Waka Keuangan</span></label>
+                  </div>
+                  <div class="assignment-section-label">Staf Pelaksana Unit</div>
+                  <div class="checkbox-grid">
+                    <label class="checkbox-card"><input type="checkbox" value="STAF_KURIKULUM"> <span>Staf Kurikulum</span></label>
+                    <label class="checkbox-card"><input type="checkbox" value="STAF_KESISWAAN"> <span>Staf Kesiswaan</span></label>
+                    <label class="checkbox-card"><input type="checkbox" value="STAF_SARPRAS"> <span>Staf Sarpras</span></label>
+                    <label class="checkbox-card"><input type="checkbox" value="STAF_HUMAS_PERSONALIA"> <span>Staf Humas & Personalia</span></label>
+                    <label class="checkbox-card"><input type="checkbox" value="STAF_KEUANGAN"> <span>Staf Keuangan</span></label>
+                  </div>
+                  <div class="assignment-section-label">Tim Khusus & Koordinator Program</div>
+                  <div class="checkbox-grid">
+                    <label class="checkbox-card"><input type="checkbox" value="KOORD_UMMI"> <span>Koordinator Ummi</span></label>
+                    <label class="checkbox-card"><input type="checkbox" value="TIM_UMMI"> <span>Tim Ummi (Guru Al-Qur'an)</span></label>
+                    <label class="checkbox-card"><input type="checkbox" value="TIM_IT"> <span>Tim IT & Sistem</span></label>
+                    <label class="checkbox-card"><input type="checkbox" value="TIM_B_INGGRIS"> <span>Tim English Lab</span></label>
+                  </div>
+                  <div class="assignment-section-label">Guru Ekstrakurikuler</div>
+                  <div class="checkbox-grid">
+                    <label class="checkbox-card"><input type="checkbox" value="GURU_EKSTRA_HW"> <span>Pembina HW</span></label>
+                    <label class="checkbox-card"><input type="checkbox" value="GURU_EKSTRA_TS"> <span>Pembina Tapak Suci</span></label>
+                    <label class="checkbox-card"><input type="checkbox" value="GURU_EKSTRA_PANAHAN_PUTRA"> <span>Ekskul Panahan Putra</span></label>
+                    <label class="checkbox-card"><input type="checkbox" value="GURU_EKSTRA_PANAHAN_PUTRI"> <span>Ekskul Panahan Putri</span></label>
+                    <label class="checkbox-card"><input type="checkbox" value="GURU_EKSTRA_BADMINTON"> <span>Ekskul Badminton</span></label>
+                    <label class="checkbox-card"><input type="checkbox" value="GURU_EKSTRA_RENANG"> <span>Ekskul Renang</span></label>
+                    <label class="checkbox-card"><input type="checkbox" value="GURU_EKSTRA_COOKING"> <span>Ekskul Cooking</span></label>
+                    <label class="checkbox-card"><input type="checkbox" value="GURU_EKSTRA_TARI"> <span>Ekskul Tari</span></label>
+                    <label class="checkbox-card"><input type="checkbox" value="GURU_EKSTRA_LUKIS"> <span>Ekskul Lukis</span></label>
+                    <label class="checkbox-card"><input type="checkbox" value="GURU_EKSTRA_SEMPOA"> <span>Ekskul Sempoa</span></label>
+                    <label class="checkbox-card"><input type="checkbox" value="GURU_EKSTRA_STORY_TELLING"> <span>Ekskul Story Telling</span></label>
+                    <label class="checkbox-card"><input type="checkbox" value="GURU_EKSTRA_TAHFIDZ_CAMP"> <span>Pembina Tahfidz Camp</span></label>
+                  </div>
+                  <div class="assignment-section-label">Guru Mapel Spesifik</div>
+                  <div class="checkbox-grid">
+                    <label class="checkbox-card"><input type="checkbox" value="GURU_MAPEL_PAI"> <span>Guru Mapel PAI</span></label>
+                    <label class="checkbox-card"><input type="checkbox" value="GURU_MAPEL_PJOK"> <span>Guru Mapel PJOK</span></label>
+                    <label class="checkbox-card"><input type="checkbox" value="GURU_MAPEL_B_INGGRIS"> <span>Guru Mapel B. Inggris</span></label>
+                    <label class="checkbox-card"><input type="checkbox" value="GURU_MAPEL_SENI"> <span>Guru Mapel Seni</span></label>
+                    <label class="checkbox-card"><input type="checkbox" value="GURU_MAPEL_TIK"> <span>Guru Mapel TIK</span></label>
+                  </div>
                 </div>
-                <small class="text-muted">Pilih satu atau lebih penugasan tambahan.</small>
+                <small class="text-muted">Pilih satu atau lebih penugasan struktural / tim.</small>
               </div>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-outline" onclick="App.closeModal('modal-usr')">Batal</button>
+              <button type="button" class="btn btn-outline" data-close-modal="modal-usr">Batal</button>
               <button type="submit" class="btn btn-primary">Simpan</button>
             </div>
           </form>
@@ -359,7 +453,12 @@ const AdminPages = {
       <div class="card">
         <div class="card-header">
           <h3 class="card-title">Daftar kelas</h3>
-          ${isKurikulum ? `<button class="btn btn-primary" id="btn-add-cls"><i class="ph ph-plus"></i> Tambah</button>` : ''}
+          ${isKurikulum ? `
+            <div class="card-actions">
+              <button class="btn btn-outline" id="btn-promo-cls"><i class="ph ph-arrow-fat-lines-up"></i> Kenaikan Kelas</button>
+              <button class="btn btn-primary" id="btn-add-cls"><i class="ph ph-plus"></i> Tambah</button>
+            </div>
+          ` : ''}
         </div>
         <div class="table-responsive">
           <table class="table"><thead><tr><th>Nama Kelas</th><th>Wali Kelas</th><th>Jumlah Siswa</th><th style="width:220px">Aksi</th></tr></thead>
@@ -370,7 +469,7 @@ const AdminPages = {
         <div class="modal">
           <div class="modal-header">
             <h3 class="modal-title" id="cls-modal-title">Tambah kelas</h3>
-            <button class="btn-icon" onclick="App.closeModal('modal-cls')"><i class="ph ph-x"></i></button>
+            <button class="btn-icon" data-close-modal="modal-cls"><i class="ph ph-x"></i></button>
           </div>
           <form id="form-cls">
             <div class="modal-body">
@@ -388,7 +487,7 @@ const AdminPages = {
               </div>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-outline" onclick="App.closeModal('modal-cls')">Batal</button>
+              <button type="button" class="btn btn-outline" data-close-modal="modal-cls">Batal</button>
               <button type="submit" class="btn btn-primary">Simpan</button>
             </div>
           </form>
@@ -398,7 +497,7 @@ const AdminPages = {
         <div class="modal">
           <div class="modal-header">
             <h3 class="modal-title" id="mapel-modal-title">Atur Guru Mata Pelajaran</h3>
-            <button class="btn-icon" onclick="App.closeModal('modal-mapel')"><i class="ph ph-x"></i></button>
+            <button class="btn-icon" data-close-modal="modal-mapel"><i class="ph ph-x"></i></button>
           </div>
           <form id="form-mapel">
             <div class="modal-body">
@@ -407,8 +506,56 @@ const AdminPages = {
               ${mapelRows}
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-outline" onclick="App.closeModal('modal-mapel')">Batal</button>
+              <button type="button" class="btn btn-outline" data-close-modal="modal-mapel">Batal</button>
               <button type="submit" class="btn btn-primary">Simpan Penugasan</button>
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="modal-overlay" id="modal-promo">
+        <div class="modal modal-lg">
+          <div class="modal-header">
+            <h3 class="modal-title"><i class="ph ph-arrow-fat-lines-up"></i> Kenaikan Kelas & Promosi Rombel</h3>
+            <button class="btn-icon" data-close-modal="modal-promo"><i class="ph ph-x"></i></button>
+          </div>
+          <form id="form-promo">
+            <div class="modal-body">
+              <p class="text-muted soft-note">Pilih kelas asal dan kelas tujuan untuk memproses kenaikan kelas atau kelulusan siswa secara massal pada akhir tahun ajaran.</p>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Kelas Asal (Saat Ini)</label>
+                  <select id="promo-from-cls" required>
+                    <option value="">— Pilih Kelas Asal —</option>
+                    ${classArr.map(c => `<option value="${c.id}">${AppConfig.escapeHtml(c.name)}</option>`).join('')}
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Kelas Tujuan (Kenaikan / Kelulusan)</label>
+                  <select id="promo-to-cls" required>
+                    <option value="">— Pilih Kelas Tujuan —</option>
+                    ${classArr.map(c => `<option value="${c.id}">${AppConfig.escapeHtml(c.name)}</option>`).join('')}
+                    <option value="LULUS_ALUMNI">Lulus / Alumni (Khusus Kelas 6)</option>
+                  </select>
+                </div>
+              </div>
+              <div class="card-header">
+                <label><strong>Daftar Siswa yang Akan Dipromosikan:</strong></label>
+                <div>
+                  <input type="checkbox" id="promo-select-all" checked> <label for="promo-select-all">Pilih Semua</label>
+                </div>
+              </div>
+              <div class="table-responsive">
+                <table class="table table-sm">
+                  <thead><tr><th style="width:40px">Pilih</th><th>NIS</th><th>Nama Siswa</th><th>Status</th></tr></thead>
+                  <tbody id="promo-students-tbody">
+                    <tr><td colspan="4" class="text-center text-muted">Pilih kelas asal terlebih dahulu.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-outline" data-close-modal="modal-promo">Batal</button>
+              <button type="submit" class="btn btn-primary" id="btn-submit-promo"><i class="ph ph-check"></i> Eksekusi Kenaikan Kelas</button>
             </div>
           </form>
         </div>
@@ -491,6 +638,100 @@ const AdminPages = {
       App.closeModal('modal-mapel');
       AdminPages.renderClasses(container);
     };
+    const btnPromoCls = document.getElementById('btn-promo-cls');
+    if (btnPromoCls) {
+      btnPromoCls.onclick = () => {
+        document.getElementById('promo-from-cls').value = '';
+        document.getElementById('promo-to-cls').value = '';
+        document.getElementById('promo-students-tbody').innerHTML = '<tr><td colspan="4" class="text-center text-muted">Pilih kelas asal terlebih dahulu.</td></tr>';
+        document.getElementById('modal-promo').classList.add('active');
+      };
+    }
+    const promoFromSelect = document.getElementById('promo-from-cls');
+    if (promoFromSelect) {
+      promoFromSelect.onchange = () => {
+        const fromId = promoFromSelect.value;
+        const tbody = document.getElementById('promo-students-tbody');
+        if (!fromId) {
+          tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Pilih kelas asal terlebih dahulu.</td></tr>';
+          return;
+        }
+        const filteredStudents = studentArr.filter(s => s.classId === fromId).sort((a,b) => a.name.localeCompare(b.name));
+        if (!filteredStudents.length) {
+          tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Tidak ada siswa terdaftar di kelas ini.</td></tr>';
+          return;
+        }
+        tbody.innerHTML = filteredStudents.map(s => `
+          <tr>
+            <td><input type="checkbox" class="chk-promo-stu" data-stu-id="${s.id}" checked></td>
+            <td>${s.nis || '-'}</td>
+            <td><strong>${AppConfig.escapeHtml(s.name)}</strong></td>
+            <td><span class="badge badge-success">Siap Promosi</span></td>
+          </tr>
+        `).join('');
+        const selectAll = document.getElementById('promo-select-all');
+        if (selectAll) selectAll.checked = true;
+      };
+    }
+    const promoSelectAll = document.getElementById('promo-select-all');
+    if (promoSelectAll) {
+      promoSelectAll.onchange = (e) => {
+        document.querySelectorAll('.chk-promo-stu').forEach(chk => { chk.checked = e.target.checked; });
+      };
+    }
+    const formPromo = document.getElementById('form-promo');
+    if (formPromo) {
+      formPromo.onsubmit = async (e) => {
+        e.preventDefault();
+        const fromId = document.getElementById('promo-from-cls').value;
+        const toId = document.getElementById('promo-to-cls').value;
+        if (!fromId || !toId) return alert('Pilih kelas asal dan kelas tujuan.');
+        if (fromId === toId) return alert('Kelas tujuan tidak boleh sama dengan kelas asal.');
+        const selectedIds = [];
+        document.querySelectorAll('.chk-promo-stu:checked').forEach(chk => {
+          selectedIds.push(chk.dataset.stuId);
+        });
+        if (!selectedIds.length) return alert('Pilih setidaknya satu siswa untuk dipromosikan.');
+        const fromClsName = classArr.find(c => c.id === fromId)?.name || fromId;
+        const toClsName = toId === 'LULUS_ALUMNI' ? 'Lulus / Alumni' : (classArr.find(c => c.id === toId)?.name || toId);
+        if (!confirm(`Yakin ingin mempromosikan ${selectedIds.length} siswa dari ${fromClsName} ke ${toClsName}?`)) return;
+        const submitBtn = document.getElementById('btn-submit-promo');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="ph ph-spinner"></i> Memproses...';
+        try {
+          const updates = {};
+          selectedIds.forEach(id => {
+            if (toId === 'LULUS_ALUMNI') {
+              updates[`students/${id}/classId`] = 'ALUMNI';
+              updates[`students/${id}/status`] = 'Lulus';
+            } else {
+              updates[`students/${id}/classId`] = toId;
+            }
+          });
+          const promoLog = {
+            date: new Date().toISOString(),
+            fromClassId: fromId,
+            fromClassName: fromClsName,
+            toClassId: toId,
+            toClassName: toClsName,
+            totalStudents: selectedIds.length,
+            studentIds: selectedIds,
+            executedBy: Auth.currentUser.uid
+          };
+          const promoKey = firebase.database().ref(`classes/${fromId}/promotion`).push().key;
+          updates[`classes/${fromId}/promotion/${promoKey}`] = promoLog;
+          updates[`student_promotions/${promoKey}`] = promoLog;
+          await firebase.database().ref().update(updates);
+          alert(`Sukses mempromosikan ${selectedIds.length} siswa ke ${toClsName}!`);
+          App.closeModal('modal-promo');
+          AdminPages.renderClasses(container);
+        } catch (err) {
+          alert('Gagal memproses promosi: ' + err.message);
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="ph ph-check"></i> Eksekusi Kenaikan Kelas';
+        }
+      };
+    }
   },
   async renderStudents(container, classId) {
     const classes = await DB.getClasses();
@@ -582,7 +823,7 @@ const AdminPages = {
         <div class="modal">
           <div class="modal-header">
             <h3 class="modal-title" id="stu-modal-title">Tambah siswa</h3>
-            <button class="btn-icon" onclick="App.closeModal('modal-stu')"><i class="ph ph-x"></i></button>
+            <button class="btn-icon" data-close-modal="modal-stu"><i class="ph ph-x"></i></button>
           </div>
           <form id="form-stu">
             <div class="modal-body">
@@ -596,7 +837,7 @@ const AdminPages = {
               <div class="form-group"><label>Tautkan Orang Tua</label><select id="stu-parent"><option value="">— Tidak ditautkan —</option>${ortuOptions}</select></div>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-outline" onclick="App.closeModal('modal-stu')">Batal</button>
+              <button type="button" class="btn btn-outline" data-close-modal="modal-stu">Batal</button>
               <button type="submit" class="btn btn-primary">Simpan</button>
             </div>
           </form>
@@ -718,7 +959,7 @@ const AdminPages = {
       <div class="modal">
         <div class="modal-header">
           <h3 class="modal-title" id="sub-modal-title">Tambah mata pelajaran</h3>
-          <button class="btn-icon" onclick="App.closeModal('modal-sub')"><i class="ph ph-x"></i></button>
+          <button class="btn-icon" data-close-modal="modal-sub"><i class="ph ph-x"></i></button>
         </div>
         <form id="form-sub">
           <div class="modal-body">
@@ -742,7 +983,7 @@ const AdminPages = {
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-outline" onclick="App.closeModal('modal-sub')">Batal</button>
+            <button type="button" class="btn btn-outline" data-close-modal="modal-sub">Batal</button>
             <button type="submit" class="btn btn-primary">Simpan</button>
           </div>
         </form>
@@ -823,7 +1064,7 @@ const AdminPages = {
       <div class="modal">
         <div class="modal-header">
           <h3 class="modal-title" id="eks-modal-title">Tambah ekstrakurikuler</h3>
-          <button class="btn-icon" onclick="App.closeModal('modal-eks')"><i class="ph ph-x"></i></button>
+          <button class="btn-icon" data-close-modal="modal-eks"><i class="ph ph-x"></i></button>
         </div>
         <form id="form-eks">
           <div class="modal-body">
@@ -845,7 +1086,7 @@ const AdminPages = {
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-outline" onclick="App.closeModal('modal-eks')">Batal</button>
+            <button type="button" class="btn btn-outline" data-close-modal="modal-eks">Batal</button>
             <button type="submit" class="btn btn-primary">Simpan</button>
           </div>
         </form>

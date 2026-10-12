@@ -3,11 +3,9 @@ const DB = {
     if (!isDBReady()) return Promise.resolve(fallback);
     return db.ref(path).once('value').then((snap) => snap.val() ?? fallback);
   },
-
   _readCollection(path, fallback = {}) {
     return this._read(path, fallback);
   },
-
   _buildUnitFlags(assignments = []) {
     const flags = {};
     AppConfig.normalizeAssignments(assignments).forEach((item) => {
@@ -18,7 +16,6 @@ const DB = {
     });
     return flags;
   },
-
   _sanitizeUserPayload(data = {}) {
     const safeData = { ...data };
     delete safeData.password;
@@ -28,7 +25,6 @@ const DB = {
     }
     return safeData;
   },
-
   async backfillUnitFlags() {
     if (!isDBReady() || !this._currentUserIsAdmin()) return;
     const users = await this.getAllUsers();
@@ -41,20 +37,16 @@ const DB = {
     });
     if (Object.keys(updates).length) await db.ref().update(updates);
   },
-
   _currentUserIsAdmin() {
-    return !!(typeof Auth !== 'undefined' && Auth.currentRole === AppConfig.ROLES.ADMIN);
+    return !!(typeof Auth !== 'undefined' && (Auth.currentRole === AppConfig.ROLES.ADMIN || (Auth.currentAssignments || []).some((a) => a.startsWith('WAKA_') || a === 'TIM_IT')));
   },
-
   async _canManageClass(classId) {
     if (!classId || typeof Auth === 'undefined' || !Auth.currentUser) return true;
     if (this._currentUserIsAdmin()) return true;
-
     const classes = await this.getClasses();
     const cls = classes[classId] || null;
     return !!(cls && (cls.teacherId === Auth.currentUser.uid || (cls.subjectTeachers && Object.values(cls.subjectTeachers).includes(Auth.currentUser.uid))));
   },
-
   _buildAttendancePayload(data = {}) {
     const payload = {};
     if (data.time_in) payload.time_in = data.time_in;
@@ -65,7 +57,6 @@ const DB = {
     if (data.proofUrl) payload.proof_url = data.proofUrl;
     return payload;
   },
-
   _serializeStudentAttendance(data = {}) {
     const normalized = {};
     Object.entries(data || {}).forEach(([studentId, status]) => {
@@ -112,7 +103,6 @@ const DB = {
   },
   async getSettings() {
     const defaultSettings = AppConfig.DEFAULT_SETTINGS;
-
     if (!isDBReady()) return defaultSettings;
     const snap = await db.ref('settings').once('value');
     const current = snap.val() || {};
@@ -159,7 +149,6 @@ const DB = {
     if (typeof Auth !== 'undefined' && Auth.currentUser && teacherId !== Auth.currentUser.uid && !isAdmin) {
       throw new Error('Anda tidak berwenang mengubah presensi guru lain.');
     }
-
     const payload = this._buildAttendancePayload(data || {});
     if (!Object.keys(payload).length) return;
     await db.ref(`teacher_attendance/${dateStr}/${teacherId}`).update(payload);
@@ -173,7 +162,6 @@ const DB = {
   },
   async submitTeacherAttendanceToWorker({ dateStr, teacherId, type, photoDataUrl, location, accuracy }) {
     const workerUrl = (window.CLOUDFLARE_ATTENDANCE_WORKER_URL || '').trim();
-
     if (!workerUrl || workerUrl.includes('your-subdomain')) {
       const fallbackProof = await this.saveTeacherAttendanceProof(dateStr, teacherId, photoDataUrl, 'image/jpeg');
       const payload = {
@@ -185,7 +173,6 @@ const DB = {
       await this.saveTeacherAttendance(dateStr, teacherId, payload);
       return { status: 'success', proof_url: fallbackProof, record: payload };
     }
-
     const user = typeof firebase !== 'undefined' && firebase.auth ? firebase.auth().currentUser : null;
     const idToken = user ? await user.getIdToken() : '';
     const response = await fetch(workerUrl, {
@@ -204,18 +191,15 @@ const DB = {
         clientTimestamp: new Date().toISOString()
       })
     });
-
     let result = {};
     try {
       result = await response.json();
     } catch (error) {
       result = { status: 'error', message: 'Respons worker tidak valid JSON.' };
     }
-
     if (!response.ok || result.status !== 'success') {
       throw new Error(result && result.message ? result.message : 'Gagal memvalidasi absensi di server.');
     }
-
     return result;
   },
   async getDailyStudentAttendance(dateStr, classId) {
@@ -232,7 +216,6 @@ const DB = {
         throw new Error('Anda tidak berwenang mengisi absensi kelas ini.');
       }
     }
-
     const normalized = this._serializeStudentAttendance(data);
     if (!Object.keys(normalized).length) return;
     await db.ref(`student_attendance_daily/${dateStr}/${classId}`).update(normalized);
@@ -406,7 +389,6 @@ const DB = {
       notes: data.notes || '',
       createdAt: data.createdAt || firebase.database.ServerValue.TIMESTAMP
     };
-
     const ref = id ? db.ref(`facilities/assets/${id}`) : db.ref('facilities/assets').push();
     await ref.set(normalized);
     return ref.key;
@@ -425,7 +407,6 @@ const DB = {
       notes: data.notes || '',
       createdAt: data.createdAt || firebase.database.ServerValue.TIMESTAMP
     };
-
     const ref = id ? db.ref(`facilities/rooms/${id}`) : db.ref('facilities/rooms').push();
     await ref.set(normalized);
     return ref.key;
@@ -443,7 +424,6 @@ const DB = {
       status: data.status || 'Diajukan',
       createdAt: data.createdAt || firebase.database.ServerValue.TIMESTAMP
     };
-
     const ref = id ? db.ref(`facilities/maintenance/${id}`) : db.ref('facilities/maintenance').push();
     await ref.set(normalized);
     return ref.key;
@@ -462,7 +442,6 @@ const DB = {
       status: data.status || 'Aktif',
       createdAt: data.createdAt || firebase.database.ServerValue.TIMESTAMP
     };
-
     const ref = id ? db.ref(`personnel/employees/${id}`) : db.ref('personnel/employees').push();
     await ref.set(normalized);
     return ref.key;
@@ -478,7 +457,6 @@ const DB = {
       date: data.date || new Date().toISOString().slice(0, 10),
       createdAt: data.createdAt || firebase.database.ServerValue.TIMESTAMP
     };
-
     const ref = id ? db.ref(`personnel/announcements/${id}`) : db.ref('personnel/announcements').push();
     await ref.set(normalized);
     return ref.key;
@@ -496,7 +474,6 @@ const DB = {
       date: data.date || new Date().toISOString().slice(0, 10),
       createdAt: data.createdAt || firebase.database.ServerValue.TIMESTAMP
     };
-
     const ref = id ? db.ref(`student_affairs/achievements/${id}`) : db.ref('student_affairs/achievements').push();
     await ref.set(normalized);
     return ref.key;
@@ -514,7 +491,6 @@ const DB = {
       date: data.date || new Date().toISOString().slice(0, 10),
       createdAt: data.createdAt || firebase.database.ServerValue.TIMESTAMP
     };
-
     const ref = id ? db.ref(`student_affairs/violations/${id}`) : db.ref('student_affairs/violations').push();
     await ref.set(normalized);
     return ref.key;
@@ -602,7 +578,6 @@ const DB = {
       acc.count += 1;
       return acc;
     }, { income: 0, expense: 0, count: 0 });
-
     summary.net = summary.income - summary.expense;
     return summary;
   },
@@ -617,7 +592,6 @@ const DB = {
       date: data.date || new Date().toISOString().slice(0, 10),
       createdAt: data.createdAt || firebase.database.ServerValue.TIMESTAMP
     };
-
     const ref = id ? db.ref(`finance/ledger/${id}`) : db.ref('finance/ledger').push();
     await ref.set(entry);
     return ref.key;
@@ -639,7 +613,6 @@ const DB = {
       note: data.note || '',
       createdAt: data.createdAt || firebase.database.ServerValue.TIMESTAMP
     };
-
     const ref = id ? db.ref(`finance/student_bills/${id}`) : db.ref('finance/student_bills').push();
     await ref.set(normalized);
     return ref.key;
@@ -652,7 +625,6 @@ const DB = {
     await db.ref(`finance/student_bills/${id}/status`).set('paid');
   }
 ,
-
   async getStudentReferenceIndex() {
     const students = await this.getAllStudents();
     const index = {};
@@ -674,7 +646,6 @@ const DB = {
     return this._readCollection('facilities/maintenance', {});
   }
 };
-
 Object.assign(DB, {
   toArray: AppConfig.toArray
 });

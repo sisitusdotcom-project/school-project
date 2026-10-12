@@ -37,7 +37,6 @@
   --space-compact: 8px;
   --space-section: 12px
 }
-
 * {
   box-sizing: border-box;
   margin: 0;
@@ -50,7 +49,6 @@
 .form-row > * {
   min-width: 0;
 }
-
 body {
   font-family: 'Inter', sans-serif;
   background-color: var(--bg-body);
@@ -59,29 +57,24 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale
 }
-
 button,
 input,
 select,
 textarea {
   font: inherit
 }
-
 :focus-visible {
   outline: 3px solid var(--primary-light);
   outline-offset: 2px
 }
-
 a {
   text-decoration: none;
   color: inherit
 }
-
 i,
 i.ph {
   text-decoration: none !important
 }
-
 h1,
 h2,
 h3,
@@ -93,40 +86,31 @@ h6 {
   line-height: 1.2;
   color: var(--text-main)
 }
-
 h1 {
   font-size: clamp(1.5rem, 4vw, 2rem)
 }
-
 h2 {
   font-size: clamp(1.25rem, 3vw, 1.5rem)
 }
-
 h3 {
   font-size: clamp(1.125rem, 2vw, 1.25rem)
 }
-
 p {
   font-size: clamp(0.938rem, 1.2vw, 1rem)
 }
-
 small,
 .text-small {
   font-size: clamp(0.75rem, 1vw, 0.813rem)
 }
-
 .text-muted {
   color: var(--text-muted)
 }
-
 .text-center {
   text-align: center
 }
-
 .hidden {
   display: none !important
 }
-
 .fullscreen-overlay {
   position: fixed;
   inset: 0;
@@ -138,7 +122,6 @@ small,
   z-index: 9999;
   transition: opacity 0.3s ease
 }
-
 .loader {
   width: 44px;
   height: 44px;
@@ -149,7 +132,6 @@ small,
   animation: spin 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
   position: relative;
 }
-
 .loader::after {
   content: '';
   position: absolute;
@@ -163,7 +145,6 @@ small,
   border-right-color: #06b6d4;
   animation: spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite reverse;
 }
-
 @keyframes spin {
   to {
     transform: rotate(360deg);

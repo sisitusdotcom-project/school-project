@@ -111,7 +111,6 @@ const KepsekPages = {
           <div><p class="stat-value">${studentArr.length}</p><p class="stat-label text-muted">Total Siswa Aktif</p></div>
         </div>
       </section>
-
       <section class="card-grid section-spacer">
         <div class="card card-accent-danger">
           <h3 class="card-title section-spacer"><i class="ph ph-warning-circle" class="text-danger"></i> Daftar Siswa Perlu Perhatian Khusus</h3>
@@ -125,13 +124,11 @@ const KepsekPages = {
             </table>
           </div>
         </div>
-
         <div class="card">
           <h3 class="card-title section-spacer">Rata-rata Karakter Sekolah — Sem ${sem}, ${year}</h3>
           <div class="kepsek-chart-wrap"><canvas id="chart-school"></canvas></div>
         </div>
       </section>
-
       <section class="card">
         <div class="card-header">
           <h3 class="card-title">Rekapitulasi per Kelas</h3>
@@ -292,6 +289,5 @@ const KepsekPages = {
         if (e.currentTarget.dataset.href) window.location.hash = e.currentTarget.dataset.href;
       });
     });
-    
   }
 };
