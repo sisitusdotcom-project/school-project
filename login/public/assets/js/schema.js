@@ -42,7 +42,7 @@
       }
     },
     personnel: {
-      label: 'Personalia & Humas',
+      label: 'Humas & Personalia',
       collections: {
         attendance: 'personnel/attendance',
         leaveRequests: 'personnel/leaveRequests',
@@ -61,6 +61,5 @@
       }
     }
   });
-
   window.SCHOOL_RTDB_SCHEMA = Object.freeze(RTDB_SCHEMA);
 })();

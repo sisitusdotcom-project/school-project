@@ -1,31 +1,27 @@
 window.AdminAssignmentsModule = {
   async render(container) {
     Router.setTitle('Penugasan', 'Admin menetapkan tugas dan wewenang per role agar tidak ada tumpang tindih kerja.');
-
     const userList = DB.toArray(await DB.getAllUsers());
     const classList = DB.toArray(await DB.getClasses());
     const assignmentPillars = [
-      { title: 'Keuangan', owner: 'Unit keuangan / bendahara', detail: 'Bertanggung jawab pada kas, tagihan, pembayaran, anggaran, dan laporan keuangan.' },
-      { title: 'Kurikulum', owner: 'Guru, waka kurikulum, dan tim pembelajaran', detail: 'Admin hanya menyiapkan struktur data awal, kurikulum tidak dibebankan ke dashboard admin.' },
-      { title: 'Kesiswaan', owner: 'Tim kesiswaan', detail: 'Mengelola siswa, absensi, prestasi, pelanggaran, dan perkembangan siswa.' },
-      { title: 'Sarpras', owner: 'Tim sarpras', detail: 'Mengelola aset, ruangan, maintenance, dan kebutuhan fasilitas sekolah.' },
-      { title: 'Personalia', owner: 'Humas & personalia', detail: 'Mengelola data pegawai, organisasi, dan struktur SDM sekolah.' }
+      { title: 'Keuangan', owner: 'Waka & Staf Keuangan', detail: 'Bertanggung jawab pada kas, tagihan, pembayaran, anggaran, dan laporan keuangan.' },
+      { title: 'Kurikulum', owner: 'Waka & Staf Kurikulum, Guru', detail: 'Mengelola kalender akademik, jadwal pelajaran, perangkat ajar, pemantauan KBM, dan nilai.' },
+      { title: 'Kesiswaan', owner: 'Waka & Staf Kesiswaan', detail: 'Mengelola siswa, absensi siswa, prestasi, tata tertib, ekstrakurikuler, dan beasiswa.' },
+      { title: 'Sarpras', owner: 'Waka & Staf Sarpras', detail: 'Mengelola aset, inventaris, perawatan fasilitas, keamanan, dan peminjaman sarana.' },
+      { title: 'Humas & Personalia', owner: 'Waka & Staf Humas & Personalia', detail: 'Mengelola data pegawai, SDM, kedisiplinan guru, publikasi, SPMB, dan kemitraan sekolah.' }
     ];
-
     const roleSummary = [
       { role: 'Admin', count: userList.filter((user) => user.role === AppConfig.ROLES.ADMIN).length },
       { role: 'Guru', count: userList.filter((user) => user.role === AppConfig.ROLES.GURU).length },
       { role: 'Kepsek', count: userList.filter((user) => user.role === AppConfig.ROLES.KEPSEK).length },
       { role: 'Orang Tua', count: userList.filter((user) => user.role === AppConfig.ROLES.ORTU).length }
     ];
-
     const roleCards = roleSummary.map((item) => `
       <div class="card stat-card">
         <div class="stat-icon stat-icon--primary"><i class="ph ph-users"></i></div>
         <div><p class="stat-value">${item.count}</p><p class="stat-label text-muted">${item.role}</p></div>
       </div>
     `).join('');
-
     const assignmentRows = assignmentPillars.map((item) => `
       <tr>
         <td><strong>${AppConfig.escapeHtml(item.title)}</strong></td>
@@ -33,12 +29,10 @@ window.AdminAssignmentsModule = {
         <td>${AppConfig.escapeHtml(item.detail)}</td>
       </tr>
     `).join('');
-
     container.innerHTML = `
       <section class="card-grid section-spacer">
         ${roleCards}
       </section>
-
       <div class="card section-block">
         <div class="card-body">
           <h3 class="card-title">Tujuan tab penugasan</h3>
@@ -49,7 +43,6 @@ window.AdminAssignmentsModule = {
           </ul>
         </div>
       </div>
-
       <div class="card section-block">
         <div class="card-body">
           <h3 class="card-title">Matriks penugasan unit</h3>

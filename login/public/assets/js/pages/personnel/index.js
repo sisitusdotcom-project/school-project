@@ -1,9 +1,10 @@
 const PersonnelPages = {
   async renderDashboard(container) {
     const role = Auth.currentRole || AppConfig.ROLES.ADMIN;
+    const assignments = Auth.currentAssignments || [];
     Router.setTitle('Humas & Personalia', 'Ringkasan pegawai dan struktur sekolah.');
-
     const isAdmin = role === AppConfig.ROLES.ADMIN;
+    const isWaka = isAdmin || assignments.includes('WAKA_HUMAS_PERSONALIA');
     const [directoryData, usersData, settingsData] = await Promise.all([
       DB.getPersonnelDirectory(),
       isAdmin ? DB.getAllUsers() : Promise.resolve({}),
@@ -15,7 +16,6 @@ const PersonnelPages = {
     const guruCount = personnelDirectory.filter((employee) => employee.position?.toLowerCase().includes('guru')).length;
     const employeeCount = personnelDirectory.length;
     const kepsekCount = personnelDirectory.filter((employee) => employee.position?.toLowerCase().includes('kepala sekolah')).length;
-
     container.innerHTML = `
       <section class="card-grid section-spacer">
         <div class="card stat-card">
@@ -35,19 +35,18 @@ const PersonnelPages = {
           <div><p class="stat-value">${isAdmin ? users.length : '—'}</p><p class="stat-label text-muted">${isAdmin ? 'Akun sistem' : 'Akses akun disembunyikan'}</p></div>
         </div>
       </section>
-
       <div class="card section-block">
         <div class="card-body">
-          <h3 class="card-title">Tugas personalia</h3>
+          <h3 class="card-title">Tugas Humas & Personalia</h3>
           <ul class="list-plain">
             <li>Role aktif: <strong>${role}</strong></li>
             <li>Direktori pegawai adalah sumber rekap personel; akun sistem hanya untuk autentikasi dan akses.</li>
             <li>Kepala sekolah memantau efektivitas, bukan mengubah profil pegawai dari dashboard ini.</li>
-            <li>Data pegawai, pelatihan, pengaduan, dan acara dikelola melalui menu Personalia di samping.</li>
+            <li>Data pegawai, pelatihan, pengaduan, dan acara dikelola melalui menu Humas & Personalia di samping.</li>
           </ul>
         </div>
       </div>
-
+      ${isWaka ? `
       <section class="card section-spacer">
         <div class="card-header">
           <h3 class="card-title">Pengaturan Jam Absensi Harian</h3>
@@ -72,7 +71,6 @@ const PersonnelPages = {
           <button type="submit" class="btn btn-primary"><i class="ph ph-floppy-disk"></i> Simpan Jam Absensi</button>
         </form>
       </section>
-
       <section class="card">
         <div class="card-header">
           <h3 class="card-title">Pengaturan Tanggal Rekap Absensi</h3>
@@ -89,23 +87,20 @@ const PersonnelPages = {
           <button type="submit" class="btn btn-primary"><i class="ph ph-floppy-disk"></i> Simpan Tanggal</button>
         </form>
       </section>
+      ` : ''}
     `;
-
+    if (!isWaka) return;
     const bindSettingsForm = (formId, buildPayload) => {
       const form = document.getElementById(formId);
       if (!form) return;
-
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
         const isConfirmed = confirm('Anda akan mengubah aturan absensi untuk seluruh sistem. Yakin ingin melanjutkan?');
         if (!isConfirmed) return;
-
         const btn = form.querySelector('button');
         const originalHtml = btn.innerHTML;
         btn.disabled = true;
         btn.innerHTML = '<i class="ph ph-spinner"></i> Menyimpan...';
-
         try {
           const payload = buildPayload();
           const currentSettings = await DB.getSettings();
@@ -127,7 +122,6 @@ const PersonnelPages = {
         }
       });
     };
-
     bindSettingsForm('form-attendance-time-settings', () => ({
       attendanceRules: {
         checkInStart: document.getElementById('set-checkin-start').value || '07:00',
@@ -136,7 +130,6 @@ const PersonnelPages = {
         checkOutEnd: document.getElementById('set-checkout-end').value || '17:00'
       }
     }));
-
     bindSettingsForm('form-attendance-date-settings', () => ({
       attendanceRules: {
         attendanceStartDate: document.getElementById('set-date-start').value || '',

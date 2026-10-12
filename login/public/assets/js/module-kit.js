@@ -8,6 +8,13 @@ const ModuleKit = {
     curriculum: 'WAKA_KURIKULUM',
     it_admin: 'TIM_IT'
   },
+  STAFF_UNIT_BY_ROLE: {
+    studentAffairs: 'STAF_KESISWAAN',
+    personnel: 'STAF_HUMAS_PERSONALIA',
+    facilities: 'STAF_SARPRAS',
+    finance: 'STAF_KEUANGAN',
+    curriculum: 'STAF_KURIKULUM'
+  },
   REF_LOADERS: {
     student: () => DB.getAllStudents(),
     class: () => DB.getClasses(),
@@ -39,7 +46,9 @@ const ModuleKit = {
     const role = Auth.currentRole;
     if (role === AppConfig.ROLES.ADMIN) return true;
     if ((def.writeRoles || []).includes(role)) return true;
-    const units = (def.writeRoles || []).map((r) => this.UNIT_BY_ROLE[r]).filter(Boolean).concat(def.units || []);
+    const wakaUnits = (def.writeRoles || []).map((r) => this.UNIT_BY_ROLE[r]).filter(Boolean);
+    const staffUnits = !def.wakaOnly ? (def.writeRoles || []).map((r) => this.STAFF_UNIT_BY_ROLE[r]).filter(Boolean) : [];
+    const units = [...wakaUnits, ...staffUnits, ...(def.units || [])];
     return units.some((u) => this.hasUnit(u));
   },
   async scopedClasses(node, ownerKey, ctx, allUnit) {
@@ -339,7 +348,6 @@ const ModuleKit = {
       try {
         for (const f of def.fields) {
           if (f.readonly) continue;
-          
           if (f.type === 'file') {
             const fileEl = form.querySelector(`#mk-f-${f.key}_file`);
             const hiddenEl = form.querySelector(`#mk-f-${f.key}`);
@@ -366,7 +374,6 @@ const ModuleKit = {
             payload[f.key] = value;
             continue;
           }
-
           const el = form.querySelector(`#mk-f-${f.key}`);
           if (f.type === 'multi') {
             const chosen = {};

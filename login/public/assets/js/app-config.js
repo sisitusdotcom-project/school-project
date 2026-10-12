@@ -14,16 +14,28 @@
     KOMITE: 'komite',
     TENDIK: 'tendik'
   });
-
   const UNIT_LABELS = Object.freeze({
     [ROLES.FINANCE]: 'Keuangan',
     [ROLES.CURRICULUM]: 'Kurikulum',
     [ROLES.STUDENT_AFFAIRS]: 'Kesiswaan',
-    [ROLES.PERSONNEL]: 'Personalia',
+    [ROLES.PERSONNEL]: 'Humas & Personalia',
     [ROLES.FACILITIES]: 'Sarpras',
-    [ROLES.IT_ADMIN]: 'IT Admin'
+    [ROLES.IT_ADMIN]: 'IT Admin',
+    'WAKA_HUMAS_PERSONALIA': 'Waka Humas & Personalia',
+    'STAF_HUMAS_PERSONALIA': 'Staf Humas & Personalia',
+    'WAKA_KEUANGAN': 'Waka Keuangan',
+    'STAF_KEUANGAN': 'Staf Keuangan',
+    'WAKA_KURIKULUM': 'Waka Kurikulum',
+    'STAF_KURIKULUM': 'Staf Kurikulum',
+    'WAKA_KESISWAAN': 'Waka Kesiswaan',
+    'STAF_KESISWAAN': 'Staf Kesiswaan',
+    'WAKA_SARPRAS': 'Waka Sarpras',
+    'STAF_SARPRAS': 'Staf Sarpras',
+    'TIM_IT': 'Tim IT',
+    'KOORD_UMMI': 'Koordinator Ummi',
+    'TIM_UMMI': 'Tim Ummi',
+    'TIM_B_INGGRIS': 'Tim B. Inggris'
   });
-
   const ROLE_LABELS = Object.freeze({
     [ROLES.ADMIN]: 'Administrator',
     [ROLES.GURU]: 'Guru / Wali Kelas',
@@ -32,14 +44,13 @@
     [ROLES.FINANCE]: 'Keuangan',
     [ROLES.CURRICULUM]: 'Kurikulum',
     [ROLES.STUDENT_AFFAIRS]: 'Kesiswaan',
-    [ROLES.PERSONNEL]: 'Personalia',
+    [ROLES.PERSONNEL]: 'Humas & Personalia',
     [ROLES.FACILITIES]: 'Sarpras',
     [ROLES.IT_ADMIN]: 'IT Admin',
     [ROLES.GURU_EKSKUL]: 'Guru Ekstrakurikuler',
     [ROLES.KOMITE]: 'Komite Sekolah',
     [ROLES.TENDIK]: 'Tenaga Kependidikan'
   });
-
   const NAV_ITEMS = Object.freeze({
     [ROLES.ADMIN]: [
       { hash: '#/dashboard', icon: 'ph-squares-four', text: 'Dashboard Sekolah' },
@@ -67,7 +78,7 @@
       { hash: '#/curriculum', icon: 'ph-books', text: 'Monitoring Kurikulum' },
       { hash: '#/student-affairs', icon: 'ph-users-three', text: 'Monitoring Kesiswaan' },
       { hash: '#/finance', icon: 'ph-wallet', text: 'Monitoring Keuangan' },
-      { hash: '#/personnel', icon: 'ph-briefcase', text: 'Monitoring Personalia' },
+      { hash: '#/personnel', icon: 'ph-briefcase', text: 'Monitoring Humas & Personalia' },
       { hash: '#/facilities', icon: 'ph-building-office', text: 'Monitoring Sarpras' }
     ],
     [ROLES.TENDIK]: [
@@ -114,20 +125,31 @@
       { hash: '#/attendance', icon: 'ph-map-pin', text: 'Presensi Kehadiran' }
     ],
     'WAKA_HUMAS_PERSONALIA': [
-      { hash: '#/personnel', icon: 'ph-briefcase', text: 'Dashboard Personalia', group: 'Personalia: Administrasi SDM' },
-      { hash: '#/admin/users', icon: 'ph-users', text: 'Kelola Pengguna', group: 'Personalia: Administrasi SDM' },
-      { hash: '#/admin/assignments', icon: 'ph-clipboard-text', text: 'Distribusi Penugasan', group: 'Personalia: Administrasi SDM' },
-      { hash: '#/personnel/data', icon: 'ph-folder-user', text: 'Data Kepegawaian', group: 'Personalia: Administrasi SDM' },
-      { hash: '#/admin/attendance', icon: 'ph-clock', text: 'Pantau Disiplin Guru', group: 'Personalia: Kinerja & Kesejahteraan' },
-      { hash: '#/personnel/evaluations', icon: 'ph-chart-line-up', text: 'Penilaian Kinerja (PKG)', group: 'Personalia: Kinerja & Kesejahteraan' },
-      { hash: '#/personnel/training', icon: 'ph-certificate', text: 'Pelatihan & Kompetensi', group: 'Personalia: Kinerja & Kesejahteraan' },
-      { hash: '#/personnel/welfare', icon: 'ph-heart', text: 'Kesejahteraan Staf', group: 'Personalia: Kinerja & Kesejahteraan' },
-      { hash: '#/personnel/publications', icon: 'ph-megaphone', text: 'Publikasi & Informasi', group: 'Humas: Komunikasi Publik' },
-      { hash: '#/personnel/complaints', icon: 'ph-chats', text: 'Layanan Pengaduan', group: 'Humas: Komunikasi Publik' },
-      { hash: '#/personnel/documents', icon: 'ph-folder', text: 'Dokumen Kerja Sama', group: 'Humas: Dokumen & SPMB' },
-      { hash: '#/personnel/spmb', icon: 'ph-users', text: 'Manajemen SPMB', group: 'Humas: Dokumen & SPMB' },
-      { hash: '#/personnel/partnerships', icon: 'ph-handshake', text: 'Kemitraan & MoU', group: 'Humas: Kemitraan & Acara' },
-      { hash: '#/personnel/events', icon: 'ph-calendar-star', text: 'Manajemen Acara', group: 'Humas: Kemitraan & Acara' }
+      { hash: '#/personnel', icon: 'ph-briefcase', text: 'Dashboard Humas & Personalia', group: 'Humas & Personalia: Administrasi SDM' },
+      { hash: '#/admin/users', icon: 'ph-users', text: 'Kelola Pengguna', group: 'Humas & Personalia: Administrasi SDM' },
+      { hash: '#/admin/assignments', icon: 'ph-clipboard-text', text: 'Distribusi Penugasan', group: 'Humas & Personalia: Administrasi SDM' },
+      { hash: '#/personnel/data', icon: 'ph-folder-user', text: 'Data Kepegawaian', group: 'Humas & Personalia: Administrasi SDM' },
+      { hash: '#/admin/attendance', icon: 'ph-clock', text: 'Pantau Disiplin Guru', group: 'Humas & Personalia: Kinerja & Kesejahteraan' },
+      { hash: '#/personnel/evaluations', icon: 'ph-chart-line-up', text: 'Penilaian Kinerja (PKG)', group: 'Humas & Personalia: Kinerja & Kesejahteraan' },
+      { hash: '#/personnel/training', icon: 'ph-certificate', text: 'Pelatihan & Kompetensi', group: 'Humas & Personalia: Kinerja & Kesejahteraan' },
+      { hash: '#/personnel/welfare', icon: 'ph-heart', text: 'Kesejahteraan Staf', group: 'Humas & Personalia: Kinerja & Kesejahteraan' },
+      { hash: '#/personnel/publications', icon: 'ph-megaphone', text: 'Publikasi & Informasi', group: 'Humas & Personalia: Komunikasi Publik & Aduan' },
+      { hash: '#/personnel/complaints', icon: 'ph-chats', text: 'Layanan Pengaduan', group: 'Humas & Personalia: Komunikasi Publik & Aduan' },
+      { hash: '#/personnel/documents', icon: 'ph-folder', text: 'Dokumen Kerja Sama', group: 'Humas & Personalia: Kemitraan & Dokumen' },
+      { hash: '#/personnel/partnerships', icon: 'ph-handshake', text: 'Kemitraan & MoU', group: 'Humas & Personalia: Kemitraan & Dokumen' },
+      { hash: '#/personnel/events', icon: 'ph-calendar-star', text: 'Manajemen Acara', group: 'Humas & Personalia: Kemitraan & Dokumen' },
+      { hash: '#/personnel/spmb', icon: 'ph-users', text: 'Manajemen SPMB', group: 'Humas & Personalia: Penerimaan Siswa (SPMB)' }
+    ],
+    'STAF_HUMAS_PERSONALIA': [
+      { hash: '#/personnel', icon: 'ph-briefcase', text: 'Dashboard Humas & Personalia', group: 'Humas & Personalia: Administrasi SDM' },
+      { hash: '#/personnel/data', icon: 'ph-folder-user', text: 'Data Kepegawaian', group: 'Humas & Personalia: Administrasi SDM' },
+      { hash: '#/personnel/training', icon: 'ph-certificate', text: 'Pelatihan & Kompetensi', group: 'Humas & Personalia: Kinerja & Kesejahteraan' },
+      { hash: '#/personnel/welfare', icon: 'ph-heart', text: 'Kesejahteraan Staf', group: 'Humas & Personalia: Kinerja & Kesejahteraan' },
+      { hash: '#/personnel/publications', icon: 'ph-megaphone', text: 'Publikasi & Informasi', group: 'Humas & Personalia: Komunikasi Publik & Aduan' },
+      { hash: '#/personnel/complaints', icon: 'ph-chats', text: 'Layanan Pengaduan', group: 'Humas & Personalia: Komunikasi Publik & Aduan' },
+      { hash: '#/personnel/documents', icon: 'ph-folder', text: 'Dokumen Kerja Sama', group: 'Humas & Personalia: Kemitraan & Dokumen' },
+      { hash: '#/personnel/partnerships', icon: 'ph-handshake', text: 'Kemitraan & MoU', group: 'Humas & Personalia: Kemitraan & Dokumen' },
+      { hash: '#/personnel/events', icon: 'ph-calendar-star', text: 'Manajemen Acara', group: 'Humas & Personalia: Kemitraan & Dokumen' }
     ],
     'WAKA_KESISWAAN': [
       { hash: '#/student-affairs', icon: 'ph-users-three', text: 'Dashboard Kesiswaan', group: 'Kesiswaan: Umum' },
@@ -138,6 +160,15 @@
       { hash: '#/admin/extracurriculars', icon: 'ph-trophy', text: 'Ekstrakurikuler', group: 'Kesiswaan: Bakat & Prestasi' },
       { hash: '#/student-affairs/achievements', icon: 'ph-medal', text: 'Lomba & Penghargaan', group: 'Kesiswaan: Bakat & Prestasi' },
       { hash: '#/admin/attendance', icon: 'ph-calendar-check', text: 'Pantau Kehadiran Siswa', group: 'Kesiswaan: Administrasi' },
+      { hash: '#/student-affairs/scholarships', icon: 'ph-hand-coins', text: 'Data Beasiswa & PIP', group: 'Kesiswaan: Administrasi' }
+    ],
+    'STAF_KESISWAAN': [
+      { hash: '#/student-affairs', icon: 'ph-users-three', text: 'Dashboard Kesiswaan', group: 'Kesiswaan: Umum' },
+      { hash: '#/student-affairs/ppdb', icon: 'ph-user-plus', text: 'PPDB & Mutasi', group: 'Kesiswaan: PPDB & Transisi' },
+      { hash: '#/student-affairs/mpls', icon: 'ph-flag-banner', text: 'Masa Pengenalan (MPLS)', group: 'Kesiswaan: PPDB & Transisi' },
+      { hash: '#/admin/characters', icon: 'ph-star', text: 'Indikator Karakter & Sikap', group: 'Kesiswaan: Karakter & Disiplin' },
+      { hash: '#/student-affairs/rules', icon: 'ph-gavel', text: 'Tata Tertib & TPPK', group: 'Kesiswaan: Karakter & Disiplin' },
+      { hash: '#/student-affairs/achievements', icon: 'ph-medal', text: 'Lomba & Penghargaan', group: 'Kesiswaan: Bakat & Prestasi' },
       { hash: '#/student-affairs/scholarships', icon: 'ph-hand-coins', text: 'Data Beasiswa & PIP', group: 'Kesiswaan: Administrasi' }
     ],
     'WAKA_KURIKULUM': [
@@ -154,6 +185,15 @@
       { hash: '#/curriculum/evaluations', icon: 'ph-exam', text: 'Sistem Penilaian', group: 'Kurikulum: Supervisi & Evaluasi' },
       { hash: '#/curriculum/supervision', icon: 'ph-chalkboard-teacher', text: 'Supervisi Guru', group: 'Kurikulum: Supervisi & Evaluasi' }
     ],
+    'STAF_KURIKULUM': [
+      { hash: '#/curriculum', icon: 'ph-books', text: 'Dashboard Kurikulum', group: 'Kurikulum: Umum' },
+      { hash: '#/curriculum/schedules', icon: 'ph-calendar', text: 'Jadwal Pelajaran & Kalender', group: 'Kurikulum: Perencanaan' },
+      { hash: '#/curriculum/syllabus', icon: 'ph-folder-open', text: 'Perangkat & Modul Ajar', group: 'Kurikulum: Pelaksanaan KBM' },
+      { hash: '#/curriculum/monitoring', icon: 'ph-eye', text: 'Pemantauan KBM', group: 'Kurikulum: Pelaksanaan KBM' },
+      { hash: '#/curriculum/questions', icon: 'ph-file-code', text: 'Bank Soal', group: 'Kurikulum: Pelaksanaan KBM' },
+      { hash: '#/curriculum/journals', icon: 'ph-notebook', text: 'Jurnal Pembelajaran', group: 'Kurikulum: Pelaksanaan KBM' },
+      { hash: '#/curriculum/grades', icon: 'ph-exam', text: 'Database Nilai', group: 'Kurikulum: Supervisi & Evaluasi' }
+    ],
     'WAKA_KEUANGAN': [
       { hash: '#/finance', icon: 'ph-wallet', text: 'Dashboard Keuangan', group: 'Keuangan: Umum' },
       { hash: '#/finance/rkas', icon: 'ph-chart-bar', text: 'Penyusunan RKAS', group: 'Keuangan: Perencanaan' },
@@ -167,12 +207,30 @@
       { hash: '#/finance/reports', icon: 'ph-file-text', text: 'LPJ & Sinkronisasi Kas', group: 'Keuangan: Dokumen & Laporan' },
       { hash: '#/finance/transparency', icon: 'ph-projector-screen', text: 'Publikasi Anggaran', group: 'Keuangan: Dokumen & Laporan' }
     ],
+    'STAF_KEUANGAN': [
+      { hash: '#/finance', icon: 'ph-wallet', text: 'Dashboard Keuangan', group: 'Keuangan: Umum' },
+      { hash: '#/finance/transactions', icon: 'ph-arrows-left-right', text: 'Penerimaan & Pengeluaran', group: 'Keuangan: Pembukuan' },
+      { hash: '#/finance/cashbook', icon: 'ph-book-open', text: 'Buku Kas Umum (BKU)', group: 'Keuangan: Pembukuan' },
+      { hash: '#/finance/bos', icon: 'ph-receipt', text: 'Laporan BOS', group: 'Keuangan: BOS & Beasiswa' },
+      { hash: '#/finance/scholarships', icon: 'ph-hand-coins', text: 'Pengajuan Beasiswa', group: 'Keuangan: BOS & Beasiswa' },
+      { hash: '#/finance/archives', icon: 'ph-archive-box', text: 'Arsip Bukti Transaksi', group: 'Keuangan: Dokumen & Laporan' },
+      { hash: '#/finance/reports', icon: 'ph-file-text', text: 'LPJ & Sinkronisasi Kas', group: 'Keuangan: Dokumen & Laporan' }
+    ],
     'WAKA_SARPRAS': [
       { hash: '#/facilities', icon: 'ph-building-office', text: 'Dashboard Sarpras', group: 'Sarpras: Inventarisasi' },
       { hash: '#/facilities/inventory', icon: 'ph-archive-box', text: 'Buku Inventaris (Aset)', group: 'Sarpras: Inventarisasi' },
       { hash: '#/facilities/dapodik', icon: 'ph-cloud-arrow-up', text: 'Data Sarpras Dapodik', group: 'Sarpras: Inventarisasi' },
       { hash: '#/facilities/planning', icon: 'ph-clipboard-text', text: 'Analisis Kebutuhan', group: 'Sarpras: Perencanaan & Pengadaan' },
       { hash: '#/facilities/rkas', icon: 'ph-shopping-cart', text: 'Rencana Pengadaan (RKAS)', group: 'Sarpras: Perencanaan & Pengadaan' },
+      { hash: '#/facilities/maintenance', icon: 'ph-wrench', text: 'Perawatan Gedung & Sanitasi', group: 'Sarpras: Pemeliharaan & Keamanan' },
+      { hash: '#/facilities/safety', icon: 'ph-shield-check', text: 'Pengecekan Keamanan Area', group: 'Sarpras: Pemeliharaan & Keamanan' },
+      { hash: '#/facilities/electronics', icon: 'ph-desktop', text: 'Pemeliharaan Elektronik & IT', group: 'Sarpras: Pemeliharaan & Keamanan' },
+      { hash: '#/facilities/loans', icon: 'ph-hand-pointing', text: 'Peminjaman Fasilitas', group: 'Sarpras: Pengawasan & Penghapusan' },
+      { hash: '#/facilities/disposal', icon: 'ph-trash', text: 'Penghapusan Aset Rusak', group: 'Sarpras: Pengawasan & Penghapusan' }
+    ],
+    'STAF_SARPRAS': [
+      { hash: '#/facilities', icon: 'ph-building-office', text: 'Dashboard Sarpras', group: 'Sarpras: Inventarisasi' },
+      { hash: '#/facilities/inventory', icon: 'ph-archive-box', text: 'Buku Inventaris (Aset)', group: 'Sarpras: Inventarisasi' },
       { hash: '#/facilities/maintenance', icon: 'ph-wrench', text: 'Perawatan Gedung & Sanitasi', group: 'Sarpras: Pemeliharaan & Keamanan' },
       { hash: '#/facilities/safety', icon: 'ph-shield-check', text: 'Pengecekan Keamanan Area', group: 'Sarpras: Pemeliharaan & Keamanan' },
       { hash: '#/facilities/electronics', icon: 'ph-desktop', text: 'Pemeliharaan Elektronik & IT', group: 'Sarpras: Pemeliharaan & Keamanan' },
@@ -210,7 +268,6 @@
       { hash: '#/guru/english/progress', icon: 'ph-translate', text: 'Jurnal Progres Speaking', group: 'English Lab' }
     ]
   });
-
   const DEFAULT_SETTINGS = Object.freeze({
     currentAcademicYear: '2026/2027',
     currentSemester: '1',
@@ -223,8 +280,6 @@
       attendanceEndDate: ''
     })
   });
-
-
   function escapeHtml(unsafe) {
     if (unsafe == null) return '';
     return String(unsafe)
@@ -237,7 +292,6 @@
   function normalizeSettings(rawSettings = {}) {
     const source = rawSettings || {};
     const attendanceRules = source.attendanceRules || {};
-
     return {
       ...DEFAULT_SETTINGS,
       ...source,
@@ -247,7 +301,6 @@
       }
     };
   }
-
   function toArray(value) {
     if (!value) return [];
     if (Array.isArray(value)) return value;
@@ -256,28 +309,23 @@
       ...value[key]
     }));
   }
-
   function normalizeAssignments(assignments = []) {
     if (!Array.isArray(assignments)) {
       if (assignments) return [String(assignments)];
       return [];
     }
-
     return [...new Set(assignments
       .filter(Boolean)
       .map((item) => String(item).trim())
       .filter(Boolean))];
   }
-
   function getRoleLabel(role) {
     return ROLE_LABELS[role] || 'Pengguna';
   }
-
   function formatUserName(user) {
     if (!user) return 'Pengguna';
     let name = user.name || 'Pengguna';
     if (user.role === ROLES.ORTU) return name;
-
     if (user.gender) {
       if (user.gender === 'L' && !name.toLowerCase().startsWith('ustadz')) {
         name = `Ustadz ${name}`;
@@ -287,29 +335,23 @@
     }
     return name;
   }
-
   function getRoleAssignments(user = {}) {
     if (!user || typeof user !== 'object') return [];
     return normalizeAssignments(user.assignments || user.unitRoles || user.roles || []);
   }
-
   function getRoleAssignmentLabel(user = {}) {
     const assignments = getRoleAssignments(user);
     if (!assignments.length) return getRoleLabel(user.role);
     const unitLabels = assignments.map((item) => {
       if (UNIT_LABELS[item]) return UNIT_LABELS[item];
-      // Format dynamically for assignments like GURU_EKSTRA_HW -> Guru Ekstra Hw
       return item.split('_').map(word => word.charAt(0) + word.slice(1).toLowerCase()).join(' ');
     }).join(', ');
     return `${getRoleLabel(user.role)} · ${unitLabels}`;
   }
-
   const TEACHING_PREFIXES = ['GURU_', 'WAKA_', 'TIM_UMMI', 'TIM_B_INGGRIS'];
-
   function isTeachingAssignment(a) {
     return TEACHING_PREFIXES.some(prefix => a.startsWith(prefix));
   }
-
   function getRoleNav(role, assignments = []) {
     let baseNav = [...(NAV_ITEMS[role] || [])];
     const isGuru = role === ROLES.GURU || assignments.some(isTeachingAssignment);
@@ -344,7 +386,6 @@
     const merged = [...baseNav, ...unitNav];
     return merged.filter((item, index, arr) => arr.findIndex((entry) => entry.hash === item.hash) === index);
   }
-
   function getRoleBadgeClass(role) {
     switch (role) {
       case ROLES.ADMIN:
@@ -359,7 +400,6 @@
         return 'badge-outline';
     }
   }
-
   const APP_DEFAULTS = Object.freeze({
     googleDriveUploadUrl: 'https://script.google.com/macros/s/AKfycbwHNSb34p_FcX_dTQuw87viaZ9joh2rT3KdtMLBVvwpocWzyF3HICPUPRfPuy63LDsNsw/exec',
     attendanceWorkerUrl: 'https://musada-absensi.sisitusdotcom.workers.dev/',
@@ -369,13 +409,11 @@
       radiusMeters: null
     })
   });
-
   const runtimeConfig = {
     googleDriveUploadUrl: window.GOOGLE_DRIVE_UPLOAD_URL || APP_DEFAULTS.googleDriveUploadUrl,
     attendanceWorkerUrl: window.CLOUDFLARE_ATTENDANCE_WORKER_URL || APP_DEFAULTS.attendanceWorkerUrl,
     attendanceGeofence: window.APP_ATTENDANCE_GEOFENCE || APP_DEFAULTS.attendanceGeofence
   };
-
   window.APP_ATTENDANCE_GEOFENCE = Object.freeze(runtimeConfig.attendanceGeofence);
   window.GOOGLE_DRIVE_UPLOAD_URL = runtimeConfig.googleDriveUploadUrl;
   window.CLOUDFLARE_ATTENDANCE_WORKER_URL = runtimeConfig.attendanceWorkerUrl;
@@ -383,7 +421,6 @@
     uploadUrl: runtimeConfig.googleDriveUploadUrl,
     attendanceWorkerUrl: runtimeConfig.attendanceWorkerUrl
   });
-
   window.AppConfig = Object.freeze({
     ROLES,
     ROLE_LABELS,

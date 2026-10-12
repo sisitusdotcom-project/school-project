@@ -72,7 +72,7 @@
       ],
       derive: (p) => ({ total: (p.basicSalary || 0) + (p.allowance || 0) - (p.deduction || 0) })
     },
-    '#/finance/proposals': {
+    '#/finance/proposals': { wakaOnly: true,
       node: 'finance/proposals', noun: 'Persetujuan Proposal', writeRoles: FI, dateField: 'date', statusField: 'status', badges,
       subtitle: 'Evaluasi anggaran tiap agenda kegiatan sekolah.',
       summary: [
@@ -103,7 +103,7 @@
         area('description', 'Keterangan')
       ]
     },
-    '#/personnel/spmb': {
+    '#/personnel/spmb': { wakaOnly: true,
       node: 'spmb_registrations', noun: 'Manajemen SPMB', writeRoles: PE, dateField: 'timestamp', statusField: 'status', badges,
       subtitle: 'Data pendaftar siswa baru (SPMB).',
       summary: [
@@ -201,7 +201,6 @@
         area('description', 'Keterangan')
       ]
     },
-
     '#/tendik/performance': {
       node: 'tendik/performance', noun: 'Laporan Kinerja', writeRoles: ['tendik'], dateField: 'date',
       subtitle: 'Progress pekerjaan harian/pekanan.',
@@ -262,7 +261,6 @@
         file('proof', 'Bukti Transaksi', 'komite_finance')
       ]
     },
-
     '#/student-affairs/rules': {
       node: 'student_affairs/violations', noun: 'Pelanggaran & TPPK', writeRoles: SA, dateField: 'date', statusField: 'status', badges: { ...badges, Dilaporkan: 'warning', Ditindaklanjuti: 'warning' },
       subtitle: 'Pencatatan pelanggaran tata tertib dan kasus TPPK beserta tindak lanjutnya.',
@@ -377,7 +375,7 @@
         sel('status', 'Status', ['Aktif', 'Cuti', 'Nonaktif'], { required: true, default: 'Aktif' })
       ]
     },
-    '#/personnel/evaluations': {
+    '#/personnel/evaluations': { wakaOnly: true,
       node: 'personnel/evaluations', noun: 'Penilaian Kinerja (PKG)', writeRoles: PE, dateField: 'date', statusField: 'predicate', badges: { 'Sangat Baik': 'success', Baik: 'success', Cukup: 'warning', Kurang: 'danger' },
       subtitle: 'Penilaian kinerja guru dan tenaga kependidikan per periode.',
       summary: [
@@ -536,7 +534,7 @@
         area('note', 'Catatan')
       ]
     },
-    '#/facilities/planning': {
+    '#/facilities/planning': { wakaOnly: true,
       node: 'facilities/needs', noun: 'Analisis Kebutuhan', writeRoles: FA, statusField: 'status', badges: { ...badges, Diusulkan: 'warning', Ditunda: 'warning' },
       subtitle: 'Usulan kebutuhan sarana dan prasarana beserta prioritasnya.',
       summary: [
@@ -554,7 +552,7 @@
         area('reason', 'Alasan / Dasar Kebutuhan')
       ]
     },
-    '#/facilities/rkas': {
+    '#/facilities/rkas': { wakaOnly: true,
       node: 'facilities/procurement', noun: 'Rencana Pengadaan (RKAS)', writeRoles: FA, statusField: 'status', badges: { ...badges, Rencana: 'warning', Proses: 'warning' },
       subtitle: 'Rencana dan realisasi pengadaan barang.',
       derive: (p) => ({ total: Number(p.qty || 0) * Number(p.unitPrice || 0) }),
@@ -683,7 +681,7 @@
     '#/finance/cashbook': {
       view: 'cashbook', writeRoles: [], subtitle: 'Buku Kas Umum per bulan dengan saldo berjalan, dihitung otomatis dari jurnal transaksi.'
     },
-    '#/finance/rkas': {
+    '#/finance/rkas': { wakaOnly: true,
       node: 'finance/rkas', noun: 'Penyusunan RKAS', writeRoles: FI, statusField: 'status', badges: { ...badges, Draft: 'warning', Revisi: 'warning' },
       subtitle: 'Pagu anggaran dan realisasi per komponen.',
       derive: (p) => ({ remaining: Number(p.pagu || 0) - Number(p.realized || 0) }),
@@ -823,7 +821,7 @@
         area('observation', 'Temuan')
       ]
     },
-    '#/curriculum/evaluations': {
+    '#/curriculum/evaluations': { wakaOnly: true,
       node: 'curriculum/assessment_policies', noun: 'Sistem Penilaian', writeRoles: CU,
       subtitle: 'Kebijakan penilaian: KKM, bobot, dan jadwal asesmen.',
       summary: [
@@ -837,7 +835,7 @@
         area('description', 'Penjelasan')
       ]
     },
-    '#/curriculum/supervision': {
+    '#/curriculum/supervision': { wakaOnly: true,
       node: 'curriculum/supervision', noun: 'Supervisi Guru', writeRoles: CU, dateField: 'date', statusField: 'status', badges: { ...badges, Terjadwal: 'warning' },
       subtitle: 'Jadwal dan hasil supervisi akademik.',
       summary: [

@@ -15,14 +15,12 @@ const AdminPages = {
     const studentArr = DB.toArray(students);
     const guruCount = userArr.filter(u => u.role === AppConfig.ROLES.GURU || AppConfig.getRoleAssignments(u).some(AppConfig.isTeachingAssignment)).length;
     const ortuCount = userArr.filter(u => u.role === AppConfig.ROLES.ORTU).length;
-
     const summaryCards = [
       { label: 'Pengguna aktif', value: userArr.length, tone: 'primary', icon: 'ph-users' },
       { label: 'Guru', value: guruCount, tone: 'success', icon: 'ph-chalkboard-teacher' },
       { label: 'Kelas', value: classArr.length, tone: 'warning', icon: 'ph-books' },
       { label: 'Siswa', value: studentArr.length, tone: 'danger', icon: 'ph-student' }
     ];
-
     container.innerHTML = `
       <section class="card-grid section-spacer">
         ${summaryCards.map((item) => `
@@ -32,18 +30,16 @@ const AdminPages = {
           </div>
         `).join('')}
       </section>
-
       <section class="card section-spacer">
         <div class="card-header">
           <h3 class="card-title">Peran admin saat ini</h3>
         </div>
         <ul class="list-plain">
           <li>Menetapkan role utama akun: admin, guru, kepsek, orang tua.</li>
-          <li>Menentukan penugasan unit kerja: keuangan, kurikulum, kesiswaan, personalia, dan sarpras.</li>
+          <li>Menentukan penugasan unit kerja: keuangan, kurikulum, kesiswaan, humas & personalia, dan sarpras.</li>
           <li>Memastikan tiap unit punya pemilik tugas dan tidak saling menimpa operasional.</li>
         </ul>
       </section>
-
       <section class="card section-spacer">
         <div class="card-header">
           <h3 class="card-title">Konfigurasi sekolah</h3>
@@ -55,7 +51,6 @@ const AdminPages = {
           <li>Orang tua terdaftar: <strong>${ortuCount}</strong></li>
         </ul>
       </section>
-
     `;
   },
   async renderCharacters(container) {
@@ -156,17 +151,14 @@ const AdminPages = {
     Router.setTitle('Kelola Pengguna', 'Tambah, edit, dan atur peran pengguna sistem.');
     const users = await DB.getAllUsers();
     let userArr = DB.toArray(users);
-    
     const renderTable = () => {
       const q = (document.getElementById('search-user')?.value || '').toLowerCase();
       const roleFilter = document.getElementById('filter-role')?.value || '';
-      
       const filtered = userArr.filter(u => {
         const matchSearch = (u.name || '').toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q);
         const matchRole = roleFilter ? u.role === roleFilter : true;
         return matchSearch && matchRole;
       });
-      
       const rows = filtered.length ? filtered.map(u => `
         <tr>
           <td>
@@ -186,7 +178,6 @@ const AdminPages = {
           </td>
         </tr>
       `).join('') : '<tr><td colspan="4" class="text-center text-muted">Tidak ada pengguna ditemukan.</td></tr>';
-      
       const tbody = container.querySelector('#tbody-users');
       if (tbody) tbody.innerHTML = rows;
       container.querySelectorAll('[data-edit-usr]').forEach(btn => {
@@ -216,7 +207,6 @@ const AdminPages = {
         };
       });
     };
-
     container.innerHTML = `
       <div class="card toolbar-panel">
         <div class="toolbar-row">
@@ -257,14 +247,20 @@ const AdminPages = {
               <div class="form-group">
                 <label>Tugas / unit kerja</label>
                 <div class="checkbox-grid" id="usr-assignments-group">
-                  <label class="checkbox-card"><input type="checkbox" value="WAKA_KEUANGAN"> <span>Keuangan</span></label>
-                  <label class="checkbox-card"><input type="checkbox" value="WAKA_KURIKULUM"> <span>Kurikulum</span></label>
-                  <label class="checkbox-card"><input type="checkbox" value="WAKA_KESISWAAN"> <span>Kesiswaan</span></label>
-                  <label class="checkbox-card"><input type="checkbox" value="WAKA_HUMAS"> <span>Personalia</span></label>
-                  <label class="checkbox-card"><input type="checkbox" value="WAKA_SARPRAS"> <span>Sarpras</span></label>
-                  <label class="checkbox-card"><input type="checkbox" value="TIM_IT"> <span>IT/Sinkronisasi</span></label>
-                  <label class="checkbox-card"><input type="checkbox" value="TIM_UMMI"> <span>Koord. Ummi</span></label>
-                  <label class="checkbox-card"><input type="checkbox" value="TIM_B_INGGRIS"> <span>Koord. B. Inggris</span></label>
+                  <label class="checkbox-card"><input type="checkbox" value="WAKA_HUMAS_PERSONALIA"> <span>Waka Humas & Personalia</span></label>
+                  <label class="checkbox-card"><input type="checkbox" value="STAF_HUMAS_PERSONALIA"> <span>Staf Humas & Personalia</span></label>
+                  <label class="checkbox-card"><input type="checkbox" value="WAKA_KEUANGAN"> <span>Waka Keuangan</span></label>
+                  <label class="checkbox-card"><input type="checkbox" value="STAF_KEUANGAN"> <span>Staf Keuangan</span></label>
+                  <label class="checkbox-card"><input type="checkbox" value="WAKA_KURIKULUM"> <span>Waka Kurikulum</span></label>
+                  <label class="checkbox-card"><input type="checkbox" value="STAF_KURIKULUM"> <span>Staf Kurikulum</span></label>
+                  <label class="checkbox-card"><input type="checkbox" value="WAKA_KESISWAAN"> <span>Waka Kesiswaan</span></label>
+                  <label class="checkbox-card"><input type="checkbox" value="STAF_KESISWAAN"> <span>Staf Kesiswaan</span></label>
+                  <label class="checkbox-card"><input type="checkbox" value="WAKA_SARPRAS"> <span>Waka Sarpras</span></label>
+                  <label class="checkbox-card"><input type="checkbox" value="STAF_SARPRAS"> <span>Staf Sarpras</span></label>
+                  <label class="checkbox-card"><input type="checkbox" value="TIM_IT"> <span>Tim IT</span></label>
+                  <label class="checkbox-card"><input type="checkbox" value="KOORD_UMMI"> <span>Koord. Ummi</span></label>
+                  <label class="checkbox-card"><input type="checkbox" value="TIM_UMMI"> <span>Tim Ummi</span></label>
+                  <label class="checkbox-card"><input type="checkbox" value="TIM_B_INGGRIS"> <span>Tim B. Inggris</span></label>
                 </div>
                 <small class="text-muted">Pilih satu atau lebih penugasan tambahan.</small>
               </div>
@@ -280,7 +276,6 @@ const AdminPages = {
     renderTable();
     document.getElementById('search-user').addEventListener('input', renderTable);
     document.getElementById('filter-role').addEventListener('change', renderTable);
-
     document.getElementById('btn-add-usr').onclick = () => {
       document.getElementById('usr-modal-title').innerText = 'Tambah pengguna';
       document.getElementById('usr-id').value = '';
@@ -295,7 +290,6 @@ const AdminPages = {
       document.getElementById('usr-password').setAttribute('required', 'true');
       App.openModal('modal-usr');
     };
-
     document.getElementById('form-usr').onsubmit = async (e) => {
       e.preventDefault();
       const btn = e.target.querySelector('button[type="submit"]');
@@ -351,7 +345,6 @@ const AdminPages = {
           </td>
         </tr>`;
     }).join('') : '<tr><td colspan="4" class="text-center text-muted">Belum ada kelas.</td></tr>';
-    
     const guruOptions = guruArr.map(g => `<option value="${g.id}">${AppConfig.escapeHtml(g.name)}</option>`).join('');
     const mapelRows = subArr.map(sub => `
       <div class="subject-editor-row">
@@ -362,7 +355,6 @@ const AdminPages = {
         </select>
       </div>
     `).join('');
-
     container.innerHTML = `
       <div class="card">
         <div class="card-header">
@@ -374,7 +366,6 @@ const AdminPages = {
           <tbody>${rows}</tbody></table>
         </div>
       </div>
-
       <div class="modal-overlay" id="modal-cls">
         <div class="modal">
           <div class="modal-header">
@@ -403,7 +394,6 @@ const AdminPages = {
           </form>
         </div>
       </div>
-
       <div class="modal-overlay" id="modal-mapel">
         <div class="modal">
           <div class="modal-header">
@@ -424,7 +414,6 @@ const AdminPages = {
         </div>
       </div>
     `;
-
     const btnAddCls = document.getElementById('btn-add-cls');
     if (btnAddCls) {
       btnAddCls.onclick = () => {
@@ -435,7 +424,6 @@ const AdminPages = {
         document.getElementById('modal-cls').classList.add('active');
       };
     }
-    
     container.querySelectorAll('[data-edit-cls]').forEach(btn => {
       btn.onclick = () => {
         const c = classArr.find(x => x.id === btn.dataset.editCls);
@@ -447,7 +435,6 @@ const AdminPages = {
         document.getElementById('modal-cls').classList.add('active');
       };
     });
-
     container.querySelectorAll('[data-mapel-cls]').forEach(btn => {
       btn.onclick = () => {
         const c = classArr.find(x => x.id === btn.dataset.mapelCls);
@@ -459,11 +446,9 @@ const AdminPages = {
           const subId = sel.dataset.subjectId;
           sel.value = (c.subjectTeachers && c.subjectTeachers[subId]) ? c.subjectTeachers[subId] : '';
         });
-        
         document.getElementById('modal-mapel').classList.add('active');
       };
     });
-
     container.querySelectorAll('[data-del-cls]').forEach(btn => {
       btn.onclick = async () => {
         const classId = btn.dataset.delCls;
@@ -477,13 +462,11 @@ const AdminPages = {
         AdminPages.renderClasses(container);
       };
     });
-    
     container.querySelectorAll('[data-view-cls]').forEach(btn => {
       btn.onclick = () => {
         window.location.hash = `#/admin/students/${btn.dataset.viewCls}`;
       };
     });
-
     document.getElementById('form-cls').onsubmit = async (e) => {
       e.preventDefault();
       const id = document.getElementById('cls-id').value || null;
@@ -494,19 +477,16 @@ const AdminPages = {
       App.closeModal('modal-cls');
       AdminPages.renderClasses(container);
     };
-
     document.getElementById('form-mapel').onsubmit = async (e) => {
       e.preventDefault();
       const id = document.getElementById('mapel-cls-id').value;
       if (!id) return;
-      
       const subjectTeachers = {};
       document.querySelectorAll('.mapel-select').forEach(sel => {
         if (sel.value) {
           subjectTeachers[sel.dataset.subjectId] = sel.value;
         }
       });
-      
       await DB.saveClassSubjectTeachers(id, subjectTeachers);
       App.closeModal('modal-mapel');
       AdminPages.renderClasses(container);
@@ -526,17 +506,14 @@ const AdminPages = {
     ]);
     const studentArr = DB.toArray(studentData).sort((a,b) => a.name.localeCompare(b.name));
     const ortuArr = DB.toArray(users).filter(u => u.role === AppConfig.ROLES.ORTU);
-    
     const renderTable = () => {
       const q = (document.getElementById('search-student')?.value || '').toLowerCase();
       const genderFilter = document.getElementById('filter-gender')?.value || '';
-      
       const filtered = studentArr.filter(s => {
         const matchSearch = (s.name || '').toLowerCase().includes(q) || (s.nis || '').toLowerCase().includes(q);
         const matchGender = genderFilter ? s.gender === genderFilter : true;
         return matchSearch && matchGender;
       });
-      
       const rows = filtered.length ? filtered.map(s => {
         const parent = ortuArr.find(p => p.id === s.parentId);
         return `
@@ -552,7 +529,6 @@ const AdminPages = {
           </tr>
         `;
       }).join('') : '<tr><td colspan="5" class="text-center text-muted">Tidak ada data siswa ditemukan.</td></tr>';
-      
       const tbody = container.querySelector('#tbody-students');
       if (tbody) tbody.innerHTML = rows;
       container.querySelectorAll('[data-edit-stu]').forEach(btn => {
@@ -577,9 +553,7 @@ const AdminPages = {
         };
       });
     };
-
     const ortuOptions = ortuArr.map(p => `<option value="${p.id}">${AppConfig.escapeHtml(p.name)} (${AppConfig.escapeHtml(p.username)})</option>`).join('');
-    
     container.innerHTML = `
       <div class="toolbar-panel"><a href="#/admin/classes" class="btn btn-outline"><i class="ph ph-arrow-left"></i> Kembali ke kelas</a></div>
       <div class="card toolbar-panel">
@@ -629,12 +603,9 @@ const AdminPages = {
         </div>
       </div>
     `;
-
     renderTable();
-
     document.getElementById('search-student').addEventListener('input', renderTable);
     document.getElementById('filter-gender').addEventListener('change', renderTable);
-
     document.getElementById('btn-add-stu').onclick = () => {
       document.getElementById('stu-modal-title').innerText = 'Tambah siswa';
       document.getElementById('stu-id').value = '';
@@ -645,7 +616,6 @@ const AdminPages = {
       document.getElementById('stu-parent').value = '';
       App.openModal('modal-stu');
     };
-
     document.getElementById('form-stu').onsubmit = async (e) => {
       e.preventDefault();
       const id = document.getElementById('stu-id').value || null;
@@ -677,11 +647,9 @@ const AdminPages = {
       'lokal': 'badge-warning',
       'kekhasan': 'badge-danger'
     };
-    
     const renderTable = () => {
       const q = (document.getElementById('search-sub')?.value || '').toLowerCase();
       const filtered = subArr.filter(s => (s.name || '').toLowerCase().includes(q));
-      
       const rows = filtered.length ? filtered.map(s => `
         <tr>
           <td>${s.order || '-'}</td>
@@ -693,10 +661,8 @@ const AdminPages = {
           </td>
         </tr>
       `).join('') : '<tr><td colspan="4" class="text-center text-muted">Belum ada mata pelajaran.</td></tr>';
-      
       const tbody = container.querySelector('#tbody-subjects');
       if (tbody) tbody.innerHTML = rows;
-
       container.querySelectorAll('[data-edit-sub]').forEach(btn => {
         btn.onclick = () => {
           const s = subArr.find(x => x.id === btn.dataset.editSub);
@@ -711,7 +677,6 @@ const AdminPages = {
         };
       });
     };
-
     container.innerHTML = `
       <div class="card toolbar-panel">
         <div class="toolbar-row">
@@ -732,12 +697,9 @@ const AdminPages = {
       </div>
       ${AdminPages._subjectModal()}
     `;
-    
     renderTable();
     document.getElementById('search-sub').addEventListener('input', renderTable);
-
     document.getElementById('btn-add-sub').onclick = () => AdminPages._openSubjectModal(null, subArr.length + 1);
-    
     document.getElementById('form-sub').onsubmit = async (e) => {
       e.preventDefault();
       const id = document.getElementById('sub-id').value || null;
@@ -816,7 +778,6 @@ const AdminPages = {
         </td>
       </tr>
     `}).join('') : '<tr><td colspan="4" class="text-center text-muted">Belum ada ekstrakurikuler.</td></tr>';
-    
     container.innerHTML = `
       <div class="card">
         <div class="card-header">
@@ -914,7 +875,6 @@ const AdminPages = {
     const classArr = DB.toArray(classes);
     const studentArr = DB.toArray(students);
     const teacherArr = DB.toArray(users).filter(u => u.role === AppConfig.ROLES.GURU || AppConfig.getRoleAssignments(u).some(AppConfig.isTeachingAssignment));
-
     const renderTeacherRows = (dateStr, teacherData, attendanceData) => teacherArr.map(g => {
       const att = attendanceData[g.id] || {};
       const status = att.time_in ? (att.time_out ? 'Selesai' : 'Datang') : 'Belum hadir';
@@ -933,7 +893,6 @@ const AdminPages = {
         </tr>
       `;
     }).join('') || '<tr><td colspan="5" class="text-center text-muted">Belum ada data presensi guru.</td></tr>';
-
     const renderStudentSummary = (dateStr, attendanceData) => classArr.map(cls => {
       const classStudents = studentArr.filter(s => s.classId === cls.id);
       const att = attendanceData[cls.id] || {};
@@ -956,7 +915,6 @@ const AdminPages = {
         </tr>
       `;
     }).join('') || '<tr><td colspan="6" class="text-center text-muted">Belum ada data absensi siswa.</td></tr>';
-
     const buildTable = async (selectedDate) => {
       const [teacherData, studentData] = await Promise.all([
         DB.getTeacherAttendanceByDate(selectedDate),
@@ -1000,7 +958,6 @@ const AdminPages = {
           </div>
         </div>
       `;
-
       const datePicker = document.getElementById('attendance-date-picker');
       if (datePicker) {
         datePicker.onchange = async () => {
@@ -1008,7 +965,6 @@ const AdminPages = {
           await buildTable(nextDate);
         };
       }
-
       container.querySelectorAll('[data-proof-url]').forEach(btn => {
         btn.onclick = () => {
           const url = btn.dataset.proofUrl;
@@ -1036,8 +992,6 @@ const AdminPages = {
         };
       });
     };
-
     await buildTable(defaultDate);
   },
-
 };
