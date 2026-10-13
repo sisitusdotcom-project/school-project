@@ -23,7 +23,7 @@ const CurriculumPages = {
           <div><p class="stat-value">${subjectList.length}</p><p class="stat-label text-muted">Mata Pelajaran Aktif</p></div>
         </div>
         <div class="card stat-card">
-          <div class="stat-icon stat-icon--danger"><i class="ph ph-school"></i></div>
+          <div class="stat-icon stat-icon--danger"><i class="ph ph-buildings"></i></div>
           <div><p class="stat-value">${classList.length}</p><p class="stat-label text-muted">Rombongan Belajar</p></div>
         </div>
       </section>
@@ -55,7 +55,7 @@ const CurriculumPages = {
               </div>
             </a>
             <a href="#/curriculum/syllabus" class="quick-nav-card">
-              <div class="quick-nav-icon"><i class="ph ph-folder-arrow-up"></i></div>
+              <div class="quick-nav-icon"><i class="ph ph-upload-simple"></i></div>
               <div class="quick-nav-info">
                 <div class="quick-nav-title">Perangkat & Modul Ajar</div>
                 <div class="quick-nav-desc">Verifikasi Prota, Prosem & RPP</div>

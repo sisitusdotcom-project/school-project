@@ -70,7 +70,7 @@ const GuruPages = {
               </div>
             </a>
             <a href="#/curriculum/syllabus" class="quick-nav-card">
-              <div class="quick-nav-icon"><i class="ph ph-folder-arrow-up"></i></div>
+              <div class="quick-nav-icon"><i class="ph ph-upload-simple"></i></div>
               <div class="quick-nav-info">
                 <div class="quick-nav-title">Perangkat Ajar</div>
                 <div class="quick-nav-desc">Unggah modul ajar & RPP</div>

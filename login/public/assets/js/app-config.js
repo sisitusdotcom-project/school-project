@@ -101,7 +101,7 @@
     'GURU_UMUM': [
       { hash: '#/attendance', icon: 'ph-map-pin', text: 'Presensi Kehadiran', group: 'Tugas Utama' },
       { hash: '#/guru/academic', icon: 'ph-check-square', text: 'Nilai Akademik', group: 'Tugas Utama Guru' },
-      { hash: '#/curriculum/syllabus', icon: 'ph-folder-arrow-up', text: 'Upload Perangkat Ajar', group: 'Tugas Utama Guru' },
+      { hash: '#/curriculum/syllabus', icon: 'ph-upload-simple', text: 'Upload Perangkat Ajar', group: 'Tugas Utama Guru' },
       { hash: '#/guru/portfolio', icon: 'ph-folder', text: 'Portofolio Guru', group: 'Tugas Utama Guru' },
       { hash: '#/guru/observations', icon: 'ph-note-pencil', text: 'Riwayat Observasi', group: 'Tugas Utama Guru' }
     ],
