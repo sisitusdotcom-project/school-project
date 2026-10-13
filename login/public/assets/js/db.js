@@ -251,7 +251,11 @@ const DB = {
   },
   async saveClass(id, data) {
     if (!isDBReady()) return null;
-    const ref = id ? db.ref(`classes/${id}`) : db.ref('classes').push();
+    if (id) {
+      await db.ref(`classes/${id}`).update(data);
+      return id;
+    }
+    const ref = db.ref('classes').push();
     await ref.set(data);
     return ref.key;
   },
@@ -263,12 +267,63 @@ const DB = {
     if (!isDBReady()) return;
     await db.ref(`classes/${classId}/subjectTeachers`).set(subjectTeachers);
   },
+  async getClassSubjects(classId) {
+    if (!classId || !isDBReady()) return [];
+    const [classes, subjects, users] = await Promise.all([
+      this.getClasses(),
+      this.getSubjects(),
+      this.getAllUsers()
+    ]);
+    const cls = classes[classId];
+    if (!cls) return [];
+    const st = cls.subjectTeachers || {};
+    const subMap = subjects || {};
+    const userMap = users || {};
+    const subKeys = Object.keys(st);
+    if (!subKeys.length) {
+      return this.toArray(subMap).sort((a, b) => (a.order || 0) - (b.order || 0)).map(s => ({
+        id: s.id,
+        name: s.name,
+        category: s.category || 'standar',
+        order: s.order || 99,
+        teacherId: cls.teacherId || '',
+        teacherName: cls.teacherId && userMap[cls.teacherId] ? userMap[cls.teacherId].name : 'Default Wali Kelas'
+      }));
+    }
+    const result = [];
+    for (const subId of subKeys) {
+      const meta = subMap[subId] || (cls.customSubjects && cls.customSubjects[subId]) || { id: subId, name: subId, category: 'standar', order: 99 };
+      const teacherId = st[subId] || '';
+      const teacher = teacherId && userMap[teacherId] ? userMap[teacherId] : null;
+      result.push({
+        id: subId,
+        name: meta.name || subId,
+        category: meta.category || 'standar',
+        order: meta.order !== undefined ? meta.order : 99,
+        teacherId: teacherId,
+        teacherName: teacher ? teacher.name : (cls.teacherId && userMap[cls.teacherId] ? `${userMap[cls.teacherId].name} (Wali Kelas)` : 'Belum Ditugaskan')
+      });
+    }
+    return result.sort((a, b) => (a.order || 0) - (b.order || 0) || a.name.localeCompare(b.name));
+  },
+  async addSubjectToClass(classId, subjectId, teacherId = '') {
+    if (!isDBReady() || !classId || !subjectId) return;
+    await db.ref(`classes/${classId}/subjectTeachers/${subjectId}`).set(teacherId);
+  },
+  async removeSubjectFromClass(classId, subjectId) {
+    if (!isDBReady() || !classId || !subjectId) return;
+    await db.ref(`classes/${classId}/subjectTeachers/${subjectId}`).remove();
+  },
   async getUmmiClasses() {
     return this._readCollection('ummi_classes', {});
   },
   async saveUmmiClass(id, data) {
     if (!isDBReady()) return null;
-    const ref = id ? db.ref(`ummi_classes/${id}`) : db.ref('ummi_classes').push();
+    if (id) {
+      await db.ref(`ummi_classes/${id}`).update(data);
+      return id;
+    }
+    const ref = db.ref('ummi_classes').push();
     await ref.set(data);
     return ref.key;
   },

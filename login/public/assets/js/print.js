@@ -46,11 +46,22 @@ async function generateReport(studentId, container) {
       DB.getParentResponse(year, sem, studentId),
       DB.getAssessments(year, sem, studentId)
     ]);
-    const subjects = DB.toArray(subjectsObj).sort((a, b) => (a.order || 0) - (b.order || 0));
+    const normCategory = (cat) => {
+      const c = (cat || '').toLowerCase();
+      if (c === 'agama') return 'Agama';
+      if (c === 'standar' || c === 'umum') return 'Umum';
+      if (c === 'lokal' || c === 'muatan lokal') return 'Muatan Lokal';
+      if (c === 'kekhasan') return 'Kekhasan';
+      return 'Umum';
+    };
+    const classSubKeys = cls && cls.subjectTeachers ? Object.keys(cls.subjectTeachers) : [];
+    const allSubs = DB.toArray(subjectsObj);
+    const subjects = (classSubKeys.length > 0 ? allSubs.filter(s => classSubKeys.includes(s.id)) : allSubs)
+      .sort((a, b) => (a.order || 0) - (b.order || 0));
     const ekskuls = DB.toArray(ekskulsObj);
     const characters = DB.toArray(charactersObj).sort((a, b) => (a.order || 0) - (b.order || 0));
     const getGroupHtml = (groupName, startNo, groupLabel) => {
-      const groupSubjects = subjects.filter(s => s.category === groupName);
+      const groupSubjects = subjects.filter(s => normCategory(s.category) === groupName);
       if (!groupSubjects.length) return '';
       let html = `
         <tr>
@@ -77,7 +88,7 @@ async function generateReport(studentId, container) {
       return html;
     };
     const getGeneralHtml = (startNo) => {
-      const generalSubjects = subjects.filter(s => s.category === 'Umum');
+      const generalSubjects = subjects.filter(s => normCategory(s.category) === 'Umum');
       if (!generalSubjects.length) return {
         html: '',
         count: 0
@@ -106,13 +117,13 @@ async function generateReport(studentId, container) {
     let tableHtml = '';
     let currentNo = 1;
     tableHtml += getGroupHtml('Agama', currentNo, 'Pendidikan Agama');
-    if (subjects.some(s => s.category === 'Agama')) currentNo++;
+    if (subjects.some(s => normCategory(s.category) === 'Agama')) currentNo++;
     const general = getGeneralHtml(currentNo);
     tableHtml += general.html;
     currentNo += general.count;
     tableHtml += getGroupHtml('Muatan Lokal', currentNo, 'Muatan Lokal');
-    if (subjects.some(s => s.category === 'Muatan Lokal')) currentNo++;
-    const kekhasanSubjects = subjects.filter(s => s.category === 'Kekhasan');
+    if (subjects.some(s => normCategory(s.category) === 'Muatan Lokal')) currentNo++;
+    const kekhasanSubjects = subjects.filter(s => normCategory(s.category) === 'Kekhasan');
     kekhasanSubjects.forEach((sub, idx) => {
       const grade = academic[sub.id] || {};
       tableHtml += `

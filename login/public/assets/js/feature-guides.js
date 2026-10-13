@@ -711,5 +711,249 @@ const FeatureGuides = {
       };
     }
   }
+,
+  customSteps: {
+    '#/attendance': [
+      'Pastikan fitur GPS / Lokasi di perangkat atau komputer Anda telah aktif.',
+      'Izinkan akses lokasi saat peramban (browser) menampilkan pop-up permintaan izin lokasi.',
+      'Pastikan indikator menunjukkan bahwa posisi Anda telah berada di dalam batas radius sekolah.',
+      'Klik tombol \'Presensi Datang\' saat baru tiba di sekolah, atau tombol \'Presensi Pulang\' saat jam dinas berakhir.',
+      'Waktu jam datang/pulang Anda akan tercatat seketika di tabel riwayat presensi harian.'
+    ],
+    '#/admin/classes': [
+      'Wewenang Kurikulum (SSOT): Penyesuaian mata pelajaran dan penetapan guru pengampu hanya dapat dilakukan oleh Waka Kurikulum atau Administrator.',
+      'Kemandirian Mapel per Rombel: Setiap rombel (misal 4 Abdurrahman bin Auf dan 4 Hafshah binti Umar) memiliki struktur mata pelajaran mandiri sesuai kurikulum yang berlaku di rombel tersebut.',
+      'Menambah Mapel ke Rombel: Klik tombol \'Mapel\' pada baris kelas yang diinginkan. Pada jendela yang terbuka, pilih mata pelajaran dari Bank Mapel, lalu klik tombol \'+ Tambah ke Rombel\'.',
+      'Menetapkan Guru Pengampu: Pilih nama guru pada kolom pengampu mapel. Jika dibiarkan Default, kewenangan pengisian nilai akan dipegang oleh Wali Kelas.',
+      'Menghapus Mapel dari Rombel: Klik ikon tempat sampah merah pada baris mata pelajaran untuk menghapusnya khusus dari rombel ini (tidak memengaruhi rombel lain atau bank mapel sekolah).',
+      'Menyimpan Perubahan: Klik tombol \'Simpan Penugasan Rombel\'. Struktur mapel ini menjadi satu-satunya sumber acuan (SSOT) untuk input nilai akademik guru dan lembar cetak rapor santri.',
+      'Menetapkan Wali Kelas: Klik ikon pensil pada baris kelas untuk memperbarui nama wali kelas pendamping.',
+      'Kenaikan Kelas: Gunakan tombol \'Kenaikan Kelas\' di kanan atas untuk memproses kenaikan rombel secara massal pada akhir tahun ajaran.'
+    ],
+    '#/admin/subjects': [
+      'Bank Master Mata Pelajaran (SSOT): Menu ini dikelola oleh Waka Kurikulum untuk mendefinisikan seluruh mata pelajaran resmi sekolah beserta kategorinya (Agama, Umum, Muatan Lokal, Kekhasan).',
+      'Menambah Mata Pelajaran Baru: Klik tombol \'Tambah Mapel\' di kanan atas. Masukkan nama mapel, pilih kategori kurikulum, dan tentukan nomor urut cetak rapor. Mapel baru ini akan langsung tersedia di Bank Mapel untuk dipilih oleh setiap rombel.',
+      'Mengatur Mata Pelajaran per Rombel: Klik tombol tautan <a href="#/admin/classes" class="guide-action-link">Atur Pemetaan per Rombel</a> untuk memilih rombel mana saja yang mengambil mapel tersebut serta menetapkan guru pengampunya.',
+      'Monitoring Distribusi Mapel: Kolom \'Guru Pengampu Terpetakan\' otomatis menampilkan jumlah rombel yang mengambil mapel tersebut beserta nama-nama guru pengajarnya.'
+    ],
+    '#/guru/academic': [
+      'Pilih kelas binaan Anda pada menu pilihan kelas.',
+      'Pilihan mata pelajaran yang muncul otomatis disesuaikan dengan mata pelajaran aktif di rombel tersebut (sesuai struktur kurikulum yang ditetapkan oleh Waka Kurikulum).',
+      'Jika Anda adalah Wali Kelas, Anda dapat memilih seluruh mata pelajaran yang diajarkan di kelas Anda. Jika Anda adalah Guru Mapel, Anda hanya dapat memilih mata pelajaran yang ditugaskan kepada Anda di rombel tersebut.',
+      'Klik tombol \'Tampilkan\' untuk memuat daftar seluruh santri.',
+      'Masukkan nilai angka (rentang 0-100) dan deskripsi capaian kompetensi, lalu klik tombol \'Simpan Nilai\'. Nilai ini otomatis menjadi sumber data resmi untuk lembar rapor.'
+    ],
+    '#/curriculum/syllabus': [
+      'Klik tombol \'Unggah Modul Ajar\' di pojok kanan atas.',
+      'Tentukan judul perangkat, pilih kelas yang diampu, nama mata pelajaran, serta semester berjalan.',
+      'Masukkan tautan link dokumen (Google Drive atau penyimpanan awan) yang sudah diatur hak akses lihatnya.',
+      'Klik \'Simpan\'. Dokumen akan masuk ke antrean telaah Waka Kurikulum dengan alur status Draft, Diajukan, hingga Disetujui.'
+    ],
+    '#/guru/student-attendance': [
+      'Halaman otomatis mendeteksi kelas binaan Anda sebagai Wali Kelas.',
+      'Pilih tanggal absensi (secara default terisi tanggal hari ini).',
+      'Seluruh siswa secara bawaan berstatus Hadir (H). Klik pilihan Sakit (S), Izin (I), atau Alpa (A) bagi santri yang berhalangan hadir.',
+      'Klik tombol \'Simpan Absensi\'. Rekap kehadiran otomatis terakumulasi ke buku rapor siswa.'
+    ],
+    '#/guru/classes': [
+      'Pilih kelas binaan Anda pada daftar kelas yang tersedia.',
+      'Klik tombol \'Penilaian Karakter\' untuk mengisi penilaian sikap dan karakter Profil Pelajar Pancasila santri.',
+      'Klik tombol \'Data Tambahan Rapor\' untuk memeriksa dan melengkapi catatan kegiatan ekstrakurikuler serta catatan wali kelas.',
+      'Klik tombol \'Cetak Rapor\' untuk melihat pratinjau lembar rapor lengkap sebelum dibagikan ke wali murid.'
+    ],
+    '#/admin/users': [
+      'Gunakan kolom pencarian atau filter peran untuk menemukan akun guru, karyawan, atau orang tua murid.',
+      'Periksa label penugasan di bawah nama guru untuk mengetahui rombel dan mata pelajaran yang diampu saat ini.',
+      'Klik ikon pensil (Edit) di baris akun yang bersangkutan untuk memperbarui nama, email dinas, atau mereset kata sandi baru jika pengguna lupa password.',
+      'Klik tombol \'Tambah Pengguna\' jika ada guru, tenaga kependidikan, atau warga sekolah baru yang perlu dibuatkan akun login.'
+    ],
+    '#/admin/assignments': [
+      'Gunakan tab kategori unit (Pimpinan, Kurikulum, Kesiswaan, Sarpras, Keuangan, Kepegawaian, Tim Khusus, Ekskul) untuk menyaring personil.',
+      'Klik tombol \'Atur Penugasan\' pada baris nama guru atau tenaga kependidikan yang ingin diberikan tugas.',
+      'Beri tanda centang pada amanah atau peran struktural yang diemban (misal: Waka Kurikulum, Staf Kesiswaan, Tim IT, Koordinator Ummi, dll.).',
+      'Klik \'Simpan\'. Begitu disimpan, menu-menu kerja yang bersangkutan di sidebar pengguna tersebut akan langsung aktif seketika.'
+    ],
+    '#/student-affairs/leaves': [
+      'Pantau daftar permohonan izin atau surat sakit yang diajukan oleh orang tua/wali murid.',
+      'Klik tombol telaah untuk memeriksa tanggal izin, alasan ketidakhadiran, serta lampiran foto surat dokter jika ada.',
+      'Klik tombol \'Setujui\' untuk memvalidasi perizinan. Status izin ini akan otomatis terhubung ke lembar absensi harian wali kelas.'
+    ],
+    '#/finance/cashbook': [
+      'Buku Kas Umum (BKU) menyajikan catatan mutasi penerimaan dan pengeluaran madrasah secara kronologis.',
+      'Gunakan filter tanggal atau rentang bulan untuk memeriksa pembukuan periode tertentu.',
+      'Periksa kolom Saldo Berjalan untuk memastikan kesesuaian antara kas fisik/bank dengan catatan di sistem.',
+      'Klik tombol \'Cetak BKU\' atau \'Export Excel\' untuk mencetak laporan pertanggungjawaban kas resmi.'
+    ],
+    '#/finance/transactions': [
+      'Untuk mencatat kas masuk atau pengeluaran baru, klik tombol \'Tambah Transaksi\' di kanan atas.',
+      'Pilih jenis kas (Penerimaan atau Pengeluaran).',
+      'Masukkan nominal rupiah, pilih pos anggaran (misal: SPP, BOS, Sarpras, Kegiatan Siswa), dan tulis keterangan transaksi secara jelas.',
+      'Unggah atau masukkan tautan bukti kuitansi/nota.',
+      'Klik tombol \'Simpan Transaksi\'. Saldo pada Buku Kas Umum akan otomatis terhitung secara real-time.'
+    ],
+    '#/student-affairs/alumni': [
+      'Buka menu Penelusuran Alumni untuk mendata santri kelas 6 yang telah menyelesaikan studi.',
+      'Klik tombol \'Tambah Alumni\' atau klik edit pada siswa yang sudah terdaftar.',
+      'Pilih jenis sekolah lanjutan yang dituju (SMP, MTs, atau Pondok Pesantren) dan masukkan nama sekolah/pesantren tujuan.',
+      'Klik tombol \'Simpan\'. Data ini tersimpan sebagai arsip rekam jejak kelulusan resmi sekolah.'
+    ],
+    '#/student-affairs/ppdb': [
+      'Pantau formulir pendaftaran calon peserta didik baru (SPMB / PPDB) yang masuk dari formulir daring sekolah.',
+      'Klik pada nama calon siswa untuk memvalidasi berkas identitas dan status kelengkapan data.',
+      'Ubah status pendaftaran menjadi \'Diterima\' setelah calon santri dinyatakan lolos tahap observasi dan pemetaan.'
+    ],
+    '#/dashboard': [
+      'Halaman beranda eksekutif menampilkan ringkasan metrik utama madrasah sesuai peran Anda.',
+      'Gunakan kartu-kartu navigasi cepat untuk langsung berpindah ke menu operasional yang sering Anda gunakan.',
+      'Pantau statistik harian dan pengumuman kedinasan madrasah secara berkala.'
+    ],
+    '#/ortu/dashboard': [
+      'Memantau perkembangan belajar, capaian tahfidz, dan rekap presensi ananda secara langsung dari gawai Anda.',
+      'Gunakan menu <a href="#/student-affairs/leaves" class="guide-action-link">Permohonan Izin / Sakit</a> jika ananda berhalangan hadir ke sekolah.',
+      'Periksa menu <a href="#/finance/student-bills" class="guide-action-link">Riwayat Tagihan SPP</a> untuk mengecek status pembayaran administrasi sekolah.'
+    ]
+  },
+  getSteps(path, guide = {}, navText = '') {
+    if (this.customSteps && this.customSteps[path]) {
+      return this.customSteps[path];
+    }
+    if (guide.usage) {
+      const parts = guide.usage.split(/\.\s+/).map(p => p.trim().replace(/\.$/, '')).filter(Boolean);
+      if (parts.length > 1) {
+        return parts.map(p => p + '.');
+      }
+    }
+    return [
+      `Buka menu ${AppConfig.escapeHtml(navText)} untuk memeriksa seluruh data yang tercatat.`,
+      'Gunakan kolom pencarian atau filter yang tersedia untuk menyaring data spesifik.',
+      'Klik tombol Tambah di bagian atas jika ingin mencatat atau mengajukan data baru.',
+      'Pastikan seluruh isian formulir telah lengkap dan benar sebelum menekan tombol Simpan.'
+    ];
+  },
+  renderGuidePage(container) {
+    container = container || document.getElementById('main-content') || document.querySelector('main:not(#login-view)') || document.querySelector('.main-content');
+    if (!container) return;
+    Router.setTitle('Panduan Aplikasi', 'Pusat panduan penggunaan dan alur kerja sistem terpadu.');
+    const role = Auth.currentRole || 'guru';
+    const assignments = Auth.currentAssignments || [];
+    const activeNav = AppConfig.getRoleNav(role, assignments).filter(n => n.hash !== '#/panduan');
+    const roleTitle = AppConfig.getRoleAssignmentLabel(Auth.userData || { role, assignments });
+    const groups = new Map();
+    activeNav.forEach(item => {
+      const g = item.group || 'Menu Utama';
+      if (!groups.has(g)) groups.set(g, []);
+      groups.get(g).push(item);
+    });
+    const categoryPills = ['Semua', ...groups.keys()].map(g => `<button type="button" class="btn-guide-pill ${g === 'Semua' ? 'active' : ''}" data-guide-category="${AppConfig.escapeHtml(g)}">${AppConfig.escapeHtml(g)}</button>`).join('');
+    let sectionsHtml = '';
+    groups.forEach((items, groupName) => {
+      const cardsHtml = items.map(nav => {
+        const guide = FeatureGuides.items[nav.hash] || {};
+        const steps = FeatureGuides.getSteps(nav.hash, guide, nav.text);
+        const stepsHtml = steps.map((s, idx) => `
+          <div class="guide-step-row">
+            <span class="guide-step-number">${idx + 1}</span>
+            <div class="guide-step-body">${s}</div>
+          </div>
+        `).join('');
+        const flowFrom = guide.from ? `<span class="guide-flow-tag">Input: ${AppConfig.escapeHtml(guide.from)}</span>` : '';
+        const flowTo = guide.to ? `<span class="guide-flow-tag">Tujuan: ${AppConfig.escapeHtml(guide.to)}</span>` : '';
+        return `
+          <div class="guide-card-item" data-guide-group="${AppConfig.escapeHtml(groupName)}" data-guide-keywords="${AppConfig.escapeHtml((nav.text + ' ' + (guide.func || '') + ' ' + steps.join(' ')).toLowerCase())}">
+            <div>
+              <div class="guide-card-header">
+                <div class="guide-card-name">
+                  <i class="ph ${nav.icon || 'ph-squares-four'}"></i>
+                  <span>${AppConfig.escapeHtml(nav.text)}</span>
+                </div>
+                <a href="${nav.hash}" class="btn btn-primary btn-sm"><i class="ph ph-arrow-square-out"></i> Buka Fitur</a>
+              </div>
+              <div class="guide-purpose-box">
+                <p class="guide-purpose-text">${AppConfig.escapeHtml(guide.func || 'Modul operasional madrasah.')}</p>
+              </div>
+              <div class="guide-steps-list">
+                ${stepsHtml}
+              </div>
+            </div>
+            <div class="guide-footer-meta">
+              ${flowFrom}
+              ${flowTo}
+            </div>
+          </div>
+        `;
+      }).join('');
+      sectionsHtml += `
+        <div class="guide-section" data-section-group="${AppConfig.escapeHtml(groupName)}">
+          <div class="guide-section-title"><i class="ph ph-folder"></i> ${AppConfig.escapeHtml(groupName)} (${items.length} Fitur)</div>
+          <div class="guide-cards-grid">
+            ${cardsHtml}
+          </div>
+        </div>
+      `;
+    });
+    container.innerHTML = `
+      <div class="guide-header-card">
+        <div class="guide-header-top">
+          <div class="guide-header-title">
+            <i class="ph ph-book-open-text"></i>
+            <div>
+              <h2>Buku Panduan Penggunaan Sistem</h2>
+              <p>Petunjuk operasional praktis step-by-step sesuai peran dan wewenang akun Anda.</p>
+            </div>
+          </div>
+          <div class="guide-role-tag"><i class="ph ph-user-check"></i> ${AppConfig.escapeHtml(roleTitle)}</div>
+        </div>
+        <div class="guide-search-wrapper">
+          <div class="guide-search-box">
+            <i class="ph ph-magnifying-glass"></i>
+            <input type="text" id="input-guide-search" placeholder="Cari panduan fitur atau langkah kerja (contoh: presensi, pemetaan, nilai, izin)...">
+          </div>
+        </div>
+        <div class="guide-filter-pills" id="guide-pills-bar">
+          ${categoryPills}
+        </div>
+      </div>
+      <div id="guide-sections-container">
+        ${sectionsHtml}
+      </div>
+      <div id="guide-empty-state" class="card text-center text-muted hidden guide-empty-state">
+        <i class="ph ph-magnifying-glass guide-empty-icon"></i>
+        Tidak ditemukan panduan yang sesuai dengan kata kunci pencarian Anda.
+      </div>
+    `;
+    const searchInput = document.getElementById('input-guide-search');
+    const pillButtons = container.querySelectorAll('[data-guide-category]');
+    let currentCategory = 'Semua';
+    const applyFilter = () => {
+      const q = (searchInput?.value || '').trim().toLowerCase();
+      let visibleCount = 0;
+      container.querySelectorAll('.guide-section').forEach(sec => {
+        const secGroup = sec.dataset.sectionGroup;
+        const matchCategory = (currentCategory === 'Semua' || secGroup === currentCategory);
+        let secVisibleCards = 0;
+        sec.querySelectorAll('.guide-card-item').forEach(card => {
+          const matchSearch = !q || (card.dataset.guideKeywords || '').includes(q);
+          const show = matchCategory && matchSearch;
+          card.classList.toggle('hidden', !show);
+          if (show) {
+            secVisibleCards++;
+            visibleCount++;
+          }
+        });
+        sec.classList.toggle('hidden', secVisibleCards === 0);
+      });
+      const emptyState = document.getElementById('guide-empty-state');
+      if (emptyState) emptyState.classList.toggle('hidden', visibleCount > 0);
+    };
+    if (searchInput) searchInput.addEventListener('input', applyFilter);
+    pillButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        pillButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentCategory = btn.dataset.guideCategory;
+        applyFilter();
+      });
+    });
+  }
 };
 window.FeatureGuides = FeatureGuides;

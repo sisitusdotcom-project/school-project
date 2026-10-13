@@ -57,23 +57,46 @@
     'GURU_MAPEL_TIK': 'Guru Mapel TIK'
   });
   function buildTeachingLabels(userId, classes = {}, subjects = {}) {
-    const labels = new Map();
-    Object.entries(classes || {}).forEach(([classId, classroom]) => {
+    const subjMap = new Map();
+    const classList = Object.entries(classes || {});
+    const totalClasses = classList.length;
+    classList.forEach(([classId, classroom]) => {
       const subjectTeachers = classroom?.subjectTeachers || {};
       Object.entries(subjects || {}).forEach(([subjectId, subject]) => {
-        const teacherId = subjectTeachers[subjectId];
-        if (teacherId !== userId || subject?.active === false) return;
-        const className = classroom.name || classId;
-        labels.set(`${subjectId}:${classId}`, {
-          label: `${subject.name} · ${className}`,
-          subjectOrder: subject.order || 0,
-          className
-        });
+        if (subjectTeachers[subjectId] !== userId || subject?.active === false) return;
+        if (!subjMap.has(subjectId)) {
+          subjMap.set(subjectId, {
+            name: subject.name,
+            order: subject.order || 0,
+            classes: []
+          });
+        }
+        const rawName = classroom.name || classId;
+        const shortName = rawName.split(' BINTI ')[0].split(' BIN ')[0].split(' ASH ')[0].trim();
+        subjMap.get(subjectId).classes.push({ id: classId, name: shortName });
       });
     });
-    return [...labels.values()]
-      .sort((a, b) => a.className.localeCompare(b.className, 'id') || a.subjectOrder - b.subjectOrder || a.label.localeCompare(b.label, 'id'))
-      .map(({ label }) => label);
+    if (!subjMap.size) return [];
+    return [...subjMap.values()]
+      .sort((a, b) => (a.order || 0) - (b.order || 0) || a.name.localeCompare(b.name, 'id'))
+      .map((item) => {
+        const cCount = item.classes.length;
+        if (cCount === totalClasses && totalClasses > 1) {
+          return `${item.name} (Semua Kelas)`;
+        }
+        if (cCount > 3) {
+          const grades = [...new Set(item.classes.map((c) => {
+            const m = c.id.match(/CLASS_(\d)_/);
+            return m ? parseInt(m[1], 10) : null;
+          }).filter(Boolean))].sort((x, y) => x - y);
+          if (grades.length > 1 && grades[grades.length - 1] - grades[0] === grades.length - 1) {
+            return `${item.name} (Kelas ${grades[0]}-${grades[grades.length - 1]})`;
+          }
+          return `${item.name} (${cCount} Rombel)`;
+        }
+        const names = item.classes.map((c) => c.name).join(', ');
+        return `${item.name} (${names})`;
+      });
   }
   const ROLE_LABELS = Object.freeze({
     [ROLES.ADMIN]: 'Administrator',
@@ -431,7 +454,9 @@
       return NAV_ITEMS[unit] || [];
     });
     const merged = [...baseNav, ...unitNav];
-    return merged.filter((item, index, arr) => arr.findIndex((entry) => entry.hash === item.hash) === index);
+    const unique = merged.filter((item, index, arr) => arr.findIndex((entry) => entry.hash === item.hash) === index);
+    unique.push({ hash: '#/panduan', icon: 'ph-book-open', text: 'Panduan Aplikasi', group: 'Bantuan' });
+    return unique;
   }
   function getRoleBadgeClass(role) {
     switch (role) {

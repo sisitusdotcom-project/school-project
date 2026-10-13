@@ -1,6 +1,7 @@
 const App = {
   getDashboardRenderer() {
     const renderers = {
+          '#/panduan': typeof FeatureGuides !== 'undefined' ? FeatureGuides.renderGuidePage : null,
       [AppConfig.ROLES.ADMIN]: AdminPages.renderDashboard,
       [AppConfig.ROLES.GURU]: GuruPages.renderDashboard,
       [AppConfig.ROLES.KEPSEK]: KepsekPages.renderDashboard,
@@ -27,6 +28,7 @@ const App = {
     if (!role) return false;
     let path = rawPath || '#/dashboard';
     if (path === '#/guru/attendance') path = '#/attendance';
+    if (path === '#/panduan') return true;
     if (path === '#/dashboard') return !!this.getDashboardRenderer();
     if (role === AppConfig.ROLES.ADMIN) return true;
     if (path === '#/attendance' && role !== AppConfig.ROLES.ORTU) return true;
@@ -122,7 +124,7 @@ const App = {
         allRoutes.add(item.hash);
       });
     });
-    ['#/admin/students/:id', '#/guru/assess/:id', '#/guru/observe/:id', '#/guru/student-attendance/:id'].forEach(r => allRoutes.add(r));
+    ['#/admin/students/:id', '#/guru/assess/:id', '#/guru/observe/:id', '#/guru/student-attendance/:id', '#/panduan'].forEach(r => allRoutes.add(r));
     allRoutes.forEach(path => {
       if (path === '#/dashboard') return;
       Router.add(path, async (container, routeParams) => {
@@ -145,6 +147,7 @@ const App = {
           return;
         }
         const renderers = {
+          '#/panduan': typeof FeatureGuides !== 'undefined' ? FeatureGuides.renderGuidePage : null,
           '#/admin/assignments': window.AdminAssignmentsModule?.render,
           '#/admin/users': typeof AdminPages !== 'undefined' ? AdminPages.renderUsers : null,
           '#/admin/classes': typeof AdminPages !== 'undefined' ? AdminPages.renderClasses : null,

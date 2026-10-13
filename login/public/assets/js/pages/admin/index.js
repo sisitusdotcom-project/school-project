@@ -447,15 +447,6 @@ const AdminPages = {
         </tr>`;
     }).join('') : '<tr><td colspan="4" class="text-center text-muted">Belum ada kelas.</td></tr>';
     const guruOptions = guruArr.map(g => `<option value="${g.id}">${AppConfig.escapeHtml(g.name)}</option>`).join('');
-    const mapelRows = subArr.map(sub => `
-      <div class="subject-editor-row">
-        <label>${AppConfig.escapeHtml(sub.name)}</label>
-        <select class="mapel-select" data-subject-id="${sub.id}">
-          <option value="">— Default (Wali Kelas) —</option>
-          ${guruOptions}
-        </select>
-      </div>
-    `).join('');
     container.innerHTML = `
       <div class="card">
         <div class="card-header">
@@ -501,20 +492,35 @@ const AdminPages = {
         </div>
       </div>
       <div class="modal-overlay" id="modal-mapel">
-        <div class="modal">
+        <div class="modal modal-lg">
           <div class="modal-header">
-            <h3 class="modal-title" id="mapel-modal-title">Atur Guru Mata Pelajaran</h3>
+            <h3 class="modal-title" id="mapel-modal-title">Mata Pelajaran & Guru Pengampu</h3>
             <button class="btn-icon" data-close-modal="modal-mapel"><i class="ph ph-x"></i></button>
           </div>
           <form id="form-mapel">
             <div class="modal-body">
               <input type="hidden" id="mapel-cls-id">
-              <p class="text-muted soft-note">Tentukan guru khusus untuk mata pelajaran tertentu. Jika dikosongkan, hak akses pengisian nilai akan dikembalikan ke Wali Kelas.</p>
-              ${mapelRows}
+              <p class="text-muted soft-note">Struktur mata pelajaran bersifat mandiri per rombel. Anda dapat menambah mapel dari bank mapel, menugaskan guru pengampu, atau menghapus mapel dari rombel ini.</p>
+              ${isKurikulum ? `
+                <div class="rombel-mapel-toolbar">
+                  <div class="form-group mb-0 flex-1">
+                    <label>Pilih Mata Pelajaran dari Bank Mapel:</label>
+                    <select id="mapel-select-add">
+                      <option value="">Pilih Mata Pelajaran</option>
+                    </select>
+                  </div>
+                  <button type="button" class="btn btn-primary" id="btn-add-subject-to-class"><i class="ph ph-plus"></i> Tambah ke Rombel</button>
+                </div>
+              ` : ''}
+              <div class="rombel-mapel-header-bar">
+                <span id="mapel-count-badge" class="badge badge-primary">0 Mata Pelajaran</span>
+                <a href="#/admin/subjects" class="guide-action-link"><i class="ph ph-sliders"></i> Kelola Bank Mapel</a>
+              </div>
+              <div id="mapel-list-container" class="rombel-mapel-list"></div>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-outline" data-close-modal="modal-mapel">Batal</button>
-              <button type="submit" class="btn btn-primary">Simpan Penugasan</button>
+              ${isKurikulum ? `<button type="submit" class="btn btn-primary"><i class="ph ph-floppy-disk"></i> Simpan Penugasan Rombel</button>` : ''}
             </div>
           </form>
         </div>
@@ -589,17 +595,110 @@ const AdminPages = {
         document.getElementById('modal-cls').classList.add('active');
       };
     });
+    let activeClass = null;
+    let editingSubjectTeachers = {};
+    const categoryBadge = {
+      'agama': 'badge-success',
+      'standar': 'badge-primary',
+      'lokal': 'badge-warning',
+      'kekhasan': 'badge-danger'
+    };
+    const categoryLabel = {
+      'agama': 'Agama',
+      'standar': 'Umum',
+      'lokal': 'Muatan Lokal',
+      'kekhasan': 'Kekhasan'
+    };
+    const updateMapelAddDropdown = () => {
+      const addSelect = document.getElementById('mapel-select-add');
+      if (!addSelect) return;
+      const currentSubIds = Object.keys(editingSubjectTeachers);
+      const availableToAdd = subArr.filter(s => !currentSubIds.includes(s.id));
+      if (!availableToAdd.length) {
+        addSelect.innerHTML = '<option value="">Semua mata pelajaran kurikulum telah terpasang</option>';
+        addSelect.disabled = true;
+      } else {
+        addSelect.disabled = false;
+        addSelect.innerHTML = '<option value="">Pilih Mata Pelajaran</option>' +
+          availableToAdd.map(s => `<option value="${s.id}">[${categoryLabel[s.category] || s.category}] ${AppConfig.escapeHtml(s.name)}</option>`).join('');
+      }
+    };
+    const renderMapelList = () => {
+      const containerEl = document.getElementById('mapel-list-container');
+      const countBadge = document.getElementById('mapel-count-badge');
+      if (!containerEl) return;
+      const subIds = Object.keys(editingSubjectTeachers);
+      if (countBadge) countBadge.textContent = `${subIds.length} Mata Pelajaran Aktif`;
+      updateMapelAddDropdown();
+      if (!subIds.length) {
+        containerEl.innerHTML = '<div class="card text-center text-muted p-3">Belum ada mata pelajaran untuk rombel ini. Pilih dari dropdown di atas untuk menambahkan.</div>';
+        return;
+      }
+      const activeSubjects = subIds.map(sid => {
+        const meta = subArr.find(s => s.id === sid) || { id: sid, name: sid, category: 'standar', order: 99 };
+        return {
+          id: sid,
+          name: meta.name || sid,
+          category: meta.category || 'standar',
+          order: meta.order !== undefined ? meta.order : 99,
+          teacherId: editingSubjectTeachers[sid] || ''
+        };
+      }).sort((a, b) => (a.order || 0) - (b.order || 0) || a.name.localeCompare(b.name));
+      containerEl.innerHTML = activeSubjects.map(sub => `
+        <div class="rombel-subject-item" data-item-sub="${sub.id}">
+          <div class="rombel-subject-info">
+            <span class="badge ${categoryBadge[sub.category] || 'badge-primary'}">${categoryLabel[sub.category] || sub.category}</span>
+            <strong>${AppConfig.escapeHtml(sub.name)}</strong>
+          </div>
+          <div class="rombel-subject-controls">
+            <select class="mapel-select-input" data-sub-id="${sub.id}" ${!isKurikulum ? 'disabled' : ''}>
+              <option value="">Default (Wali Kelas)</option>
+              ${guruArr.map(g => `<option value="${g.id}" ${sub.teacherId === g.id ? 'selected' : ''}>${AppConfig.escapeHtml(g.name)}</option>`).join('')}
+            </select>
+            ${isKurikulum ? `
+              <button type="button" class="btn btn-outline btn-danger btn-sm btn-del-rombel-sub" data-del-sub="${sub.id}" title="Hapus dari rombel ini">
+                <i class="ph ph-trash"></i>
+              </button>
+            ` : ''}
+          </div>
+        </div>
+      `).join('');
+      containerEl.querySelectorAll('.mapel-select-input').forEach(sel => {
+        sel.onchange = (e) => {
+          const sid = e.target.dataset.subId;
+          editingSubjectTeachers[sid] = e.target.value;
+        };
+      });
+      containerEl.querySelectorAll('.btn-del-rombel-sub').forEach(btn => {
+        btn.onclick = () => {
+          const sid = btn.dataset.delSub;
+          delete editingSubjectTeachers[sid];
+          renderMapelList();
+        };
+      });
+    };
+    const btnAddSubToClass = document.getElementById('btn-add-subject-to-class');
+    if (btnAddSubToClass) {
+      btnAddSubToClass.onclick = () => {
+        const addSelect = document.getElementById('mapel-select-add');
+        const selectedSubId = addSelect ? addSelect.value : '';
+        if (!selectedSubId) {
+          alert('Pilih mata pelajaran yang ingin ditambahkan terlebih dahulu.');
+          return;
+        }
+        editingSubjectTeachers[selectedSubId] = (activeClass && activeClass.teacherId) || '';
+        renderMapelList();
+      };
+    }
     container.querySelectorAll('[data-mapel-cls]').forEach(btn => {
       btn.onclick = () => {
         const c = classArr.find(x => x.id === btn.dataset.mapelCls);
         if (!c) return;
-        document.getElementById('mapel-modal-title').innerText = `Guru Mapel - Kelas ${AppConfig.escapeHtml(c.name)}`;
+        activeClass = c;
+        editingSubjectTeachers = { ...(c.subjectTeachers || {}) };
+        document.getElementById('mapel-modal-title').textContent = `Mata Pelajaran & Guru Pengampu - Kelas ${c.name}`;
         document.getElementById('mapel-cls-id').value = c.id;
-        const selects = document.querySelectorAll('.mapel-select');
-        selects.forEach(sel => {
-          const subId = sel.dataset.subjectId;
-          sel.value = (c.subjectTeachers && c.subjectTeachers[subId]) ? c.subjectTeachers[subId] : '';
-        });
+        renderMapelList();
         document.getElementById('modal-mapel').classList.add('active');
       };
     });
@@ -633,15 +732,10 @@ const AdminPages = {
     };
     document.getElementById('form-mapel').onsubmit = async (e) => {
       e.preventDefault();
+      if (!isKurikulum) return;
       const id = document.getElementById('mapel-cls-id').value;
       if (!id) return;
-      const subjectTeachers = {};
-      document.querySelectorAll('.mapel-select').forEach(sel => {
-        if (sel.value) {
-          subjectTeachers[sel.dataset.subjectId] = sel.value;
-        }
-      });
-      await DB.saveClassSubjectTeachers(id, subjectTeachers);
+      await DB.saveClassSubjectTeachers(id, editingSubjectTeachers);
       App.closeModal('modal-mapel');
       AdminPages.renderClasses(container);
     };
@@ -880,9 +974,10 @@ const AdminPages = {
     };
   },
   async renderSubjects(container) {
-    Router.setTitle('Mata Pelajaran', 'Kelola daftar mata pelajaran sekolah.');
-    const subjects = await DB.getSubjects();
+    Router.setTitle('Pemetaan Mapel & Guru', 'Kelola struktur mata pelajaran kurikulum dan pemetaan guru pengampu.');
+    const [subjects, classes, users] = await Promise.all([DB.getSubjects(), DB.getClasses(), DB.getAllUsers()]);
     const subArr = DB.toArray(subjects).sort((a, b) => (a.order || 0) - (b.order || 0));
+    const classArr = DB.toArray(classes);
     const categoryLabel = {
       'agama': 'Agama',
       'standar': 'Umum',
@@ -898,17 +993,27 @@ const AdminPages = {
     const renderTable = () => {
       const q = (document.getElementById('search-sub')?.value || '').toLowerCase();
       const filtered = subArr.filter(s => (s.name || '').toLowerCase().includes(q));
-      const rows = filtered.length ? filtered.map(s => `
+      const rows = filtered.length ? filtered.map(s => {
+        const assignedTeachers = [...new Set(classArr.map(c => c.subjectTeachers && c.subjectTeachers[s.id]).filter(Boolean))];
+        const assignedClassesCount = classArr.filter(c => c.subjectTeachers && c.subjectTeachers[s.id]).length;
+        let mappingInfo = '<span class="text-muted">Mengikuti Wali Kelas</span>';
+        if (assignedTeachers.length > 0) {
+          const names = assignedTeachers.map(tid => (users[tid]?.name || tid).split(',')[0]).join(', ');
+          mappingInfo = `<strong>${assignedClassesCount} Rombel</strong> <small class="text-muted">(${AppConfig.escapeHtml(names)})</small>`;
+        }
+        return `
         <tr>
           <td>${s.order || '-'}</td>
           <td><strong>${AppConfig.escapeHtml(s.name)}</strong></td>
           <td><span class="badge ${categoryBadge[s.category] || 'badge-primary'}">${categoryLabel[s.category] || s.category}</span></td>
+          <td>${mappingInfo}</td>
           <td class="action-cell">
             <button class="btn btn-outline btn-sm" data-edit-sub="${s.id}"><i class="ph ph-pencil-simple"></i></button>
             <button class="btn btn-danger btn-sm" data-del-sub="${s.id}"><i class="ph ph-trash"></i></button>
           </td>
         </tr>
-      `).join('') : '<tr><td colspan="4" class="text-center text-muted">Belum ada mata pelajaran.</td></tr>';
+      `;
+      }).join('') : '<tr><td colspan="5" class="text-center text-muted">Belum ada mata pelajaran.</td></tr>';
       const tbody = container.querySelector('#tbody-subjects');
       if (tbody) tbody.innerHTML = rows;
       container.querySelectorAll('[data-edit-sub]').forEach(btn => {
@@ -934,12 +1039,15 @@ const AdminPages = {
               <input type="text" id="search-sub" placeholder="Cari mata pelajaran...">
             </div>
           </div>
-          <button class="btn btn-primary" id="btn-add-sub"><i class="ph ph-plus"></i> Tambah Mapel</button>
+          <div class="toolbar-actions">
+            <a href="#/admin/classes" class="btn btn-outline"><i class="ph ph-chalkboard-teacher"></i> Atur Pemetaan per Rombel</a>
+            <button class="btn btn-primary" id="btn-add-sub"><i class="ph ph-plus"></i> Tambah Mapel</button>
+          </div>
         </div>
       </div>
       <div class="card">
         <div class="table-responsive">
-          <table class="table"><thead><tr><th class="table-col-sm">No</th><th>Nama Mata Pelajaran</th><th>Kategori</th><th class="table-col-md">Aksi</th></tr></thead>
+          <table class="table"><thead><tr><th class="table-col-sm">No</th><th>Nama Mata Pelajaran</th><th>Kategori</th><th>Guru Pengampu Terpetakan</th><th class="table-col-md">Aksi</th></tr></thead>
           <tbody id="tbody-subjects"></tbody></table>
         </div>
       </div>

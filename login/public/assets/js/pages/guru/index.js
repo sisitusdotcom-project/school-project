@@ -244,7 +244,7 @@ const GuruPages = {
     const stuOpts = studentArr.map(s => `<option value="${s.id}">${AppConfig.escapeHtml(s.name)}</option>`).join('');
     const charOpts = charArr.map(c => `<option value="${c.id}">${AppConfig.escapeHtml(c.name)}</option>`).join('');
     const obsData = await DB.getObservationsByTeacher(Auth.currentUser.uid);
-    const obsArr = DB.toArray(obsData).filter(o => studentArr.some(s => s.id === o.studentId)).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)).slice(0, 30); // 30 terbaru
+    const obsArr = DB.toArray(obsData).filter(o => studentArr.some(s => s.id === o.studentId)).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)).slice(0, 30); 
     const obsRows = obsArr.length ? obsArr.map(o => {
       const stu = studentArr.find(s => s.id === o.studentId);
       const ch = charArr.find(c => c.id === o.characterId);
@@ -367,13 +367,15 @@ const GuruPages = {
         return;
       }
       const cls = classArr.find(c => c.id === classId);
-      const isWali = cls.teacherId === uid;
+      const isWali = cls && cls.teacherId === uid;
+      const classSubKeys = cls && cls.subjectTeachers ? Object.keys(cls.subjectTeachers) : [];
+      const classSubjects = classSubKeys.length > 0 ? subArr.filter(s => classSubKeys.includes(s.id)) : subArr;
       let availableSubjects = [];
       if (isWali) {
-        availableSubjects = subArr;
+        availableSubjects = classSubjects;
       } else {
         const mySubjectIds = Object.keys(cls.subjectTeachers || {}).filter(subId => cls.subjectTeachers[subId] === uid);
-        availableSubjects = subArr.filter(s => mySubjectIds.includes(s.id));
+        availableSubjects = classSubjects.filter(s => mySubjectIds.includes(s.id));
       }
       availableSubjects.forEach(s => {
         subSelect.innerHTML += `<option value="${s.id}">${AppConfig.escapeHtml(s.name)}</option>`;
@@ -1169,7 +1171,7 @@ const GuruPages = {
     }
     const attData = await DB.getDailyStudentAttendance(dateStr, classId);
     const rows = studentArr.map((s, idx) => {
-      const currentAtt = attData[s.id] || 'H'; // Default Hadir
+      const currentAtt = attData[s.id] || 'H'; 
       return `
         <div class="card" style="margin-bottom: 8px; padding: 12px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
           <div style="flex: 1; min-width: 150px;">

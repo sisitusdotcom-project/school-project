@@ -142,5 +142,67 @@ rtdb.users['ADMIN'] = {
   isActive: true,
   createdAt: Date.now()
 };
+const gradeClasses = {
+  1: ['CLASS_1_ABU_BAKAR_ASH_SHIDDIQ', 'CLASS_1_AISYAH_BINTI_ABU_BAKAR', 'CLASS_1_UMAR_BIN_KHATTAB'],
+  2: ['CLASS_2_KHADIJAH_BINTI_KHUWAILID', 'CLASS_2_SALMAN_AL_FARISI', 'CLASS_2_UTSMAN_BIN_AFFAN'],
+  3: ['CLASS_3_ALI_BIN_ABI_THALIB', 'CLASS_3_BILAL_BIN_RABBAH', 'CLASS_3_ZAINAB_BINTI_JAHSYI'],
+  4: ['CLASS_4_ABDURRAHMAN_BIN_AUF', 'CLASS_4_HAFSHAH_BINTI_UMAR', 'CLASS_4_KHALID_BIN_WALID'],
+  5: ['CLASS_5_MARYAM_BINTI_IMRAN', 'CLASS_5_ZAID_BIN_TSABIT'],
+  6: ['CLASS_6_FATIMAH_BINTI_MUHAMMAD', 'CLASS_6_MU_ADZ_BIN_JABAL']
+};
+const allClasses = Object.values(gradeClasses).flat();
+allClasses.forEach(cid => {
+  if (rtdb.classes[cid]) rtdb.classes[cid].subjectTeachers = rtdb.classes[cid].subjectTeachers || {};
+});
+function mapSubject(cids, subId, teacherUid) {
+  cids.forEach(cid => {
+    if (rtdb.classes[cid]) {
+      rtdb.classes[cid].subjectTeachers = rtdb.classes[cid].subjectTeachers || {};
+      rtdb.classes[cid].subjectTeachers[subId] = teacherUid;
+    }
+  });
+}
+mapSubject(allClasses, 'SUB_PJOK', 'GTK_MUHAMMAD_MUZAKKI');
+mapSubject(allClasses, 'SUB_TARIKH_ISLAM', 'GTK_NURUL_LAILY_MUFIDA');
+mapSubject(allClasses, 'SUB_FIQIH', 'GTK_MUHAMMAD_NIAM_AGUSTIAN');
+mapSubject([...gradeClasses[1], ...gradeClasses[2]], 'SUB_ALQURAN_HADITS', 'GTK_VINDY_APRILLIA');
+mapSubject([...gradeClasses[3], ...gradeClasses[4], ...gradeClasses[5], ...gradeClasses[6]], 'SUB_ALQURAN_HADITS', 'GTK_AHMAD_TSALIS_NOVARIYANTO');
+mapSubject([...gradeClasses[4], ...gradeClasses[5], ...gradeClasses[6]], 'SUB_TIK', 'GTK_VINDY_APRILLIA');
+mapSubject([...gradeClasses[3], ...gradeClasses[4], ...gradeClasses[5], ...gradeClasses[6]], 'SUB_B_ARAB', 'GTK_FURQON');
+mapSubject(gradeClasses[3], 'SUB_AQIDAH_AKHLAQ', 'GTK_MUHAMMAD_NIAM_AGUSTIAN');
+mapSubject([...gradeClasses[4], ...gradeClasses[5]], 'SUB_AQIDAH_AKHLAQ', 'GTK_FURQON');
+mapSubject(gradeClasses[6], 'SUB_AQIDAH_AKHLAQ', 'GTK_APRILIA_AN_UMILLAH');
+mapSubject([...gradeClasses[4], ...gradeClasses[5], ...gradeClasses[6]], 'SUB_B_INGGRIS', 'GTK_APRILIA_AN_UMILLAH');
+mapSubject([...gradeClasses[4], ...gradeClasses[5], ...gradeClasses[6]], 'SUB_KEMUHAMMADIYAHAN', 'GTK_ANGGA_DWI_KURNIAWAN_KUSUMA');
+mapSubject(gradeClasses[5], 'SUB_MTK', 'GTK_AINAINI_RATNA_NOERI');
+mapSubject(gradeClasses[5], 'SUB_PKN', 'GTK_AINAINI_RATNA_NOERI');
+mapSubject(gradeClasses[5], 'SUB_SAINS', 'GTK_ANGGA_DWI_KURNIAWAN_KUSUMA');
+mapSubject(gradeClasses[5], 'SUB_B_INDO', 'GTK_ROICHATUL_JANNAH');
+mapSubject(gradeClasses[5], 'SUB_SBK', 'GTK_NURUL_LAILY_MUFIDA');
+mapSubject(gradeClasses[6], 'SUB_MTK', 'GTK_ROUDHOTUL_MILLAH');
+mapSubject(gradeClasses[6], 'SUB_SAINS', 'GTK_ROUDHOTUL_MILLAH');
+mapSubject(gradeClasses[6], 'SUB_B_INDO', 'GTK_EKA_DESSY_PRATIWI');
+mapSubject(gradeClasses[6], 'SUB_SBK', 'GTK_EKA_DESSY_PRATIWI');
+mapSubject(gradeClasses[4], 'SUB_SAINS', 'GTK_ROICHATUL_JANNAH');
+mapSubject(['CLASS_4_ABDURRAHMAN_BIN_AUF'], 'SUB_MTK', 'GTK_DEAYU_ICHA_RISTYA');
+mapSubject(['CLASS_4_ABDURRAHMAN_BIN_AUF'], 'SUB_PKN', 'GTK_DEAYU_ICHA_RISTYA');
+mapSubject(['CLASS_4_ABDURRAHMAN_BIN_AUF'], 'SUB_SBK', 'GTK_DEAYU_ICHA_RISTYA');
+mapSubject(['CLASS_4_HAFSHAH_BINTI_UMAR'], 'SUB_MTK', 'GTK_KHALIMAH_SA_DIYAH');
+mapSubject(['CLASS_4_HAFSHAH_BINTI_UMAR'], 'SUB_PKN', 'GTK_KHALIMAH_SA_DIYAH');
+mapSubject(['CLASS_4_HAFSHAH_BINTI_UMAR'], 'SUB_SBK', 'GTK_KHALIMAH_SA_DIYAH');
+mapSubject(['CLASS_4_KHALID_BIN_WALID'], 'SUB_MTK', 'GTK_ROICHATUL_JANNAH');
+mapSubject(['CLASS_4_KHALID_BIN_WALID'], 'SUB_PKN', 'GTK_ROICHATUL_JANNAH');
+mapSubject(['CLASS_4_KHALID_BIN_WALID'], 'SUB_SBK', 'GTK_ROICHATUL_JANNAH');
+const elementarySubs = ['SUB_MTK', 'SUB_B_INDO', 'SUB_B_INGGRIS', 'SUB_PKN', 'SUB_SBK', 'SUB_SAINS'];
+[1, 2, 3].forEach(g => {
+  gradeClasses[g].forEach(cid => {
+    const waliId = rtdb.classes[cid]?.teacherId;
+    if (waliId) {
+      elementarySubs.forEach(sid => {
+        rtdb.classes[cid].subjectTeachers[sid] = waliId;
+      });
+    }
+  });
+});
 fs.writeFileSync('./data/musada-sd-default-rtdb-export.json', JSON.stringify(rtdb, null, 2));
 console.log('Successfully generated ./data/musada-sd-default-rtdb-export.json, Teachers:', Object.values(rtdb.users).filter(u => u.role !== 'ortu').length, 'Students:', Object.values(rtdb.users).filter(u => u.role === 'ortu').length);

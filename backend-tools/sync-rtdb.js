@@ -8,17 +8,21 @@ const app = initializeApp({
   databaseURL: 'https://musada-sd-default-rtdb.firebaseio.com'
 });
 const db = getDatabase(app);
-async function syncUsers() {
+async function syncDatabase() {
   const exportPath = path.join(__dirname, 'data', 'musada-sd-default-rtdb-export.json');
   const data = JSON.parse(fs.readFileSync(exportPath, 'utf8'));
   const users = data.users || {};
-  console.log(`Menyinkronkan ${Object.keys(users).length} pengguna ke Firebase Realtime Database...`);
+  const classes = data.classes || {};
+  const subjects = data.subjects || {};
+  console.log(`Menyinkronkan ${Object.keys(users).length} pengguna, ${Object.keys(classes).length} kelas, dan ${Object.keys(subjects).length} mata pelajaran...`);
   await db.ref('users').update(users);
+  await db.ref('classes').update(classes);
+  await db.ref('subjects').update(subjects);
   await Promise.all(Object.keys(users).map((uid) => db.ref(`users/${uid}/teachingRole`).remove()));
-  console.log('Sinkronisasi pengguna ke RTDB berhasil!');
+  console.log('Sinkronisasi RTDB berhasil!');
   process.exit(0);
 }
-syncUsers().catch((err) => {
+syncDatabase().catch((err) => {
   console.error('Gagal:', err);
   process.exit(1);
 });
