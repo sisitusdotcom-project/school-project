@@ -14,6 +14,7 @@ async function syncUsers() {
   const users = data.users || {};
   console.log(`Menyinkronkan ${Object.keys(users).length} pengguna ke Firebase Realtime Database...`);
   await db.ref('users').update(users);
+  await Promise.all(Object.keys(users).map((uid) => db.ref(`users/${uid}/teachingRole`).remove()));
   console.log('Sinkronisasi pengguna ke RTDB berhasil!');
   process.exit(0);
 }

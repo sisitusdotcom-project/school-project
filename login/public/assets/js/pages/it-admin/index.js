@@ -71,13 +71,18 @@ const ITAdminPages = {
       </section>
     `;
     document.getElementById('btn-export-guru-tsv').addEventListener('click', async () => {
-      const users = await DB.getAllUsers();
+      const [users, classes, subjects] = await Promise.all([
+        DB.getAllUsers(),
+        DB.getClasses(),
+        DB.getSubjects()
+      ]);
       const arr = DB.toArray(users).filter((u) => u.role !== 'ortu' && u.role !== 'kepsek');
       arr.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
       let tsvContent = 'No\tNama\tJabatan\tJenis Kelamin\tTugas Mengajar\tTugas Tambahan\n';
       arr.forEach((u, i) => {
         const assignments = (u.assignments || []).join(', ');
-        tsvContent += `${i + 1}\t${u.name || '-'}\t${u.jabatan || 'Guru'}\t${u.gender || '-'}\t${u.teachingRole || '-'}\t${assignments || '-'}\n`;
+        const teachingLabels = DB.buildTeachingLabels(u.id, classes, subjects).join(', ');
+        tsvContent += `${i + 1}\t${u.name || '-'}\t${u.jabatan || 'Guru'}\t${u.gender || '-'}\t${teachingLabels || '-'}\t${assignments || '-'}\n`;
       });
       const blob = new Blob([tsvContent], { type: 'text/tab-separated-values;charset=utf-8;' });
       const link = document.createElement('a');

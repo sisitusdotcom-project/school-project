@@ -204,7 +204,11 @@ const AdminPages = {
   },
   async renderUsers(container) {
     Router.setTitle('Kelola Pengguna', 'Tambah, edit, dan atur peran pengguna sistem.');
-    const users = await DB.getAllUsers();
+    const [users, classes, subjects] = await Promise.all([
+      DB.getAllUsers(),
+      DB.getClasses(),
+      DB.getSubjects()
+    ]);
     let userArr = DB.toArray(users);
     const renderTable = () => {
       const q = (document.getElementById('search-user')?.value || '').toLowerCase();
@@ -214,7 +218,9 @@ const AdminPages = {
         const matchRole = roleFilter ? u.role === roleFilter : true;
         return matchSearch && matchRole;
       });
-      const rows = filtered.length ? filtered.map(u => `
+      const rows = filtered.length ? filtered.map(u => {
+        const teachingLabels = DB.buildTeachingLabels(u.id, classes, subjects);
+        return `
         <tr>
           <td>
             <strong>${AppConfig.escapeHtml(u.name)}</strong><br>
@@ -222,7 +228,7 @@ const AdminPages = {
               Email: ${u.email || '-'}<br>
               <span class="user-id-subtext">Default: ${u.id.toLowerCase().replace(/[^a-z0-9]/g, '')}@musada.sch.id</span>
             </small>
-            ${u.teachingRole ? `<div class="mt-4"><small class="text-muted"><i class="ph ph-book-open"></i> ${AppConfig.escapeHtml(u.teachingRole)}</small></div>` : ''}
+            ${teachingLabels.length ? `<div class="mt-4"><small class="text-muted"><i class="ph ph-book-open"></i> ${teachingLabels.map(label => AppConfig.escapeHtml(label)).join(', ')}</small></div>` : ''}
           </td>
           <td>
             <div class="user-badges-container">
@@ -239,7 +245,8 @@ const AdminPages = {
             <button class="btn btn-danger btn-sm" data-del-usr="${u.id}"><i class="ph ph-trash"></i></button>
           </td>
         </tr>
-      `).join('') : '<tr><td colspan="4" class="text-center text-muted">Tidak ada pengguna ditemukan.</td></tr>';
+      `;
+      }).join('') : '<tr><td colspan="4" class="text-center text-muted">Tidak ada pengguna ditemukan.</td></tr>';
       const tbody = container.querySelector('#tbody-users');
       if (tbody) tbody.innerHTML = rows;
       container.querySelectorAll('[data-edit-usr]').forEach(btn => {

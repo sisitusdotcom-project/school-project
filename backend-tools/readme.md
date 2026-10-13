@@ -18,11 +18,20 @@ node generate-db.js
 ```
 Perintah ini akan membaca file TSV dan merangkai data dalam bentuk file JSON raksasa yang berada di `data/musada-sd-default-rtdb-export.json`.
 
-**4. Buat Akun Autentikasi**
+Kolom **Tugas Mengajar** pada TSV tidak disimpan sebagai atribut pengguna. Label tugas mengajar di aplikasi dihitung hanya dari pemetaan eksplisit `classes/{classId}/subjectTeachers`. Wali kelas tetap memiliki akses ke mapel yang belum dipetakan, tetapi tidak ditampilkan sebagai daftar semua mapel agar informasi tidak berulang dan terlalu panjang. Dengan demikian, menu **Pemetaan Mapel & Guru** adalah satu-satunya sumber data penugasan mapel khusus.
+
+**4. Sinkronkan ke Firebase Realtime Database**
+Setelah JSON ditinjau, jalankan:
+```bash
+node sync-rtdb.js
+```
+Sinkronisasi juga menghapus field legacy `users/{uid}/teachingRole` dari akun yang diimpor.
+
+**5. Buat Akun Autentikasi**
 Jika ada siswa atau guru/tenaga kependidikan *baru* yang mendaftar, jalankan perintah ini agar mereka mendapatkan akses Login (Email & Password tergenerate secara otomatis):
 ```bash
 node import-auth-admin.js
 ```
 
-**5. Selesai!**
+**6. Selesai!**
 Proses sinkronisasi telah rampung. Seluruh data pada aplikasi web kini sudah tersinkronisasi 100% dengan data yang baru.

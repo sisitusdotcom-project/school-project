@@ -246,6 +246,9 @@ const DB = {
       return isWali || isMapel;
     });
   },
+  buildTeachingLabels(userId, classes, subjects) {
+    return AppConfig.buildTeachingLabels(userId, classes, subjects);
+  },
   async saveClass(id, data) {
     if (!isDBReady()) return null;
     const ref = id ? db.ref(`classes/${id}`) : db.ref('classes').push();

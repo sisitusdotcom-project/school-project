@@ -92,7 +92,6 @@ for (let i = 0; i < guruLines.length; i++) {
   let name = cols[1]?.trim();
   let jabatan = cols[2]?.trim() || '';
   let gender = cols[3]?.trim() || '';
-  let tugasMengajar = cols[4]?.trim() || '';
   let tugasTambahan = cols[5]?.trim() || '';
   if (!name || name.toLowerCase() === 'nama') continue;
   const baseName = name.split(',')[0].trim();
@@ -103,14 +102,13 @@ for (let i = 0; i < guruLines.length; i++) {
       role: jabatan === 'Tenaga Kependidikan' ? 'tendik' : (jabatan === 'Kepala Sekolah' ? 'kepsek' : 'guru'),
       jabatan: jabatan,
       gender: gender,
-      teachingRole: (tugasMengajar && tugasMengajar !== '-') ? tugasMengajar : '',
       assignments: [],
       isActive: true,
       createdAt: Date.now()
     };
   }
   const user = rtdb.users[uid];
-  const allTugas = [tugasMengajar, tugasTambahan].filter(t => t && t !== '-').join(', ');
+  const allTugas = [tugasTambahan].filter(t => t && t !== '-').join(', ');
   const tugasList = allTugas.split(',').map(t => t.trim()).filter(Boolean);
   for (const t of tugasList) {
     if (!t) continue;
@@ -140,7 +138,6 @@ rtdb.users['ADMIN'] = {
   role: 'admin',
   jabatan: 'Administrator',
   gender: 'L',
-  teachingRole: '',
   assignments: ['TIM_IT'],
   isActive: true,
   createdAt: Date.now()

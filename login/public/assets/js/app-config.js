@@ -56,6 +56,25 @@
     'GURU_MAPEL_SENI': 'Guru Mapel Seni',
     'GURU_MAPEL_TIK': 'Guru Mapel TIK'
   });
+  function buildTeachingLabels(userId, classes = {}, subjects = {}) {
+    const labels = new Map();
+    Object.entries(classes || {}).forEach(([classId, classroom]) => {
+      const subjectTeachers = classroom?.subjectTeachers || {};
+      Object.entries(subjects || {}).forEach(([subjectId, subject]) => {
+        const teacherId = subjectTeachers[subjectId];
+        if (teacherId !== userId || subject?.active === false) return;
+        const className = classroom.name || classId;
+        labels.set(`${subjectId}:${classId}`, {
+          label: `${subject.name} · ${className}`,
+          subjectOrder: subject.order || 0,
+          className
+        });
+      });
+    });
+    return [...labels.values()]
+      .sort((a, b) => a.className.localeCompare(b.className, 'id') || a.subjectOrder - b.subjectOrder || a.label.localeCompare(b.label, 'id'))
+      .map(({ label }) => label);
+  }
   const ROLE_LABELS = Object.freeze({
     [ROLES.ADMIN]: 'Administrator',
     [ROLES.GURU]: 'Guru / Wali Kelas',
@@ -466,6 +485,7 @@
     PRIMARY_ROLES,
     ROLE_LABELS,
     UNIT_LABELS,
+    buildTeachingLabels,
     NAV_ITEMS,
     DEFAULT_SETTINGS,
     APP_DEFAULTS,
