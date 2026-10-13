@@ -1,11 +1,11 @@
 :root {
-  --bg-body: #f8fafc;
+  --bg-body: #eef3f9;
   --bg-card: rgba(255, 255, 255, 0.85);
   --text-main: #0f172a;
   --text-muted: #64748b;
-  --primary: #4f46e5;
-  --primary-hover: #4338ca;
-  --primary-light: #e0e7ff;
+  --primary: #2f6fed;
+  --primary-hover: #245dcc;
+  --primary-light: #dce9ff;
   --success: #10b981;
   --success-bg: #d1fae5;
   --success-text: #047857;
@@ -15,7 +15,7 @@
   --danger: #ef4444;
   --danger-bg: #fee2e2;
   --danger-text: #b91c1c;
-  --border: rgba(15, 23, 42, 0.08);
+  --border: rgba(15, 23, 42, 0.09);
   --border-strong: rgba(15, 23, 42, 0.15);
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.03);
@@ -25,7 +25,8 @@
   --radius-lg: 24px;
   --radius-full: 9999px;
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  --sidebar-width: 280px;
+  --sidebar-width: 240px;
+  --shell-header-height: 74px;
   --control-height: 40px;
   --control-height-compact: 36px;
   --card-padding: 16px;
@@ -33,7 +34,7 @@
   --table-cell-padding: 10px 14px;
   --modal-padding-x: 20px;
   --modal-padding-y: 16px;
-  --page-gutter: 28px;
+  --page-gutter: 20px;
   --space-compact: 8px;
   --space-section: 12px
 }

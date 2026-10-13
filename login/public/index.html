@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sistem Manajemen Sekolah | SD Muhammadiyah 1 Sedati</title>
+  <link rel="icon" type="image/webp" href="../../assets/img/logo/logo.webp">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -88,31 +89,47 @@
   </main>
   <div id="app-shell" class="hidden">
     <header class="mobile-header">
-      <div class="brand-logo-small"><i class="ph-fill ph-student"></i><span>SMS Musada</span></div><button
+      <div class="brand-logo-small">
+        <img src="../../assets/img/logo/logo.webp" alt="Logo Musada">
+        <span class="brand-logo-text"><strong>SMS MUSADA</strong><span>(Sistem Manajemen Sekolah)</span><small>SD Muhammadiyah 1 Sedati</small></span>
+      </div><button
         class="btn-icon" id="btn-menu-toggle" aria-label="Buka menu navigasi"><i class="ph ph-list"></i></button>
     </header>
     <aside id="sidebar" class="sidebar">
       <div class="sidebar-header">
-        <div class="brand-logo-small"><i class="ph-fill ph-student"></i><span>SMS Musada</span></div><button
+        <div class="brand-logo-small">
+          <img src="../../assets/img/logo/logo.webp" alt="Logo Musada">
+          <span class="brand-logo-text"><strong>SMS MUSADA</strong><span>(Sistem Manajemen Sekolah)</span><small>SD Muhammadiyah 1 Sedati</small></span>
+        </div><button
           class="btn-icon mobile-only" id="btn-menu-close" aria-label="Tutup menu navigasi"><i
             class="ph ph-x"></i></button>
       </div>
-      <div class="user-profile-widget">
-        <div class="avatar"><i class="ph ph-user"></i></div>
-        <div class="user-info">
-          <p class="user-name" id="current-user-name">Memuat...</p>
-          <p class="user-role" id="current-user-role">Role</p>
-        </div>
-      </div>
       <nav class="sidebar-nav" id="sidebar-nav"></nav>
-      <div class="sidebar-footer"><button class="btn-nav danger" id="btn-logout"><i
-            class="ph ph-sign-out"></i><span>Keluar</span></button></div>
     </aside>
     <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
     <main class="main-content">
       <header class="page-header">
-        <h1 id="page-title">Dashboard</h1>
-        <p id="page-subtitle" class="text-muted">Selamat datang di sistem penilaian karakter.</p>
+        <div class="page-heading">
+          <div class="page-breadcrumb">
+            <span>Dashboard</span>
+            <i class="ph ph-caret-right"></i>
+            <h1 id="page-title">Beranda</h1>
+          </div>
+          <p id="page-subtitle" class="text-muted">Selamat datang di sistem penilaian karakter.</p>
+        </div>
+        <div class="page-user">
+          <button class="page-user__profile" id="page-user-profile" aria-label="Buka profil pengguna">
+            <div class="page-user__text">
+              <span class="page-user__greeting" id="page-user-greeting">Selamat pagi,</span>
+              <strong id="page-user-name">Pengguna</strong>
+              <small id="page-user-role">Role</small>
+            </div>
+            <div class="page-user__avatar"><i class="ph ph-user"></i></div>
+          </button>
+          <button class="page-user__logout" id="page-user-logout" aria-label="Keluar">
+            <i class="ph ph-power"></i>
+          </button>
+        </div>
       </header>
       <div id="views-container" class="views-container"></div>
     </main>

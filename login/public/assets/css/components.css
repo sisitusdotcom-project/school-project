@@ -150,12 +150,10 @@
   margin-top: 8px
 }
 .card {
-  background: var(--bg-card);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-radius: var(--radius-md);
+  background: #fff;
+  border-radius: 12px;
   padding: var(--card-padding);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.045);
   border: 1px solid var(--border);
 }
 .section-block {
@@ -769,13 +767,13 @@
   flex-direction: row;
   align-items: center;
   justify-content: flex-start;
-  gap: 10px;
-  padding: 12px;
+  gap: 12px;
+  padding: 14px;
   border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+  border-radius: 12px;
   background: linear-gradient(180deg, var(--bg-card), #f8fafc);
   box-shadow: var(--shadow-sm);
-  min-height: 76px
+  min-height: 82px
 }
 .stat-card.primary {
   background: linear-gradient(180deg, #eff6ff, #f8fbff);
@@ -798,8 +796,8 @@
   border-color: rgba(148, 163, 184, 0.22)
 }
 .stat-icon {
-  width: 38px;
-  height: 38px;
+  width: 42px;
+  height: 42px;
   border-radius: 10px;
   display: flex;
   align-items: center;
@@ -1462,17 +1460,17 @@ td[colspan] > .text-muted {
 .quick-nav-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 12px;
-  margin-top: 12px;
+  gap: 10px;
+  margin-top: 10px;
 }
 .quick-nav-card {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 12px 14px;
-  background: var(--bg-card);
+  background: #fff;
   border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
+  border-radius: 9px;
   text-decoration: none;
   color: var(--text-color);
   transition: all 0.2s ease;
@@ -1481,13 +1479,13 @@ td[colspan] > .text-muted {
 .quick-nav-card:hover {
   border-color: var(--primary);
   background: #f8faff;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transform: translateY(-1px);
+  box-shadow: 0 5px 14px rgba(37, 99, 235, 0.1);
 }
 .quick-nav-icon {
   width: 38px;
   height: 38px;
-  border-radius: var(--radius-sm);
+  border-radius: 9px;
   display: flex;
   align-items: center;
   justify-content: center;

@@ -61,12 +61,6 @@ const Auth = {
     if (toggleButton) {
       toggleButton.addEventListener('click', () => this.togglePasswordVisibility());
     }
-    const logoutButton = document.getElementById('btn-logout');
-    if (logoutButton) {
-      logoutButton.addEventListener('click', async () => {
-        await this.logout();
-      });
-    }
   },
   async login() {
     const emailInput = document.getElementById('email');
@@ -118,21 +112,36 @@ const Auth = {
   },
   updateProfileUI() {
     if (!this.userData) return;
-    const userName = document.getElementById('current-user-name');
-    const userRole = document.getElementById('current-user-role');
-    const avatarWrap = document.querySelector('.avatar');
-    if (userName) userName.innerText = AppConfig.formatUserName(this.userData);
-    if (userRole) userRole.innerText = AppConfig.getRoleAssignmentLabel(this.userData || { role: this.currentRole });
+    const pageUserName = document.getElementById('page-user-name');
+    const pageUserRole = document.getElementById('page-user-role');
+    const pageUserGreeting = document.getElementById('page-user-greeting');
+    const avatarWrap = document.querySelector('.page-user__avatar');
+    if (pageUserName) pageUserName.innerText = AppConfig.formatUserName(this.userData);
+    if (pageUserRole) pageUserRole.innerText = AppConfig.getRoleAssignmentLabel(this.userData || { role: this.currentRole });
+    if (pageUserGreeting) pageUserGreeting.innerText = `${this.getTimeGreeting()},`;
     if (avatarWrap) {
       const photoUrl = this.userData.photoURL || '';
-      if (photoUrl) {
-        const normalizedUrl = DriveBridge.normalizeDriveImageUrl(photoUrl, 'w200', '');
-        if (normalizedUrl) {
-          avatarWrap.innerHTML = `<img src="${normalizedUrl}" alt="${this.userData.name}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\'ph ph-user\'></i>'">`;
-        }
+      avatarWrap.innerHTML = '<i class="ph ph-user"></i>';
+      const normalizedUrl = photoUrl
+        ? DriveBridge.normalizeDriveImageUrl(photoUrl, 'w200', '')
+        : '';
+      if (normalizedUrl) {
+        const image = document.createElement('img');
+        image.src = normalizedUrl;
+        image.alt = this.userData.name || 'Foto pengguna';
+        image.onerror = () => {
+          avatarWrap.innerHTML = '<i class="ph ph-user"></i>';
+        };
+        avatarWrap.replaceChildren(image);
       }
     }
     this.buildSidebar();
+  },
+  getTimeGreeting(hour = new Date().getHours()) {
+    if (hour < 11) return 'Selamat pagi';
+    if (hour < 15) return 'Selamat siang';
+    if (hour < 18) return 'Selamat sore';
+    return 'Selamat malam';
   },
   buildSidebar() {
     const nav = document.getElementById('sidebar-nav');

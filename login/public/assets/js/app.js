@@ -74,10 +74,11 @@ const App = {
     if (menuButton) menuButton.addEventListener('click', toggleMenu);
     if (closeButton) closeButton.addEventListener('click', toggleMenu);
     if (backdrop) backdrop.addEventListener('click', toggleMenu);
-    const profileWidget = document.querySelector('.user-profile-widget');
-    if (profileWidget) {
-      profileWidget.style.cursor = 'pointer';
-      profileWidget.addEventListener('click', async () => {
+    const pageLogout = document.getElementById('page-user-logout');
+    if (pageLogout) pageLogout.addEventListener('click', () => Auth.logout());
+    const profileButton = document.getElementById('page-user-profile');
+    if (profileButton) {
+      profileButton.addEventListener('click', async () => {
         const u = await DB.getUser(Auth.currentUser.uid);
         if (!u) return;
         document.getElementById('profile-email').value = Auth.currentUser.email || '';
