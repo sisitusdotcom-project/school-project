@@ -7,3 +7,6 @@ node_modules/
 # file lain
 package-lock.json
 package.json
+
+# Project aplikasi lain
+perpustakaan
