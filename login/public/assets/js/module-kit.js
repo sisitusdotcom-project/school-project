@@ -18,7 +18,14 @@ const ModuleKit = {
   REF_LOADERS: {
     student: () => DB.getAllStudents(),
     class: () => DB.getClasses(),
-    subject: () => DB.getSubjects(),
+    subject: async () => {
+      const [subjects, ekskuls] = await Promise.all([DB.getSubjects(), DB.getExtracurriculars()]);
+      const out = { ...(subjects || {}) };
+      Object.entries(ekskuls || {}).forEach(([id, e]) => {
+        if (e) out[id] = { name: `[Ekskul] ${e.name}`, category: 'ekskul' };
+      });
+      return out;
+    },
     user: async () => {
       const users = await DB.getAllUsers();
       const out = {};
@@ -31,7 +38,7 @@ const ModuleKit = {
       const users = await DB.getAllUsers();
       const out = {};
       Object.entries(users || {}).forEach(([id, u]) => {
-        if (u && (u.role === 'guru' || u.role === 'admin' || u.role === 'kepsek')) out[id] = u;
+        if (u && (u.role === 'guru' || u.role === 'guruEkskul' || u.role === 'admin' || u.role === 'kepsek' || AppConfig.getRoleAssignments(u).some(a => a.startsWith('GURU_EKSTRA_')))) out[id] = u;
       });
       return out;
     },

@@ -5,6 +5,12 @@ const ATTENDANCE_GEOFENCE = window.APP_ATTENDANCE_GEOFENCE || {
 };
 const GuruPages = {
   async renderDashboard(container) {
+    const role = Auth.currentRole || Auth.userData?.role;
+    const userAssignments = Auth.currentAssignments || AppConfig.getRoleAssignments(Auth.userData || {});
+    if (AppConfig.isPureGuruEkstra(role, userAssignments)) {
+      await GuruPages.renderEkstraDashboard(container);
+      return;
+    }
     Router.setTitle('Beranda', 'Selamat datang di Dasbor Digital Sekolah.');
     const today = new Date();
     const dateStr = today.toISOString().slice(0, 10);
@@ -1337,5 +1343,531 @@ const GuruPages = {
         btn.innerHTML = '<i class="ph ph-floppy-disk"></i> Simpan Absensi';
       }
     };
+  },
+  async renderEkstraDashboard(container) {
+    Router.setTitle('Beranda Pembina Ekstrakurikuler', 'Selamat datang di Dasbor Digital Ekstrakurikuler.');
+    const today = new Date();
+    const dateStr = today.toISOString().slice(0, 10);
+    const timeStr = today.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+    const uid = Auth.currentUser.uid;
+    const [ekskuls, snapAtt] = await Promise.all([
+      DB.getExtracurriculars(),
+      db.ref('ekstra/attendance').once('value')
+    ]);
+    const eksArr = DB.toArray(ekskuls);
+    let myEks = eksArr.filter(e => e.teacherId === uid);
+    if (!myEks.length) {
+      const assigns = Auth.currentAssignments || AppConfig.getRoleAssignments(Auth.userData || {});
+      myEks = eksArr.filter(e => assigns.some(a => a.toLowerCase().includes(e.name.toLowerCase().replace(/[^a-z0-9]/g, ''))));
+    }
+    const eksName = myEks.map(e => e.name).join(', ') || 'Ekstrakurikuler';
+    const totalEnrolled = myEks.reduce((sum, e) => sum + Object.keys(e.students || {}).length, 0);
+    const attList = DB.toArray(snapAtt.val() || {}).filter(a => myEks.some(e => e.id === a.ekstraId));
+    const coachName = Auth.userData?.name || Auth.currentUser?.displayName || 'Pembina';
+    container.innerHTML = `
+      <div class="card hero-panel">
+        <div class="hero-panel__inner">
+          <div>
+            <p class="hero-panel__meta">${today.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+            <h2 class="hero-panel__time">${timeStr}</h2>
+            <p class="hero-panel__meta" style="margin-top:6px;"><strong style="font-size:16px;">${AppConfig.escapeHtml(coachName)}</strong> · Pembina ${AppConfig.escapeHtml(eksName)}</p>
+          </div>
+          <div class="hero-panel__status">
+            <p class="hero-panel__meta">Model Presensi</p>
+            <span class="badge badge-primary">Berbasis Pertemuan</span>
+          </div>
+        </div>
+      </div>
+      <section class="card-grid section-spacer">
+        <div class="card stat-card">
+          <div class="stat-icon stat-icon--primary"><i class="ph ph-trophy"></i></div>
+          <div><p class="stat-value">${myEks.length}</p><p class="stat-label text-muted">Ekskul Diampu</p></div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-icon stat-icon--success"><i class="ph ph-users-three"></i></div>
+          <div><p class="stat-value">${totalEnrolled}</p><p class="stat-label text-muted">Peserta Terdaftar (SSOT)</p></div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-icon stat-icon--danger"><i class="ph ph-calendar-check"></i></div>
+          <div><p class="stat-value">${attList.length}</p><p class="stat-label text-muted">Pertemuan Terlaksana</p></div>
+        </div>
+      </section>
+      <section class="card section-spacer">
+        <div class="card-header">
+          <h3 class="card-title"><i class="ph ph-lightning"></i> Menu Utama Pembina Ekstrakurikuler</h3>
+        </div>
+        <div class="card-body">
+          <div class="quick-nav-grid">
+            <a href="#/guru/ekstra/attendance" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-users-three"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Presensi Peserta</div>
+                <div class="quick-nav-desc">Catat absensi & materi latihan per pertemuan</div>
+              </div>
+            </a>
+            <a href="#/guru/ekstra/syllabus" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-clipboard-text"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Program Latihan</div>
+                <div class="quick-nav-desc">Susun target capaian materi mingguan</div>
+              </div>
+            </a>
+            <a href="#/curriculum/syllabus" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-upload-simple"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Perangkat & Modul Ajar</div>
+                <div class="quick-nav-desc">Unggah modul ajar, silabus & panduan materi</div>
+              </div>
+            </a>
+            <a href="#/guru/portfolio" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-folder"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Portofolio Pembina</div>
+                <div class="quick-nav-desc">Dokumentasi karya, sertifikat & lisensi</div>
+              </div>
+            </a>
+            <a href="#/guru/extracurriculars" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-trophy"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Nilai E-Rapor Ekskul</div>
+                <div class="quick-nav-desc">Penilaian capaian akhir semester untuk rapor</div>
+              </div>
+            </a>
+            <a href="#/guru/ekstra/talents" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-star"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Pemetaan Bakat Siswa</div>
+                <div class="quick-nav-desc">Pencatatan potensi & prestasi khusus anak binaan</div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </section>
+      <div class="card panel-callout">
+        <h3 class="card-title info-banner"><i class="ph ph-info"></i> Ketentuan Presensi & Data Peserta</h3>
+        <p class="text-muted soft-note">Daftar peserta ekstrakurikuler dikelola secara terpusat oleh Waka Kesiswaan. Pembina cukup melakukan absensi per pertemuan saat kegiatan ekskul berlangsung.</p>
+      </div>
+    `;
+  },
+  async renderEkstraAttendance(container) {
+    Router.setTitle('Presensi Pertemuan Ekskul', 'Pencatatan kehadiran peserta dan jurnal materi per pertemuan ekstrakurikuler.');
+    const [ekskuls, users, classes, allStudents, snapAtt] = await Promise.all([
+      DB.getExtracurriculars(),
+      DB.getAllUsers(),
+      DB.getClasses(),
+      DB.getAllStudents(),
+      db.ref('ekstra/attendance').once('value')
+    ]);
+    const eksArr = DB.toArray(ekskuls).sort((a, b) => (a.order || 0) - (b.order || 0));
+    const uid = Auth.currentUser.uid;
+    const isSpecialRole = Auth.currentUser.role === AppConfig.ROLES.ADMIN || Auth.currentUser.role === AppConfig.ROLES.STUDENT_AFFAIRS || Auth.currentUser.role === AppConfig.ROLES.KEPSEK;
+    let coachEkskuls = eksArr.filter(e => e.teacherId === uid);
+    if (!coachEkskuls.length && isSpecialRole) coachEkskuls = eksArr;
+    if (!coachEkskuls.length) {
+      const userAssignments = AppConfig.getRoleAssignments(Auth.currentUser);
+      const matched = eksArr.filter(e => {
+        const simpleName = e.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+        return userAssignments.some(a => a.toLowerCase().includes(simpleName));
+      });
+      if (matched.length) coachEkskuls = matched;
+    }
+    if (!coachEkskuls.length) {
+      container.innerHTML = `<div class="card"><p class="text-muted">Anda belum terdaftar sebagai pembina ekstrakurikuler. Hubungi Waka Kesiswaan untuk penugasan pembina.</p></div>`;
+      return;
+    }
+    let activeEksId = coachEkskuls[0].id;
+    const attObj = snapAtt.val() || {};
+    const attList = Object.entries(attObj).map(([id, val]) => ({ id, ...val }));
+    const studentMap = DB.toArray(allStudents).reduce((acc, s) => { acc[s.id] = s; return acc; }, {});
+    const classMap = DB.toArray(classes).reduce((acc, c) => { acc[c.id] = c.name; return acc; }, {});
+    const renderContent = (selectedEksId) => {
+      activeEksId = selectedEksId;
+      const currentEks = eksArr.find(x => x.id === activeEksId) || coachEkskuls[0];
+      const enrolledIds = Object.keys(currentEks.students || {});
+      const enrolledStudents = enrolledIds.map(id => studentMap[id]).filter(Boolean).sort((a, b) => a.name.localeCompare(b.name));
+      const history = attList.filter(a => a.ekstraId === activeEksId).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+      const eksOptions = coachEkskuls.map(e => `<option value="${e.id}" ${e.id === activeEksId ? 'selected' : ''}>${AppConfig.escapeHtml(e.name)}</option>`).join('');
+      const rows = history.length ? history.map((item, idx) => {
+        const pres = item.presentCount ?? (item.records ? Object.values(item.records).filter(r => r === 'Hadir' || r.status === 'Hadir').length : 0);
+        const tot = item.totalCount ?? (item.records ? Object.keys(item.records).length : enrolledStudents.length);
+        const pct = tot > 0 ? Math.round((pres / tot) * 100) : 0;
+        return `
+        <tr>
+          <td>${idx + 1}</td>
+          <td><strong>${item.date || '-'}</strong></td>
+          <td>${AppConfig.escapeHtml(item.note || 'Latihan Rutin')}</td>
+          <td><span class="badge badge-success">${pres} / ${tot} Hadir (${pct}%)</span></td>
+          <td>${AppConfig.escapeHtml(item.teacherName || '-')}</td>
+          <td class="action-cell">
+            <button class="btn btn-outline btn-sm" data-view-att="${item.id}" title="Lihat Rekap"><i class="ph ph-eye"></i></button>
+            <button class="btn btn-danger btn-sm" data-del-att="${item.id}" title="Hapus"><i class="ph ph-trash"></i></button>
+          </td>
+        </tr>
+      `}).join('') : '<tr><td colspan="6" class="text-center text-muted">Belum ada riwayat presensi pertemuan.</td></tr>';
+      container.innerHTML = `
+        <div class="card" style="margin-bottom:16px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+            <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:200px;">
+              <label style="font-weight:600;margin:0;">Ekstrakurikuler:</label>
+              <select id="sel-active-ekskul" style="min-width:200px;">${eksOptions}</select>
+            </div>
+            <button class="btn btn-primary" id="btn-add-session"><i class="ph ph-plus"></i> Tambah Presensi Pertemuan</button>
+          </div>
+        </div>
+        <section class="card-grid" style="margin-bottom:16px;">
+          <div class="card stat-card">
+            <div class="stat-icon stat-icon--primary"><i class="ph ph-users-three"></i></div>
+            <div><p class="stat-value">${enrolledStudents.length}</p><p class="stat-label text-muted">Peserta Terdaftar (SSOT)</p></div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-icon stat-icon--success"><i class="ph ph-calendar-check"></i></div>
+            <div><p class="stat-value">${history.length}</p><p class="stat-label text-muted">Pertemuan Terlaksana</p></div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-icon stat-icon--warning"><i class="ph ph-clock"></i></div>
+            <div><p class="stat-value">${currentEks.schedule || '1-2x / Pekan'}</p><p class="stat-label text-muted">Jadwal Pertemuan</p></div>
+          </div>
+        </section>
+        <div class="card">
+          <div class="card-header"><h3 class="card-title">Riwayat Pertemuan & Presensi</h3></div>
+          <div class="table-responsive">
+            <table class="table">
+              <thead><tr><th style="width:50px">No</th><th style="width:120px">Tanggal</th><th>Catatan Materi Pertemuan</th><th style="width:180px">Kehadiran</th><th>Pembina</th><th style="width:90px">Aksi</th></tr></thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>
+        </div>
+        ${GuruPages._ekstraAttendanceModal(currentEks, enrolledStudents, classMap)}
+        ${GuruPages._ekstraAttendanceDetailModal()}
+      `;
+      document.getElementById('sel-active-ekskul').onchange = (e) => renderContent(e.target.value);
+      document.getElementById('btn-add-session').onclick = () => GuruPages._openEkstraAttendanceModal(currentEks, enrolledStudents, classMap, container, () => renderContent(activeEksId));
+      container.querySelectorAll('[data-view-att]').forEach(btn => {
+        btn.onclick = () => {
+          const item = history.find(h => h.id === btn.dataset.viewAtt);
+          if (item) GuruPages._openEkstraAttendanceDetailModal(item, studentMap, classMap);
+        };
+      });
+      container.querySelectorAll('[data-del-att]').forEach(btn => {
+        btn.onclick = async () => {
+          if (!confirm('Hapus data presensi pertemuan ini?')) return;
+          await db.ref(`ekstra/attendance/${btn.dataset.delAtt}`).remove();
+          delete attObj[btn.dataset.delAtt];
+          renderContent(activeEksId);
+        };
+      });
+    };
+    renderContent(activeEksId);
+  },
+  _ekstraAttendanceModal(currentEks, enrolledStudents, classMap) {
+    const today = new Date().toISOString().slice(0, 10);
+    const stuCards = enrolledStudents.length ? enrolledStudents.map(s => {
+      const className = classMap[s.classId] || s.classId || '-';
+      const idLabel = AppConfig.formatStudentIdentity(s.nis, s.nisn);
+      return `
+        <div class="eks-att-card">
+          <div class="eks-att-info">
+            <p class="eks-att-name">${AppConfig.escapeHtml(s.name)}</p>
+            <p class="eks-att-meta">${AppConfig.escapeHtml(className)} · ${idLabel}</p>
+          </div>
+          <div class="att-toggle-group" data-stu="${s.id}">
+            <button type="button" class="att-btn active-h" data-val="H">H</button>
+            <button type="button" class="att-btn" data-val="I">I</button>
+            <button type="button" class="att-btn" data-val="S">S</button>
+            <button type="button" class="att-btn" data-val="A">A</button>
+          </div>
+        </div>
+      `;
+    }).join('') : '<div class="alert alert-warning"><p style="margin:0;">Belum ada murid yang didaftarkan pada ekstrakurikuler ini oleh Kesiswaan/Admin.</p></div>';
+    return `
+    <div class="modal-overlay" id="modal-add-ekstra-att">
+      <div class="modal modal-lg">
+        <div class="modal-header">
+          <div>
+            <h3 class="modal-title">Tambah Presensi Pertemuan</h3>
+            <p class="text-muted class-teaching-note">${AppConfig.escapeHtml(currentEks.name)} · SSOT Peserta Resmi</p>
+          </div>
+          <button class="btn-icon" data-close-modal="modal-add-ekstra-att"><i class="ph ph-x"></i></button>
+        </div>
+        <form id="form-save-ekstra-att">
+          <div class="modal-body">
+            <div style="display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap;">
+              <div class="form-group" style="flex:1;min-width:180px;margin-bottom:0;">
+                <label>Tanggal Pertemuan</label>
+                <input type="date" id="input-att-date" required value="${today}">
+              </div>
+              <div class="form-group" style="flex:2;min-width:240px;margin-bottom:0;">
+                <label>Materi / Catatan Latihan</label>
+                <input type="text" id="input-att-note" required placeholder="Contoh: Pengenalan teknik dasar, fisik, atau materi pertemuan...">
+              </div>
+            </div>
+            <div class="eks-att-summary-bar">
+              <span id="summary-att-counts">Hadir: ${enrolledStudents.length} | Izin: 0 | Sakit: 0 | Alpa: 0</span>
+              <button type="button" class="btn btn-outline btn-sm" id="btn-att-all-hadir" style="margin-left:auto;"><i class="ph ph-check-circle"></i> Semua Hadir</button>
+            </div>
+            <div style="max-height:380px;overflow-y:auto;padding-right:4px;">
+              ${stuCards}
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline" data-close-modal="modal-add-ekstra-att">Batal</button>
+            <button type="submit" class="btn btn-primary" id="btn-submit-ekstra-att" ${enrolledStudents.length ? '' : 'disabled'}><i class="ph ph-floppy-disk"></i> Simpan Presensi</button>
+          </div>
+        </form>
+      </div>
+    </div>`;
+  },
+  _openEkstraAttendanceModal(currentEks, enrolledStudents, classMap, container, onSaved) {
+    const modal = document.getElementById('modal-add-ekstra-att');
+    if (!modal) return;
+    const updateSummary = () => {
+      let h = 0, i = 0, s = 0, a = 0;
+      modal.querySelectorAll('.att-toggle-group').forEach(group => {
+        const activeBtn = group.querySelector('.att-btn[class*="active-"]');
+        const val = activeBtn ? activeBtn.dataset.val : 'H';
+        if (val === 'H') h++;
+        else if (val === 'I') i++;
+        else if (val === 'S') s++;
+        else if (val === 'A') a++;
+      });
+      const el = document.getElementById('summary-att-counts');
+      if (el) el.innerText = `Hadir: ${h} | Izin: ${i} | Sakit: ${s} | Alpa: ${a}`;
+    };
+    modal.querySelectorAll('.att-toggle-group').forEach(group => {
+      group.onclick = (ev) => {
+        if (ev.target.classList.contains('att-btn')) {
+          group.querySelectorAll('.att-btn').forEach(b => b.classList.remove('active-h', 'active-s', 'active-i', 'active-a'));
+          const val = ev.target.dataset.val;
+          ev.target.classList.add(`active-${val.toLowerCase()}`);
+          updateSummary();
+        }
+      };
+    });
+    const btnAll = document.getElementById('btn-att-all-hadir');
+    if (btnAll) {
+      btnAll.onclick = () => {
+        modal.querySelectorAll('.att-toggle-group').forEach(group => {
+          group.querySelectorAll('.att-btn').forEach(b => b.classList.remove('active-h', 'active-s', 'active-i', 'active-a'));
+          const hBtn = group.querySelector('.att-btn[data-val="H"]');
+          if (hBtn) hBtn.classList.add('active-h');
+        });
+        updateSummary();
+      };
+    }
+    const form = document.getElementById('form-save-ekstra-att');
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btn-submit-ekstra-att');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Menyimpan...';
+      const dateVal = document.getElementById('input-att-date').value;
+      const noteVal = document.getElementById('input-att-note').value.trim();
+      const records = {};
+      let presentCount = 0;
+      modal.querySelectorAll('.att-toggle-group').forEach(group => {
+        const sid = group.dataset.stu;
+        const student = enrolledStudents.find(x => x.id === sid);
+        const activeBtn = group.querySelector('.att-btn[class*="active-"]');
+        const statusVal = activeBtn ? activeBtn.dataset.val : 'H';
+        const statusLabel = statusVal === 'H' ? 'Hadir' : (statusVal === 'I' ? 'Izin' : (statusVal === 'S' ? 'Sakit' : 'Alpa'));
+        if (statusLabel === 'Hadir') presentCount++;
+        records[sid] = {
+          status: statusLabel,
+          name: student ? student.name : sid,
+          class: student ? (classMap[student.classId] || student.classId || '-') : '-'
+        };
+      });
+      const newRef = db.ref('ekstra/attendance').push();
+      await newRef.set({
+        date: dateVal,
+        ekstraId: currentEks.id,
+        ekstraName: currentEks.name,
+        teacherId: Auth.currentUser.uid,
+        teacherName: Auth.currentUser.name || Auth.currentUser.displayName || 'Pembina',
+        note: noteVal,
+        records: records,
+        presentCount: presentCount,
+        totalCount: enrolledStudents.length,
+        createdAt: firebase.database.ServerValue.TIMESTAMP
+      });
+      btn.disabled = false;
+      btn.innerHTML = '<i class="ph ph-floppy-disk"></i> Simpan Presensi';
+      App.closeModal('modal-add-ekstra-att');
+      if (onSaved) onSaved();
+    };
+    updateSummary();
+    modal.classList.add('active');
+  },
+  _ekstraAttendanceDetailModal() {
+    return `
+    <div class="modal-overlay" id="modal-eks-att-detail">
+      <div class="modal modal-lg">
+        <div class="modal-header">
+          <div>
+            <h3 class="modal-title" id="det-att-title">Detail Presensi Pertemuan</h3>
+            <p class="text-muted class-teaching-note" id="det-att-sub"></p>
+          </div>
+          <button class="btn-icon" data-close-modal="modal-eks-att-detail"><i class="ph ph-x"></i></button>
+        </div>
+        <div class="modal-body">
+          <div style="background:#f8fafc;padding:12px;border-radius:8px;border:1px solid var(--border-color);margin-bottom:14px;">
+            <p style="margin:0 0 4px 0;"><strong>Catatan / Materi:</strong> <span id="det-att-note"></span></p>
+            <p style="margin:0;"><strong>Kehadiran:</strong> <span id="det-att-summary"></span></p>
+          </div>
+          <div style="max-height:360px;overflow-y:auto;">
+            <table class="eks-detail-table">
+              <thead><tr><th style="width:50px">No</th><th>Nama Murid</th><th>Kelas</th><th style="width:110px">Status</th></tr></thead>
+              <tbody id="det-att-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-close-modal="modal-eks-att-detail">Tutup</button>
+        </div>
+      </div>
+    </div>`;
+  },
+  _openEkstraAttendanceDetailModal(item, studentMap, classMap) {
+    document.getElementById('det-att-title').innerText = `Presensi: ${item.ekstraName || 'Ekstrakurikuler'}`;
+    document.getElementById('det-att-sub').innerText = `Tanggal: ${item.date || '-'} · Pembina: ${item.teacherName || '-'}`;
+    document.getElementById('det-att-note').innerText = item.note || 'Latihan Rutin';
+    const recs = item.records || {};
+    const recEntries = Object.entries(recs);
+    let h = 0, i = 0, s = 0, a = 0;
+    const rows = recEntries.map(([sid, rec], idx) => {
+      const status = typeof rec === 'string' ? rec : (rec.status || 'Hadir');
+      if (status === 'Hadir') h++;
+      else if (status === 'Izin') i++;
+      else if (status === 'Sakit') s++;
+      else a++;
+      const stu = studentMap[sid] || {};
+      const name = rec.name || stu.name || sid;
+      const cName = rec.class || classMap[stu.classId] || stu.classId || '-';
+      const badgeCls = status === 'Hadir' ? 'badge-success' : (status === 'Izin' ? 'badge-warning' : (status === 'Sakit' ? 'badge-primary' : 'badge-danger'));
+      return `
+        <tr>
+          <td>${idx + 1}</td>
+          <td><strong>${AppConfig.escapeHtml(name)}</strong></td>
+          <td>${AppConfig.escapeHtml(cName)}</td>
+          <td><span class="badge ${badgeCls}">${status}</span></td>
+        </tr>
+      `;
+    }).join('');
+    document.getElementById('det-att-summary').innerText = `Hadir: ${h} | Izin: ${i} | Sakit: ${s} | Alpa: ${a} (Total ${recEntries.length} Murid)`;
+    document.getElementById('det-att-tbody').innerHTML = rows || '<tr><td colspan="4" class="text-center text-muted">Tidak ada rincian data.</td></tr>';
+    document.getElementById('modal-eks-att-detail').classList.add('active');
+  },
+  async renderEkstraGrades(container) {
+    Router.setTitle('Nilai E-Rapor Ekstrakurikuler', 'Input nilai akhir dan deskripsi capaian ekstrakurikuler peserta binaan.');
+    const uid = Auth.currentUser.uid;
+    const [ekskuls, allStudents, settings] = await Promise.all([
+      DB.getExtracurriculars(),
+      DB.getAllStudents(),
+      DB.getSettings()
+    ]);
+    const eksArr = DB.toArray(ekskuls);
+    let myEks = eksArr.filter(e => e.teacherId === uid);
+    if (!myEks.length) {
+      const assigns = AppConfig.getRoleAssignments(Auth.currentUser);
+      myEks = eksArr.filter(e => assigns.some(a => a.toLowerCase().includes(e.name.toLowerCase().replace(/[^a-z0-9]/g, ''))));
+    }
+    if (!myEks.length) {
+      container.innerHTML = `<div class="card"><p class="text-muted">Anda belum memiliki ekstrakurikuler binaan untuk dinilai.</p></div>`;
+      return;
+    }
+    const year = settings.currentAcademicYear || '2026/2027';
+    const sem = settings.currentSemester || '1';
+    let activeEks = myEks[0];
+    const studentMap = DB.toArray(allStudents).reduce((acc, s) => { acc[s.id] = s; return acc; }, {});
+    const renderGradeForm = async (selectedId) => {
+      activeEks = myEks.find(e => e.id === selectedId) || myEks[0];
+      const enrolledIds = Object.keys(activeEks.students || {});
+      const enrolledStudents = enrolledIds.map(id => studentMap[id]).filter(Boolean).sort((a, b) => a.name.localeCompare(b.name));
+      const eksOpts = myEks.map(e => `<option value="${e.id}" ${e.id === activeEks.id ? 'selected' : ''}>${AppConfig.escapeHtml(e.name)}</option>`).join('');
+      if (!enrolledStudents.length) {
+        container.innerHTML = `
+          <div class="card" style="margin-bottom:16px;">
+            <div style="display:flex;gap:12px;align-items:center;">
+              <label style="font-weight:600;margin:0;">Ekstrakurikuler:</label>
+              <select id="sel-grade-eks">${eksOpts}</select>
+            </div>
+          </div>
+          <div class="card"><p class="text-muted">Belum ada murid yang didaftarkan pada ekstrakurikuler ini oleh Kesiswaan/Admin.</p></div>
+        `;
+        document.getElementById('sel-grade-eks').onchange = (e) => renderGradeForm(e.target.value);
+        return;
+      }
+      container.innerHTML = `<div class="loader" style="margin:40px auto;"></div>`;
+      const gradesData = {};
+      await Promise.all(enrolledStudents.map(async (s) => {
+        const dt = await DB.getStudentExtracurriculars(year, sem, s.id);
+        gradesData[s.id] = dt[activeEks.id] || { score: '', description: '' };
+      }));
+      const rows = enrolledStudents.map((s, idx) => {
+        const g = gradesData[s.id] || { score: '', description: '' };
+        return `
+        <div class="card" style="margin-bottom:12px;padding:14px;">
+          <h4 style="margin:0 0 10px 0;font-size:15px;">${idx + 1}. ${AppConfig.escapeHtml(s.name)}</h4>
+          <div style="display:flex;gap:14px;flex-wrap:wrap;">
+            <div class="form-group" style="flex:0 0 140px;margin-bottom:0;">
+              <label>Nilai (Predikat)</label>
+              <select class="eks-input-score" data-sid="${s.id}">
+                <option value="">— Belum Dinilai —</option>
+                <option value="A" ${g.score === 'A' ? 'selected' : ''}>A (Sangat Baik)</option>
+                <option value="B" ${g.score === 'B' ? 'selected' : ''}>B (Baik)</option>
+                <option value="C" ${g.score === 'C' ? 'selected' : ''}>C (Cukup)</option>
+                <option value="D" ${g.score === 'D' ? 'selected' : ''}>D (Kurang)</option>
+              </select>
+            </div>
+            <div class="form-group" style="flex:1;min-width:220px;margin-bottom:0;">
+              <label>Deskripsi Capaian Rapor</label>
+              <input type="text" class="eks-input-desc" data-sid="${s.id}" value="${AppConfig.escapeHtml(g.description || '')}" placeholder="Contoh: Sangat aktif dan menguasai materi dengan sangat baik.">
+            </div>
+          </div>
+        </div>
+      `}).join('');
+      container.innerHTML = `
+        <div class="card" style="margin-bottom:16px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+            <div style="display:flex;gap:12px;align-items:center;">
+              <label style="font-weight:600;margin:0;">Ekstrakurikuler:</label>
+              <select id="sel-grade-eks">${eksOpts}</select>
+            </div>
+            <span class="badge badge-primary">Tahun Ajaran ${year} (Sem. ${sem})</span>
+          </div>
+        </div>
+        <form id="form-save-all-grades">
+          ${rows}
+          <div style="position:sticky;bottom:16px;margin-top:20px;z-index:100;">
+            <button type="submit" class="btn btn-primary" style="width:100%;padding:14px;font-size:15px;box-shadow:0 4px 12px rgba(0,0,0,0.15);"><i class="ph ph-floppy-disk"></i> Simpan Semua Nilai E-Rapor Ekskul</button>
+          </div>
+        </form>
+      `;
+      document.getElementById('sel-grade-eks').onchange = (e) => renderGradeForm(e.target.value);
+      document.getElementById('form-save-all-grades').onsubmit = async (ev) => {
+        ev.preventDefault();
+        const btn = ev.target.querySelector('button[type="submit"]');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Menyimpan Nilai...';
+        const scores = document.querySelectorAll('.eks-input-score');
+        const descs = document.querySelectorAll('.eks-input-desc');
+        for (let i = 0; i < scores.length; i++) {
+          const sid = scores[i].dataset.sid;
+          const score = scores[i].value;
+          const description = descs[i].value.trim();
+          if (score || description) {
+            await DB.saveStudentExtracurricular(year, sem, sid, activeEks.id, { score, description, updatedBy: uid });
+          } else {
+            await DB.deleteStudentExtracurricular(year, sem, sid, activeEks.id);
+          }
+        }
+        btn.disabled = false;
+        btn.innerHTML = '<i class="ph ph-check"></i> Tersimpan Berhasil!';
+        setTimeout(() => {
+          btn.innerHTML = '<i class="ph ph-floppy-disk"></i> Simpan Semua Nilai E-Rapor Ekskul';
+        }, 2000);
+      };
+    };
+    renderGradeForm(activeEks.id);
   }
 };

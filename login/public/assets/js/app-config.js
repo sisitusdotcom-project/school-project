@@ -122,7 +122,7 @@
       { hash: '#/dashboard', icon: 'ph-squares-four', text: 'Beranda' }
     ],
     'GURU_UMUM': [
-      { hash: '#/attendance', icon: 'ph-map-pin', text: 'Presensi Kehadiran', group: 'Tugas Utama' },
+      { hash: '#/attendance', icon: 'ph-map-pin', text: 'Presensi Kehadiran' },
       { hash: '#/guru/academic', icon: 'ph-check-square', text: 'Input Nilai Mapel', group: 'Tugas Utama Guru' },
       { hash: '#/curriculum/syllabus', icon: 'ph-upload-simple', text: 'Upload Perangkat Ajar', group: 'Tugas Utama Guru' },
       { hash: '#/guru/portfolio', icon: 'ph-folder', text: 'Portofolio Guru', group: 'Tugas Utama Guru' },
@@ -145,16 +145,13 @@
       { hash: '#/facilities', icon: 'ph-building-office', text: 'Monitoring Sarpras' }
     ],
     [ROLES.TENDIK]: [
+      { hash: '#/dashboard', icon: 'ph-squares-four', text: 'Beranda' },
       { hash: '#/attendance', icon: 'ph-map-pin', text: 'Presensi Kehadiran' },
-      { hash: '#/tendik/performance', icon: 'ph-clipboard-text', text: 'Laporan Kinerja' },
-      { hash: '#/tendik/portfolio', icon: 'ph-folder', text: 'Portofolio' }
+      { hash: '#/tendik/performance', icon: 'ph-clipboard-text', text: 'Laporan Kinerja', group: 'Tupoksi Tenaga Kependidikan' },
+      { hash: '#/tendik/portfolio', icon: 'ph-folder', text: 'Portofolio', group: 'Tupoksi Tenaga Kependidikan' }
     ],
     [ROLES.GURU_EKSKUL]: [
-      { hash: '#/attendance', icon: 'ph-map-pin', text: 'Presensi Kehadiran' },
-      { hash: '#/guru/ekstra/syllabus', icon: 'ph-clipboard-text', text: 'Program Latihan' },
-      { hash: '#/guru/ekstra/attendance', icon: 'ph-users-three', text: 'Presensi Peserta' },
-      { hash: '#/guru/extracurriculars', icon: 'ph-trophy', text: 'Nilai E-Rapor Ekskul' },
-      { hash: '#/guru/ekstra/talents', icon: 'ph-star', text: 'Pemetaan Siswa Berbakat' }
+      { hash: '#/dashboard', icon: 'ph-squares-four', text: 'Beranda' }
     ],
     [ROLES.KOMITE]: [
       { hash: '#/komite/activities', icon: 'ph-users-three', text: 'Kegiatan Paguyuban' },
@@ -167,7 +164,8 @@
       { hash: '#/finance/student-bills', icon: 'ph-receipt', text: 'Riwayat Tagihan SPP' }
     ],
     [ROLES.IT_ADMIN]: [
-      { hash: '#/it-admin/dashboard', icon: 'ph-database', text: 'Sinkronisasi Data' }
+      { hash: '#/it-admin/dashboard', icon: 'ph-database', text: 'Sinkronisasi Data' },
+      { hash: '#/attendance', icon: 'ph-map-pin', text: 'Presensi Kehadiran' }
     ],
     [ROLES.PERSONNEL]: [
       { hash: '#/dashboard', icon: 'ph-squares-four', text: 'Beranda' },
@@ -318,9 +316,11 @@
     ],
     'GURU_EKSTRA': [
       { hash: '#/guru/ekstra/syllabus', icon: 'ph-clipboard-text', text: 'Program Latihan', group: 'Guru Ekskul: Perencanaan' },
+      { hash: '#/curriculum/syllabus', icon: 'ph-upload-simple', text: 'Perangkat & Modul Ajar', group: 'Guru Ekskul: Perencanaan' },
       { hash: '#/guru/ekstra/attendance', icon: 'ph-users-three', text: 'Presensi Peserta', group: 'Guru Ekskul: Pelaksanaan' },
       { hash: '#/guru/extracurriculars', icon: 'ph-trophy', text: 'Nilai E-Rapor Ekskul', group: 'Guru Ekskul: Evaluasi' },
-      { hash: '#/guru/ekstra/talents', icon: 'ph-star', text: 'Pemetaan Siswa Berbakat', group: 'Guru Ekskul: Evaluasi' }
+      { hash: '#/guru/ekstra/talents', icon: 'ph-star', text: 'Pemetaan Siswa Berbakat', group: 'Guru Ekskul: Evaluasi' },
+      { hash: '#/guru/portfolio', icon: 'ph-folder', text: 'Portofolio Pembina', group: 'Guru Ekskul: Pengembangan' }
     ],
     'KOORD_UMMI': [
       { hash: '#/guru/ummi/koord/mapping', icon: 'ph-users-three', text: 'Pemetaan Rombel & Guru', group: 'Koordinator Ummi' },
@@ -409,24 +409,34 @@
     if (!user || typeof user !== 'object') return [];
     return normalizeAssignments(user.assignments || user.unitRoles || user.roles || []);
   }
+  function isTeachingAssignment(a) {
+    const prefixes = ['GURU_KELAS_', 'GURU_MAPEL_', 'TIM_UMMI', 'TIM_B_INGGRIS'];
+    return prefixes.some(prefix => a.startsWith(prefix)) || a === 'GURU_UMMI' || a === 'KOORD_UMMI';
+  }
+  function isPureGuruEkstra(role, assignments = []) {
+    const list = Array.isArray(assignments) ? assignments : [];
+    const hasEkstra = list.some(a => a && a.startsWith('GURU_EKSTRA_')) || role === ROLES.GURU_EKSKUL;
+    const hasAcademic = list.some(isTeachingAssignment);
+    return hasEkstra && !hasAcademic && role !== ROLES.TENDIK && role !== ROLES.ADMIN && role !== ROLES.KEPSEK;
+  }
   function getRoleAssignmentLabel(user = {}) {
     const assignments = getRoleAssignments(user);
     if (!assignments.length) return getRoleLabel(user.role);
+    const isPure = isPureGuruEkstra(user.role, assignments);
     const unitLabels = assignments.map((item) => {
       if (UNIT_LABELS[item]) return UNIT_LABELS[item];
       return item.split('_').map(word => word.charAt(0) + word.slice(1).toLowerCase()).join(' ');
     }).join(', ');
-    return `${getRoleLabel(user.role)} · ${unitLabels}`;
-  }
-  const TEACHING_PREFIXES = ['GURU_', 'WAKA_', 'TIM_UMMI', 'TIM_B_INGGRIS'];
-  function isTeachingAssignment(a) {
-    return TEACHING_PREFIXES.some(prefix => a.startsWith(prefix));
+    const baseRole = isPure ? 'Guru Ekstrakurikuler' : getRoleLabel(user.role);
+    return `${baseRole} · ${unitLabels}`;
   }
   function getRoleNav(role, assignments = []) {
     let baseNav = [...(NAV_ITEMS[role] || [])];
-    const isGuru = role === ROLES.GURU || assignments.some(isTeachingAssignment);
+    const isEkstra = assignments.some(a => a.startsWith('GURU_EKSTRA_')) || role === ROLES.GURU_EKSKUL;
+    const isPure = isPureGuruEkstra(role, assignments);
+    const isGuru = !isPure && (role === ROLES.GURU || assignments.some(isTeachingAssignment));
     const isWaliKelas = assignments.some(a => a.startsWith('GURU_KELAS_'));
-    const isGuruEkstra = assignments.some(a => a.startsWith('GURU_EKSTRA_'));
+    const isGuruEkstra = isEkstra;
     const isTimUmmi = assignments.some(a => a === 'GURU_UMMI' || a === 'TIM_UMMI' || a === 'KOORD_UMMI');
     const isTimInggris = assignments.some(a => a === 'TIM_B_INGGRIS');
     if (isGuru) {
@@ -568,6 +578,7 @@
     getRoleBadgeClass,
     getAssignmentBadgeClass,
     isTeachingAssignment,
+    isPureGuruEkstra,
     formatUserName,
     getStudentNis,
     getStudentNisn,

@@ -1793,3 +1793,23 @@ td[colspan] > .text-muted {
 .attendance-info-banner p{margin:0;font-size:13px;color:#64748b;}
 .attendance-save-wrapper{position:sticky;bottom:16px;margin-top:24px;z-index:100;}
 .btn-save-attendance{width:100%;padding:14px;font-size:15px;box-shadow:0 4px 12px rgba(0,0,0,0.15);}
+.eks-students-filter-row{display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap;}
+.eks-students-filter-row > *{min-width:0;}
+.eks-students-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px;max-height:380px;overflow-y:auto;padding:4px;}
+.eks-student-item{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--bg-hover,#f8fafc);border:1px solid var(--border-color);border-radius:var(--radius-md,8px);cursor:pointer;transition:all .15s;}
+.eks-student-item:hover{border-color:var(--primary);background:var(--bg-card);}
+.eks-student-item input[type="checkbox"]{width:18px;height:18px;cursor:pointer;accent-color:var(--primary);}
+.eks-student-meta{display:flex;flex-direction:column;min-width:0;flex:1;}
+.eks-student-name{font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.eks-student-sub{font-size:11px;color:var(--text-muted);}
+.eks-badge-counter{background:var(--primary-light,#e0f2fe);color:var(--primary,#0284c7);padding:4px 10px;border-radius:6px;font-weight:600;font-size:13px;}
+.eks-att-summary-bar{display:flex;gap:12px;align-items:center;background:#f8fafc;padding:10px 14px;border-radius:8px;border:1px solid var(--border-color);margin-bottom:12px;flex-wrap:wrap;font-size:13px;font-weight:600;}
+.eks-att-summary-item{display:flex;align-items:center;gap:6px;}
+.eks-att-card{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border:1px solid var(--border-color);border-radius:8px;background:var(--bg-card);margin-bottom:8px;gap:12px;flex-wrap:wrap;}
+.eks-att-card > *{min-width:0;}
+.eks-att-info{display:flex;flex-direction:column;gap:2px;flex:1;min-width:180px;}
+.eks-att-name{font-weight:600;font-size:14px;margin:0;}
+.eks-att-meta{font-size:12px;color:var(--text-muted);margin:0;}
+.eks-detail-table{width:100%;border-collapse:collapse;margin-top:12px;}
+.eks-detail-table th,.eks-detail-table td{padding:8px 10px;border-bottom:1px solid var(--border-color);font-size:13px;text-align:left;}
+.eks-detail-table th{background:#f8fafc;font-weight:600;}

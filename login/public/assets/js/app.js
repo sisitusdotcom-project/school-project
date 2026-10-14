@@ -1,9 +1,15 @@
 const App = {
   getDashboardRenderer() {
+    const role = Auth.currentRole || Auth.userData?.role;
+    const assignments = Auth.currentAssignments || AppConfig.getRoleAssignments(Auth.userData || {});
+    if (AppConfig.isPureGuruEkstra(role, assignments)) {
+      return GuruPages.renderEkstraDashboard;
+    }
     const renderers = {
-          '#/panduan': typeof FeatureGuides !== 'undefined' ? FeatureGuides.renderGuidePage : null,
+      '#/panduan': typeof FeatureGuides !== 'undefined' ? FeatureGuides.renderGuidePage : null,
       [AppConfig.ROLES.ADMIN]: AdminPages.renderDashboard,
       [AppConfig.ROLES.GURU]: GuruPages.renderDashboard,
+      [AppConfig.ROLES.GURU_EKSKUL]: GuruPages.renderEkstraDashboard,
       [AppConfig.ROLES.KEPSEK]: KepsekPages.renderDashboard,
       [AppConfig.ROLES.ORTU]: OrtuPages.renderDashboard,
       [AppConfig.ROLES.PERSONNEL]: PersonnelPages.renderDashboard,
@@ -13,7 +19,7 @@ const App = {
       [AppConfig.ROLES.STUDENT_AFFAIRS]: StudentAffairsPages.renderDashboard,
       [AppConfig.ROLES.IT_ADMIN]: ITAdminPages.renderDashboard
     };
-    return renderers[Auth.currentRole] || (async (container) => {
+    return renderers[role] || (async (container) => {
       container.innerHTML = `
         <div class="card section-block">
           <div class="card-body text-center">
@@ -38,7 +44,7 @@ const App = {
     if (path.startsWith('#/guru/student-attendance/')) path = '#/guru/student-attendance';
     if (path.startsWith('#/guru/classes/')) path = '#/guru/classes';
     const assignments = Auth.currentAssignments || [];
-    if (role === AppConfig.ROLES.GURU) {
+    if (role === AppConfig.ROLES.GURU || role === AppConfig.ROLES.GURU_EKSKUL) {
       const guruAllowed = [
         '#/attendance',
         '#/guru/academic',
@@ -48,7 +54,11 @@ const App = {
         '#/guru/student-attendance',
         '#/guru/classes',
         '#/guru/additional',
-        '#/student-affairs/leaves'
+        '#/student-affairs/leaves',
+        '#/guru/ekstra/syllabus',
+        '#/guru/ekstra/attendance',
+        '#/guru/extracurriculars',
+        '#/guru/ekstra/talents'
       ];
       if (guruAllowed.includes(path)) return true;
     }
@@ -166,6 +176,8 @@ const App = {
           '#/guru/assess/:id': typeof GuruPages !== 'undefined' ? GuruPages.renderAssessment : null,
           '#/guru/observe/:id': typeof GuruPages !== 'undefined' ? GuruPages.renderObserveClass : null,
           '#/guru/student-attendance/:id': typeof GuruPages !== 'undefined' ? GuruPages.renderStudentAttendanceInput : null,
+          '#/guru/ekstra/attendance': typeof GuruPages !== 'undefined' ? GuruPages.renderEkstraAttendance : null,
+          '#/guru/extracurriculars': typeof GuruPages !== 'undefined' ? GuruPages.renderEkstraGrades : null,
           '#/kepsek/reports': typeof KepsekPages !== 'undefined' ? KepsekPages.renderReports : null,
           '#/ortu/dashboard': typeof OrtuPages !== 'undefined' ? OrtuPages.renderDashboard : null,
           '#/finance': typeof FinancePages !== 'undefined' ? FinancePages.renderDashboard : null,

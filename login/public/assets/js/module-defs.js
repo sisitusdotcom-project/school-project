@@ -173,7 +173,7 @@
       ]
     },
     '#/guru/portfolio': { own: true,
-      node: 'guru/portfolio', noun: 'Portofolio Guru', writeRoles: ['guru'], dateField: 'date',
+      node: 'guru/portfolio', noun: 'Portofolio Guru & Pembina', writeRoles: [R.GURU, R.GURU_EKSKUL, R.TENDIK], dateField: 'date',
       subtitle: 'Dokumen pencapaian dan rekam jejak guru.',
       fields: [
         date('date', 'Tanggal', { required: true }),
@@ -759,7 +759,7 @@
       ]
     },
     '#/curriculum/syllabus': { own: true,
-      node: 'curriculum/documents', noun: 'Perangkat & Modul Ajar', writeRoles: [R.CURRICULUM, R.GURU], statusField: 'status', badges: { ...badges, 'Diajukan': 'warning', 'Disetujui (ACC)': 'success', 'Perlu Revisi': 'danger', 'Draft': 'neutral' }, units: ['GURU_UMUM', 'WALI_KELAS'],
+      node: 'curriculum/documents', noun: 'Perangkat & Modul Ajar', writeRoles: [R.CURRICULUM, R.GURU, R.GURU_EKSKUL], statusField: 'status', badges: { ...badges, 'Diajukan': 'warning', 'Disetujui (ACC)': 'success', 'Perlu Revisi': 'danger', 'Draft': 'neutral' }, units: ['GURU_UMUM', 'WALI_KELAS', 'GURU_EKSTRA'],
       subtitle: 'Pengumpulan, telaah, dan verifikasi perangkat pembelajaran guru oleh Kurikulum.',
       summary: [
         { label: 'Total Dokumen', icon: 'ph-folder-open', tone: 'primary' },
@@ -840,34 +840,6 @@
         t('title', 'Materi Latihan', { required: true }),
         area('target', 'Target Capaian'),
         sel('status', 'Status', ['Direncanakan', 'Berjalan', 'Selesai'], { required: true, default: 'Direncanakan' })
-      ]
-    },
-    '#/guru/ekstra/attendance': {
-      node: 'ekstra/attendance', noun: 'Presensi Ekskul', writeRoles: [R.GURU], dateField: 'date',
-      subtitle: 'Kehadiran peserta ekstrakurikuler.',
-      summary: [
-        { label: 'Total Pertemuan', icon: 'ph-users-three', tone: 'primary' }
-      ],
-      fields: [
-        date('date', 'Tanggal', { required: true }),
-        ref('ekstraId', 'Ekstrakurikuler', 'ekskul', { required: true }),
-        ref('students', 'Siswa Hadir', 'student', { type: 'multi' }),
-        area('note', 'Catatan Pertemuan')
-      ]
-    },
-    '#/guru/extracurriculars': {
-      node: 'ekstra/grades', noun: 'Nilai E-Rapor Ekskul', writeRoles: [R.GURU], statusField: 'grade', badges: { A: 'success', B: 'success', C: 'warning', D: 'danger' },
-      subtitle: 'Penilaian akhir semester untuk ekstrakurikuler.',
-      summary: [
-        { label: 'Total Nilai', icon: 'ph-trophy', tone: 'primary' }
-      ],
-      fields: [
-        t('academicYear', 'Tahun Ajaran', { required: true }),
-        sel('semester', 'Semester', ['Ganjil', 'Genap'], { required: true }),
-        ref('ekstraId', 'Ekstrakurikuler', 'ekskul', { required: true }),
-        ref('studentId', 'Siswa', 'student', { required: true }),
-        sel('grade', 'Nilai (Predikat)', ['A', 'B', 'C', 'D'], { required: true }),
-        area('description', 'Deskripsi Capaian', { required: true })
       ]
     },
     '#/guru/ekstra/talents': {

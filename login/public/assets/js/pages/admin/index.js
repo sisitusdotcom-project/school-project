@@ -1116,26 +1116,32 @@ const AdminPages = {
     document.getElementById('modal-sub').classList.add('active');
   },
   async renderExtracurriculars(container) {
-    Router.setTitle('Ekstrakurikuler', 'Kelola daftar ekstrakurikuler sekolah.');
-    const [ekskuls, users] = await Promise.all([
+    Router.setTitle('Ekstrakurikuler', 'Kelola daftar ekstrakurikuler sekolah dan pemetaan peserta SSOT.');
+    const [ekskuls, users, classes, allStudents] = await Promise.all([
       DB.getExtracurriculars(),
-      DB.getAllUsers()
+      DB.getAllUsers(),
+      DB.getClasses(),
+      DB.getAllStudents()
     ]);
-    const guruArr = DB.toArray(users).filter(u => u.role === AppConfig.ROLES.GURU || AppConfig.getRoleAssignments(u).some(AppConfig.isTeachingAssignment));
+    const pembinaArr = DB.toArray(users).filter(u => u.role === AppConfig.ROLES.GURU || u.role === AppConfig.ROLES.GURU_EKSKUL || u.role === AppConfig.ROLES.TENDIK || AppConfig.getRoleAssignments(u).some(a => a.startsWith('GURU_EKSTRA_')));
+    const classArr = DB.toArray(classes);
+    const studentArr = DB.toArray(allStudents);
     const eksArr = DB.toArray(ekskuls).sort((a, b) => (a.order || 0) - (b.order || 0));
     const rows = eksArr.length ? eksArr.map(e => {
-      const guru = guruArr.find(g => g.id === e.teacherId);
+      const guru = pembinaArr.find(g => g.id === e.teacherId);
+      const studentCount = Object.keys(e.students || {}).length;
       return `
       <tr>
         <td>${e.order || '-'}</td>
         <td><strong>${AppConfig.escapeHtml(e.name)}</strong></td>
         <td>${guru ? guru.name : '<span class="text-muted">Belum ada pembina</span>'}</td>
+        <td><button class="btn btn-outline btn-sm" data-manage-students="${e.id}"><i class="ph ph-users-three"></i> ${studentCount} Murid</button></td>
         <td class="action-cell">
           <button class="btn btn-outline btn-sm" data-edit-eks="${e.id}"><i class="ph ph-pencil-simple"></i></button>
           <button class="btn btn-danger btn-sm" data-del-eks="${e.id}"><i class="ph ph-trash"></i></button>
         </td>
       </tr>
-    `}).join('') : '<tr><td colspan="4" class="text-center text-muted">Belum ada ekstrakurikuler.</td></tr>';
+    `}).join('') : '<tr><td colspan="5" class="text-center text-muted">Belum ada ekstrakurikuler.</td></tr>';
     container.innerHTML = `
       <div class="card">
         <div class="card-header">
@@ -1143,17 +1149,24 @@ const AdminPages = {
           <button class="btn btn-primary" id="btn-add-eks"><i class="ph ph-plus"></i> Tambah</button>
         </div>
         <div class="table-responsive">
-          <table class="table"><thead><tr><th style="width:50px">No</th><th>Nama Ekstrakurikuler</th><th>Guru Pembina</th><th style="width:100px">Aksi</th></tr></thead>
+          <table class="table"><thead><tr><th style="width:50px">No</th><th>Nama Ekstrakurikuler</th><th>Guru Pembina</th><th style="width:140px">Peserta (SSOT)</th><th style="width:100px">Aksi</th></tr></thead>
           <tbody>${rows}</tbody></table>
         </div>
       </div>
-      ${AdminPages._extracurricularModal(guruArr)}
+      ${AdminPages._extracurricularModal(pembinaArr)}
+      ${AdminPages._extracurricularStudentsModal(classArr)}
     `;
     document.getElementById('btn-add-eks').onclick = () => AdminPages._openExtracurricularModal(null, eksArr.length + 1);
     container.querySelectorAll('[data-edit-eks]').forEach(btn => {
       btn.onclick = () => {
         const e = eksArr.find(x => x.id === btn.dataset.editEks);
         if (e) AdminPages._openExtracurricularModal(e);
+      };
+    });
+    container.querySelectorAll('[data-manage-students]').forEach(btn => {
+      btn.onclick = () => {
+        const e = eksArr.find(x => x.id === btn.dataset.manageStudents);
+        if (e) AdminPages._openExtracurricularStudentsModal(e, studentArr, classArr, container);
       };
     });
     container.querySelectorAll('[data-del-eks]').forEach(btn => {
@@ -1166,10 +1179,13 @@ const AdminPages = {
     document.getElementById('form-eks').onsubmit = async (e) => {
       e.preventDefault();
       const id = document.getElementById('eks-id').value || null;
+      const existing = id ? ekskuls[id] : null;
       await DB.saveExtracurricular(id, {
         name: document.getElementById('eks-name').value.trim(),
         order: parseInt(document.getElementById('eks-order').value) || 1,
-        teacherId: document.getElementById('eks-teacher').value || null
+        teacherId: document.getElementById('eks-teacher').value || null,
+        schedule: document.getElementById('eks-schedule').value.trim() || null,
+        students: existing ? (existing.students || null) : null
       });
       App.closeModal('modal-eks');
       AdminPages.renderExtracurriculars(container);
@@ -1198,6 +1214,10 @@ const AdminPages = {
               </select>
             </div>
             <div class="form-group">
+              <label>Jadwal Latihan</label>
+              <input id="eks-schedule" placeholder="Contoh: Jumat, 13.00 - 14.30">
+            </div>
+            <div class="form-group">
               <label>Urutan tampil</label>
               <input id="eks-order" type="number" min="1" value="1">
             </div>
@@ -1215,8 +1235,129 @@ const AdminPages = {
     document.getElementById('eks-id').value = existing ? existing.id : '';
     document.getElementById('eks-name').value = existing ? existing.name : '';
     document.getElementById('eks-teacher').value = existing ? (existing.teacherId || '') : '';
+    document.getElementById('eks-schedule').value = existing ? (existing.schedule || '') : '';
     document.getElementById('eks-order').value = existing ? existing.order : (nextOrder || 1);
     document.getElementById('modal-eks').classList.add('active');
+  },
+  _extracurricularStudentsModal(classArr) {
+    const classOpts = classArr.map(c => `<option value="${c.id}">${AppConfig.escapeHtml(c.name)}</option>`).join('');
+    return `
+    <div class="modal-overlay" id="modal-eks-students">
+      <div class="modal modal-lg">
+        <div class="modal-header">
+          <div>
+            <h3 class="modal-title" id="modal-eks-stu-title">Kelola Peserta Ekstrakurikuler</h3>
+            <p class="text-muted class-teaching-note" id="modal-eks-stu-sub">Pemetaan resmi murid peserta ekstrakurikuler (SSOT Kesiswaan)</p>
+          </div>
+          <button class="btn-icon" data-close-modal="modal-eks-students"><i class="ph ph-x"></i></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="modal-eks-stu-id">
+          <div class="eks-students-filter-row">
+            <select id="modal-eks-class-filter" class="mapel-select-input">
+              <option value="">— Semua Kelas —</option>
+              ${classOpts}
+            </select>
+            <input type="text" id="modal-eks-search" placeholder="Cari nama murid atau NIS..." class="mapel-select-input">
+            <span class="eks-badge-counter" id="modal-eks-count">0 Murid Terpilih</span>
+          </div>
+          <div class="card-actions-row">
+            <button type="button" class="btn btn-outline btn-sm" id="btn-eks-select-all"><i class="ph ph-check-square"></i> Pilih Semua Tampil</button>
+            <button type="button" class="btn btn-outline btn-sm" id="btn-eks-deselect-all"><i class="ph ph-square"></i> Batalkan Semua Tampil</button>
+          </div>
+          <div class="eks-students-list" id="modal-eks-students-list"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" data-close-modal="modal-eks-students">Batal</button>
+          <button type="button" class="btn btn-primary" id="btn-save-eks-students"><i class="ph ph-floppy-disk"></i> Simpan Daftar Peserta</button>
+        </div>
+      </div>
+    </div>`;
+  },
+  _openExtracurricularStudentsModal(ekskul, studentArr, classArr, container) {
+    document.getElementById('modal-eks-stu-id').value = ekskul.id;
+    document.getElementById('modal-eks-stu-title').innerText = `Kelola Peserta: ${ekskul.name}`;
+    const selectedMap = { ...(ekskul.students || {}) };
+    const classMap = classArr.reduce((acc, c) => { acc[c.id] = c.name; return acc; }, {});
+    const updateCount = () => {
+      const cnt = Object.keys(selectedMap).length;
+      document.getElementById('modal-eks-count').innerText = `${cnt} Murid Terpilih`;
+    };
+    const renderList = () => {
+      const filterClass = document.getElementById('modal-eks-class-filter').value;
+      const searchVal = document.getElementById('modal-eks-search').value.toLowerCase().trim();
+      const filtered = studentArr.filter(s => {
+        if (filterClass && s.classId !== filterClass) return false;
+        if (searchVal) {
+          const matchName = (s.name || '').toLowerCase().includes(searchVal);
+          const matchNis = (s.nis || '').includes(searchVal) || (s.nisn || '').includes(searchVal);
+          if (!matchName && !matchNis) return false;
+        }
+        return true;
+      });
+      const listCont = document.getElementById('modal-eks-students-list');
+      if (!filtered.length) {
+        listCont.innerHTML = '<p class="text-muted class-teaching-note">Tidak ada murid yang cocok dengan filter.</p>';
+        return;
+      }
+      listCont.innerHTML = filtered.map(s => {
+        const isChecked = !!selectedMap[s.id];
+        const className = classMap[s.classId] || s.classId || '-';
+        const idLabel = AppConfig.formatStudentIdentity(s.nis, s.nisn);
+        return `
+          <label class="eks-student-item">
+            <input type="checkbox" data-student-id="${s.id}" ${isChecked ? 'checked' : ''}>
+            <div class="eks-student-meta">
+              <span class="eks-student-name">${AppConfig.escapeHtml(s.name)}</span>
+              <span class="eks-student-sub">${AppConfig.escapeHtml(className)} · ${idLabel}</span>
+            </div>
+          </label>
+        `;
+      }).join('');
+      listCont.querySelectorAll('input[type="checkbox"]').forEach(chk => {
+        chk.onchange = (ev) => {
+          const sid = ev.target.dataset.studentId;
+          if (ev.target.checked) {
+            selectedMap[sid] = true;
+          } else {
+            delete selectedMap[sid];
+          }
+          updateCount();
+        };
+      });
+    };
+    document.getElementById('modal-eks-class-filter').value = '';
+    document.getElementById('modal-eks-search').value = '';
+    document.getElementById('modal-eks-class-filter').onchange = renderList;
+    document.getElementById('modal-eks-search').oninput = renderList;
+    document.getElementById('btn-eks-select-all').onclick = () => {
+      document.querySelectorAll('#modal-eks-students-list input[type="checkbox"]').forEach(chk => {
+        chk.checked = true;
+        selectedMap[chk.dataset.studentId] = true;
+      });
+      updateCount();
+    };
+    document.getElementById('btn-eks-deselect-all').onclick = () => {
+      document.querySelectorAll('#modal-eks-students-list input[type="checkbox"]').forEach(chk => {
+        chk.checked = false;
+        delete selectedMap[chk.dataset.studentId];
+      });
+      updateCount();
+    };
+    document.getElementById('btn-save-eks-students').onclick = async () => {
+      const btn = document.getElementById('btn-save-eks-students');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Menyimpan...';
+      const cleanStudents = Object.keys(selectedMap).length ? selectedMap : null;
+      await db.ref(`extracurriculars/${ekskul.id}/students`).set(cleanStudents);
+      btn.disabled = false;
+      btn.innerHTML = '<i class="ph ph-floppy-disk"></i> Simpan Daftar Peserta';
+      App.closeModal('modal-eks-students');
+      AdminPages.renderExtracurriculars(container);
+    };
+    updateCount();
+    renderList();
+    document.getElementById('modal-eks-students').classList.add('active');
   },
   async renderAttendance(container) {
     Router.setTitle('Rekapan Presensi', 'Monitoring absensi guru dan siswa per hari.');
