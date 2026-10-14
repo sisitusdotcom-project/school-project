@@ -634,7 +634,8 @@ const FeatureGuides = {
   get(routePath) {
     if (!routePath) return null;
     const cleanPath = routePath.split('?')[0];
-    if (this.items[cleanPath]) return this.items[cleanPath];
+    const effectivePath = (cleanPath === '#/dashboard' && window.Auth && window.Auth.currentRole === 'ortu') ? '#/ortu/dashboard' : cleanPath;
+    if (this.items[effectivePath]) return this.items[effectivePath];
     const baseDynamic = cleanPath.split('/').slice(0, -1).join('/') + '/:id';
     if (this.items[baseDynamic]) return this.items[baseDynamic];
     if (window.ModuleKit && window.ModuleKit.defs && window.ModuleKit.defs[cleanPath]) {
@@ -812,11 +813,24 @@ const FeatureGuides = {
       'Memantau perkembangan belajar, capaian tahfidz, dan rekap presensi ananda secara langsung dari gawai Anda.',
       'Gunakan menu <a href="#/student-affairs/leaves" class="guide-action-link">Permohonan Izin / Sakit</a> jika ananda berhalangan hadir ke sekolah.',
       'Periksa menu <a href="#/finance/student-bills" class="guide-action-link">Riwayat Tagihan SPP</a> untuk mengecek status pembayaran administrasi sekolah.'
+    ],
+    '#/student-affairs/leaves': [
+      'Klik tombol Tambah di sudut kanan atas untuk membuka formulir perizinan siswa.',
+      'Pilih nama Ananda dan tentukan rentang tanggal mulai hingga selesai izin/sakit.',
+      'Pilih jenis perizinan (Sakit / Izin Keluarga / Dispensasi) dan unggah foto surat keterangan dokter atau surat izin orang tua.',
+      'Tuliskan alasan izin secara jelas, lalu tekan Simpan. Permohonan akan berstatus Diajukan dan diverifikasi oleh pihak madrasah.'
+    ],
+    '#/finance/student-bills': [
+      'Tinjau seluruh riwayat tagihan bulanan SPP Ananda beserta status pembayarannya (Lunas / Belum Lunas / Bebas Beasiswa).',
+      'Gunakan kotak pencarian atau filter status untuk mencari bulan tagihan tertentu.',
+      'Klik tombol Buka pada kolom bukti pembayaran untuk melihat salinan kwitansi resmi dari madrasah.',
+      'Tekan tombol Excel untuk mengunduh rekapitulasi data tagihan ke dalam format spreadsheet.'
     ]
   },
   getSteps(path, guide = {}, navText = '') {
-    if (this.customSteps && this.customSteps[path]) {
-      return this.customSteps[path];
+    const effectivePath = (path === '#/dashboard' && window.Auth && window.Auth.currentRole === 'ortu') ? '#/ortu/dashboard' : path;
+    if (this.customSteps && this.customSteps[effectivePath]) {
+      return this.customSteps[effectivePath];
     }
     if (guide.usage) {
       const parts = guide.usage.split(/\.\s+/).map(p => p.trim().replace(/\.$/, '')).filter(Boolean);

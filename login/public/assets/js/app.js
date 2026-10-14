@@ -35,7 +35,7 @@ const App = {
     let path = rawPath || '#/dashboard';
     if (path === '#/guru/attendance') path = '#/attendance';
     if (path === '#/panduan') return true;
-    if (path === '#/dashboard') return !!this.getDashboardRenderer();
+    if (path === '#/dashboard' || path === '#/ortu/dashboard') return !!this.getDashboardRenderer();
     if (role === AppConfig.ROLES.ADMIN) return true;
     if (path === '#/attendance' && role !== AppConfig.ROLES.ORTU) return true;
     if (path.startsWith('#/admin/students/')) path = '#/admin/classes';

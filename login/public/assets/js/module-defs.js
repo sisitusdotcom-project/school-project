@@ -1056,7 +1056,7 @@
       ]
     },
     '#/student-affairs/leaves': {
-      node: 'student_affairs/leaves', noun: 'Perizinan Siswa', writeRoles: [R.STUDENT_AFFAIRS, R.GURU], dateField: 'startDate', statusField: 'status', badges: { Disetujui: 'success', Diajukan: 'warning', Ditolak: 'danger' },
+      node: 'student_affairs/leaves', noun: 'Perizinan Siswa', writeRoles: [R.STUDENT_AFFAIRS, R.GURU, R.ORTU], dateField: 'startDate', statusField: 'status', badges: { Disetujui: 'success', Diajukan: 'warning', Ditolak: 'danger' },
       subtitle: 'Pengajuan dan verifikasi surat izin sakit dan dispensasi siswa.',
       summary: [
         { label: 'Total Pengajuan', icon: 'ph-calendar-x', tone: 'primary' },

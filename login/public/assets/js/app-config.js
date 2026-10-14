@@ -159,7 +159,7 @@
       { hash: '#/komite/finance-komite', icon: 'ph-wallet', text: 'Keuangan Komite' }
     ],
     [ROLES.ORTU]: [
-      { hash: '#/ortu/dashboard', icon: 'ph-graduation-cap', text: 'Perkembangan Anak' },
+      { hash: '#/dashboard', icon: 'ph-graduation-cap', text: 'Perkembangan Anak' },
       { hash: '#/student-affairs/leaves', icon: 'ph-calendar-x', text: 'Permohonan Izin / Sakit' },
       { hash: '#/finance/student-bills', icon: 'ph-receipt', text: 'Riwayat Tagihan SPP' }
     ],

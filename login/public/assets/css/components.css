@@ -1172,6 +1172,56 @@ td[colspan] > .text-muted {
   display: grid;
   gap: 16px
 }
+.ortu-grid > *,
+.ortu-sub-grid > * {
+  min-width: 0;
+}
+.char-score--4 {
+  color: var(--primary);
+}
+.char-score--3 {
+  color: var(--success);
+}
+.char-score--2 {
+  color: var(--warning);
+}
+.char-score--1 {
+  color: var(--danger);
+}
+.char-score--0 {
+  color: var(--text-muted);
+}
+.progress-fill--4 {
+  width: 100%;
+  background: var(--primary);
+}
+.progress-fill--3 {
+  width: 75%;
+  background: var(--success);
+}
+.progress-fill--2 {
+  width: 50%;
+  background: var(--warning);
+}
+.progress-fill--1 {
+  width: 25%;
+  background: var(--danger);
+}
+.progress-fill--0 {
+  width: 0%;
+  background: var(--border);
+}
+.ortu-child-switcher {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.ortu-child-btn.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
 .ortu-inner-card {
   padding: 16px
 }

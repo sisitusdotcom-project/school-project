@@ -332,6 +332,9 @@ const DB = {
     await db.ref(`ummi_classes/${id}`).remove();
   },
   async getAllStudents() {
+    if (typeof Auth !== 'undefined' && Auth.currentUser && (Auth.currentRole === 'ortu' || Auth.userData?.role === 'ortu')) {
+      return this.getStudentsByParent(Auth.currentUser.uid);
+    }
     return this._readCollection('students', {});
   },
   async getStudentReferenceIndex() {

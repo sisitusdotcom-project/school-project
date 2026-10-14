@@ -16,7 +16,12 @@ const ModuleKit = {
     curriculum: 'STAF_KURIKULUM'
   },
   REF_LOADERS: {
-    student: () => DB.getAllStudents(),
+    student: async () => {
+      if (typeof Auth !== 'undefined' && Auth.currentUser && (Auth.currentRole === 'ortu' || Auth.userData?.role === 'ortu')) {
+        return DB.getStudentsByParent(Auth.currentUser.uid);
+      }
+      return DB.getAllStudents();
+    },
     class: () => DB.getClasses(),
     subject: async () => {
       const [subjects, ekskuls] = await Promise.all([DB.getSubjects(), DB.getExtracurriculars()]);
@@ -228,8 +233,14 @@ const ModuleKit = {
     const canAdd = writable && !def.noAdd;
     const canDel = writable && !def.noDelete;
     const uid = Auth.currentUser ? Auth.currentUser.uid : '';
+    const isOrtu = Auth.currentRole === 'ortu' || Auth.userData?.role === 'ortu';
     const loadRows = async () => {
       const all = await this.fetchRows(def.node);
+      if (isOrtu) {
+        const myStudents = await DB.getStudentsByParent(Auth.currentUser.uid);
+        const childIds = Object.keys(myStudents || {});
+        return all.filter((r) => childIds.includes(r.studentId) || r.createdBy === uid);
+      }
       return !def.own || this.sees(def) ? all : all.filter((r) => r.createdBy === uid);
     };
     const [rows, refs] = await Promise.all([loadRows(), this.loadRefs(def)]);
@@ -308,8 +319,8 @@ const ModuleKit = {
         <tr>
           ${listFields.map((f) => `<td${f.type === 'money' ? ' class="text-right"' : ''}>${this.cell(def, f, row, refs)}</td>`).join('')}
           ${writable ? `<td class="action-cell text-right">
-            <button type="button" class="btn btn-sm btn-outline" data-mk-edit="${row.id}" title="Ubah"><i class="ph ph-pencil-simple"></i></button>
-            ${canDel ? `<button type="button" class="btn btn-sm btn-danger" data-mk-del="${row.id}" title="Hapus"><i class="ph ph-trash"></i></button>` : ''}
+            ${(!isOrtu || row.status === 'Diajukan') ? `<button type="button" class="btn btn-sm btn-outline" data-mk-edit="${row.id}" title="Ubah"><i class="ph ph-pencil-simple"></i></button>` : ''}
+            ${(canDel && (!isOrtu || row.status === 'Diajukan')) ? `<button type="button" class="btn btn-sm btn-danger" data-mk-del="${row.id}" title="Hapus"><i class="ph ph-trash"></i></button>` : ''}
           </td>` : ''}
         </tr>`).join('') || `<tr><td colspan="${colCount}" class="text-muted">Belum ada data.</td></tr>`;
       countEl.textContent = `${list.length} dari ${state.rows.length} data`;
@@ -363,6 +374,13 @@ const ModuleKit = {
         }
         el.value = value === undefined || value === null ? '' : value;
       });
+      if (isOrtu) {
+        const sf = form.querySelector('#mk-f-status');
+        if (sf) {
+          sf.value = row ? (row.status || 'Diajukan') : 'Diajukan';
+          sf.disabled = true;
+        }
+      }
       App.openModal(modalId);
     };
     const closeForm = () => App.closeModal(modalId);
@@ -447,6 +465,7 @@ const ModuleKit = {
           payload[f.key] = value;
           if (f.ref) payload[`${f.key}Name`] = value ? ((refs[f.ref] || {})[value] || '') : '';
         }
+        if (isOrtu) payload.status = 'Diajukan';
         const ctx = refs.__ctx;
         const derived = def.derive ? def.derive(payload, ctx) : {};
         const stamp = firebase.database.ServerValue.TIMESTAMP;
