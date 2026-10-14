@@ -419,6 +419,11 @@
     if (!user || typeof user !== 'object') return [];
     return normalizeAssignments(user.assignments || user.unitRoles || user.roles || []);
   }
+  function hasAnyUnit(user = {}, units = []) {
+    const assignments = getRoleAssignments(user);
+    const unitList = Array.isArray(units) ? units : [units];
+    return unitList.some(u => assignments.includes(u));
+  }
   function isAcademicTeachingAssignment(a) {
     if (!a) return false;
     return a.startsWith('GURU_KELAS_') || a.startsWith('GURU_MAPEL_');
@@ -616,6 +621,7 @@
     getStudentNis,
     getStudentNisn,
     formatStudentIdentity,
-    getClassPhase
+    getClassPhase,
+    hasAnyUnit
   });
 })();

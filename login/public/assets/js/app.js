@@ -162,11 +162,6 @@ const App = {
           `;
           return;
         }
-        if (typeof ModuleKit !== 'undefined' && ModuleKit.has(path)) {
-          const config = ModuleKit.defs[path];
-          await ModuleKit.render(container, path, config.noun || 'Modul', config.icon || 'ph-cube');
-          return;
-        }
         const renderers = {
           '#/panduan': typeof FeatureGuides !== 'undefined' ? FeatureGuides.renderGuidePage : null,
           '#/admin/assignments': window.AdminAssignmentsModule?.render,
@@ -207,6 +202,11 @@ const App = {
         };
         if (renderers[path]) {
           await renderers[path](container, routeParams);
+          return;
+        }
+        if (typeof ModuleKit !== 'undefined' && ModuleKit.has(path)) {
+          const config = ModuleKit.defs[path];
+          await ModuleKit.render(container, path, config.noun || 'Modul', config.icon || 'ph-cube');
           return;
         }
         container.innerHTML = `

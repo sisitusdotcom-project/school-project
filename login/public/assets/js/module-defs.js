@@ -856,69 +856,6 @@
         area('notes', 'Rencana Pembinaan')
       ]
     },
-    '#/guru/ummi/koord/mapping': {
-      node: 'ummi_classes', noun: 'Pemetaan Rombel Ummi', writeRoles: [R.ADMIN], units: ['KOORD_UMMI'],
-      subtitle: 'Pembentukan kelompok belajar Ummi dan penugasan guru.',
-      summary: [
-        { label: 'Total Rombel', icon: 'ph-users-three', tone: 'primary' }
-      ],
-      fields: [
-        t('name', 'Nama Kelompok', { required: true }),
-        sel('level', 'Level / Jilid', ['Pra-TK', 'Jilid 1', 'Jilid 2', 'Jilid 3', 'Jilid 4', 'Jilid 5', 'Jilid 6', 'Al-Quran', 'Ghorib', 'Tajwid'], { required: true }),
-        ref('teacherId', 'Guru Pengampu', 'teacher', { required: true }),
-        ref('students', 'Daftar Siswa', 'student', { type: 'multi' })
-      ]
-    },
-    '#/guru/ummi/koord/exams': {
-      node: 'ummi_exams', noun: 'Antrean Ujian / Munaqosyah', writeRoles: [R.ADMIN], units: ['KOORD_UMMI'], dateField: 'date', statusField: 'status', badges: { ...badges, Lulus: 'success', Mengulang: 'warning', Antre: 'warning' },
-      subtitle: 'Penjadwalan dan hasil ujian kenaikan jilid Ummi.',
-      summary: [
-        { label: 'Total Peserta', icon: 'ph-exam', tone: 'primary' },
-        { label: 'Lulus', icon: 'ph-check-circle', tone: 'success', where: { status: 'Lulus' } }
-      ],
-      fields: [
-        date('date', 'Tanggal Ujian', { required: true }),
-        ref('studentId', 'Siswa', 'ummiStudent', { required: true }),
-        sel('level', 'Level Ujian', ['Jilid 1', 'Jilid 2', 'Jilid 3', 'Jilid 4', 'Jilid 5', 'Jilid 6', 'Al-Quran', 'Ghorib', 'Tajwid', 'Munaqosyah'], { required: true }),
-        ref('examiner', 'Penguji', 'teacher', { required: true }),
-        sel('status', 'Status', ['Antre', 'Lulus', 'Mengulang'], { required: true, default: 'Antre' }),
-        t('score', 'Nilai / Keterangan')
-      ]
-    },
-    '#/guru/ummi/koord/tasmi': {
-      node: 'ummi_tasmi_schedules', noun: 'Plotting Guru Tasmi\'', writeRoles: [R.ADMIN], units: ['KOORD_UMMI'], dateField: 'date',
-      subtitle: 'Penjadwalan ujian Tasmi\' dan pengujinya.',
-      summary: [
-        { label: 'Total Jadwal', icon: 'ph-microphone-stage', tone: 'primary' }
-      ],
-      fields: [
-        date('date', 'Tanggal', { required: true }),
-        ref('studentId', 'Siswa', 'ummiStudent', { required: true }),
-        t('juz', 'Juz yang Diujikan', { required: true }),
-        ref('examiner', 'Penguji (Penyimak)', 'teacher', { required: true }),
-        time('time', 'Pukul')
-      ]
-    },
-    '#/guru/ummi/classes': {
-      view: 'myclasses', classNode: 'ummi_classes', progressNode: 'ummi_progress', ownerKey: 'teacherId', allUnit: 'KOORD_UMMI',
-      subtitle: 'Daftar rombongan belajar Ummi yang Anda ampu beserta progresnya.'
-    },
-    '#/guru/ummi/progress': {
-      node: 'ummi_progress', noun: 'Jurnal Harian Jilid', writeRoles: [R.GURU], dateField: 'date', statusField: 'status', badges: { Lancar: 'success', Ulang: 'warning' },
-      subtitle: 'Catatan harian perkembangan membaca Al-Quran siswa.',
-      summary: [
-        { label: 'Total Setoran', icon: 'ph-book-open', tone: 'primary' },
-        { label: 'Lancar', icon: 'ph-check-circle', tone: 'success', where: { status: 'Lancar' } }
-      ],
-      fields: [
-        date('date', 'Tanggal', { required: true }),
-        ref('studentId', 'Siswa', 'ummiStudent', { required: true }),
-        t('level', 'Jilid / Level', { required: true }),
-        t('page', 'Halaman / Ayat', { required: true }),
-        sel('status', 'Status', ['Lancar', 'Ulang'], { required: true }),
-        area('notes', 'Catatan Guru')
-      ]
-    },
     '#/guru/ummi/tahfidz': {
       node: 'ummi_tahfidz', noun: 'Setoran Tahfidz', writeRoles: [R.GURU], dateField: 'date', statusField: 'grade', badges: { A: 'success', B: 'success', C: 'warning', D: 'danger' },
       subtitle: 'Buku mutabaah hafalan surat dan juz siswa.',

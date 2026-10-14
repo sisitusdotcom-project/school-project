@@ -34,12 +34,14 @@ const UMMI_GRADES = [
 const UMMIPages = {
   async renderUmmiMapping(container) {
     Router.setTitle('Pemetaan Rombel & Guru Ummi', 'Atur pembagian rombel berbasis kemampuan santri lintas kelas.');
-    const [ummiClasses, users, allStudents, allClasses] = await Promise.all([
+    const [ummiClasses, users, allStudents, allClasses, roomsData] = await Promise.all([
       DB.getUmmiClasses(),
       DB.getAllUsers(),
       DB.getAllStudents(),
-      DB.getAllClasses()
+      DB.getClasses(),
+      DB.getRooms()
     ]);
+    const roomArr = DB.toArray(roomsData);
     const classArr = DB.toArray(ummiClasses);
     const guruUmmi = DB.toArray(users).filter(u => {
       const assignments = AppConfig.getRoleAssignments(u);
@@ -51,7 +53,7 @@ const UMMIPages = {
       return `
         <tr>
           <td>${idx + 1}</td>
-          <td><strong>${AppConfig.escapeHtml(c.name)}</strong><br><small class="text-muted">${AppConfig.escapeHtml(c.level || 'Jilid')}</small></td>
+          <td><strong>${AppConfig.escapeHtml(c.name)}</strong><br><small class="text-muted"><i class="ph ph-map-pin"></i> ${AppConfig.escapeHtml(c.room || 'Tempat belum diatur')} · ${AppConfig.escapeHtml(c.level || 'Jilid')}</small></td>
           <td>${teacher ? AppConfig.escapeHtml(teacher.name) : '<span class="text-muted">Belum ditugaskan</span>'}</td>
           <td><span class="badge badge-primary">${studentCount} Santri</span></td>
           <td class="action-cell table-col-md">
@@ -80,7 +82,7 @@ const UMMIPages = {
             <thead>
               <tr>
                 <th>No</th>
-                <th>Nama Rombel / Tingkat</th>
+                <th>Nama Rombel & Tempat</th>
                 <th>Ustadz / Ustadzah Pengampu</th>
                 <th>Jumlah Santri</th>
                 <th>Aksi</th>
@@ -116,6 +118,13 @@ const UMMIPages = {
                   <option value="">— Pilih Guru Ummi —</option>
                   ${guruOptions}
                 </select>
+              </div>
+              <div class="form-group">
+                <label>Tempat / Ruang Belajar (Di Lingkungan Sekolah)</label>
+                <input type="text" id="ummi-room" list="rooms-list-options" placeholder="Contoh: Serambi Masjid (Sayap Timur), Kelas 1 Abu Bakar, dll.">
+                <datalist id="rooms-list-options">
+                  ${roomArr.map(r => `<option value="${AppConfig.escapeHtml(r.name || r.id)}"></option>`).join('')}
+                </datalist>
               </div>
             </div>
             <div class="modal-footer">
@@ -161,6 +170,7 @@ const UMMIPages = {
       document.getElementById('ummi-modal-title').innerText = 'Tambah Rombel Ummi';
       document.getElementById('form-ummi').reset();
       document.getElementById('ummi-id').value = '';
+      document.getElementById('ummi-room').value = '';
       App.openModal('modal-ummi');
     };
     container.querySelectorAll('[data-edit-ummi]').forEach(btn => {
@@ -173,6 +183,7 @@ const UMMIPages = {
         document.getElementById('ummi-name').value = cls.name || '';
         document.getElementById('ummi-level').value = cls.level || '';
         document.getElementById('ummi-teacher').value = cls.teacherId || '';
+        document.getElementById('ummi-room').value = cls.room || '';
         App.openModal('modal-ummi');
       };
     });
@@ -206,7 +217,8 @@ const UMMIPages = {
       const data = {
         name: document.getElementById('ummi-name').value.trim(),
         level: document.getElementById('ummi-level').value,
-        teacherId: document.getElementById('ummi-teacher').value
+        teacherId: document.getElementById('ummi-teacher').value,
+        room: document.getElementById('ummi-room').value.trim()
       };
       if (!data.name || !data.level || !data.teacherId) return;
       const btnSave = document.getElementById('btn-save-ummi');
@@ -258,7 +270,6 @@ const UMMIPages = {
       listCont.innerHTML = filtered.map(s => {
         const isChecked = !!selectedMap[s.id];
         const className = classMap[s.classId] || s.classId || '-';
-        const idLabel = AppConfig.formatStudentIdentity(s.nis, s.nisn);
         const curLvl = s.ummiLevel || cls.level || 'Jilid';
         return `
           <label class="eks-student-item">
@@ -330,7 +341,7 @@ const UMMIPages = {
     const [ummiClasses, allStudents, allClasses] = await Promise.all([
       DB.getUmmiClasses(),
       DB.getAllStudents(),
-      DB.getAllClasses()
+      DB.getClasses()
     ]);
     const classArr = DB.toArray(ummiClasses);
     let myClasses = classArr.filter(c => c.teacherId === uid);
@@ -357,7 +368,6 @@ const UMMIPages = {
       const studentsInRombel = studentIds.map(id => studentMap[id]).filter(Boolean).sort((a, b) => a.name.localeCompare(b.name));
       const studentRows = studentsInRombel.length ? studentsInRombel.map((s, sIdx) => {
         const cName = gradeClassMap[s.classId] || s.classId || '-';
-        const idLabel = AppConfig.formatStudentIdentity(s.nis, s.nisn);
         const stuLevel = s.ummiLevel || (cls.students[s.id] && cls.students[s.id].level) || cls.level || 'Jilid';
         return `
           <tr>
@@ -365,20 +375,19 @@ const UMMIPages = {
             <td><strong>${AppConfig.escapeHtml(s.name)}</strong></td>
             <td>${AppConfig.escapeHtml(cName)}</td>
             <td><span class="badge badge-success">${AppConfig.escapeHtml(stuLevel)}</span></td>
-            <td>${idLabel}</td>
             <td class="action-cell table-col-md">
               <a href="#/guru/ummi/progress?classId=${cls.id}&studentId=${s.id}" class="btn btn-primary btn-sm"><i class="ph ph-book-open"></i> Buka Jurnal</a>
               <button class="btn btn-outline btn-sm" data-req-exam="${s.id}" data-stu-name="${AppConfig.escapeHtml(s.name)}" data-cur-level="${AppConfig.escapeHtml(stuLevel)}" data-cls-id="${cls.id}"><i class="ph ph-arrow-circle-up"></i> Ajukan Tes</button>
             </td>
           </tr>
         `;
-      }).join('') : '<tr><td colspan="6" class="text-center text-muted">Belum ada santri terdaftar di rombel ini.</td></tr>';
+      }).join('') : '<tr><td colspan="5" class="text-center text-muted">Belum ada santri terdaftar di rombel ini.</td></tr>';
       return `
         <div class="card section-spacer">
           <div class="card-header">
             <div>
               <h3 class="card-title">${idx + 1}. ${AppConfig.escapeHtml(cls.name)}</h3>
-              <p class="text-muted">${AppConfig.escapeHtml(cls.level || 'Jilid')} · Total ${studentsInRombel.length} Santri Binaan Lintas Kelas</p>
+              <p class="text-muted"><i class="ph ph-map-pin"></i> <strong>Tempat:</strong> ${AppConfig.escapeHtml(cls.room || 'Tempat belum diatur')} · Tingkat: ${AppConfig.escapeHtml(cls.level || 'Jilid')} · Total ${studentsInRombel.length} Santri Binaan Lintas Kelas</p>
             </div>
             <div style="display:flex;gap:8px;align-items:center;">
               <a href="#/guru/ummi/progress?classId=${cls.id}" class="btn btn-primary btn-sm"><i class="ph ph-book-open"></i> Jurnal Rombel Ini</a>
@@ -392,7 +401,6 @@ const UMMIPages = {
                   <th>Nama Santri</th>
                   <th>Kelas Formal</th>
                   <th>Tingkat Jilid</th>
-                  <th>Identitas</th>
                   <th>Aksi Pembelajaran</th>
                 </tr>
               </thead>
@@ -498,16 +506,21 @@ const UMMIPages = {
     const [ummiClasses, allStudents, allClasses] = await Promise.all([
       DB.getUmmiClasses(),
       DB.getAllStudents(),
-      DB.getAllClasses()
+      DB.getClasses()
     ]);
     const classArr = DB.toArray(ummiClasses);
-    let myClasses = classArr.filter(c => c.teacherId === uid);
+    const userAssigns = Auth.currentAssignments || AppConfig.getRoleAssignments(Auth.userData || Auth.currentUser || {});
+    const isKoordOrAdmin = userAssigns.includes('KOORD_UMMI') || Auth.currentRole === 'admin' || Auth.userData?.role === 'admin';
+    let myClasses = isKoordOrAdmin ? classArr : classArr.filter(c => c.teacherId === uid);
     if (!myClasses.length) {
       const assigns = Auth.currentAssignments || AppConfig.getRoleAssignments(Auth.userData || {});
       myClasses = classArr.filter(c => assigns.some(a => a.toLowerCase().includes(c.name.toLowerCase().replace(/[^a-z0-9]/g, ''))));
     }
     if (!myClasses.length) {
-      container.innerHTML = `<div class="card"><p class="text-muted">Anda belum memiliki Rombel Ummi untuk mencatat jurnal harian.</p></div>`;
+      myClasses = classArr;
+    }
+    if (!myClasses.length) {
+      container.innerHTML = `<div class="card"><p class="text-muted">Belum ada Rombel Ummi terdaftar di sistem. Silakan buat rombel terlebih dahulu di menu Pemetaan Rombel.</p></div>`;
       return;
     }
     const studentMap = DB.toArray(allStudents).reduce((acc, s) => { acc[s.id] = s; return acc; }, {});
@@ -542,21 +555,21 @@ const UMMIPages = {
       const nextMeetingNo = journalsArr.length ? (Math.max(...journalsArr.map(j => Number(j.meetingNo) || 0)) + 1) : 1;
       const todayStr = new Date().toISOString().slice(0, 10);
       const curStudentLevel = activeStudent.ummiLevel || (activeCls.students[activeStudent.id] && activeCls.students[activeStudent.id].level) || activeCls.level || 'Jilid 1';
-      const levelOpts = UMMI_LEVELS.map(lvl => `<option value="${lvl}" ${lvl === curStudentLevel ? 'selected' : ''}>${lvl}</option>`).join('');
+      const levelOpts = UMMI_LEVELS.map(lvl => `<option value="${lvl}" ${lvl === curStudentLevel ? 'selected' : ''}>${lvl} — ${UMMI_LEVEL_DESCS[lvl] || ''}</option>`).join('');
       const gradeOpts = UMMI_GRADES.map(g => `<option value="${g.score}">${g.label}</option>`).join('');
       const journalRows = journalsArr.length ? journalsArr.map(j => {
         const badgeCls = (j.score >= 90) ? 'badge-success' : ((j.score >= 80) ? 'badge-primary' : 'badge-warning');
         return `
           <tr>
-            <td class="text-center"><strong>${j.meetingNo || '-'}</strong></td>
+            <td class="text-center"><strong>${j.meetingNo || j.meetingNumber || '-'}</strong></td>
             <td>${AppConfig.escapeHtml(j.date || '-')}</td>
             <td><span class="badge badge-primary">${AppConfig.escapeHtml(j.level || '-')}</span></td>
-            <td><strong>${AppConfig.escapeHtml(j.page || '-')}</strong></td>
+            <td><strong>${AppConfig.escapeHtml(j.page || j.pageOrAyat || '-')}</strong></td>
             <td>${AppConfig.escapeHtml(j.material || '-')}</td>
-            <td><span class="badge ${badgeCls}">${j.score || '-'} (${j.predicate || '-'})</span><br><small class="text-muted">${AppConfig.escapeHtml(j.action || '')}</small></td>
+            <td><span class="badge ${badgeCls}">${j.score || '-'} (${j.predicate || (UMMI_GRADES.find(g => g.score === Number(j.score)) || {}).predicate || '-'})</span><br><small class="text-muted">${AppConfig.escapeHtml(j.action || (UMMI_GRADES.find(g => g.score === Number(j.score)) || {}).action || '')}</small></td>
             <td><span class="badge badge-success"><i class="ph ph-check"></i> ${AppConfig.escapeHtml(j.teacherName || 'Ustadz')}</span></td>
-            <td>${j.parentVerified ? '<span class="badge badge-success"><i class="ph ph-check-double"></i> Sudah Disimak</span>' : '<span class="badge badge-warning">Belum Disimak</span>'}</td>
-            <td>${AppConfig.escapeHtml(j.note || '-')}</td>
+            <td>${j.parentVerified ? `<span class="badge badge-success"><i class="ph ph-check-double"></i> Disimak (${AppConfig.escapeHtml(j.parentVerifiedBy || 'Orang Tua')})</span>` : '<span class="badge badge-warning">Belum Disimak</span>'}</td>
+            <td>${AppConfig.escapeHtml(j.note || j.notes || '-')}</td>
             <td class="action-cell">
               <button class="btn btn-danger btn-sm" data-del-journal="${j.id}" title="Hapus"><i class="ph ph-trash"></i></button>
             </td>

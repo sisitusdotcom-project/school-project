@@ -38,8 +38,23 @@
       ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('unitFlags').child('WAKA_KURIKULUM').val() === true)"
     },
     "ummi_classes": {
-      ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')",
-      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru')"
+      ".read": "auth != null",
+      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')"
+    },
+    "ummi_journals": {
+      ".read": "auth != null",
+      "$studentId": {
+        ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu' || root.child('students').child($studentId).child('parentId').val() === auth.uid || auth.uid === $studentId)",
+        ".write": "auth != null"
+      }
+    },
+    "ummi_exams": {
+      ".read": "auth != null",
+      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')"
+    },
+    "rooms": {
+      ".read": "auth != null",
+      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')"
     },
     "students": {
       ".indexOn": [
@@ -297,10 +312,7 @@
       ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')",
       ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru')"
     },
-    "ummi_exams": {
-      ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')",
-      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru')"
-    },
+
     "ummi_tasmi_schedules": {
       ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')",
       ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru')"

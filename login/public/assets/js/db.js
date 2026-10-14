@@ -238,6 +238,9 @@ const DB = {
   async getClasses() {
     return this._readCollection('classes', {});
   },
+  async getAllClasses() {
+    return this.getClasses();
+  },
   async getClassesForTeacher(teacherUid) {
     const classes = await this.getClasses();
     return this.toArray(classes).filter(c => {
@@ -437,6 +440,17 @@ const DB = {
       source: 'auto_ummi',
       updatedAt: firebase.database.ServerValue.TIMESTAMP
     });
+  },
+  async getRooms() {
+    if (!isDBReady()) return {};
+    const snap = await db.ref('rooms').once('value');
+    return snap.val() || {};
+  },
+  async saveRoom(id, data) {
+    if (!isDBReady()) return;
+    const key = id || db.ref('rooms').push().key;
+    await db.ref(`rooms/${key}`).set({ ...data, id: key });
+    return key;
   },
   async getAllStudents() {
     if (typeof Auth !== 'undefined' && Auth.currentUser && (Auth.currentRole === 'ortu' || Auth.userData?.role === 'ortu')) {
