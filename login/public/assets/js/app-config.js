@@ -577,8 +577,8 @@
     googleDriveUploadUrl: 'https://script.google.com/macros/s/AKfycbwHNSb34p_FcX_dTQuw87viaZ9joh2rT3KdtMLBVvwpocWzyF3HICPUPRfPuy63LDsNsw/exec',
     attendanceWorkerUrl: 'https://musada-absensi.sisitusdotcom.workers.dev/',
     attendanceGeofence: Object.freeze({
-      lat: -7.378455833160138,
-      lng: 112.7592952448637,
+      lat: -7.3983706788877965,
+      lng: 112.74834269927545,
       radiusMeters: 60
     })
   });
