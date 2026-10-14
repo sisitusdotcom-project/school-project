@@ -52,11 +52,11 @@ const UMMIPages = {
       const studentCount = Object.keys(c.students || {}).length;
       return `
         <tr>
-          <td>${idx + 1}</td>
+          <td class="text-center">${idx + 1}</td>
           <td><strong>${AppConfig.escapeHtml(c.name)}</strong><br><small class="text-muted"><i class="ph ph-map-pin"></i> ${AppConfig.escapeHtml(c.room || 'Tempat belum diatur')} · ${AppConfig.escapeHtml(c.level || 'Jilid')}</small></td>
           <td>${teacher ? AppConfig.escapeHtml(teacher.name) : '<span class="text-muted">Belum ditugaskan</span>'}</td>
           <td><span class="badge badge-primary">${studentCount} Santri</span></td>
-          <td class="action-cell table-col-md">
+          <td class="action-cell">
             <button class="btn btn-primary btn-sm" data-map-students="${c.id}" title="Petakan Santri"><i class="ph ph-users-three"></i> Petakan Santri</button>
             <button class="btn btn-outline btn-sm" data-edit-ummi="${c.id}" title="Edit Rombel"><i class="ph ph-pencil-simple"></i></button>
             <button class="btn btn-danger btn-sm" data-del-ummi="${c.id}" title="Hapus"><i class="ph ph-trash"></i></button>
@@ -264,7 +264,7 @@ const UMMIPages = {
       });
       const listCont = document.getElementById('modal-map-students-list');
       if (!filtered.length) {
-        listCont.innerHTML = '<p class="text-muted" style="padding:16px;">Tidak ada santri yang cocok dengan filter.</p>';
+        listCont.innerHTML = '<p class="text-muted" class="empty-state-text">Tidak ada santri yang cocok dengan filter.</p>';
         return;
       }
       listCont.innerHTML = filtered.map(s => {
@@ -276,7 +276,7 @@ const UMMIPages = {
             <input type="checkbox" data-student-id="${s.id}" ${isChecked ? 'checked' : ''}>
             <div class="eks-student-meta">
               <span class="eks-student-name">${AppConfig.escapeHtml(s.name)}</span>
-              <span class="eks-student-sub">${AppConfig.escapeHtml(className)} · ${idLabel} · <strong style="color:var(--primary);">${AppConfig.escapeHtml(curLvl)}</strong></span>
+              <span class="eks-student-sub">${AppConfig.escapeHtml(className)} · ${idLabel} · <strong class="text-primary">${AppConfig.escapeHtml(curLvl)}</strong></span>
             </div>
           </label>
         `;
@@ -353,7 +353,7 @@ const UMMIPages = {
       container.innerHTML = `
         <div class="card section-block">
           <div class="card-body text-center">
-            <div class="stat-icon stat-icon--warning" style="margin:0 auto 16px;"><i class="ph ph-chalkboard-teacher"></i></div>
+            <div class="stat-icon stat-icon--warning" ><i class="ph ph-chalkboard-teacher"></i></div>
             <h3 class="card-title">Belum Ada Rombel Ditugaskan</h3>
             <p class="text-muted">Anda belum memiliki Rombel Ummi yang ditugaskan oleh Koordinator Ummi. Silakan hubungi Koordinator Ummi untuk pemetaan rombel santri.</p>
           </div>
@@ -371,41 +371,66 @@ const UMMIPages = {
         const stuLevel = s.ummiLevel || (cls.students[s.id] && cls.students[s.id].level) || cls.level || 'Jilid';
         return `
           <tr>
-            <td>${sIdx + 1}</td>
+            <td class="text-center">${sIdx + 1}</td>
             <td><strong>${AppConfig.escapeHtml(s.name)}</strong></td>
             <td>${AppConfig.escapeHtml(cName)}</td>
             <td><span class="badge badge-success">${AppConfig.escapeHtml(stuLevel)}</span></td>
-            <td class="action-cell table-col-md">
+            <td class="action-cell">
               <a href="#/guru/ummi/progress?classId=${cls.id}&studentId=${s.id}" class="btn btn-primary btn-sm"><i class="ph ph-book-open"></i> Buka Jurnal</a>
               <button class="btn btn-outline btn-sm" data-req-exam="${s.id}" data-stu-name="${AppConfig.escapeHtml(s.name)}" data-cur-level="${AppConfig.escapeHtml(stuLevel)}" data-cls-id="${cls.id}"><i class="ph ph-arrow-circle-up"></i> Ajukan Tes</button>
             </td>
           </tr>
         `;
       }).join('') : '<tr><td colspan="5" class="text-center text-muted">Belum ada santri terdaftar di rombel ini.</td></tr>';
+      const mobileStudentCards = studentsInRombel.length ? studentsInRombel.map((s, sIdx) => {
+        const cName = gradeClassMap[s.classId] || s.classId || '-';
+        const stuLevel = s.ummiLevel || (cls.students[s.id] && cls.students[s.id].level) || cls.level || 'Jilid';
+        return `
+          <div class="ummi-student-item">
+            <div class="ummi-student-item-top">
+              <div class="ummi-student-item-title">
+                <span class="ummi-student-num">${sIdx + 1}.</span>
+                <strong>${AppConfig.escapeHtml(s.name)}</strong>
+              </div>
+              <span class="badge badge-success badge-sm">${AppConfig.escapeHtml(stuLevel)}</span>
+            </div>
+            <div class="ummi-student-item-sub">
+              <span><i class="ph ph-chalkboard"></i> ${AppConfig.escapeHtml(cName)}</span>
+            </div>
+            <div class="ummi-student-item-actions">
+              <a href="#/guru/ummi/progress?classId=${cls.id}&studentId=${s.id}" class="btn btn-primary btn-xs"><i class="ph ph-book-open"></i> Buka Jurnal</a>
+              <button class="btn btn-outline btn-xs" data-req-exam="${s.id}" data-stu-name="${AppConfig.escapeHtml(s.name)}" data-cur-level="${AppConfig.escapeHtml(stuLevel)}" data-cls-id="${cls.id}"><i class="ph ph-arrow-circle-up"></i> Ajukan Tes</button>
+            </div>
+          </div>
+        `;
+      }).join('') : '<p class="text-muted text-center empty-state-text">Belum ada santri terdaftar di rombel ini.</p>';
       return `
         <div class="card section-spacer">
-          <div class="card-header">
-            <div>
+          <div class="card-header ummi-rombel-header">
+            <div class="ummi-rombel-info">
               <h3 class="card-title">${idx + 1}. ${AppConfig.escapeHtml(cls.name)}</h3>
-              <p class="text-muted"><i class="ph ph-map-pin"></i> <strong>Tempat:</strong> ${AppConfig.escapeHtml(cls.room || 'Tempat belum diatur')} · Tingkat: ${AppConfig.escapeHtml(cls.level || 'Jilid')} · Total ${studentsInRombel.length} Santri Binaan Lintas Kelas</p>
+              <p class="text-muted ummi-rombel-meta"><i class="ph ph-map-pin"></i> <strong>Tempat:</strong> ${AppConfig.escapeHtml(cls.room || 'Tempat belum diatur')} · Tingkat: ${AppConfig.escapeHtml(cls.level || 'Jilid')} · Total ${studentsInRombel.length} Santri Binaan Lintas Kelas</p>
             </div>
-            <div style="display:flex;gap:8px;align-items:center;">
+            <div class="card-header-actions ummi-rombel-actions">
               <a href="#/guru/ummi/progress?classId=${cls.id}" class="btn btn-primary btn-sm"><i class="ph ph-book-open"></i> Jurnal Rombel Ini</a>
             </div>
           </div>
-          <div class="table-responsive">
+          <div class="ummi-students-desktop table-responsive">
             <table class="table">
               <thead>
                 <tr>
-                  <th>No</th>
+                  <th class="table-col-sm text-center">No</th>
                   <th>Nama Santri</th>
                   <th>Kelas Formal</th>
                   <th>Tingkat Jilid</th>
-                  <th>Aksi Pembelajaran</th>
+                  <th class="table-col-action">Aksi Pembelajaran</th>
                 </tr>
               </thead>
               <tbody>${studentRows}</tbody>
             </table>
+          </div>
+          <div class="ummi-students-mobile">
+            ${mobileStudentCards}
           </div>
         </div>
       `;
@@ -537,10 +562,12 @@ const UMMIPages = {
       const clsOpts = myClasses.map(c => `<option value="${c.id}" ${c.id === activeCls.id ? 'selected' : ''}>${AppConfig.escapeHtml(c.name)} (${AppConfig.escapeHtml(c.level || 'Jilid')})</option>`).join('');
       if (!enrolledStudents.length) {
         container.innerHTML = `
-          <div class="card toolbar-panel">
-            <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
-              <label style="font-weight:600;margin:0;">Pilih Rombel:</label>
-              <select id="sel-jurnal-cls" class="mapel-select-input">${clsOpts}</select>
+          <div class="card toolbar-panel ummi-toolbar-card">
+            <div class="ummi-toolbar">
+              <div class="ummi-toolbar-item">
+                <label class="ummi-toolbar-label">Pilih Rombel:</label>
+                <select id="sel-jurnal-cls" class="ummi-toolbar-select">${clsOpts}</select>
+              </div>
             </div>
           </div>
           <div class="card"><p class="text-muted">Belum ada santri di rombel ini. Koordinator dapat menambahkan santri lewat menu Pemetaan Rombel.</p></div>
@@ -577,25 +604,29 @@ const UMMIPages = {
         `;
       }).join('') : '<tr><td colspan="10" class="text-center text-muted">Belum ada riwayat tatap muka. Masukkan sesi pembelajaran hari ini pada form di bawah.</td></tr>';
       container.innerHTML = `
-        <div class="card toolbar-panel" style="margin-bottom:16px;">
-          <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;justify-content:space-between;">
-            <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
-              <label style="font-weight:600;margin:0;">Rombel Ummi:</label>
-              <select id="sel-jurnal-cls" class="mapel-select-input">${clsOpts}</select>
-              <label style="font-weight:600;margin:0 0 0 8px;">Pilih Santri:</label>
-              <select id="sel-jurnal-stu" class="mapel-select-input">${studentOpts}</select>
+        <div class="card toolbar-panel ummi-toolbar-card">
+          <div class="ummi-toolbar">
+            <div class="ummi-toolbar-group">
+              <div class="ummi-toolbar-item">
+                <label class="ummi-toolbar-label">Rombel Ummi:</label>
+                <select id="sel-jurnal-cls" class="ummi-toolbar-select">${clsOpts}</select>
+              </div>
+              <div class="ummi-toolbar-item">
+                <label class="ummi-toolbar-label">Pilih Santri:</label>
+                <select id="sel-jurnal-stu" class="ummi-toolbar-select">${studentOpts}</select>
+              </div>
             </div>
-            <button class="btn btn-primary btn-sm" id="btn-quick-req-exam"><i class="ph ph-arrow-circle-up"></i> Ajukan Tes Kenaikan Jilid</button>
+            <button class="btn btn-primary btn-sm ummi-toolbar-btn" id="btn-quick-req-exam"><i class="ph ph-arrow-circle-up"></i> Ajukan Tes Kenaikan Jilid</button>
           </div>
         </div>
-        <div class="card section-spacer" style="padding:16px;background:var(--bg-card);">
-          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
-            <div>
-              <h3 style="margin:0 0 4px 0;font-size:16px;">${AppConfig.escapeHtml(activeStudent.name)}</h3>
-              <p class="text-muted" style="margin:0;font-size:13px;">Kelas Formal: <strong>${gradeClassMap[activeStudent.classId] || activeStudent.classId || '-'}</strong> · Rombel: <strong>${AppConfig.escapeHtml(activeCls.name)}</strong> · Tingkat Saat Ini: <span class="badge badge-primary" style="font-size:13px;">${AppConfig.escapeHtml(curStudentLevel)}</span></p>
+        <div class="card section-spacer ummi-student-card">
+          <div class="ummi-student-banner">
+            <div class="ummi-student-info">
+              <h3 class="ummi-student-title">${AppConfig.escapeHtml(activeStudent.name)}</h3>
+              <p class="ummi-student-meta">Kelas Formal: <strong>${gradeClassMap[activeStudent.classId] || activeStudent.classId || '-'}</strong> · Rombel: <strong>${AppConfig.escapeHtml(activeCls.name)}</strong> · Tingkat Saat Ini: <span class="badge badge-primary">${AppConfig.escapeHtml(curStudentLevel)}</span></p>
             </div>
-            <div style="text-align:right;">
-              <span class="badge badge-success" style="font-size:14px;padding:6px 12px;"><i class="ph ph-calendar-check"></i> Total ${journalsArr.length} Tatap Muka</span>
+            <div class="ummi-student-badge-wrap">
+              <span class="badge badge-success ummi-stat-badge"><i class="ph ph-calendar-check"></i> Total ${journalsArr.length} Tatap Muka</span>
             </div>
           </div>
         </div>
@@ -603,40 +634,40 @@ const UMMIPages = {
           <div class="card-header">
             <h3 class="card-title"><i class="ph ph-plus-circle"></i> Input Sesi Pembelajaran Hari Ini</h3>
           </div>
-          <form id="form-add-journal" style="padding:16px 0 0 0;">
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;">
-              <div class="form-group" style="margin-bottom:0;">
+          <form id="form-add-journal" class="ummi-journal-form">
+            <div class="ummi-form-grid">
+              <div class="form-group">
                 <label>Tatap Muka Ke- (Otomatis Urut)</label>
-                <input type="number" id="in-meeting" value="${nextMeetingNo}" required readonly style="background:var(--bg-hover,#f8fafc);font-weight:bold;">
+                <input type="number" id="in-meeting" value="${nextMeetingNo}" required readonly class="input-readonly-bold">
               </div>
-              <div class="form-group" style="margin-bottom:0;">
+              <div class="form-group">
                 <label>Tanggal Belajar</label>
                 <input type="date" id="in-date" value="${todayStr}" required>
               </div>
-              <div class="form-group" style="margin-bottom:0;">
+              <div class="form-group">
                 <label>Tingkat / Jilid</label>
                 <select id="in-level" required>${levelOpts}</select>
               </div>
-              <div class="form-group" style="margin-bottom:0;">
+              <div class="form-group">
                 <label>Halaman / Ayat</label>
                 <input type="text" id="in-page" placeholder="Contoh: Hal. 15 / QS. An-Naba: 1-10" required>
               </div>
             </div>
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-top:14px;">
-              <div class="form-group" style="margin-bottom:0;">
+            <div class="ummi-form-grid-wide">
+              <div class="form-group">
                 <label>Materi Pokok Bahasan</label>
                 <input type="text" id="in-material" placeholder="Contoh: Mengenal tanda sukun dan hukum qalqalah" required>
               </div>
-              <div class="form-group" style="margin-bottom:0;">
+              <div class="form-group">
                 <label>Nilai & Kualitas Baca (Standar Ummi)</label>
                 <select id="in-score" required>${gradeOpts}</select>
               </div>
             </div>
-            <div class="form-group" style="margin-top:14px;margin-bottom:14px;">
+            <div class="form-group ummi-form-note-group">
               <label>Catatan Kesalahan / Keterangan Belajar di Sekolah</label>
               <input type="text" id="in-note" placeholder="Contoh: Perhatikan panjang mad thabi\'i pada baris ke-3, fashahah sudah sangat baik.">
             </div>
-            <button type="submit" class="btn btn-primary" id="btn-save-journal" style="width:100%;padding:12px;font-size:15px;"><i class="ph ph-floppy-disk"></i> Simpan Sesi & Perbarui Capaian BTQ</button>
+            <button type="submit" class="btn btn-primary ummi-submit-btn" id="btn-save-journal"><i class="ph ph-floppy-disk"></i> Simpan Sesi & Perbarui Capaian BTQ</button>
           </form>
         </div>
         <div class="card section-spacer">
@@ -648,7 +679,7 @@ const UMMIPages = {
             <table class="table">
               <thead>
                 <tr>
-                  <th style="width:50px;">Tatap Muka</th>
+                  <th class="table-col-sm">Tatap Muka</th>
                   <th>Tanggal</th>
                   <th>Jilid</th>
                   <th>Halaman / Ayat</th>
@@ -894,7 +925,7 @@ const UMMIPages = {
         </div>
       </section>
       <div class="card toolbar-panel">
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <div class="btn-group-wrap">
           <button class="btn btn-outline btn-sm active" data-filter="all">Semua (${examArr.length})</button>
           <button class="btn btn-outline btn-sm" data-filter="Menunggu ACC">Menunggu ACC (${pendingCount})</button>
           <button class="btn btn-outline btn-sm" data-filter="Dijadwalkan">Dijadwalkan (${scheduledCount})</button>
@@ -941,7 +972,7 @@ const UMMIPages = {
               <div class="form-group">
                 <label>Tanggal Ujian Kenaikan</label>
                 <input type="date" id="acc-date" required>
-                <small class="text-muted" id="acc-quota-note" style="display:block;margin-top:4px;">*Maksimal kuota 7 santri per hari untuk setiap penguji.</small>
+                <small class="text-muted text-block-hint" id="acc-quota-note">*Maksimal kuota 7 santri per hari untuk setiap penguji.</small>
               </div>
               <div class="form-group">
                 <label>Koordinator / Penguji Yang Ditugaskan</label>

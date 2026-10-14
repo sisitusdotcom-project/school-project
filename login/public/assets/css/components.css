@@ -2,7 +2,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
   padding: 8px 12px;
   font-family: 'Inter', sans-serif;
   font-size: 13px;
@@ -12,10 +12,12 @@
   cursor: pointer;
   transition: var(--transition);
   white-space: nowrap;
-  min-height: var(--control-height)
+  min-height: var(--control-height);
+  line-height: 1.2;
 }
 .btn i {
-  font-size: 18px
+  font-size: 16px;
+  flex-shrink: 0;
 }
 .btn-primary {
   background: var(--primary);
@@ -155,6 +157,9 @@
   padding: var(--card-padding);
   box-shadow: 0 4px 18px rgba(15, 23, 42, 0.045);
   border: 1px solid var(--border);
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 .section-block {
   margin-top: 12px
@@ -169,10 +174,16 @@
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  margin-bottom: 12px
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.card-header > * {
+  min-width: 0;
 }
 .card-title {
   font-size: 16px;
+  min-width: 0;
+  word-break: break-word;
   font-weight: 600;
   margin: 0
 }
@@ -576,6 +587,9 @@
 }
 .table-responsive {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   overflow-x: auto;
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch
@@ -588,10 +602,11 @@
 }
 .table th,
 .table td {
-  padding: 12px 16px;
+  padding: 10px 14px;
   text-align: left;
-  font-size: 14px;
-  border-bottom: 1px solid var(--border)
+  font-size: 13.5px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
 }
 .table th {
   font-weight: 500;
@@ -920,14 +935,26 @@
 }
 .action-cell {
   display: flex;
-  gap: 6px
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+.action-cell > * {
+  flex-shrink: 0;
+}
+.table-col-action {
+  white-space: nowrap;
+  width: 1%;
+  min-width: 230px;
 }
 .btn-sm {
   padding: 6px 10px;
-  font-size: 13px
+  font-size: 12.5px;
+  gap: 6px;
 }
 .btn-sm i {
-  font-size: 16px
+  font-size: 15px;
+  flex-shrink: 0;
 }
 .inline-form {
   display: flex;
@@ -1863,3 +1890,68 @@ td[colspan] > .text-muted {
 .eks-detail-table{width:100%;border-collapse:collapse;margin-top:12px;}
 .eks-detail-table th,.eks-detail-table td{padding:8px 10px;border-bottom:1px solid var(--border-color);font-size:13px;text-align:left;}
 .eks-detail-table th{background:#f8fafc;font-weight:600;}
+.empty-state-icon{margin:0 auto 16px;}
+.empty-state-text{padding:16px;}
+.card-header-actions{display:flex;gap:8px;align-items:center;}
+.btn-group-wrap{display:flex;gap:8px;flex-wrap:wrap;}
+.text-block-hint{display:block;margin-top:4px;}
+.input-readonly-bold{background:var(--bg-hover,#f8fafc);font-weight:bold;}
+.ummi-toolbar-card{margin-bottom:16px;}
+.ummi-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.ummi-toolbar-group{display:flex;align-items:center;gap:12px;flex-wrap:wrap;flex:1;min-width:0;}
+.ummi-toolbar-item{display:flex;align-items:center;gap:8px;min-width:0;flex:1;}
+.ummi-toolbar-label{font-weight:600;font-size:13px;white-space:nowrap;margin:0;}
+.ummi-toolbar-select{flex:1;min-width:140px;max-width:100%;padding:8px 10px;border-radius:var(--radius-sm,6px);border:1px solid var(--border-color);font-size:13px;background:var(--bg-card);color:var(--text-main);}
+.ummi-toolbar-btn{white-space:nowrap;}
+.ummi-student-card{padding:16px;background:var(--bg-card);}
+.ummi-student-banner{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
+.ummi-student-info{min-width:0;flex:1;}
+.ummi-student-title{margin:0 0 4px 0;font-size:16px;word-break:break-word;}
+.ummi-student-meta{margin:0;font-size:13px;word-break:break-word;}
+.ummi-student-badge-wrap{text-align:right;}
+.ummi-stat-badge{font-size:14px;padding:6px 12px;}
+.ummi-journal-form{padding:16px 0 0 0;}
+.ummi-form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;}
+.ummi-form-grid > *{min-width:0;margin-bottom:0;}
+.ummi-form-grid-wide{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:14px;}
+.ummi-form-grid-wide > *{min-width:0;margin-bottom:0;}
+.ummi-form-note-group{margin-top:14px;margin-bottom:14px;}
+.ummi-submit-btn{width:100%;padding:12px;font-size:15px;}
+.table-col-sm{width:50px;}
+@media(max-width:768px){
+.ummi-toolbar{flex-direction:column;align-items:stretch;gap:10px;}
+.ummi-toolbar-group{flex-direction:column;align-items:stretch;gap:10px;width:100%;}
+.ummi-toolbar-item{flex-direction:column;align-items:stretch;gap:4px;width:100%;}
+.ummi-toolbar-label{white-space:normal;}
+.ummi-toolbar-select{width:100%;min-width:0;max-width:100%;}
+.ummi-toolbar-btn{width:100%;justify-content:center;}
+.ummi-student-banner{flex-direction:column;align-items:flex-start;}
+.ummi-student-badge-wrap{text-align:left;width:100%;}
+.ummi-form-grid,.ummi-form-grid-wide{grid-template-columns:1fr;gap:10px;}
+}
+.btn-xs{padding:5px 8px;font-size:12px;border-radius:6px;gap:4px;display:inline-flex;align-items:center;}
+.btn-xs i{font-size:14px;}
+.badge-xs,.badge-sm{font-size:11px;padding:3px 8px;border-radius:4px;}
+.ummi-rombel-info{min-width:0;flex:1;}
+.ummi-rombel-meta{margin:2px 0 0 0;font-size:12.5px;color:var(--text-muted);line-height:1.4;}
+.ummi-rombel-actions{display:flex;gap:8px;align-items:center;}
+.ummi-students-desktop{display:block;}
+.ummi-students-mobile{display:none;}
+.ummi-student-item{background:var(--bg-hover,#f8fafc);border:1px solid var(--border);border-radius:8px;padding:8px 10px;display:flex;flex-direction:column;gap:5px;box-sizing:border-box;}
+.ummi-student-item-top{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.ummi-student-item-title{font-size:13px;font-weight:600;color:var(--text-main);display:flex;align-items:center;gap:5px;min-width:0;}
+.ummi-student-item-title strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.ummi-student-num{color:var(--text-muted);font-size:11.5px;}
+.ummi-student-item-sub{font-size:11.5px;color:var(--text-muted);display:flex;align-items:center;gap:4px;}
+.ummi-student-item-actions{display:flex;align-items:center;gap:6px;margin-top:2px;}
+.ummi-student-item-actions > *{flex:1;justify-content:center;text-align:center;}
+@media(max-width:768px){
+.ummi-students-desktop{display:none;}
+.ummi-students-mobile{display:flex;flex-direction:column;gap:6px;}
+.ummi-rombel-header{flex-direction:column;align-items:stretch;gap:8px;}
+.ummi-rombel-actions{width:100%;}
+.ummi-rombel-actions .btn{width:100%;justify-content:center;padding:7px 10px;font-size:13px;}
+.table th,.table td{padding:7px 8px;font-size:12px;}
+.btn-sm{padding:5px 8px;font-size:12px;}
+.btn-sm i{font-size:14px;}
+}

@@ -417,6 +417,8 @@
 .main-content {
   flex: 1;
   min-width: 0;
+  max-width: 100%;
+  overflow-x: hidden;
   margin-left: var(--sidebar-width);
   min-height: 100vh;
   min-height: 100dvh;
@@ -537,6 +539,8 @@
 .views-container {
   flex: 1;
   min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
   padding: 20px var(--page-gutter) 24px
 }
 .view-section {
@@ -615,7 +619,7 @@
   }
   .main-content {
     margin-left: 0;
-    padding-top: 60px
+    padding-top: 74px;
   }
   .page-header {
     height: auto;
@@ -650,7 +654,8 @@
     font-size: 16px;
   }
   .views-container {
-    padding: 14px 16px 18px
+    padding: 12px 12px 18px;
+    max-width: 100%;
   }
 }
 @media (min-width:1024px) {
