@@ -1,7 +1,7 @@
-const ATTENDANCE_GEOFENCE = window.APP_ATTENDANCE_GEOFENCE || {
-  lat: null,
-  lng: null,
-  radiusMeters: null
+const ATTENDANCE_GEOFENCE = window.APP_ATTENDANCE_GEOFENCE || window.AppConfig?.attendanceGeofence || {
+  lat: -7.378455833160138,
+  lng: 112.7592952448637,
+  radiusMeters: 60
 };
 const GuruPages = {
   async renderDashboard(container) {
@@ -921,30 +921,46 @@ const GuruPages = {
   async renderTeacherAttendance(container) {
     Router.setTitle('Presensi Kehadiran', 'Rekam kehadiran harian Anda di area sekolah.');
     container.innerHTML = `
-      <div class="card" style="text-align: center; padding: 32px 16px;">
-        <div id="geo-status-icon" style="width: 64px; height: 64px; background: #F3F4F6; color: #9CA3AF; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; transition: all 0.3s ease;">
-          <i class="ph ph-spinner ph-spin" style="font-size: 32px;"></i>
+      <div class="card attendance-status-card">
+        <div id="geo-status-icon" class="attendance-status-icon">
+          <i class="ph ph-spinner ph-spin"></i>
         </div>
-        <h3 id="geo-status-title" style="margin: 0 0 8px 0;">Mencari Lokasi...</h3>
-        <p id="geo-status-text" class="text-muted" style="margin: 0 0 24px 0; font-size: 14px;">Mohon tunggu dan pastikan posisi Anda aktif.</p>
-        <div style="display: flex; gap: 12px; justify-content: center;">
+        <h3 id="geo-status-title" class="attendance-status-title">Mencari Lokasi...</h3>
+        <p id="geo-status-text" class="attendance-status-text">Mohon tunggu, sedang memverifikasi posisi koordinat Anda di sekolah.</p>
+        <div id="geo-permission-box" class="attendance-permission-box">
+          <div class="attendance-guide-title">
+            <i class="ph ph-shield-warning"></i>
+            <span>Akses Lokasi Dibutuhkan</span>
+          </div>
+          <p class="text-muted" style="font-size:13px;margin:0 0 8px 0;">Presensi membutuhkan verifikasi posisi GPS perangkat Anda. Jika izin lokasi belum aktif, silakan ikuti petunjuk berikut:</p>
+          <ul class="attendance-guide-list">
+            <li><strong>Android (Chrome / Edge):</strong> Ketuk ikon gembok 🔒 atau setelan di samping alamat web &gt; pilih <strong>Izin Situs</strong> &gt; aktifkan <strong>Lokasi</strong>.</li>
+            <li><strong>iPhone / iPad (Safari):</strong> Buka <strong>Pengaturan</strong> &gt; <strong>Privasi &amp; Keamanan</strong> &gt; <strong>Layanan Lokasi</strong> (Pastikan Aktif) &gt; pilih <strong>Situs Web Safari</strong> &gt; <strong>Saat Menggunakan App</strong>.</li>
+            <li><strong>Laptop / Komputer:</strong> Klik ikon gembok 🔒 di sebelah kiri URL &gt; ubah izin Lokasi ke <strong>Izinkan</strong> &gt; lalu muat ulang.</li>
+          </ul>
+          <div class="attendance-guide-actions">
+            <button type="button" class="btn btn-primary btn-sm" id="btn-request-geo"><i class="ph ph-map-pin"></i> Izinkan / Coba Ulang Akses Lokasi</button>
+            <button type="button" class="btn btn-outline btn-sm" id="btn-reload-geo"><i class="ph ph-arrows-clockwise"></i> Muat Ulang Halaman</button>
+          </div>
+        </div>
+        <div class="attendance-actions-row">
           <button id="btn-checkin" class="btn btn-primary" disabled><i class="ph ph-sign-in"></i> Presensi Datang</button>
           <button id="btn-checkout" class="btn btn-outline" disabled><i class="ph ph-sign-out"></i> Presensi Pulang</button>
         </div>
-        <div id="proof-panel" style="margin-top: 20px; border: 1px solid #E5E7EB; border-radius: 12px; padding: 14px; text-align: left; display: none;">
-          <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 10px;">
+        <div id="proof-panel" class="attendance-proof-panel">
+          <div class="attendance-proof-header">
             <strong style="font-size: 13px;">Bukti Foto Kehadiran dari Kamera</strong>
             <span id="proof-status" class="text-muted" style="font-size: 12px;">Belum ada foto</span>
           </div>
-          <video id="attendance-camera-video" autoplay playsinline muted style="width: 100%; max-height: 220px; object-fit: cover; border-radius: 10px; border: 1px solid #E5E7EB; background: #000; display: block;"></video>
+          <video id="attendance-camera-video" class="attendance-camera-video" autoplay playsinline muted></video>
           <button id="attendance-camera-capture" type="button" class="btn btn-primary" style="width: 100%; margin-top: 12px;">Ambil Foto Kamera</button>
-          <div id="attendance-proof-wrapper" style="display: none; margin-top: 12px;">
-            <img id="attendance-proof-preview" src="" alt="Preview bukti presensi" style="width: 100%; max-height: 220px; object-fit: cover; border-radius: 10px; border: 1px solid #E5E7EB;">
+          <div id="attendance-proof-wrapper" class="attendance-proof-wrapper">
+            <img id="attendance-proof-preview" class="attendance-proof-preview" src="" alt="Preview bukti presensi">
           </div>
         </div>
       </div>
-      <div class="card" style="margin-top: 16px;">
-        <h4 style="margin: 0 0 12px 0; font-size: 14px;">Riwayat Hari Ini</h4>
+      <div class="card attendance-history-card">
+        <h4 class="attendance-history-title">Riwayat Hari Ini</h4>
         <div id="att-history-container">
           <p class="text-muted" style="font-size: 13px; margin: 0;">Memuat data...</p>
         </div>
@@ -953,6 +969,7 @@ const GuruPages = {
     const statusIcon = document.getElementById('geo-status-icon');
     const statusTitle = document.getElementById('geo-status-title');
     const statusText = document.getElementById('geo-status-text');
+    const permissionBox = document.getElementById('geo-permission-box');
     const btnCheckin = document.getElementById('btn-checkin');
     const btnCheckout = document.getElementById('btn-checkout');
     const histContainer = document.getElementById('att-history-container');
@@ -1091,9 +1108,10 @@ const GuruPages = {
       }
     };
     await loadHistory();
-    const schoolLat = Number(ATTENDANCE_GEOFENCE?.lat);
-    const schoolLng = Number(ATTENDANCE_GEOFENCE?.lng);
-    const maxRadius = Number(ATTENDANCE_GEOFENCE?.radiusMeters ?? 0);
+    const geofence = window.APP_ATTENDANCE_GEOFENCE || window.AppConfig?.attendanceGeofence || ATTENDANCE_GEOFENCE;
+    const schoolLat = Number(geofence?.lat ?? -7.378455833160138);
+    const schoolLng = Number(geofence?.lng ?? 112.7592952448637);
+    const maxRadius = Number(geofence?.radiusMeters ?? 60);
     const maxAccuracy = 200;
     const hasLocalGeofence = Number.isFinite(schoolLat) && Number.isFinite(schoolLng) && Number.isFinite(maxRadius) && maxRadius > 0;
     const getDistance = (lat1, lon1, lat2, lon2) => {
@@ -1112,6 +1130,7 @@ const GuruPages = {
     const acceptPosition = (latitude, longitude, accuracy, distance) => {
       currentAccuracy = Number(accuracy || 0);
       currentLocation = { lat: latitude, lng: longitude };
+      permissionBox.classList.remove('active');
       if (!hasLocalGeofence) {
         const posisiReady = currentAccuracy <= maxAccuracy;
         if (posisiReady) {
@@ -1165,18 +1184,11 @@ const GuruPages = {
       statusIcon.style.background = '#FEF3C7'; statusIcon.style.color = '#F59E0B';
       statusIcon.innerHTML = '<i class="ph ph-warning" style="font-size: 32px;"></i>';
       statusTitle.innerText = "Posisi Belum Valid";
-      statusText.innerText = `Jarak Anda sekitar ${Math.round(distance)} m dari sekolah dan akurasi posisi ${Math.round(accuracy)} m. Harap bergerak ke area yang lebih dekat atau tunggu posisi lebih stabil.`;
+      statusText.innerText = `Jarak Anda sekitar ${Math.round(distance)} m dari sekolah dan akurasi posisi ${Math.round(accuracy)} m. Harap berada di area sekolah (maksimal ${maxRadius} m).`;
       btnCheckin.disabled = true;
       btnCheckout.disabled = true;
       return false;
     };
-    if (!navigator.geolocation) {
-      statusIcon.style.background = '#FEE2E2'; statusIcon.style.color = '#EF4444';
-      statusIcon.innerHTML = '<i class="ph ph-warning-circle" style="font-size: 32px;"></i>';
-      statusTitle.innerText = "Perangkat Tidak Mendukung Posisi";
-      statusText.innerText = "Perangkat Anda tidak mendukung fitur lokasi.";
-      return;
-    }
     const onGeoSuccess = (position) => {
       const { latitude, longitude, accuracy } = position.coords;
       const distance = hasLocalGeofence ? getDistance(schoolLat, schoolLng, latitude, longitude) : 0;
@@ -1190,14 +1202,70 @@ const GuruPages = {
       statusIcon.style.background = '#FEE2E2'; statusIcon.style.color = '#EF4444';
       statusIcon.innerHTML = '<i class="ph ph-warning-circle" style="font-size: 32px;"></i>';
       statusTitle.innerText = "Akses Posisi Ditolak";
-      statusText.innerText = "Izinkan akses posisi pada browser untuk melakukan presensi.";
+      statusText.innerText = "Izinkan akses posisi pada browser untuk melakukan presensi. Silakan aktifkan izin lokasi di bawah ini.";
+      permissionBox.classList.add('active');
+      btnCheckin.disabled = true;
+      btnCheckout.disabled = true;
       console.error('Geolocation error:', error);
     };
-    watchId = navigator.geolocation.watchPosition(onGeoSuccess, onGeoError, {
-      enableHighAccuracy: true,
-      timeout: 15000,
-      maximumAge: 0
-    });
+    const startGeolocationWatch = () => {
+      if (!navigator.geolocation) {
+        statusIcon.style.background = '#FEE2E2'; statusIcon.style.color = '#EF4444';
+        statusIcon.innerHTML = '<i class="ph ph-warning-circle" style="font-size: 32px;"></i>';
+        statusTitle.innerText = "Perangkat Tidak Mendukung Posisi";
+        statusText.innerText = "Perangkat Anda tidak mendukung fitur lokasi GPS.";
+        permissionBox.classList.remove('active');
+        return;
+      }
+      if (watchId !== null) {
+        navigator.geolocation.clearWatch(watchId);
+        watchId = null;
+      }
+      watchId = navigator.geolocation.watchPosition(onGeoSuccess, onGeoError, {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 0
+      });
+    };
+    const reqGeoBtn = document.getElementById('btn-request-geo');
+    if (reqGeoBtn) {
+      reqGeoBtn.onclick = () => {
+        if (!navigator.geolocation) return;
+        statusTitle.innerText = "Meminta Izin Lokasi...";
+        statusText.innerText = "Silakan pilih 'Izinkan' / 'Allow' saat kotak dialog browser muncul.";
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            permissionBox.classList.remove('active');
+            onGeoSuccess(pos);
+            startGeolocationWatch();
+          },
+          (err) => {
+            onGeoError(err);
+            alert('Izin lokasi masih belum diaktifkan pada browser/perangkat Anda. Silakan periksa petunjuk izin situs di atas, lalu muat ulang halaman.');
+          },
+          { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
+      };
+    }
+    const reloadGeoBtn = document.getElementById('btn-reload-geo');
+    if (reloadGeoBtn) {
+      reloadGeoBtn.onclick = () => {
+        window.location.reload();
+      };
+    }
+    if (navigator.permissions && navigator.permissions.query) {
+      navigator.permissions.query({ name: 'geolocation' }).then(perm => {
+        perm.onchange = () => {
+          if (perm.state === 'granted') {
+            permissionBox.classList.remove('active');
+            startGeolocationWatch();
+          } else if (perm.state === 'denied') {
+            onGeoError({ code: 1, message: 'User denied Geolocation' });
+          }
+        };
+      }).catch(() => {});
+    }
+    startGeolocationWatch();
     const handlePresensi = async (type) => {
       if (!currentLocation) return;
       const btn = type === 'in' ? btnCheckin : btnCheckout;

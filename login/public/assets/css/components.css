@@ -1955,3 +1955,25 @@ td[colspan] > .text-muted {
 .btn-sm{padding:5px 8px;font-size:12px;}
 .btn-sm i{font-size:14px;}
 }
+.attendance-status-card{text-align:center;padding:28px 16px;}
+.attendance-status-icon{width:64px;height:64px;background:#F3F4F6;color:#9CA3AF;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px auto;transition:all .3s ease;}
+.attendance-status-icon i{font-size:32px;}
+.attendance-status-title{margin:0 0 8px 0;font-size:17px;font-weight:600;}
+.attendance-status-text{margin:0 0 20px 0;font-size:13.5px;color:var(--text-muted);line-height:1.45;max-width:480px;margin-left:auto;margin-right:auto;}
+.attendance-actions-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.attendance-permission-box{display:none;margin-top:16px;padding:16px;background:var(--bg-hover,#f8fafc);border:1px solid var(--border-color);border-radius:12px;text-align:left;}
+.attendance-permission-box.active{display:block;}
+.attendance-guide-title{display:flex;align-items:center;gap:8px;font-weight:600;font-size:14px;color:var(--danger-text,#b91c1c);margin-bottom:8px;}
+.attendance-guide-title i{font-size:20px;}
+.attendance-guide-list{margin:8px 0 14px 18px;font-size:12.5px;color:var(--text-muted);line-height:1.6;}
+.attendance-guide-list li{margin-bottom:6px;}
+.attendance-guide-list strong{color:var(--text-main);}
+.attendance-guide-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+.attendance-proof-panel{margin-top:20px;border:1px solid var(--border-color);border-radius:12px;padding:14px;text-align:left;display:none;}
+.attendance-proof-header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px;}
+.attendance-camera-video{width:100%;max-height:220px;object-fit:cover;border-radius:10px;border:1px solid var(--border-color);background:#000;display:block;}
+.attendance-proof-wrapper{display:none;margin-top:12px;}
+.attendance-proof-preview{width:100%;max-height:220px;object-fit:cover;border-radius:10px;border:1px solid var(--border-color);}
+.attendance-history-card{margin-top:16px;}
+.attendance-history-title{margin:0 0 12px 0;font-size:14px;font-weight:600;}
+.attendance-history-item{display:flex;justify-content:space-between;border-bottom:1px solid var(--border-color);padding-bottom:8px;margin-bottom:8px;font-size:13px;}
