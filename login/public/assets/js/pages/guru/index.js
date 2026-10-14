@@ -211,7 +211,7 @@ const GuruPages = {
                 <span class="badge badge-primary">${idx + 1}</span>
                 <div>
                   <strong>${AppConfig.escapeHtml(s.name)}</strong>
-                  <div class="text-muted small">${AppConfig.formatStudentIdentity(s)}</div>
+                  <div class="text-muted small">${AppConfig.formatStudentIdentity(s)} · <span class="badge badge-success"><i class="ph ph-book-open"></i> Ummi: ${AppConfig.escapeHtml(s.ummiLevel || 'Pra-Jilid')}</span></div>
                 </div>
               </div>
               <a href="print.html?id=${s.id}" target="_blank" class="btn btn-primary btn-sm"><i class="ph ph-printer"></i> Cetak Rapor F4</a>

@@ -56,7 +56,7 @@ async function generateReport(studentId, container) {
     };
     const classSubKeys = cls && cls.subjectTeachers ? Object.keys(cls.subjectTeachers) : [];
     const allSubs = DB.toArray(subjectsObj);
-    const subjects = (classSubKeys.length > 0 ? allSubs.filter(s => classSubKeys.includes(s.id)) : allSubs)
+    const subjects = (classSubKeys.length > 0 ? allSubs.filter(s => classSubKeys.includes(s.id) || s.id === 'SUB_BTQ') : allSubs)
       .sort((a, b) => (a.order || 0) - (b.order || 0));
     const ekskuls = DB.toArray(ekskulsObj);
     const characters = DB.toArray(charactersObj).sort((a, b) => (a.order || 0) - (b.order || 0));

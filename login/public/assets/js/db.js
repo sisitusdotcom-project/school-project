@@ -331,6 +331,113 @@ const DB = {
     if (!isDBReady()) return;
     await db.ref(`ummi_classes/${id}`).remove();
   },
+  async getUmmiJournals(studentId) {
+    if (!isDBReady() || !studentId) return {};
+    const snap = await db.ref(`ummi_journals/${studentId}`).once('value');
+    return snap.val() || {};
+  },
+  async saveUmmiJournal(studentId, journalId, data) {
+    if (!isDBReady() || !studentId) return null;
+    let key = journalId;
+    if (key) {
+      await db.ref(`ummi_journals/${studentId}/${key}`).update({
+        ...data,
+        updatedAt: firebase.database.ServerValue.TIMESTAMP
+      });
+    } else {
+      const ref = db.ref(`ummi_journals/${studentId}`).push();
+      key = ref.key;
+      await ref.set({
+        ...data,
+        id: key,
+        createdAt: firebase.database.ServerValue.TIMESTAMP
+      });
+    }
+    await this.syncStudentBTQGrade(studentId);
+    return key;
+  },
+  async deleteUmmiJournal(studentId, journalId) {
+    if (!isDBReady() || !studentId || !journalId) return;
+    await db.ref(`ummi_journals/${studentId}/${journalId}`).remove();
+    await this.syncStudentBTQGrade(studentId);
+  },
+  async verifyParentUmmiJournal(studentId, journalId) {
+    if (!isDBReady() || !studentId || !journalId) return;
+    await db.ref(`ummi_journals/${studentId}/${journalId}`).update({
+      parentVerified: true,
+      parentVerifiedAt: firebase.database.ServerValue.TIMESTAMP
+    });
+  },
+  async getUmmiExams() {
+    return this._readCollection('ummi_exams', {});
+  },
+  async saveUmmiExam(examId, data) {
+    if (!isDBReady()) return null;
+    let key = examId;
+    if (key) {
+      await db.ref(`ummi_exams/${key}`).update({
+        ...data,
+        updatedAt: firebase.database.ServerValue.TIMESTAMP
+      });
+    } else {
+      const ref = db.ref('ummi_exams').push();
+      key = ref.key;
+      await ref.set({
+        ...data,
+        id: key,
+        createdAt: firebase.database.ServerValue.TIMESTAMP
+      });
+    }
+    if (data.status === 'Lolos' && data.studentId && data.targetLevel) {
+      await this.updateStudentUmmiLevel(data.studentId, data.targetLevel, data.ummiClassId);
+    }
+    return key;
+  },
+  async deleteUmmiExam(examId) {
+    if (!isDBReady() || !examId) return;
+    await db.ref(`ummi_exams/${examId}`).remove();
+  },
+  async getScheduledUmmiExamsCount(dateStr, examinerId) {
+    if (!isDBReady() || !dateStr) return 0;
+    const snap = await db.ref('ummi_exams').once('value');
+    const exams = this.toArray(snap.val() || {});
+    return exams.filter(e => e.scheduledDate === dateStr && (examinerId ? e.examinerId === examinerId : true) && (e.status === 'Dijadwalkan' || e.status === 'Lolos')).length;
+  },
+  async updateStudentUmmiLevel(studentId, newLevel, ummiClassId) {
+    if (!isDBReady() || !studentId || !newLevel) return;
+    await db.ref(`students/${studentId}/ummiLevel`).set(newLevel);
+    if (ummiClassId) {
+      await db.ref(`ummi_classes/${ummiClassId}/students/${studentId}`).update({
+        level: newLevel
+      });
+    }
+    await this.syncStudentBTQGrade(studentId);
+  },
+  async syncStudentBTQGrade(studentId, explicitYear, explicitSem) {
+    if (!isDBReady() || !studentId) return;
+    let year = explicitYear;
+    let sem = explicitSem;
+    if (!year || !sem) {
+      const settings = await this.getSettings();
+      year = settings.currentAcademicYear || '2026/2027';
+      sem = settings.currentSemester || '1';
+    }
+    const snap = await db.ref(`ummi_journals/${studentId}`).once('value');
+    const journals = this.toArray(snap.val() || {});
+    if (!journals.length) return;
+    const scores = journals.map(j => Number(j.score) || 0).filter(s => s > 0);
+    if (!scores.length) return;
+    const avgScore = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
+    const sorted = journals.sort((a, b) => (Number(b.meetingNo) || 0) - (Number(a.meetingNo) || 0));
+    const latest = sorted[0];
+    const compDesc = `Ananda telah mencapai pembelajaran metode Ummi pada tingkat ${latest.level || 'Ummi'} (terakhir pada ${latest.page || 'halaman awal'}). Menunjukkan kualitas bacaan yang baik dan aktif dalam bimbingan tatap muka Al-Qur'an.`;
+    await this.saveAcademicGrade(year, sem, studentId, 'SUB_BTQ', {
+      score: avgScore,
+      competency: compDesc,
+      source: 'auto_ummi',
+      updatedAt: firebase.database.ServerValue.TIMESTAMP
+    });
+  },
   async getAllStudents() {
     if (typeof Auth !== 'undefined' && Auth.currentUser && (Auth.currentRole === 'ortu' || Auth.userData?.role === 'ortu')) {
       return this.getStudentsByParent(Auth.currentUser.uid);
