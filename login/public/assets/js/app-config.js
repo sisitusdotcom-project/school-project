@@ -11,11 +11,14 @@
     FACILITIES: 'facilities',
     IT_ADMIN: 'it_admin',
     GURU_EKSKUL: 'guruEkskul',
+    GURU_UMMI: 'guruUmmi',
     KOMITE: 'komite',
     TENDIK: 'tendik'
   });
   const PRIMARY_ROLES = Object.freeze({
     [ROLES.GURU]: 'Guru / Pendidik',
+    [ROLES.GURU_UMMI]: 'Guru UMMI',
+    [ROLES.GURU_EKSKUL]: 'Guru Ekstrakurikuler',
     [ROLES.TENDIK]: 'Tenaga Kependidikan',
     [ROLES.KEPSEK]: 'Kepala Sekolah',
     [ROLES.ADMIN]: 'Administrator Sistem',
@@ -34,7 +37,7 @@
     'STAF_SARPRAS': 'Staf Sarpras',
     'TIM_IT': 'Tim IT & Sistem',
     'KOORD_UMMI': 'Koordinator Ummi',
-    'TIM_UMMI': 'Guru / Tim Ummi',
+    'TIM_UMMI': 'Tim Ummi',
     'TIM_B_INGGRIS': 'Tim English Lab',
     'GURU_EKSTRA_BADMINTON': 'Ekskul Badminton',
     'GURU_EKSTRA_COOKING': 'Ekskul Cooking',
@@ -110,6 +113,7 @@
     [ROLES.FACILITIES]: 'Sarpras',
     [ROLES.IT_ADMIN]: 'IT Admin',
     [ROLES.GURU_EKSKUL]: 'Guru Ekstrakurikuler',
+    [ROLES.GURU_UMMI]: 'Guru UMMI',
     [ROLES.KOMITE]: 'Komite Sekolah',
     [ROLES.TENDIK]: 'Tenaga Kependidikan'
   });
@@ -152,6 +156,10 @@
     ],
     [ROLES.GURU_EKSKUL]: [
       { hash: '#/dashboard', icon: 'ph-squares-four', text: 'Beranda' }
+    ],
+    [ROLES.GURU_UMMI]: [
+      { hash: '#/dashboard', icon: 'ph-squares-four', text: 'Beranda' },
+      { hash: '#/attendance', icon: 'ph-map-pin', text: 'Presensi Kehadiran' }
     ],
     [ROLES.KOMITE]: [
       { hash: '#/komite/activities', icon: 'ph-users-three', text: 'Kegiatan Paguyuban' },
@@ -331,7 +339,9 @@
       { hash: '#/guru/ummi/classes', icon: 'ph-chalkboard-teacher', text: 'Rombel Ummi Saya', group: 'Guru Ummi: Kelas & Capaian' },
       { hash: '#/guru/ummi/progress', icon: 'ph-book-open', text: 'Jurnal Harian Jilid', group: 'Guru Ummi: Kelas & Capaian' },
       { hash: '#/guru/ummi/tahfidz', icon: 'ph-book-bookmark', text: 'Setoran Tahfidz (Juz 30-1)', group: 'Guru Ummi: Tahfidz & Tasmi\'' },
-      { hash: '#/guru/ummi/tasmi', icon: 'ph-headphones', text: 'Ujian Tasmi\' (Penguji)', group: 'Guru Ummi: Tahfidz & Tasmi\'' }
+      { hash: '#/guru/ummi/tasmi', icon: 'ph-headphones', text: 'Ujian Tasmi\' (Penguji)', group: 'Guru Ummi: Tahfidz & Tasmi\'' },
+      { hash: '#/curriculum/syllabus', icon: 'ph-upload-simple', text: 'Perangkat & Modul Ummi', group: 'Guru Ummi: Administrasi' },
+      { hash: '#/guru/portfolio', icon: 'ph-folder', text: 'Portofolio Guru Ummi', group: 'Guru Ummi: Administrasi' }
     ],
     'TIM_B_INGGRIS': [
       { hash: '#/guru/english/classes', icon: 'ph-chalkboard-teacher', text: 'Rombel English Lab', group: 'English Lab' },
@@ -409,36 +419,57 @@
     if (!user || typeof user !== 'object') return [];
     return normalizeAssignments(user.assignments || user.unitRoles || user.roles || []);
   }
+  function isAcademicTeachingAssignment(a) {
+    if (!a) return false;
+    return a.startsWith('GURU_KELAS_') || a.startsWith('GURU_MAPEL_');
+  }
   function isTeachingAssignment(a) {
-    const prefixes = ['GURU_KELAS_', 'GURU_MAPEL_', 'TIM_UMMI', 'TIM_B_INGGRIS'];
-    return prefixes.some(prefix => a.startsWith(prefix)) || a === 'GURU_UMMI' || a === 'KOORD_UMMI';
+    if (!a) return false;
+    const prefixes = ['GURU_KELAS_', 'GURU_MAPEL_', 'TIM_B_INGGRIS'];
+    return prefixes.some(prefix => a.startsWith(prefix));
   }
   function isPureGuruEkstra(role, assignments = []) {
     const list = Array.isArray(assignments) ? assignments : [];
     const hasEkstra = list.some(a => a && a.startsWith('GURU_EKSTRA_')) || role === ROLES.GURU_EKSKUL;
-    const hasAcademic = list.some(isTeachingAssignment);
+    const hasAcademic = list.some(isAcademicTeachingAssignment);
     return hasEkstra && !hasAcademic && role !== ROLES.TENDIK && role !== ROLES.ADMIN && role !== ROLES.KEPSEK;
+  }
+  function isPureGuruUmmi(role, assignments = []) {
+    const list = Array.isArray(assignments) ? assignments : [];
+    const hasUmmi = list.some(a => a === 'GURU_UMMI' || a === 'TIM_UMMI' || a === 'KOORD_UMMI') || role === ROLES.GURU_UMMI;
+    const hasAcademic = list.some(isAcademicTeachingAssignment);
+    return hasUmmi && !hasAcademic && role !== ROLES.TENDIK && role !== ROLES.ADMIN && role !== ROLES.KEPSEK;
   }
   function getRoleAssignmentLabel(user = {}) {
     const assignments = getRoleAssignments(user);
     if (!assignments.length) return getRoleLabel(user.role);
     const isPure = isPureGuruEkstra(user.role, assignments);
+    const isPureUmmi = isPureGuruUmmi(user.role, assignments);
     const unitLabels = assignments.map((item) => {
       if (UNIT_LABELS[item]) return UNIT_LABELS[item];
       return item.split('_').map(word => word.charAt(0) + word.slice(1).toLowerCase()).join(' ');
     }).join(', ');
-    const baseRole = isPure ? 'Guru Ekstrakurikuler' : getRoleLabel(user.role);
+    let baseRole = getRoleLabel(user.role);
+    if (isPure) baseRole = 'Guru Ekstrakurikuler';
+    else if (isPureUmmi) baseRole = 'Guru UMMI';
     return `${baseRole} · ${unitLabels}`;
   }
   function getRoleNav(role, assignments = []) {
     let baseNav = [...(NAV_ITEMS[role] || [])];
     const isEkstra = assignments.some(a => a.startsWith('GURU_EKSTRA_')) || role === ROLES.GURU_EKSKUL;
     const isPure = isPureGuruEkstra(role, assignments);
-    const isGuru = !isPure && (role === ROLES.GURU || assignments.some(isTeachingAssignment));
+    const isPureUmmi = isPureGuruUmmi(role, assignments);
+    const isGuru = !isPure && !isPureUmmi && (role === ROLES.GURU || assignments.some(isAcademicTeachingAssignment));
     const isWaliKelas = assignments.some(a => a.startsWith('GURU_KELAS_'));
     const isGuruEkstra = isEkstra;
-    const isTimUmmi = assignments.some(a => a === 'GURU_UMMI' || a === 'TIM_UMMI' || a === 'KOORD_UMMI');
+    const isTimUmmi = assignments.some(a => a === 'GURU_UMMI' || a === 'TIM_UMMI' || a === 'KOORD_UMMI') || role === ROLES.GURU_UMMI;
     const isTimInggris = assignments.some(a => a === 'TIM_B_INGGRIS');
+    if (isPureUmmi) {
+      baseNav = [
+        { hash: '#/dashboard', icon: 'ph-squares-four', text: 'Beranda' },
+        { hash: '#/attendance', icon: 'ph-map-pin', text: 'Presensi Kehadiran' }
+      ];
+    }
     if (isGuru) {
       baseNav = [...baseNav, ...(NAV_ITEMS['GURU_UMUM'] || [])];
     }
@@ -578,7 +609,9 @@
     getRoleBadgeClass,
     getAssignmentBadgeClass,
     isTeachingAssignment,
+    isAcademicTeachingAssignment,
     isPureGuruEkstra,
+    isPureGuruUmmi,
     formatUserName,
     getStudentNis,
     getStudentNisn,

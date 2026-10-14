@@ -173,7 +173,7 @@
       ]
     },
     '#/guru/portfolio': { own: true,
-      node: 'guru/portfolio', noun: 'Portofolio Guru & Pembina', writeRoles: [R.GURU, R.GURU_EKSKUL, R.TENDIK], dateField: 'date',
+      node: 'guru/portfolio', noun: 'Portofolio Guru & Pembina', writeRoles: [R.GURU, R.GURU_EKSKUL, R.GURU_UMMI, R.TENDIK], dateField: 'date',
       subtitle: 'Dokumen pencapaian dan rekam jejak guru.',
       fields: [
         date('date', 'Tanggal', { required: true }),
@@ -759,7 +759,7 @@
       ]
     },
     '#/curriculum/syllabus': { own: true,
-      node: 'curriculum/documents', noun: 'Perangkat & Modul Ajar', writeRoles: [R.CURRICULUM, R.GURU, R.GURU_EKSKUL], statusField: 'status', badges: { ...badges, 'Diajukan': 'warning', 'Disetujui (ACC)': 'success', 'Perlu Revisi': 'danger', 'Draft': 'neutral' }, units: ['GURU_UMUM', 'WALI_KELAS', 'GURU_EKSTRA'],
+      node: 'curriculum/documents', noun: 'Perangkat & Modul Ajar', writeRoles: [R.CURRICULUM, R.GURU, R.GURU_EKSKUL, R.GURU_UMMI], statusField: 'status', badges: { ...badges, 'Diajukan': 'warning', 'Disetujui (ACC)': 'success', 'Perlu Revisi': 'danger', 'Draft': 'neutral' }, units: ['GURU_UMUM', 'WALI_KELAS', 'GURU_EKSTRA', 'TIM_UMMI'],
       subtitle: 'Pengumpulan, telaah, dan verifikasi perangkat pembelajaran guru oleh Kurikulum.',
       summary: [
         { label: 'Total Dokumen', icon: 'ph-folder-open', tone: 'primary' },

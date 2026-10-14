@@ -11,6 +11,10 @@ const GuruPages = {
       await GuruPages.renderEkstraDashboard(container);
       return;
     }
+    if (AppConfig.isPureGuruUmmi(role, userAssignments)) {
+      await GuruPages.renderUmmiDashboard(container);
+      return;
+    }
     Router.setTitle('Beranda', 'Selamat datang di Dasbor Digital Sekolah.');
     const today = new Date();
     const dateStr = today.toISOString().slice(0, 10);
@@ -1343,6 +1347,158 @@ const GuruPages = {
         btn.innerHTML = '<i class="ph ph-floppy-disk"></i> Simpan Absensi';
       }
     };
+  },
+  async renderUmmiDashboard(container) {
+    Router.setTitle('Beranda Guru UMMI', "Selamat datang di Dasbor Pembelajaran Al-Qur'an & Metode Ummi.");
+    const today = new Date();
+    const dateStr = today.toISOString().slice(0, 10);
+    const timeStr = today.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+    const uid = Auth.currentUser.uid;
+    const [ummiClasses, myAtt] = await Promise.all([
+      DB.getUmmiClasses(),
+      DB.getTeacherAttendance(dateStr, uid)
+    ]);
+    const classArr = DB.toArray(ummiClasses);
+    let myClasses = classArr.filter(c => c.teacherId === uid);
+    if (!myClasses.length) {
+      const assigns = Auth.currentAssignments || AppConfig.getRoleAssignments(Auth.userData || {});
+      myClasses = classArr.filter(c => assigns.some(a => a.toLowerCase().includes(c.name.toLowerCase().replace(/[^a-z0-9]/g, ''))));
+    }
+    const rombelName = myClasses.map(c => c.name).join(', ') || 'Metode Ummi';
+    const totalEnrolled = myClasses.reduce((sum, c) => sum + Object.keys(c.students || {}).length, 0);
+    const teacherName = AppConfig.formatUserName(Auth.userData || Auth.currentUser) || 'Ustadz / Ustadzah';
+    let attStatus = 'Belum Presensi';
+    let attClass = 'badge-warning';
+    if (myAtt) {
+      if (myAtt.time_out) {
+        attStatus = 'Sudah Pulang (' + myAtt.time_out + ')';
+        attClass = 'badge-success';
+      } else if (myAtt.time_in) {
+        attStatus = 'Sudah Datang (' + myAtt.time_in + ')';
+        attClass = 'badge-success';
+      }
+    }
+    const assigns = Auth.currentAssignments || AppConfig.getRoleAssignments(Auth.userData || {});
+    const isKoord = assigns.includes('KOORD_UMMI');
+    container.innerHTML = `
+      <div class="card hero-panel">
+        <div class="hero-panel__inner">
+          <div>
+            <p class="hero-panel__meta">${today.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+            <h2 class="hero-panel__time">${timeStr}</h2>
+            <p class="hero-panel__meta" style="margin-top:6px;"><strong style="font-size:16px;">${AppConfig.escapeHtml(teacherName)}</strong> · Pengampu ${AppConfig.escapeHtml(rombelName)}</p>
+          </div>
+          <div class="hero-panel__status">
+            <p class="hero-panel__meta">Status Kehadiran</p>
+            <span class="badge ${attClass}">${attStatus}</span>
+          </div>
+        </div>
+      </div>
+      <section class="card-grid section-spacer">
+        <div class="card stat-card">
+          <div class="stat-icon stat-icon--primary"><i class="ph ph-chalkboard-teacher"></i></div>
+          <div><p class="stat-value">${myClasses.length}</p><p class="stat-label text-muted">Rombel Diampu</p></div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-icon stat-icon--success"><i class="ph ph-users-three"></i></div>
+          <div><p class="stat-value">${totalEnrolled}</p><p class="stat-label text-muted">Santri Binaan</p></div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-icon stat-icon--danger"><i class="ph ph-calendar-check"></i></div>
+          <div><p class="stat-value">${myAtt ? (myAtt.time_in || 'Hadir') : 'Belum'}</p><p class="stat-label text-muted">Presensi Datang</p></div>
+        </div>
+      </section>
+      <section class="card section-spacer">
+        <div class="card-header">
+          <h3 class="card-title"><i class="ph ph-lightning"></i> Menu Utama Pembelajaran UMMI</h3>
+        </div>
+        <div class="card-body">
+          <div class="quick-nav-grid">
+            <a href="#/attendance" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-map-pin"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Presensi Kehadiran</div>
+                <div class="quick-nav-desc">Catat presensi harian guru via GPS sekolah</div>
+              </div>
+            </a>
+            <a href="#/guru/ummi/classes" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-chalkboard-teacher"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Rombel Ummi Saya</div>
+                <div class="quick-nav-desc">Daftar santri & kelompok jilid yang diampu</div>
+              </div>
+            </a>
+            <a href="#/guru/ummi/progress" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-book-open"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Jurnal Harian Jilid</div>
+                <div class="quick-nav-desc">Pencatatan halaman & capaian jilid harian</div>
+              </div>
+            </a>
+            <a href="#/guru/ummi/tahfidz" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-book-bookmark"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Setoran Tahfidz</div>
+                <div class="quick-nav-desc">Simak hafalan surat juz 30 - 1 santri</div>
+              </div>
+            </a>
+            <a href="#/guru/ummi/tasmi" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-headphones"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Ujian Tasmi'</div>
+                <div class="quick-nav-desc">Pengujian kelulusan tasmi' & munaqosyah</div>
+              </div>
+            </a>
+            <a href="#/curriculum/syllabus" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-upload-simple"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Perangkat & Modul Ummi</div>
+                <div class="quick-nav-desc">Unggah perangkat & panduan metode Ummi</div>
+              </div>
+            </a>
+            <a href="#/guru/portfolio" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-folder"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Portofolio Guru Ummi</div>
+                <div class="quick-nav-desc">Dokumentasi syahadah, sertifikat & lisensi</div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </section>
+      ${isKoord ? `
+      <section class="card section-spacer">
+        <div class="card-header">
+          <h3 class="card-title"><i class="ph ph-crown"></i> Menu Koordinator UMMI</h3>
+        </div>
+        <div class="card-body">
+          <div class="quick-nav-grid">
+            <a href="#/guru/ummi/koord/mapping" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-users-three"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Pemetaan Rombel & Guru</div>
+                <div class="quick-nav-desc">Atur pembagian jilid dan ustadz pengampu</div>
+              </div>
+            </a>
+            <a href="#/guru/ummi/koord/exams" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-check-circle"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Antrean Ujian Jilid</div>
+                <div class="quick-nav-desc">Verifikasi kelayakan munaqosyah santri</div>
+              </div>
+            </a>
+            <a href="#/guru/ummi/koord/tasmi" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-microphone-stage"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Plotting Guru Tasmi'</div>
+                <div class="quick-nav-desc">Jadwal dan penugasan penguji tasmi'</div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </section>
+      ` : ''}
+    `;
   },
   async renderEkstraDashboard(container) {
     Router.setTitle('Beranda Pembina Ekstrakurikuler', 'Selamat datang di Dasbor Digital Ekstrakurikuler.');

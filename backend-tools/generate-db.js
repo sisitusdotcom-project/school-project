@@ -99,7 +99,7 @@ for (let i = 0; i < guruLines.length; i++) {
   if (!rtdb.users[uid]) {
     rtdb.users[uid] = {
       name: name,
-      role: jabatan === 'Tenaga Kependidikan' ? 'tendik' : (jabatan === 'Kepala Sekolah' ? 'kepsek' : 'guru'),
+      role: jabatan === 'Tenaga Kependidikan' ? 'tendik' : (jabatan === 'Kepala Sekolah' ? 'kepsek' : (jabatan === 'Guru Ekstrakurikuler' ? 'guruEkskul' : (jabatan === 'Guru UMMI' ? 'guruUmmi' : 'guru'))),
       jabatan: jabatan,
       gender: gender,
       assignments: [],
