@@ -1240,13 +1240,13 @@ const GuruPages = {
       return;
     }
     const cards = classArr.map(c => `
-      <a href="#/guru/student-attendance/${c.id}" class="card class-card" style="display: flex; align-items: center; justify-content: space-between; text-decoration: none; color: inherit;">
+      <a href="#/guru/student-attendance/${c.id}" class="card class-card attendance-class-card">
         <div>
-          <h3 class="card-title" style="margin: 0 0 4px 0;">${AppConfig.escapeHtml(c.name)}</h3>
-          <p class="text-muted" style="margin: 0; font-size: 13px;">Input Absensi Kelas</p>
+          <h3 class="card-title attendance-class-title">${AppConfig.escapeHtml(c.name)}</h3>
+          <p class="text-muted attendance-class-subtitle">Input Absensi Kelas</p>
         </div>
-        <i class="ph ph-caret-right" style="color: #9CA3AF;"></i>
-      </div>
+        <i class="ph ph-caret-right attendance-class-caret"></i>
+      </a>
     `).join('');
     container.innerHTML = `<div class="card-grid">${cards}</div>`;
   },
@@ -1271,39 +1271,29 @@ const GuruPages = {
     const rows = studentArr.map((s, idx) => {
       const currentAtt = attData[s.id] || 'H'; 
       return `
-        <div class="card" style="margin-bottom: 8px; padding: 12px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
-          <div style="flex: 1; min-width: 150px;">
-            <p style="margin: 0; font-weight: 500; font-size: 14px;">${idx + 1}. ${AppConfig.escapeHtml(s.name)}</p>
+        <div class="card student-att-row">
+          <div class="student-att-col">
+            <p class="student-att-name">${idx + 1}. ${AppConfig.escapeHtml(s.name)}</p>
           </div>
-          <div class="att-toggle-group" data-stu="${s.id}" style="display: flex; background: #F3F4F6; border-radius: 8px; padding: 2px;">
-            <button class="att-btn ${currentAtt === 'H' ? 'active-h' : ''}" data-val="H" style="border: none; background: transparent; padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; color: #6B7280;">H</button>
-            <button class="att-btn ${currentAtt === 'S' ? 'active-s' : ''}" data-val="S" style="border: none; background: transparent; padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; color: #6B7280;">S</button>
-            <button class="att-btn ${currentAtt === 'I' ? 'active-i' : ''}" data-val="I" style="border: none; background: transparent; padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; color: #6B7280;">I</button>
-            <button class="att-btn ${currentAtt === 'A' ? 'active-a' : ''}" data-val="A" style="border: none; background: transparent; padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; color: #6B7280;">A</button>
+          <div class="att-toggle-group" data-stu="${s.id}">
+            <button type="button" class="att-btn ${currentAtt === 'H' ? 'active-h' : ''}" data-val="H">H</button>
+            <button type="button" class="att-btn ${currentAtt === 'S' ? 'active-s' : ''}" data-val="S">S</button>
+            <button type="button" class="att-btn ${currentAtt === 'I' ? 'active-i' : ''}" data-val="I">I</button>
+            <button type="button" class="att-btn ${currentAtt === 'A' ? 'active-a' : ''}" data-val="A">A</button>
           </div>
         </div>
       `;
     }).join('');
-    const style = `
-      <style>
-        .att-btn { transition: all 0.2s; }
-        .att-btn.active-h { background: #10B981; color: white !important; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-        .att-btn.active-s { background: #3B82F6; color: white !important; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-        .att-btn.active-i { background: #F59E0B; color: white !important; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-        .att-btn.active-a { background: #EF4444; color: white !important; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-      </style>
-    `;
     container.innerHTML = `
-      ${style}
-      <div style="margin-bottom:16px"><a href="#/guru/student-attendance" class="btn btn-outline"><i class="ph ph-arrow-left"></i> Kembali</a></div>
-      <div class="card" style="margin-bottom: 16px; padding: 12px; background: #F8FAFC;">
-        <p style="margin: 0; font-size: 13px; color: #64748B;">Ketuk inisial untuk mengubah status: <strong>H</strong> (Hadir), <strong>S</strong> (Sakit), <strong>I</strong> (Izin), <strong>A</strong> (Alpa).</p>
+      <div class="attendance-back-bar"><a href="#/guru/student-attendance" class="btn btn-outline"><i class="ph ph-arrow-left"></i> Kembali</a></div>
+      <div class="card attendance-info-banner">
+        <p>Ketuk inisial untuk mengubah status: <strong>H</strong> (Hadir), <strong>S</strong> (Sakit), <strong>I</strong> (Izin), <strong>A</strong> (Alpa).</p>
       </div>
       <div id="student-list-container">
         ${rows}
       </div>
-      <div style="position: sticky; bottom: 16px; margin-top: 24px; z-index: 100;">
-        <button id="btn-save-att" class="btn btn-primary" style="width: 100%; padding: 14px; font-size: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+      <div class="attendance-save-wrapper">
+        <button id="btn-save-att" class="btn btn-primary btn-save-attendance">
           <i class="ph ph-floppy-disk"></i> Simpan Absensi
         </button>
       </div>
