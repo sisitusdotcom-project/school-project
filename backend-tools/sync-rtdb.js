@@ -14,10 +14,12 @@ async function syncDatabase() {
   const users = data.users || {};
   const classes = data.classes || {};
   const subjects = data.subjects || {};
+  const characters = data.characters || {};
   console.log(`Menyinkronkan ${Object.keys(users).length} pengguna, ${Object.keys(classes).length} kelas, dan ${Object.keys(subjects).length} mata pelajaran...`);
   await db.ref('users').update(users);
   await db.ref('classes').update(classes);
   await db.ref('subjects').update(subjects);
+  await db.ref('characters').update(characters);
   await Promise.all(Object.keys(users).map((uid) => db.ref(`users/${uid}/teachingRole`).remove()));
   console.log('Sinkronisasi RTDB berhasil!');
   process.exit(0);

@@ -103,10 +103,10 @@ const ITAdminPages = {
         const nameB = b.name || '';
         return nameA.localeCompare(nameB);
       });
-      let tsvContent = 'NO\tNO INDUK\tNISN\tNAMA\tKELAS/ROMBEL\tJENIS KELAMIN\n';
+      let tsvContent = 'NO\tNIS\tNISN\tNAMA\tKELAS/ROMBEL\tJENIS KELAMIN\n';
       students.forEach((s, i) => {
         const className = classesMap[s.classId] ? classesMap[s.classId].name : '-';
-        tsvContent += `${i + 1}\t${s.nis || ''}\t${s.nisn || ''}\t${s.name || '-'}\t${className}\t${s.gender || '-'}\n`;
+        tsvContent += `${i + 1}\t${AppConfig.getStudentNis(s)}\t${AppConfig.getStudentNisn(s)}\t${s.name || '-'}\t${className}\t${s.gender || '-'}\n`;
       });
       const blob = new Blob([tsvContent], { type: 'text/tab-separated-values;charset=utf-8;' });
       const link = document.createElement('a');

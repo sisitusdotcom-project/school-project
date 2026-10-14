@@ -1764,3 +1764,14 @@ td[colspan] > .text-muted {
 .rombel-subject-item{flex-direction:column;align-items:stretch;}
 .rombel-subject-controls{min-width:0;width:100%;}
 }
+.card-actions-wrapper{display:flex;flex-direction:column;gap:8px;width:100%;}
+.card-actions-row{display:flex;gap:6px;flex-wrap:wrap;width:100%;}
+.card-actions-row > *{min-width:0;}
+.class-teaching-note{font-size:12px;color:var(--text-muted);margin-bottom:8px;}
+.rapor-students-list{display:flex;flex-direction:column;gap:8px;max-height:420px;overflow-y:auto;padding-right:4px;}
+.rapor-student-row{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--bg-hover,rgba(0,0,0,0.03));border:1px solid var(--border-color);border-radius:var(--radius-md,8px);gap:12px;}
+.rapor-student-row > *{min-width:0;}
+.rapor-student-info{display:flex;align-items:center;gap:10px;flex:1;min-width:0;}
+@media(max-width:640px){
+.rapor-student-row{flex-direction:column;align-items:stretch;}
+}

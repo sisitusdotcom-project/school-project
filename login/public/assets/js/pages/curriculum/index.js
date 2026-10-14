@@ -86,7 +86,7 @@ const CurriculumPages = {
               <div class="quick-nav-icon"><i class="ph ph-chart-bar"></i></div>
               <div class="quick-nav-info">
                 <div class="quick-nav-title">Database Nilai</div>
-                <div class="quick-nav-desc">Rekap capaian akademik santri</div>
+                <div class="quick-nav-desc">Rekap capaian akademik murid</div>
               </div>
             </a>
             <a href="#/curriculum/evaluations" class="quick-nav-card">

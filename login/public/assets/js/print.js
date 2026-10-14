@@ -213,10 +213,10 @@ async function generateReport(studentId, container) {
                   <td style="width: 35%;">: <span>${cls.name}</span></td>
               </tr>
               <tr>
-                  <td>NISN / NBM</td>
-                  <td>: <span>${student.nis || '-'}</span></td>
+                  <td>NIS / NISN</td>
+                  <td>: <span>${(window.AppConfig && AppConfig.formatStudentIdentity) ? AppConfig.formatStudentIdentity(student, 'slash') : [student.nis, student.nisn].filter(Boolean).join(' / ') || '-'}</span></td>
                   <td>Fase</td>
-                  <td>: <span>${cls.phase || '-'}</span></td>
+                  <td>: <span>${(window.AppConfig && AppConfig.getClassPhase) ? AppConfig.getClassPhase(cls) : (cls.phase || '-')}</span></td>
               </tr>
               <tr>
                   <td>Sekolah</td>

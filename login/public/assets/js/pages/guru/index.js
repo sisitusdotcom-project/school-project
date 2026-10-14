@@ -87,7 +87,7 @@ const GuruPages = {
               <div class="quick-nav-icon"><i class="ph ph-users-three"></i></div>
               <div class="quick-nav-info">
                 <div class="quick-nav-title">Absensi Siswa</div>
-                <div class="quick-nav-desc">Presensi harian santri kelas</div>
+                <div class="quick-nav-desc">Presensi harian murid kelas</div>
               </div>
             </a>
             <a href="#/guru/classes" class="quick-nav-card">
@@ -107,31 +107,110 @@ const GuruPages = {
     `;
   },
   async renderClasses(container) {
-    Router.setTitle('Kelas Saya', 'Pilih kelas untuk menilai karakter dan akademik.');
-    const classArr = await DB.getClassesForTeacher(Auth.currentUser.uid);
-    const students = await DB.getAllStudents();
+    Router.setTitle('Kelas & E-Rapor', 'Pusat pengelolaan penilaian akademik, karakter, dan pencetakan rapor rombel.');
+    const uid = Auth.currentUser.uid;
+    const [classArr, students, subjects] = await Promise.all([
+      DB.getClassesForTeacher(uid),
+      DB.getAllStudents(),
+      DB.getSubjects()
+    ]);
     const studentArr = DB.toArray(students);
     if (!classArr.length) {
-      container.innerHTML = `<div class="card"><p class="text-muted">Anda belum ditugaskan mengajar di kelas manapun. Hubungi admin untuk mendapatkan akses.</p></div>`;
+      container.innerHTML = `<div class="card"><p class="text-muted">Anda belum ditugaskan mengajar di kelas manapun. Hubungi waka kurikulum untuk pemetaan rombel.</p></div>`;
       return;
     }
     const cards = classArr.map(c => {
-      const isWali = c.teacherId === Auth.currentUser.uid;
+      const isWali = c.teacherId === uid;
       const count = studentArr.filter(s => s.classId === c.id).length;
+      const mySubjectIds = Object.keys(c.subjectTeachers || {}).filter(subId => c.subjectTeachers[subId] === uid);
+      const mySubjectNames = mySubjectIds.map(sid => (subjects[sid] && subjects[sid].name) || sid);
+      const firstSubId = mySubjectIds[0] || '';
+      let roleBadge = '';
+      let teachingNote = '';
+      let actionButtons = '';
+      if (isWali) {
+        roleBadge = '<span class="badge badge-primary"><i class="ph ph-star"></i> Wali Kelas</span>';
+        teachingNote = mySubjectNames.length ? `Wali Kelas · Mengampu: ${AppConfig.escapeHtml(mySubjectNames.join(', '))}` : 'Wali Kelas & Penanggung Jawab Rapor Rombel';
+        actionButtons = `
+          <div class="card-actions-wrapper">
+            <div class="card-actions-row">
+              <a href="#/guru/academic?classId=${c.id}" class="btn btn-primary btn-sm"><i class="ph ph-check-square"></i> Input Nilai Mapel</a>
+              <a href="#/guru/assess/${c.id}" class="btn btn-outline btn-sm"><i class="ph ph-star"></i> Nilai Karakter (P3)</a>
+            </div>
+            <div class="card-actions-row">
+              <a href="#/guru/observe/${c.id}" class="btn btn-outline btn-sm"><i class="ph ph-note-pencil"></i> Catatan Rapor</a>
+              <button type="button" class="btn btn-outline btn-sm btn-print-modal-cls" data-print-cls="${c.id}"><i class="ph ph-printer"></i> Cetak Rapor Murid</button>
+            </div>
+          </div>
+        `;
+      } else {
+        roleBadge = '<span class="badge badge-success"><i class="ph ph-chalkboard-teacher"></i> Guru Mapel</span>';
+        teachingNote = mySubjectNames.length ? `Mengampu: <strong>${AppConfig.escapeHtml(mySubjectNames.join(', '))}</strong>` : 'Guru Pengampu Mata Pelajaran';
+        actionButtons = `
+          <div class="card-actions-wrapper">
+            <div class="card-actions-row">
+              <a href="#/guru/academic?classId=${c.id}${firstSubId ? `&subjectId=${firstSubId}` : ''}" class="btn btn-primary btn-sm"><i class="ph ph-check-square"></i> Input Nilai ${AppConfig.escapeHtml(mySubjectNames[0] || 'Mapel')}</a>
+              <a href="#/guru/observe/${c.id}" class="btn btn-outline btn-sm"><i class="ph ph-chat-text"></i> Catatan</a>
+            </div>
+          </div>
+        `;
+      }
       return `
         <div class="card class-card">
           <div class="card-header">
             <h3 class="card-title">${AppConfig.escapeHtml(c.name)}</h3>
-            ${isWali ? '<span class="badge badge-primary">Wali Kelas</span>' : '<span class="badge badge-success">Guru Mapel</span>'}
+            ${roleBadge}
           </div>
-          <p class="text-muted">${count} siswa terdaftar</p>
-          <div class="card-actions">
-            <a href="#/guru/assess/${c.id}" class="btn btn-primary btn-sm"><i class="ph ph-note-pencil"></i> Nilai Karakter</a>
-            <a href="#/guru/observe/${c.id}" class="btn btn-outline btn-sm"><i class="ph ph-chat-text"></i> Catatan</a>
-          </div>
+          <div class="class-teaching-note">${teachingNote}</div>
+          <p class="text-muted">${count} murid terdaftar</p>
+          ${actionButtons}
         </div>`;
     }).join('');
-    container.innerHTML = `<div class="card-grid">${cards}</div>`;
+    container.innerHTML = `
+      <div class="card-grid">${cards}</div>
+      <div class="modal-overlay" id="modal-rapor-print">
+        <div class="modal modal-lg">
+          <div class="modal-header">
+            <h3 class="modal-title" id="rapor-modal-title">Cetak Lembar Rapor F4</h3>
+            <button class="btn-icon" data-close-modal="modal-rapor-print"><i class="ph ph-x"></i></button>
+          </div>
+          <div class="modal-body">
+            <p class="text-muted soft-note">Pilih murid untuk mencetak lembar rapor resmi format F4 (Cover, Nilai Akademik, Ekstrakurikuler, Catatan Wali Kelas, dan Presensi).</p>
+            <div id="rapor-students-list" class="rapor-students-list"></div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline" data-close-modal="modal-rapor-print">Tutup</button>
+          </div>
+        </div>
+      </div>
+    `;
+    container.querySelectorAll('.btn-print-modal-cls').forEach(btn => {
+      btn.onclick = () => {
+        const classId = btn.dataset.printCls;
+        const targetClass = classArr.find(c => c.id === classId);
+        if (!targetClass) return;
+        const classStudents = studentArr.filter(s => s.classId === classId).sort((a, b) => a.name.localeCompare(b.name));
+        document.getElementById('rapor-modal-title').textContent = `Cetak Rapor Murid - Kelas ${targetClass.name}`;
+        const listContainer = document.getElementById('rapor-students-list');
+        if (!classStudents.length) {
+          listContainer.innerHTML = '<div class="card text-center text-muted p-3">Belum ada data murid terdaftar di kelas ini.</div>';
+        } else {
+          listContainer.innerHTML = classStudents.map((s, idx) => `
+            <div class="rapor-student-row">
+              <div class="rapor-student-info">
+                <span class="badge badge-primary">${idx + 1}</span>
+                <div>
+                  <strong>${AppConfig.escapeHtml(s.name)}</strong>
+                  <div class="text-muted small">${AppConfig.formatStudentIdentity(s)}</div>
+                </div>
+              </div>
+              <a href="print.html?id=${s.id}" target="_blank" class="btn btn-primary btn-sm"><i class="ph ph-printer"></i> Cetak Rapor F4</a>
+            </div>
+          `).join('');
+        }
+        document.getElementById('modal-rapor-print').classList.add('active');
+      };
+    });
   },
   async renderAssessment(container, classId) {
     const [classes, charData, settings] = await Promise.all([
@@ -329,13 +408,19 @@ const GuruPages = {
     container.innerHTML = `<div class="card"><div class="obs-list">${items}</div></div>`;
   },
   async renderAcademicGrades(container) {
-    Router.setTitle('Nilai Akademik', 'Input nilai akhir dan capaian kompetensi siswa.');
-    const uid = Auth.currentUser.uid; const [classArr, subjects, settings] = await Promise.all([DB.getClassesForTeacher(uid), DB.getSubjects(), DB.getSettings()]);
+    Router.setTitle('Input Nilai Mapel', 'Input nilai akhir dan capaian kompetensi siswa per rombel.');
+    const uid = Auth.currentUser.uid;
+    const [classArr, subjects, settings] = await Promise.all([DB.getClassesForTeacher(uid), DB.getSubjects(), DB.getSettings()]);
     const subArr = DB.toArray(subjects).sort((a, b) => (a.order || 0) - (b.order || 0));
     if (!classArr.length || !subArr.length) {
       container.innerHTML = `<div class="card"><p class="text-muted">Data kelas atau mata pelajaran belum tersedia untuk Anda.</p></div>`;
       return;
     }
+    const hash = window.location.hash || '';
+    const queryString = hash.includes('?') ? hash.split('?')[1] : '';
+    const urlParams = new URLSearchParams(queryString);
+    const preClassId = urlParams.get('classId');
+    const preSubjectId = urlParams.get('subjectId');
     const classOpts = classArr.map(c => `<option value="${c.id}">${AppConfig.escapeHtml(c.name)}</option>`).join('');
     container.innerHTML = `
       <div class="card" style="margin-bottom:20px">
@@ -343,28 +428,27 @@ const GuruPages = {
           <div class="form-group" style="margin-bottom:0;flex:1;min-width:200px">
             <label>Pilih Kelas</label>
             <select id="ac-class" required>
-              <option value="">— Pilih Kelas —</option>
+              <option value="">Pilih Kelas</option>
               ${classOpts}
             </select>
           </div>
           <div class="form-group" style="margin-bottom:0;flex:1;min-width:200px">
             <label>Mata Pelajaran</label>
             <select id="ac-subject" required disabled>
-              <option value="">— Pilih Mata Pelajaran —</option>
+              <option value="">Pilih Mata Pelajaran</option>
             </select>
           </div>
           <button type="submit" class="btn btn-primary"><i class="ph ph-magnifying-glass"></i> Tampilkan</button>
         </form>
       </div>
       <div id="academic-container"></div>
-    `;
-    document.getElementById('ac-class').addEventListener('change', (e) => {
-      const classId = e.target.value;
+    `;    const populateSubjectsForClass = (classId) => {
       const subSelect = document.getElementById('ac-subject');
-      subSelect.innerHTML = '<option value="">— Pilih Mata Pelajaran —</option>';
+      if (!subSelect) return [];
+      subSelect.innerHTML = '<option value="">Pilih Mata Pelajaran</option>';
       if (!classId) {
         subSelect.disabled = true;
-        return;
+        return [];
       }
       const cls = classArr.find(c => c.id === classId);
       const isWali = cls && cls.teacherId === uid;
@@ -381,8 +465,11 @@ const GuruPages = {
         subSelect.innerHTML += `<option value="${s.id}">${AppConfig.escapeHtml(s.name)}</option>`;
       });
       subSelect.disabled = availableSubjects.length === 0;
-    });
-    document.getElementById('filter-academic').onsubmit = async (e) => {
+      return availableSubjects;
+    };
+    document.getElementById('ac-class').addEventListener('change', (e) => {
+      populateSubjectsForClass(e.target.value);
+    });document.getElementById('filter-academic').onsubmit = async (e) => {
       e.preventDefault();
       const classId = document.getElementById('ac-class').value;
       const subjectId = document.getElementById('ac-subject').value;
@@ -459,6 +546,17 @@ const GuruPages = {
         }
       };
     };
+    if (preClassId && classArr.some(c => c.id === preClassId)) {
+      document.getElementById('ac-class').value = preClassId;
+      const avail = populateSubjectsForClass(preClassId);
+      if (preSubjectId && avail.some(s => s.id === preSubjectId)) {
+        document.getElementById('ac-subject').value = preSubjectId;
+        setTimeout(() => {
+          const form = document.getElementById('filter-academic');
+          if (form) form.dispatchEvent(new Event('submit', { cancelable: true }));
+        }, 50);
+      }
+    }
   },
   async renderAdditionalData(container) {
     Router.setTitle('Data Tambahan', 'Input Kokurikuler, Ekstrakurikuler, Kehadiran, dan Catatan Wali Kelas.');

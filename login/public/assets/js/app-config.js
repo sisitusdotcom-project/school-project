@@ -123,7 +123,7 @@
     ],
     'GURU_UMUM': [
       { hash: '#/attendance', icon: 'ph-map-pin', text: 'Presensi Kehadiran', group: 'Tugas Utama' },
-      { hash: '#/guru/academic', icon: 'ph-check-square', text: 'Nilai Akademik', group: 'Tugas Utama Guru' },
+      { hash: '#/guru/academic', icon: 'ph-check-square', text: 'Input Nilai Mapel', group: 'Tugas Utama Guru' },
       { hash: '#/curriculum/syllabus', icon: 'ph-upload-simple', text: 'Upload Perangkat Ajar', group: 'Tugas Utama Guru' },
       { hash: '#/guru/portfolio', icon: 'ph-folder', text: 'Portofolio Guru', group: 'Tugas Utama Guru' },
       { hash: '#/guru/observations', icon: 'ph-note-pencil', text: 'Riwayat Observasi', group: 'Tugas Utama Guru' }
@@ -131,7 +131,7 @@
     'WALI_KELAS': [
       { hash: '#/guru/student-attendance', icon: 'ph-users-three', text: 'Absensi Siswa', group: 'Tupoksi Wali Kelas' },
       { hash: '#/student-affairs/leaves', icon: 'ph-calendar-x', text: 'Perizinan Siswa Sakit/Izin', group: 'Tupoksi Wali Kelas' },
-      { hash: '#/guru/classes', icon: 'ph-chalkboard-teacher', text: 'E-Rapor (Kelas)', group: 'Tupoksi Wali Kelas' },
+      { hash: '#/guru/classes', icon: 'ph-chalkboard-teacher', text: 'Kelas & E-Rapor Rombel', group: 'Tupoksi Wali Kelas' },
       { hash: '#/guru/additional', icon: 'ph-folder-plus', text: 'Data Tambahan Rapor', group: 'Tupoksi Wali Kelas' }
     ],
     [ROLES.KEPSEK]: [
@@ -484,6 +484,49 @@
     if (assignment.startsWith('GURU_EKSTRA_')) return 'badge-outline';
     return 'badge-outline';
   }
+  function getStudentNis(student = {}) {
+    if (!student) return '';
+    return String(student.nis || student.noInduk || student.nomorInduk || '').trim();
+  }
+  function getStudentNisn(student = {}) {
+    if (!student) return '';
+    return String(student.nisn || '').trim();
+  }
+  function formatStudentIdentity(student = {}, format = 'inline') {
+    const nis = getStudentNis(student);
+    const nisn = getStudentNisn(student);
+    if (format === 'slash') {
+      if (nis && nisn) return `${nis} / ${nisn}`;
+      return nis || nisn || '-';
+    }
+    if (format === 'nis-only') {
+      return nis || '-';
+    }
+    if (format === 'nisn-only') {
+      return nisn || '-';
+    }
+    return `NIS: ${escapeHtml(nis || '-')} · NISN: ${escapeHtml(nisn || '-')}`;
+  }
+  function getClassPhase(classroom = {}, format = 'letter') {
+    let phase = '';
+    if (classroom && classroom.phase && typeof classroom.phase === 'string' && classroom.phase.trim() !== '' && classroom.phase.trim() !== '-') {
+      phase = classroom.phase.trim();
+    } else {
+      const raw = String((classroom && (classroom.name || classroom.id)) || '').trim();
+      const match = raw.match(/CLASS_(\d)_/) || raw.match(/^([1-6])\b/);
+      if (match) {
+        const grade = parseInt(match[1], 10);
+        if (grade === 1 || grade === 2) phase = 'A';
+        else if (grade === 3 || grade === 4) phase = 'B';
+        else if (grade === 5 || grade === 6) phase = 'C';
+      }
+    }
+    if (!phase || phase === '-') return '-';
+    if (format === 'full') {
+      return phase.startsWith('Fase ') ? phase : `Fase ${phase}`;
+    }
+    return phase.replace(/^Fase\s+/i, '');
+  }
   const APP_DEFAULTS = Object.freeze({
     googleDriveUploadUrl: 'https://script.google.com/macros/s/AKfycbwHNSb34p_FcX_dTQuw87viaZ9joh2rT3KdtMLBVvwpocWzyF3HICPUPRfPuy63LDsNsw/exec',
     attendanceWorkerUrl: 'https://musada-absensi.sisitusdotcom.workers.dev/',
@@ -525,6 +568,10 @@
     getRoleBadgeClass,
     getAssignmentBadgeClass,
     isTeachingAssignment,
-    formatUserName
+    formatUserName,
+    getStudentNis,
+    getStudentNisn,
+    formatStudentIdentity,
+    getClassPhase
   });
 })();

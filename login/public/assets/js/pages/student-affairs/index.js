@@ -1,6 +1,6 @@
 const StudentAffairsPages = {
   async renderDashboard(container) {
-    Router.setTitle('Kesiswaan', 'Pusat pembinaan santri, pemantauan disiplin, prestasi kejuaraan, dan pendaftaran siswa baru.');
+    Router.setTitle('Kesiswaan', 'Pusat pembinaan murid, pemantauan disiplin, prestasi kejuaraan, dan pendaftaran siswa baru.');
     const todayStr = new Date().toISOString().split('T')[0];
     const [students, classes, spmbData, leavesData] = await Promise.all([
       DB.getAllStudents(),
@@ -18,7 +18,7 @@ const StudentAffairsPages = {
       <section class="card-grid section-spacer">
         <div class="card stat-card">
           <div class="stat-icon stat-icon--primary"><i class="ph ph-student"></i></div>
-          <div><p class="stat-value">${activeStudents}</p><p class="stat-label text-muted">Santri Aktif</p></div>
+          <div><p class="stat-value">${activeStudents}</p><p class="stat-label text-muted">Murid Aktif</p></div>
         </div>
         <div class="card stat-card">
           <div class="stat-icon stat-icon--success"><i class="ph ph-chalkboard"></i></div>
@@ -50,14 +50,14 @@ const StudentAffairsPages = {
               <div class="quick-nav-icon"><i class="ph ph-sparkle"></i></div>
               <div class="quick-nav-info">
                 <div class="quick-nav-title">Masa Pengenalan (MPLS)</div>
-                <div class="quick-nav-desc">Kegiatan orientasi santri baru</div>
+                <div class="quick-nav-desc">Kegiatan orientasi murid baru</div>
               </div>
             </a>
             <a href="#/admin/characters" class="quick-nav-card">
               <div class="quick-nav-icon"><i class="ph ph-star"></i></div>
               <div class="quick-nav-info">
                 <div class="quick-nav-title">Indikator Karakter</div>
-                <div class="quick-nav-desc">Rubrik adab & sikap santri</div>
+                <div class="quick-nav-desc">Rubrik adab & sikap murid</div>
               </div>
             </a>
             <a href="#/student-affairs/rules" class="quick-nav-card">
@@ -70,7 +70,7 @@ const StudentAffairsPages = {
             <a href="#/student-affairs/leaves" class="quick-nav-card">
               <div class="quick-nav-icon"><i class="ph ph-calendar-x"></i></div>
               <div class="quick-nav-info">
-                <div class="quick-nav-title">Perizinan Santri</div>
+                <div class="quick-nav-title">Perizinan Murid</div>
                 <div class="quick-nav-desc">Validasi izin sakit & cuti</div>
               </div>
             </a>
@@ -78,14 +78,14 @@ const StudentAffairsPages = {
               <div class="quick-nav-icon"><i class="ph ph-trophy"></i></div>
               <div class="quick-nav-info">
                 <div class="quick-nav-title">Lomba & Prestasi</div>
-                <div class="quick-nav-desc">Portofolio kejuaraan santri</div>
+                <div class="quick-nav-desc">Portofolio kejuaraan murid</div>
               </div>
             </a>
             <a href="#/student-affairs/scholarships" class="quick-nav-card">
               <div class="quick-nav-icon"><i class="ph ph-graduation-cap"></i></div>
               <div class="quick-nav-info">
                 <div class="quick-nav-title">Data Beasiswa & PIP</div>
-                <div class="quick-nav-desc">Seleksi santri penerima beasiswa</div>
+                <div class="quick-nav-desc">Seleksi murid penerima beasiswa</div>
               </div>
             </a>
             <a href="#/student-affairs/alumni" class="quick-nav-card">
@@ -103,7 +103,7 @@ const StudentAffairsPages = {
           <h3 class="card-title"><i class="ph ph-download-simple"></i> Ekspor Master Data Siswa</h3>
         </div>
         <div class="card-body">
-          <p class="text-muted">Unduh buku induk santri aktif lengkap dengan nomor induk, NISN, rombel kelas, dan jenis kelamin.</p>
+          <p class="text-muted">Unduh buku induk murid aktif lengkap dengan NIS, NISN, rombel kelas, dan jenis kelamin.</p>
           <div class="button-group section-spacer">
             <button id="btn-export-excel" class="btn btn-primary">
               <i class="ph ph-file-xls"></i> Export Excel
@@ -119,8 +119,8 @@ const StudentAffairsPages = {
     classList.forEach((c) => { classMap[c.id] = c.name; });
     const exportData = studentList.map((s, index) => ({
       No: index + 1,
-      NIS: s.nis || '-',
-      NISN: s.nisn || '-',
+      NIS: AppConfig.getStudentNis(s) || '-',
+      NISN: AppConfig.getStudentNisn(s) || '-',
       Nama: s.name || '-',
       'L/P': s.gender || '-',
       Kelas: classMap[s.classId] || s.classId || '-'
@@ -158,7 +158,7 @@ const StudentAffairsPages = {
         doc.setFontSize(14);
         doc.text('DAFTAR INDUK SISWA SD MUHAMMADIYAH 1 SEDATI', 40, 40);
         doc.setFontSize(9);
-        doc.text(`Tanggal Cetak: ${todayStr} | Total Santri: ${studentList.length}`, 40, 56);
+        doc.text(`Tanggal Cetak: ${todayStr} | Total Murid: ${studentList.length}`, 40, 56);
         const headers = [['No', 'NIS', 'NISN', 'Nama Siswa', 'L/P', 'Kelas']];
         const rows = exportData.map((d) => [d.No, d.NIS, d.NISN, d.Nama, d['L/P'], d.Kelas]);
         doc.autoTable({

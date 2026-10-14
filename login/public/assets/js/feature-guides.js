@@ -173,14 +173,14 @@ const FeatureGuides = {
       from: 'Calon Wali Murid Publik (via spmb.html)',
       to: 'Panitia PPDB Kesiswaan & Bendahara',
       rel: 'spmb_registrations (Pintu tunggal pendaftaran siswa baru)',
-      usage: 'Verifikasi berkas calon santri baru, cek bukti transfer formulir, dan ubah status menjadi Diterima / Menunggu Berkas.'
+      usage: 'Verifikasi berkas calon murid baru, cek bukti transfer formulir, dan ubah status menjadi Diterima / Menunggu Berkas.'
     },
     '#/student-affairs/mpls': {
       func: 'Masa Pengenalan Lingkungan Sekolah: perencanaan orientasi, pembagian gugus siswa baru, dan mentor pendamping.',
       from: 'Panitia MPLS Kesiswaan',
       to: 'Siswa Baru Kelas 1 & Guru Pembimbing',
       rel: 'student_affairs/mpls (Pengelompokan gugus dan jadwal materi)',
-      usage: 'Petakan siswa baru ke dalam Gugus 1-4, tentukan guru mentor pendamping, dan pantau adaptasi lingkungan santri.'
+      usage: 'Petakan siswa baru ke dalam Gugus 1-4, tentukan guru mentor pendamping, dan pantau adaptasi lingkungan murid.'
     },
     '#/student-affairs/rules': {
       func: 'Pencatatan pelanggaran disiplin siswa, akumulasi poin pembinaan, dan alur penanganan kekerasan/bullying (TPPK).',
@@ -211,7 +211,7 @@ const FeatureGuides = {
       usage: 'Verifikasi berkas kelayakan siswa dan setujui status beasiswa. Bendahara hanya dapat mencairkan siswa yang di-ACC di sini.'
     },
     '#/student-affairs/alumni': {
-      func: 'Tracer study data kelulusan santri, jalur kelulusan, dan penelusuran studi lanjutan ke jenjang SMP/MTs/Pesantren.',
+      func: 'Tracer study data kelulusan murid, jalur kelulusan, dan penelusuran studi lanjutan ke jenjang SMP/MTs/Pesantren.',
       from: 'Tim Kesiswaan / Alumni',
       to: 'Sekolah, Yayasan, dan Publik',
       rel: 'student_affairs/alumni (Rekam jejak alumni dan profil lulusan)',
@@ -372,56 +372,56 @@ const FeatureGuides = {
       usage: 'Unggah berkas dokumen pengembangan keprofesian pribadi Anda secara aman dan terorganisir.'
     },
     '#/guru/ummi/koord/mapping': {
-      func: 'Pemetaan kelompok mengaji metode Ummi: mengelompokkan santri per jilid (1-6, Al-Quran, Tajwid) dan guru pengampu.',
+      func: 'Pemetaan kelompok mengaji metode Ummi: mengelompokkan murid per jilid (1-6, Al-Quran, Tajwid) dan guru pengampu.',
       from: 'Koordinator Ummi',
-      to: 'Guru Ummi & Santri',
+      to: 'Guru Ummi & Murid',
       rel: 'ummi_classes (SSOT Rombel Halaqah Al-Quran)',
-      usage: 'Tentukan guru pembina halaqah dan masukkan daftar santri berdasarkan capaian jilid kemampuan membacanya.'
+      usage: 'Tentukan guru pembina halaqah dan masukkan daftar murid berdasarkan capaian jilid kemampuan membacanya.'
     },
     '#/guru/ummi/progress': {
-      func: 'Jurnal harian mengaji santri: mencatat capaian jilid, halaman, kelancaran bacaan, dan catatan tajwid/makhroj.',
+      func: 'Jurnal harian mengaji murid: mencatat capaian jilid, halaman, kelancaran bacaan, dan catatan tajwid/makhroj.',
       from: 'Guru Ummi Halaqah',
-      to: 'Santri, Koordinator Ummi, dan Orang Tua',
+      to: 'Murid, Koordinator Ummi, dan Orang Tua',
       rel: 'ummi_progress (Tampil realtime di dashboard wali murid)',
-      usage: 'Pilih nama santri pada sesi mengaji hari ini, catat jilid dan nomor halaman bacaan, lalu klik Simpan Progres.'
+      usage: 'Pilih nama murid pada sesi mengaji hari ini, catat jilid dan nomor halaman bacaan, lalu klik Simpan Progres.'
     },
     '#/guru/ummi/tahfidz': {
-      func: 'Pencatatan setoran hafalan Al-Quran santri (Juz 30 s/d Juz 1) beserta status kelancaran mutqin.',
+      func: 'Pencatatan setoran hafalan Al-Quran murid (Juz 30 s/d Juz 1) beserta status kelancaran mutqin.',
       from: 'Guru Pembimbing Tahfidz',
-      to: 'Santri, Koordinator, dan Orang Tua',
+      to: 'Murid, Koordinator, dan Orang Tua',
       rel: 'ummi_tahfidz (Rekam jejak target hafalan juz anak)',
-      usage: 'Pilih surah dan rentang ayat yang disetorkan santri, beri predikat kelancaran, dan simpan catatan hafalan.'
+      usage: 'Pilih surah dan rentang ayat yang disetorkan murid, beri predikat kelancaran, dan simpan catatan hafalan.'
     },
     '#/guru/ummi/tasmi': {
       func: 'Penilaian majelis tasmi terbuka: menguji hafalan sekali duduk di hadapan dewan penguji resmi.',
       from: 'Guru Penguji Tasmi',
-      to: 'Koordinator Ummi & Rapor Tahfidz Santri',
+      to: 'Koordinator Ummi & Rapor Tahfidz Murid',
       rel: 'ummi_tasmi_results (Sertifikasi kelulusan hafalan Al-Quran)',
       usage: 'Penguji menilai aspek kelancaran, fashohah, dan makharijul huruf selama majelis tasmi berlangsung.'
     },
     '#/guru/ekstra/syllabus': {
       func: 'Penyusunan target kurikulum dan program latihan mingguan cabang ekstrakurikuler selama satu semester.',
       from: 'Pembina Cabang Ekstrakurikuler',
-      to: 'Kesiswaan & Santri Peserta Ekskul',
+      to: 'Kesiswaan & Murid Peserta Ekskul',
       rel: 'ekstra/syllabus (Panduan modul latihan ekskul)',
       usage: 'Input materi pembinaan per pertemuan mingguan untuk panduan latihan fisik, seni, atau sains.'
     },
     '#/guru/ekstra/attendance': {
-      func: 'Presensi kehadiran santri peserta ekstrakurikuler pada setiap sesi latihan mingguan.',
+      func: 'Presensi kehadiran murid peserta ekstrakurikuler pada setiap sesi latihan mingguan.',
       from: 'Pembina Ekstrakurikuler',
       to: 'Kesiswaan & Orang Tua Murid',
       rel: 'ekstra/attendance (Syarat kelayakan penilaian rapor ekskul)',
-      usage: 'Buka form absensi pada hari latihan, centang santri yang hadir, sakit, atau berhalangan.'
+      usage: 'Buka form absensi pada hari latihan, centang murid yang hadir, sakit, atau berhalangan.'
     },
     '#/guru/extracurriculars': {
-      func: 'Penilaian predikat rapor ekstrakurikuler (Sangat Baik / Baik / Cukup) beserta deskripsi bakat santri.',
+      func: 'Penilaian predikat rapor ekstrakurikuler (Sangat Baik / Baik / Cukup) beserta deskripsi bakat murid.',
       from: 'Pembina Ekstrakurikuler',
       to: 'Wali Kelas & Cetak E-Rapor Murid',
       rel: 'ekstra/grades (Terkoneksi langsung ke lembar nilai rapor wali kelas)',
-      usage: 'Berikan predikat nilai dan kalimat deskripsi capaian bakat santri untuk otomatis dicetak di lembar E-Rapor.'
+      usage: 'Berikan predikat nilai dan kalimat deskripsi capaian bakat murid untuk otomatis dicetak di lembar E-Rapor.'
     },
     '#/guru/ekstra/talents': {
-      func: 'Pemetaan bibit santri berbakat untuk pembinaan intensif dan seleksi delegasi perlombaan resmi (O2SN, FLS2N).',
+      func: 'Pemetaan bibit murid berbakat untuk pembinaan intensif dan seleksi delegasi perlombaan resmi (O2SN, FLS2N).',
       from: 'Pembina Ekstrakurikuler',
       to: 'Waka Kesiswaan',
       rel: 'ekstra/talents (Database atlet & talenta sekolah)',
@@ -431,7 +431,7 @@ const FeatureGuides = {
       func: 'Portal terpadu orang tua: pantau kehadiran anak setiap pagi, progres mengaji Ummi/Tahfidz, catatan guru, dan rapor.',
       from: 'Wali Kelas & Guru Al-Quran',
       to: 'Orang Tua / Wali Murid',
-      rel: 'Multi-Node Santri (attendance_records, ummi_progress, student_bills)',
+      rel: 'Multi-Node Murid (attendance_records, ummi_progress, student_bills)',
       usage: 'Lihat ringkasan aktivitas ananda hari ini, ajukan permohonan izin jika sakit, dan cek tagihan SPP online.'
     },
     '#/curriculum': {
@@ -442,11 +442,11 @@ const FeatureGuides = {
       usage: 'Pantau persentase kelengkapan perangkat ajar guru dan distribusi jadwal mengajar untuk evaluasi mutu pembelajaran.'
     },
     '#/student-affairs': {
-      func: 'Panel kontrol monitoring kesiswaan terpadu (kedisiplinan, prestasi santri, rekapitulasi perizinan/sakit, dan status SPMB/PPDB).',
+      func: 'Panel kontrol monitoring kesiswaan terpadu (kedisiplinan, prestasi murid, rekapitulasi perizinan/sakit, dan status SPMB/PPDB).',
       from: 'Wali Kelas, Guru BK, Panitia SPMB, dan Pembina Prestasi',
       to: 'Waka Kesiswaan & Kepala Sekolah',
       rel: 'Multi-Node Kesiswaan (student_affairs/*, achievements, violations, leaves)',
-      usage: 'Tinjau tren kedisiplinan santri, pantau rekapitulasi perizinan harian, dan pantau progres pendaftaran murid baru.'
+      usage: 'Tinjau tren kedisiplinan murid, pantau rekapitulasi perizinan harian, dan pantau progres pendaftaran murid baru.'
     },
     '#/finance': {
       func: 'Ikhtisar neraca keuangan madrasah (realisasi RKAS, arus kas masuk/keluar, penerimaan SPP/infak, dan serapan dana BOS).',
@@ -470,7 +470,7 @@ const FeatureGuides = {
       usage: 'Pantau rasio aset layak pakai, tindak lanjuti laporan kerusakan fasilitas gedung, dan rencanakan pengadaan baru.'
     },
     '#/kepsek/reports': {
-      func: 'Monitoring berkala catatan wali kelas, tren presensi santri per rombel, dan progres penerbitan E-Rapor antar jenjang.',
+      func: 'Monitoring berkala catatan wali kelas, tren presensi murid per rombel, dan progres penerbitan E-Rapor antar jenjang.',
       from: 'Wali Kelas & Tim Kurikulum',
       to: 'Kepala Sekolah',
       rel: 'classes, academic_grades, student_attendance',
@@ -484,37 +484,37 @@ const FeatureGuides = {
       usage: 'Tinjau catatan rekomendasi dari supervisor, pelajari poin perbaikan metode ajar, dan unggah tindak lanjut perbaikan.'
     },
     '#/guru/english/classes': {
-      func: 'Pengelolaan kelompok belajar kemampuan bahasa Inggris santri berdasarkan tingkat kecakapan (Beginner, Intermediate, Advanced).',
+      func: 'Pengelolaan kelompok belajar kemampuan bahasa Inggris murid berdasarkan tingkat kecakapan (Beginner, Intermediate, Advanced).',
       from: 'Koordinator / Tim English Lab',
       to: 'Guru Mapel B. Inggris & Siswa',
       rel: 'english_classes & student_directory',
-      usage: 'Pilih kelompok kelas bahasa untuk melihat daftar santri aktif, jadwal praktikum lab, dan modul speaking mingguan.'
+      usage: 'Pilih kelompok kelas bahasa untuk melihat daftar murid aktif, jadwal praktikum lab, dan modul speaking mingguan.'
     },
     '#/guru/english/progress': {
-      func: 'Pencatatan capaian kompetensi lisan (Vocabulary, Pronunciation, Fluency, Grammar) santri dalam program English Lab.',
+      func: 'Pencatatan capaian kompetensi lisan (Vocabulary, Pronunciation, Fluency, Grammar) murid dalam program English Lab.',
       from: 'Guru Pembina English Lab',
       to: 'Koordinator Bahasa, Wali Kelas, & Orang Tua',
       rel: 'english_progress (Terkoneksi ke deskripsi rapor mulok)',
-      usage: 'Pilih nama santri, tentukan topik dialog speaking hari ini, lalu berikan skor kriteria dan feedback langsung.'
+      usage: 'Pilih nama murid, tentukan topik dialog speaking hari ini, lalu berikan skor kriteria dan feedback langsung.'
     },
     '#/guru/ummi/classes': {
-      func: 'Daftar santri bimbingan Al-Qur\'an metode Ummi yang diampu langsung oleh guru pengajar (Jilid 1-6, Al-Qur\'an, Ghorib, Tajwid).',
+      func: 'Daftar murid bimbingan Al-Qur\'an metode Ummi yang diampu langsung oleh guru pengajar (Jilid 1-6, Al-Qur\'an, Ghorib, Tajwid).',
       from: 'Koordinator Ummi (Plotting Rombel)',
       to: 'Guru Ummi yang Bertugas',
       rel: 'ummi_classes & ummi_students',
-      usage: 'Klik rombel halaqah Anda untuk melihat daftar santri, rekap jilid terakhir, dan memulai pencatatan tilawah harian.'
+      usage: 'Klik rombel halaqah Anda untuk melihat daftar murid, rekap jilid terakhir, dan memulai pencatatan tilawah harian.'
     },
     '#/guru/ummi/koord/exams': {
-      func: 'Manajemen pendaftaran, penjadwalan, dan verifikasi kelayakan santri untuk mengikuti munaqosyah jilid dan munaqosyah akhir Ummi.',
+      func: 'Manajemen pendaftaran, penjadwalan, dan verifikasi kelayakan murid untuk mengikuti munaqosyah jilid dan munaqosyah akhir Ummi.',
       from: 'Usulan Guru Ummi Halaqah',
       to: 'Koordinator Ummi & Tim Penguji',
       rel: 'ummi_exams (Syarat penerbitan sertifikat Ummi)',
-      usage: 'Tinjau santri yang diajukan naik jilid, tentukan tanggal ujian dan penguji resmi, lalu input hasil kelulusan.'
+      usage: 'Tinjau murid yang diajukan naik jilid, tentukan tanggal ujian dan penguji resmi, lalu input hasil kelulusan.'
     },
     '#/guru/ummi/koord/tasmi': {
       func: 'Penjadwalan majelis simaan Al-Qur\'an sekali duduk (1 Juz, 3 Juz, 5 Juz) serta penetapan ustadz/ustadzah penguji tasmi.',
       from: 'Koordinator Tahfidz / Ummi',
-      to: 'Penguji Tasmi & Santri Penghafal',
+      to: 'Penguji Tasmi & Murid Penghafal',
       rel: 'ummi_tasmi_schedule & student_tahfidz_records',
       usage: 'Jadwalkan majelis tasmi, tentukan target juz yang disimak, tunjuk guru penyimak, dan cetak sertifikat syahadah setelah lulus.'
     },
@@ -579,17 +579,17 @@ const FeatureGuides = {
       from: 'Bendahara Komite Sekolah',
       to: 'Pengurus Komite & Anggota Wali Murid',
       rel: 'komite/finance_records (Otonomi dana perwakilan orang tua murid)',
-      usage: 'Catat pemasukan kas komite dan penyaluran dana untuk kegiatan penunjang santri, lalu cetak laporan periodik.'
+      usage: 'Catat pemasukan kas komite dan penyaluran dana untuk kegiatan penunjang murid, lalu cetak laporan periodik.'
     },
     '#/komite/finance-paguyuban': {
-      func: 'Pembukuan kas internal paguyuban per rombel kelas (dana hias kelas, bingkisan wali kelas, konsumsi kegiatan santri).',
+      func: 'Pembukuan kas internal paguyuban per rombel kelas (dana hias kelas, bingkisan wali kelas, konsumsi kegiatan murid).',
       from: 'Bendahara Paguyuban Kelas',
       to: 'Orang Tua Murid Rombel Terkait',
       rel: 'komite/finance_paguyuban',
       usage: 'Pilih kelas binaan, catat iuran kas paguyuban dan pengeluaran kelas secara terbuka agar dapat ditinjau oleh sesama wali murid.'
     },
     '#/it-admin/sync': {
-      func: 'Pemetaan dan sinkronisasi data profil santri, rombel, dan guru dengan format ekspor/impor Dapodik & EMIS Kemenag.',
+      func: 'Pemetaan dan sinkronisasi data profil murid, rombel, dan guru dengan format ekspor/impor Dapodik & EMIS Kemenag.',
       from: 'Operator Data Madrasah',
       to: 'Pusat Data Kemendikbudristek & Kemenag',
       rel: 'students, personnel/directory, classes (SSOT Verifikasi Data Nasional)',
@@ -621,7 +621,7 @@ const FeatureGuides = {
       from: 'Tim Pengembang IT',
       to: 'Otomatisasi Notifikasi Wali Murid & Server Ujian',
       rel: 'system_integrations & notification_gateway',
-      usage: 'Atur koneksi API WhatsApp gateway untuk kirim bukti presensi santri otomatis ke orang tua, atau sambungkan server ujian CBT.'
+      usage: 'Atur koneksi API WhatsApp gateway untuk kirim bukti presensi murid otomatis ke orang tua, atau sambungkan server ujian CBT.'
     },
     '#/it-admin/dashboard': {
       func: 'Pusat telemetri operasional teknologi: monitoring lalu lintas API, kuota Google Drive, dan status geofence sekolah.',
@@ -726,7 +726,7 @@ const FeatureGuides = {
       'Menambah Mapel ke Rombel: Klik tombol \'Mapel\' pada baris kelas yang diinginkan. Pada jendela yang terbuka, pilih mata pelajaran dari Bank Mapel, lalu klik tombol \'+ Tambah ke Rombel\'.',
       'Menetapkan Guru Pengampu: Pilih nama guru pada kolom pengampu mapel. Jika dibiarkan Default, kewenangan pengisian nilai akan dipegang oleh Wali Kelas.',
       'Menghapus Mapel dari Rombel: Klik ikon tempat sampah merah pada baris mata pelajaran untuk menghapusnya khusus dari rombel ini (tidak memengaruhi rombel lain atau bank mapel sekolah).',
-      'Menyimpan Perubahan: Klik tombol \'Simpan Penugasan Rombel\'. Struktur mapel ini menjadi satu-satunya sumber acuan (SSOT) untuk input nilai akademik guru dan lembar cetak rapor santri.',
+      'Menyimpan Perubahan: Klik tombol \'Simpan Penugasan Rombel\'. Struktur mapel ini menjadi satu-satunya sumber acuan (SSOT) untuk input nilai akademik guru dan lembar cetak rapor murid.',
       'Menetapkan Wali Kelas: Klik ikon pensil pada baris kelas untuk memperbarui nama wali kelas pendamping.',
       'Kenaikan Kelas: Gunakan tombol \'Kenaikan Kelas\' di kanan atas untuk memproses kenaikan rombel secara massal pada akhir tahun ajaran.'
     ],
@@ -737,11 +737,12 @@ const FeatureGuides = {
       'Monitoring Distribusi Mapel: Kolom \'Guru Pengampu Terpetakan\' otomatis menampilkan jumlah rombel yang mengambil mapel tersebut beserta nama-nama guru pengajarnya.'
     ],
     '#/guru/academic': [
-      'Pilih kelas binaan Anda pada menu pilihan kelas.',
-      'Pilihan mata pelajaran yang muncul otomatis disesuaikan dengan mata pelajaran aktif di rombel tersebut (sesuai struktur kurikulum yang ditetapkan oleh Waka Kurikulum).',
-      'Jika Anda adalah Wali Kelas, Anda dapat memilih seluruh mata pelajaran yang diajarkan di kelas Anda. Jika Anda adalah Guru Mapel, Anda hanya dapat memilih mata pelajaran yang ditugaskan kepada Anda di rombel tersebut.',
-      'Klik tombol \'Tampilkan\' untuk memuat daftar seluruh santri.',
-      'Masukkan nilai angka (rentang 0-100) dan deskripsi capaian kompetensi, lalu klik tombol \'Simpan Nilai\'. Nilai ini otomatis menjadi sumber data resmi untuk lembar rapor.'
+      'Siapa yang Berhak Menginput: Guru Pengampu yang ditugaskan mengajar mata pelajaran tersebut di rombel bersangkutan, atau Wali Kelas untuk mata pelajaran kelas binaannya.',
+      'Cara Cepat dari Menu Kelas: Buka menu Kelas & E-Rapor, lalu klik tombol \'Input Nilai Mapel\' pada kartu kelas yang Anda ajar. Form akan otomatis memilih kelas dan mapel yang bersangkutan.',
+      'Cara Manual: Pilih kelas pada menu pilihan kelas, lalu pilih mata pelajaran yang Anda ampu (hanya mapel yang Anda ajar di kelas tersebut yang akan muncul).',
+      'Memuat Daftar Murid: Klik tombol \'Tampilkan\'. Daftar seluruh murid di kelas tersebut akan otomatis muncul.',
+      'Menginput Skor & Capaian: Masukkan nilai akhir angka (rentang 0-100) dan deskripsi capaian kompetensi siswa.',
+      'Menyimpan Nilai (SSOT): Klik tombol \'Simpan Nilai\'. Nilai ini otomatis menjadi sumber tunggal resmi yang mengalir ke lembar e-rapor wali kelas dan cetak rapor F4.'
     ],
     '#/curriculum/syllabus': [
       'Klik tombol \'Unggah Modul Ajar\' di pojok kanan atas.',
@@ -752,14 +753,14 @@ const FeatureGuides = {
     '#/guru/student-attendance': [
       'Halaman otomatis mendeteksi kelas binaan Anda sebagai Wali Kelas.',
       'Pilih tanggal absensi (secara default terisi tanggal hari ini).',
-      'Seluruh siswa secara bawaan berstatus Hadir (H). Klik pilihan Sakit (S), Izin (I), atau Alpa (A) bagi santri yang berhalangan hadir.',
+      'Seluruh siswa secara bawaan berstatus Hadir (H). Klik pilihan Sakit (S), Izin (I), atau Alpa (A) bagi murid yang berhalangan hadir.',
       'Klik tombol \'Simpan Absensi\'. Rekap kehadiran otomatis terakumulasi ke buku rapor siswa.'
     ],
     '#/guru/classes': [
-      'Pilih kelas binaan Anda pada daftar kelas yang tersedia.',
-      'Klik tombol \'Penilaian Karakter\' untuk mengisi penilaian sikap dan karakter Profil Pelajar Pancasila santri.',
-      'Klik tombol \'Data Tambahan Rapor\' untuk memeriksa dan melengkapi catatan kegiatan ekstrakurikuler serta catatan wali kelas.',
-      'Klik tombol \'Cetak Rapor\' untuk melihat pratinjau lembar rapor lengkap sebelum dibagikan ke wali murid.'
+      'Bagi Guru Mapel: Pada kartu kelas yang Anda ajar, klik tombol \'Input Nilai Mapel\' untuk langsung mengisi nilai mata pelajaran yang Anda ampu di kelas tersebut.',
+      'Bagi Wali Kelas: Kartu kelas binaan Anda dilengkapi tombol lengkap: \'Input Nilai Mapel\', \'Nilai Karakter (P3)\', \'Catatan Rapor\', dan \'Cetak Rapor Murid\'.',
+      'Penilaian Karakter Murid: Khusus Wali Kelas, klik \'Nilai Karakter (P3)\' untuk menilai aspek akhlaq, kemandirian, gotong royong, nalar kritis, kreativitas, dan kedisiplinan murid.',
+      'Mencetak Lembar Rapor F4: Khusus Wali Kelas, klik tombol \'Cetak Rapor Murid\' pada kartu kelas binaan Anda untuk membuka daftar murid dan mencetak lembar rapor format F4 resmi.'
     ],
     '#/admin/users': [
       'Gunakan kolom pencarian atau filter peran untuk menemukan akun guru, karyawan, atau orang tua murid.',
@@ -792,7 +793,7 @@ const FeatureGuides = {
       'Klik tombol \'Simpan Transaksi\'. Saldo pada Buku Kas Umum akan otomatis terhitung secara real-time.'
     ],
     '#/student-affairs/alumni': [
-      'Buka menu Penelusuran Alumni untuk mendata santri kelas 6 yang telah menyelesaikan studi.',
+      'Buka menu Penelusuran Alumni untuk mendata murid kelas 6 yang telah menyelesaikan studi.',
       'Klik tombol \'Tambah Alumni\' atau klik edit pada siswa yang sudah terdaftar.',
       'Pilih jenis sekolah lanjutan yang dituju (SMP, MTs, atau Pondok Pesantren) dan masukkan nama sekolah/pesantren tujuan.',
       'Klik tombol \'Simpan\'. Data ini tersimpan sebagai arsip rekam jejak kelulusan resmi sekolah.'
@@ -800,7 +801,7 @@ const FeatureGuides = {
     '#/student-affairs/ppdb': [
       'Pantau formulir pendaftaran calon peserta didik baru (SPMB / PPDB) yang masuk dari formulir daring sekolah.',
       'Klik pada nama calon siswa untuk memvalidasi berkas identitas dan status kelengkapan data.',
-      'Ubah status pendaftaran menjadi \'Diterima\' setelah calon santri dinyatakan lolos tahap observasi dan pemetaan.'
+      'Ubah status pendaftaran menjadi \'Diterima\' setelah calon murid dinyatakan lolos tahap observasi dan pemetaan.'
     ],
     '#/dashboard': [
       'Halaman beranda eksekutif menampilkan ringkasan metrik utama madrasah sesuai peran Anda.',

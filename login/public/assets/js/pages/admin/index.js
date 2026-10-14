@@ -82,7 +82,7 @@ const AdminPages = {
               <div class="quick-nav-icon"><i class="ph ph-star"></i></div>
               <div class="quick-nav-info">
                 <div class="quick-nav-title">Indikator Karakter</div>
-                <div class="quick-nav-desc">Rubrik adab & sikap santri</div>
+                <div class="quick-nav-desc">Rubrik adab & sikap murid</div>
               </div>
             </a>
             <a href="#/it-admin/backup" class="quick-nav-card">
@@ -435,7 +435,7 @@ const AdminPages = {
       const count = studentArr.filter(s => s.classId === c.id).length;
       return `
         <tr>
-          <td><strong>${AppConfig.escapeHtml(c.name)}</strong></td>
+          <td><strong>${AppConfig.escapeHtml(c.name)}</strong> <span class="badge badge-outline">Fase ${AppConfig.escapeHtml(AppConfig.getClassPhase(c))}</span></td>
           <td>${teacher ? teacher.name : '<span class="text-muted">Belum ditugaskan</span>'}</td>
           <td>${count} siswa</td>
           <td class="action-cell table-col-lg">
@@ -723,8 +723,10 @@ const AdminPages = {
     document.getElementById('form-cls').onsubmit = async (e) => {
       e.preventDefault();
       const id = document.getElementById('cls-id').value || null;
+      const clsName = document.getElementById('cls-name').value.trim();
       await DB.saveClass(id, {
-        name: document.getElementById('cls-name').value.trim(),
+        name: clsName,
+        phase: AppConfig.getClassPhase({ name: clsName, id }),
         teacherId: document.getElementById('cls-teacher').value || null
       });
       App.closeModal('modal-cls');
