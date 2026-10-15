@@ -1990,3 +1990,5 @@ td[colspan] > .text-muted {
 .attendance-alt-title i{font-size:16px;color:var(--primary-color,#2563eb);}
 .attendance-alt-text{margin:0 0 10px 0;font-size:12.5px;color:var(--text-muted);line-height:1.45;}
 .attendance-wa-report-btn{display:inline-flex;align-items:center;gap:6px;text-decoration:none;}
+.badge-info{background:var(--primary-light,#e0f2fe);color:var(--primary,#0284c7);}
+.komite-lead-text{margin:0 0 12px 0;}

@@ -183,8 +183,11 @@
       ]
     },
     '#/komite/activities': {
-      node: 'komite/activities', noun: 'Kegiatan Paguyuban', writeRoles: ['komite'], dateField: 'date',
-      subtitle: 'Data agenda dan kegiatan paguyuban wali murid.',
+      node: 'komite/activities', noun: 'Kegiatan Paguyuban', writeRoles: [R.KOMITE, R.PERSONNEL], dateField: 'date',
+      subtitle: 'Data agenda dan kegiatan paguyuban wali murid bersama madrasah.',
+      summary: [
+        { label: 'Total Kegiatan', icon: 'ph-calendar-check', tone: 'primary' }
+      ],
       fields: [
         date('date', 'Tanggal', { required: true }),
         t('title', 'Nama Kegiatan', { required: true }),
@@ -193,8 +196,12 @@
       ]
     },
     '#/komite/finance-paguyuban': {
-      node: 'komite/finance-paguyuban', noun: 'Keuangan Paguyuban', writeRoles: ['komite'], dateField: 'date',
+      node: 'komite/finance-paguyuban', noun: 'Keuangan Paguyuban', writeRoles: [R.KOMITE, R.FINANCE], dateField: 'date',
       subtitle: 'Laporan keuangan kas paguyuban.',
+      summary: [
+        { label: 'Total Pemasukan', icon: 'ph-download-simple', tone: 'success', sum: 'income', money: true },
+        { label: 'Total Pengeluaran', icon: 'ph-upload-simple', tone: 'danger', sum: 'expense', money: true }
+      ],
       fields: [
         date('date', 'Tanggal', { required: true }),
         t('title', 'Uraian Transaksi', { required: true }),

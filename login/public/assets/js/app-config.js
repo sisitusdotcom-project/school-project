@@ -20,6 +20,7 @@
     [ROLES.GURU_UMMI]: 'Guru UMMI',
     [ROLES.GURU_EKSKUL]: 'Guru Ekstrakurikuler',
     [ROLES.TENDIK]: 'Tenaga Kependidikan',
+    [ROLES.KOMITE]: 'Komite Sekolah',
     [ROLES.KEPSEK]: 'Kepala Sekolah',
     [ROLES.ADMIN]: 'Administrator Sistem',
     [ROLES.ORTU]: 'Orang Tua / Wali'
@@ -146,7 +147,9 @@
       { hash: '#/student-affairs', icon: 'ph-users-three', text: 'Monitoring Kesiswaan' },
       { hash: '#/finance', icon: 'ph-wallet', text: 'Monitoring Keuangan' },
       { hash: '#/personnel', icon: 'ph-briefcase', text: 'Monitoring Humas & Personalia' },
-      { hash: '#/facilities', icon: 'ph-building-office', text: 'Monitoring Sarpras' }
+      { hash: '#/facilities', icon: 'ph-building-office', text: 'Monitoring Sarpras' },
+      { hash: '#/komite/activities', icon: 'ph-users-three', text: 'Kegiatan Paguyuban', group: 'Monitoring Komite & Paguyuban' },
+      { hash: '#/komite/finance-paguyuban', icon: 'ph-wallet', text: 'Keuangan Paguyuban', group: 'Monitoring Komite & Paguyuban' }
     ],
     [ROLES.TENDIK]: [
       { hash: '#/dashboard', icon: 'ph-squares-four', text: 'Beranda' },
@@ -162,9 +165,9 @@
       { hash: '#/attendance', icon: 'ph-map-pin', text: 'Presensi Kehadiran' }
     ],
     [ROLES.KOMITE]: [
+      { hash: '#/dashboard', icon: 'ph-squares-four', text: 'Beranda' },
       { hash: '#/komite/activities', icon: 'ph-users-three', text: 'Kegiatan Paguyuban' },
-      { hash: '#/komite/finance-paguyuban', icon: 'ph-wallet', text: 'Keuangan Paguyuban' },
-      { hash: '#/komite/finance-komite', icon: 'ph-wallet', text: 'Keuangan Komite' }
+      { hash: '#/komite/finance-paguyuban', icon: 'ph-wallet', text: 'Keuangan Paguyuban' }
     ],
     [ROLES.ORTU]: [
       { hash: '#/dashboard', icon: 'ph-graduation-cap', text: 'Perkembangan Anak' },
@@ -208,7 +211,9 @@
       { hash: '#/personnel/complaints', icon: 'ph-chats', text: 'Layanan Pengaduan', group: 'Humas & Personalia: Komunikasi Publik & Aduan' },
       { hash: '#/personnel/documents', icon: 'ph-folder', text: 'Dokumen Kerja Sama', group: 'Humas & Personalia: Kemitraan & Dokumen' },
       { hash: '#/personnel/partnerships', icon: 'ph-handshake', text: 'Kemitraan & MoU', group: 'Humas & Personalia: Kemitraan & Dokumen' },
-      { hash: '#/personnel/events', icon: 'ph-calendar-star', text: 'Manajemen Acara', group: 'Humas & Personalia: Kemitraan & Dokumen' }
+      { hash: '#/personnel/events', icon: 'ph-calendar-star', text: 'Manajemen Acara', group: 'Humas & Personalia: Kemitraan & Dokumen' },
+      { hash: '#/komite/activities', icon: 'ph-users-three', text: 'Kegiatan Paguyuban', group: 'Humas & Personalia: Kemitraan & Dokumen' },
+      { hash: '#/komite/finance-paguyuban', icon: 'ph-wallet', text: 'Keuangan Paguyuban', group: 'Humas & Personalia: Kemitraan & Dokumen' }
     ],
     'STAF_HUMAS_PERSONALIA': [
       { hash: '#/personnel', icon: 'ph-briefcase', text: 'Dashboard Humas & Personalia', group: 'Humas & Personalia: Administrasi SDM' },
@@ -219,7 +224,9 @@
       { hash: '#/personnel/complaints', icon: 'ph-chats', text: 'Layanan Pengaduan', group: 'Humas & Personalia: Komunikasi Publik & Aduan' },
       { hash: '#/personnel/documents', icon: 'ph-folder', text: 'Dokumen Kerja Sama', group: 'Humas & Personalia: Kemitraan & Dokumen' },
       { hash: '#/personnel/partnerships', icon: 'ph-handshake', text: 'Kemitraan & MoU', group: 'Humas & Personalia: Kemitraan & Dokumen' },
-      { hash: '#/personnel/events', icon: 'ph-calendar-star', text: 'Manajemen Acara', group: 'Humas & Personalia: Kemitraan & Dokumen' }
+      { hash: '#/personnel/events', icon: 'ph-calendar-star', text: 'Manajemen Acara', group: 'Humas & Personalia: Kemitraan & Dokumen' },
+      { hash: '#/komite/activities', icon: 'ph-users-three', text: 'Kegiatan Paguyuban', group: 'Humas & Personalia: Kemitraan & Dokumen' },
+      { hash: '#/komite/finance-paguyuban', icon: 'ph-wallet', text: 'Keuangan Paguyuban', group: 'Humas & Personalia: Kemitraan & Dokumen' }
     ],
     'WAKA_KESISWAAN': [
       { hash: '#/student-affairs', icon: 'ph-users-three', text: 'Dashboard Kesiswaan', group: 'Kesiswaan: Umum' },
@@ -280,6 +287,7 @@
       { hash: '#/finance/proposals', icon: 'ph-file-text', text: 'Persetujuan Proposal', group: 'Keuangan: Penggajian & Proposal' },
       { hash: '#/finance/archives', icon: 'ph-archive-box', text: 'Arsip Bukti Transaksi', group: 'Keuangan: Dokumen & Laporan' },
       { hash: '#/finance/reports', icon: 'ph-file-text', text: 'LPJ & Sinkronisasi Kas', group: 'Keuangan: Dokumen & Laporan' },
+      { hash: '#/komite/finance-paguyuban', icon: 'ph-wallet', text: 'Kas Paguyuban & Komite', group: 'Keuangan: Dokumen & Laporan' },
       { hash: '#/finance/transparency', icon: 'ph-projector-screen', text: 'Publikasi Anggaran', group: 'Keuangan: Dokumen & Laporan' }
     ],
     'STAF_KEUANGAN': [
@@ -290,7 +298,8 @@
       { hash: '#/finance/scholarships', icon: 'ph-hand-coins', text: 'Pencairan Beasiswa & SPP', group: 'Keuangan: BOS & Beasiswa' },
       { hash: '#/finance/student-bills', icon: 'ph-receipt', text: 'Tagihan & SPP Siswa', group: 'Keuangan: BOS & Beasiswa' },
       { hash: '#/finance/archives', icon: 'ph-archive-box', text: 'Arsip Bukti Transaksi', group: 'Keuangan: Dokumen & Laporan' },
-      { hash: '#/finance/reports', icon: 'ph-file-text', text: 'LPJ & Sinkronisasi Kas', group: 'Keuangan: Dokumen & Laporan' }
+      { hash: '#/finance/reports', icon: 'ph-file-text', text: 'LPJ & Sinkronisasi Kas', group: 'Keuangan: Dokumen & Laporan' },
+      { hash: '#/komite/finance-paguyuban', icon: 'ph-wallet', text: 'Kas Paguyuban & Komite', group: 'Keuangan: Dokumen & Laporan' }
     ],
     'WAKA_SARPRAS': [
       { hash: '#/facilities', icon: 'ph-building-office', text: 'Dashboard Sarpras', group: 'Sarpras: Inventarisasi' },
@@ -514,6 +523,8 @@
         return 'badge-success';
       case ROLES.TENDIK:
         return 'badge-primary';
+      case ROLES.KOMITE:
+        return 'badge-info';
       case ROLES.ORTU:
         return 'badge-outline';
       default:

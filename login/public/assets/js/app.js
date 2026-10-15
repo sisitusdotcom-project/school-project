@@ -14,6 +14,7 @@ const App = {
       [AppConfig.ROLES.GURU]: GuruPages.renderDashboard,
       [AppConfig.ROLES.GURU_EKSKUL]: GuruPages.renderEkstraDashboard,
       [AppConfig.ROLES.GURU_UMMI]: GuruPages.renderUmmiDashboard,
+      [AppConfig.ROLES.KOMITE]: typeof KomitePages !== 'undefined' ? KomitePages.renderDashboard : null,
       [AppConfig.ROLES.KEPSEK]: KepsekPages.renderDashboard,
       [AppConfig.ROLES.ORTU]: OrtuPages.renderDashboard,
       [AppConfig.ROLES.PERSONNEL]: PersonnelPages.renderDashboard,
@@ -41,7 +42,7 @@ const App = {
     if (path === '#/panduan') return true;
     if (path === '#/dashboard' || path === '#/ortu/dashboard') return !!this.getDashboardRenderer();
     if (role === AppConfig.ROLES.ADMIN) return true;
-    if (path === '#/attendance' && role !== AppConfig.ROLES.ORTU) return true;
+    if (path === '#/attendance' && role !== AppConfig.ROLES.ORTU && role !== AppConfig.ROLES.KOMITE) return true;
     if (path.startsWith('#/admin/students/')) path = '#/admin/classes';
     if (path.startsWith('#/guru/assess/')) path = '#/guru/classes';
     if (path.startsWith('#/guru/observe/')) path = '#/guru/classes';
@@ -74,12 +75,16 @@ const App = {
       if (guruAllowed.includes(path)) return true;
     }
     if (role === AppConfig.ROLES.KEPSEK) {
-      const kepsekPrefixes = ['#/dashboard', '#/attendance', '#/kepsek/', '#/curriculum', '#/student-affairs', '#/finance', '#/personnel', '#/facilities'];
+      const kepsekPrefixes = ['#/dashboard', '#/attendance', '#/kepsek/', '#/curriculum', '#/student-affairs', '#/finance', '#/personnel', '#/facilities', '#/komite'];
       if (kepsekPrefixes.some(p => path === p || path.startsWith(p + '/'))) return true;
     }
     if (role === AppConfig.ROLES.TENDIK) {
       const tendikAllowed = ['#/attendance', '#/tendik/performance', '#/tendik/portfolio'];
       if (tendikAllowed.includes(path)) return true;
+    }
+    if (role === AppConfig.ROLES.KOMITE) {
+      const komiteAllowed = ['#/dashboard', '#/komite/activities', '#/komite/finance-paguyuban', '#/panduan'];
+      if (komiteAllowed.includes(path)) return true;
     }
     const navItems = AppConfig.getRoleNav(role, assignments);
     return navItems.some(nav => nav.hash === path);

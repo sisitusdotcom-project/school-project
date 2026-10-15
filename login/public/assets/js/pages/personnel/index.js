@@ -93,6 +93,20 @@ const PersonnelPages = {
                 <div class="quick-nav-desc">Kepanitiaan agenda besar sekolah</div>
               </div>
             </a>
+            <a href="#/komite/activities" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-users-three"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Kegiatan Paguyuban</div>
+                <div class="quick-nav-desc">Agenda & kemitraan paguyuban wali murid</div>
+              </div>
+            </a>
+            <a href="#/komite/finance-paguyuban" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-wallet"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Keuangan Paguyuban</div>
+                <div class="quick-nav-desc">Transparansi kas paguyuban & komite</div>
+              </div>
+            </a>
             <a href="#/personnel/partnerships" class="quick-nav-card">
               <div class="quick-nav-icon"><i class="ph ph-handshake"></i></div>
               <div class="quick-nav-info">
