@@ -92,10 +92,22 @@ const ModuleKit = {
     return (Auth.currentAssignments || []).includes(unit);
   },
   sees(def) {
-    return this.isPrivileged(def) || (def.seeAllUnits || []).some((u) => this.hasUnit(u));
+    return this.isPrivileged(def) || this.isApprover(def) || (def.seeAllUnits || []).some((u) => this.hasUnit(u));
   },
   isPrivileged() {
     return Auth.currentRole === AppConfig.ROLES.ADMIN || (Auth.currentAssignments || []).some((a) => a.startsWith('WAKA_') || a === 'TIM_IT');
+  },
+  isApprover(def) {
+    if (!def) return false;
+    const role = Auth.currentRole;
+    if (role === AppConfig.ROLES.ADMIN || role === AppConfig.ROLES.KEPSEK) return true;
+    if ((def.approverRoles || []).includes(role)) return true;
+    const approverUnits = [
+      ...(def.approverUnits || []),
+      ...(def.approverRoles || []).map((r) => this.UNIT_BY_ROLE[r]).filter(Boolean),
+      ...(def.approverRoles || []).map((r) => this.STAFF_UNIT_BY_ROLE[r]).filter(Boolean)
+    ];
+    return approverUnits.some((u) => this.hasUnit(u));
   },
   canWrite(def) {
     const role = Auth.currentRole;
@@ -241,7 +253,7 @@ const ModuleKit = {
         const childIds = Object.keys(myStudents || {});
         return all.filter((r) => childIds.includes(r.studentId) || r.createdBy === uid);
       }
-      return !def.own || this.sees(def) ? all : all.filter((r) => r.createdBy === uid);
+      return !def.own || this.sees(def) ? all : all.filter((r) => (r.teacherId && r.teacherId === uid) || r.createdBy === uid);
     };
     const [rows, refs] = await Promise.all([loadRows(), this.loadRefs(def)]);
     const state = { rows, q: '', status: '', editing: null };
@@ -374,12 +386,31 @@ const ModuleKit = {
         }
         el.value = value === undefined || value === null ? '' : value;
       });
-      if (isOrtu) {
-        const sf = form.querySelector('#mk-f-status');
+      const isApprover = this.isApprover(def);
+      if (isOrtu || (!isApprover && def.approverRoles)) {
+        const sf = form.querySelector(`#mk-f-${def.statusField || 'status'}`);
         if (sf) {
-          sf.value = row ? (row.status || 'Diajukan') : 'Diajukan';
+          sf.value = row ? (row[def.statusField || 'status'] || 'Diajukan') : 'Diajukan';
           sf.disabled = true;
         }
+      } else {
+        const sf = form.querySelector(`#mk-f-${def.statusField || 'status'}`);
+        if (sf) sf.disabled = false;
+      }
+      const tf = form.querySelector('#mk-f-teacherId');
+      if (tf) {
+        if (!isApprover) {
+          tf.value = row ? (row.teacherId || uid) : uid;
+          tf.disabled = true;
+        } else {
+          tf.disabled = false;
+        }
+      }
+      const rf = form.querySelector('#mk-f-reviewerFeedback');
+      if (rf) {
+        rf.disabled = !isApprover;
+        rf.readOnly = !isApprover;
+        rf.placeholder = isApprover ? 'Catatan telaah atau instruksi revisi dari kurikulum...' : '(Hanya dapat diisi oleh peninjau Kurikulum)';
       }
       App.openModal(modalId);
     };
@@ -392,10 +423,20 @@ const ModuleKit = {
       const editBtn = e.target.closest('[data-mk-edit]');
       const delBtn = e.target.closest('[data-mk-del]');
       if (editBtn) {
-        openForm(state.rows.find((r) => r.id === editBtn.dataset.mkEdit));
+        const row = state.rows.find((r) => r.id === editBtn.dataset.mkEdit);
+        if (row && row[def.statusField || 'status'] === 'Disetujui (ACC)' && !this.isApprover(def) && def.approverRoles) {
+          alert('Perangkat ini sudah disetujui (ACC) oleh Kurikulum. Jika ingin melakukan revisi, silakan hubungi bagian Kurikulum untuk membuka status revisi.');
+          return;
+        }
+        openForm(row);
         return;
       }
       if (!delBtn) return;
+      const targetRow = state.rows.find((r) => r.id === delBtn.dataset.mkDel);
+      if (targetRow && targetRow[def.statusField || 'status'] === 'Disetujui (ACC)' && !this.isApprover(def) && def.approverRoles) {
+        alert('Perangkat yang telah disetujui (ACC) tidak dapat dihapus. Silakan hubungi bagian Kurikulum.');
+        return;
+      }
       if (!confirm('Yakin ingin menghapus data ini?')) return;
       try {
         await db.ref(`${def.node}/${delBtn.dataset.mkDel}`).remove();
@@ -465,7 +506,20 @@ const ModuleKit = {
           payload[f.key] = value;
           if (f.ref) payload[`${f.key}Name`] = value ? ((refs[f.ref] || {})[value] || '') : '';
         }
-        if (isOrtu) payload.status = 'Diajukan';
+        const isApprover = this.isApprover(def);
+        const currentRow = state.editing ? state.rows.find((r) => r.id === state.editing) : null;
+        if (isOrtu || (!isApprover && def.approverRoles)) {
+          if (def.statusField) payload[def.statusField] = 'Diajukan';
+        }
+        if (!isApprover && def.fields.some((f) => f.key === 'teacherId')) {
+          payload.teacherId = currentRow ? (currentRow.teacherId || uid) : uid;
+          if (refs.teacher && refs.teacher[payload.teacherId]) {
+            payload.teacherIdName = refs.teacher[payload.teacherId];
+          }
+        }
+        if (!isApprover && def.fields.some((f) => f.key === 'reviewerFeedback')) {
+          payload.reviewerFeedback = currentRow ? (currentRow.reviewerFeedback || '') : '';
+        }
         const ctx = refs.__ctx;
         const derived = def.derive ? def.derive(payload, ctx) : {};
         const stamp = firebase.database.ServerValue.TIMESTAMP;

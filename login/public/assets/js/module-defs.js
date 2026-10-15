@@ -767,6 +767,9 @@
     },
     '#/curriculum/syllabus': { own: true,
       node: 'curriculum/documents', noun: 'Perangkat & Modul Ajar', writeRoles: [R.CURRICULUM, R.GURU, R.GURU_EKSKUL, R.GURU_UMMI], statusField: 'status', badges: { ...badges, 'Diajukan': 'warning', 'Disetujui (ACC)': 'success', 'Perlu Revisi': 'danger', 'Draft': 'neutral' }, units: ['GURU_UMUM', 'WALI_KELAS', 'GURU_EKSTRA', 'TIM_UMMI'],
+      approverRoles: [R.CURRICULUM],
+      approverUnits: ['WAKA_KURIKULUM', 'STAF_KURIKULUM'],
+      seeAllUnits: ['WAKA_KURIKULUM', 'STAF_KURIKULUM'],
       subtitle: 'Pengumpulan, telaah, dan verifikasi perangkat pembelajaran guru oleh Kurikulum.',
       summary: [
         { label: 'Total Dokumen', icon: 'ph-folder-open', tone: 'primary' },
