@@ -107,6 +107,20 @@ const GuruPages = {
                 <div class="quick-nav-desc">Pengisian lembar capaian rapor</div>
               </div>
             </a>
+            <a href="#/gtk/official-travel" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-airplane-takeoff"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Perjalanan Dinas</div>
+                <div class="quick-nav-desc">Pengajuan & riwayat tugas dinas guru</div>
+              </div>
+            </a>
+            <a href="#/gtk/salary-slip" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-receipt"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Slip Gaji Pribadi</div>
+                <div class="quick-nav-desc">Rincian honorarium & kehadiran cutoff 29-28</div>
+              </div>
+            </a>
           </div>
         </div>
       </section>
@@ -1940,6 +1954,109 @@ const GuruPages = {
       }
     };
   },
+  async renderTendikDashboard(container) {
+    Router.setTitle('Beranda Tenaga Kependidikan', 'Selamat datang di Dasbor Digital Tenaga Kependidikan SD Muhammadiyah 1 Sedati.');
+    const today = new Date();
+    const dateStr = today.toISOString().slice(0, 10);
+    const timeStr = today.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+    const user = Auth.currentUser || {};
+    const uid = user.uid;
+    const [myAtt, directoryData, perfData] = await Promise.all([
+      DB.getTeacherAttendance(dateStr, uid),
+      DB._readCollection ? DB._readCollection('personnel/directory', {}) : Promise.resolve({}),
+      DB._readCollection ? DB._readCollection('tendik/performance', {}) : Promise.resolve({})
+    ]);
+    const dirList = DB.toArray(directoryData);
+    const cleanUserName = (user.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const empProfile = dirList.find(d => d.userId === uid || (d.name && d.name.toLowerCase().replace(/[^a-z0-9]/g, '') === cleanUserName)) || {};
+    const nbm = empProfile.nbm || empProfile.nuptk || user.nbm || user.nuptk || user.nip || '-';
+    const position = empProfile.position || user.position || 'Tenaga Administrasi Sekolah';
+    let attStatus = 'Belum Presensi';
+    let attClass = 'badge-warning';
+    if (myAtt) {
+      if (myAtt.time_out) {
+        attStatus = 'Sudah Pulang (' + myAtt.time_out + ')';
+        attClass = 'badge-success';
+      } else if (myAtt.time_in) {
+        attStatus = 'Sudah Datang (' + myAtt.time_in + ')';
+        attClass = 'badge-success';
+      }
+    }
+    const myPerfList = DB.toArray(perfData).filter(p => p.employeeId === uid || p.userId === uid);
+    container.innerHTML = `
+      <div class="card hero-panel">
+        <div class="hero-panel__inner">
+          <div>
+            <p class="hero-panel__meta">${today.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+            <h2 class="hero-panel__time">${timeStr}</h2>
+            <p class="hero-panel__meta" style="margin-top:6px;"><strong style="font-size:16px;">${AppConfig.escapeHtml(user.name || 'Pegawai Tendik')}</strong> · NBM: ${nbm} · ${AppConfig.escapeHtml(position)}</p>
+          </div>
+          <div class="hero-panel__status">
+            <p class="hero-panel__meta">Status Kehadiran</p>
+            <span class="badge ${attClass}">${attStatus}</span>
+          </div>
+        </div>
+      </div>
+      <section class="card-grid section-spacer">
+        <div class="card stat-card">
+          <div class="stat-icon stat-icon--success"><i class="ph ph-map-pin"></i></div>
+          <div><p class="stat-value">${myAtt ? (myAtt.time_in ? '✓' : '—') : '—'}</p><p class="stat-label text-muted">Presensi Datang</p></div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-icon stat-icon--primary"><i class="ph ph-clipboard-text"></i></div>
+          <div><p class="stat-value">${myPerfList.length}</p><p class="stat-label text-muted">Laporan Kinerja</p></div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-icon stat-icon--warning"><i class="ph ph-folder-star"></i></div>
+          <div><p class="stat-value">Aktif</p><p class="stat-label text-muted">Status Kepegawaian</p></div>
+        </div>
+      </section>
+      <section class="card section-spacer">
+        <div class="card-header">
+          <h3 class="card-title"><i class="ph ph-lightning"></i> Menu Utama Tenaga Kependidikan</h3>
+        </div>
+        <div class="card-body">
+          <div class="quick-nav-grid">
+            <a href="#/attendance" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-map-pin"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Presensi Kehadiran</div>
+                <div class="quick-nav-desc">Presensi GPS masuk dan pulang harian</div>
+              </div>
+            </a>
+            <a href="#/tendik/performance" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-clipboard-text"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Laporan Kinerja Tendik</div>
+                <div class="quick-nav-desc">Catatan tupoksi & capaian tugas bulanan</div>
+              </div>
+            </a>
+            <a href="#/tendik/portfolio" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-folder"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Portofolio & Sertifikasi</div>
+                <div class="quick-nav-desc">Dokumen SK, sertifikat diklat & ijazah</div>
+              </div>
+            </a>
+            <a href="#/gtk/official-travel" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-airplane-takeoff"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Perjalanan Dinas</div>
+                <div class="quick-nav-desc">Pengajuan & riwayat tugas dinas luar</div>
+              </div>
+            </a>
+            <a href="#/gtk/salary-slip" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-receipt"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Slip Gaji Pribadi</div>
+                <div class="quick-nav-desc">Rincian penerimaan gaji bulanan & cutoff 29-28</div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </section>
+    `;
+  },
   async renderUmmiDashboard(container) {
     Router.setTitle('Beranda Guru UMMI', "Selamat datang di Dasbor Pembelajaran Al-Qur'an & Metode Ummi.");
     const today = new Date();
@@ -2053,6 +2170,20 @@ const GuruPages = {
               <div class="quick-nav-info">
                 <div class="quick-nav-title">Portofolio Guru Ummi</div>
                 <div class="quick-nav-desc">Dokumentasi syahadah, sertifikat & lisensi</div>
+              </div>
+            </a>
+            <a href="#/gtk/official-travel" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-airplane-takeoff"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Perjalanan Dinas</div>
+                <div class="quick-nav-desc">Pengajuan & riwayat tugas dinas guru ummi</div>
+              </div>
+            </a>
+            <a href="#/gtk/salary-slip" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-receipt"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Slip Gaji Pribadi</div>
+                <div class="quick-nav-desc">Rincian honor & tunjangan bulanan santri binaan</div>
               </div>
             </a>
           </div>
@@ -2186,6 +2317,20 @@ const GuruPages = {
               <div class="quick-nav-info">
                 <div class="quick-nav-title">Pemetaan Bakat Siswa</div>
                 <div class="quick-nav-desc">Pencatatan potensi & prestasi khusus anak binaan</div>
+              </div>
+            </a>
+            <a href="#/gtk/official-travel" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-airplane-takeoff"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Perjalanan Dinas</div>
+                <div class="quick-nav-desc">Pengajuan surat tugas & pendampingan lomba</div>
+              </div>
+            </a>
+            <a href="#/gtk/salary-slip" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-receipt"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Slip Gaji Pribadi</div>
+                <div class="quick-nav-desc">Rincian honor pembina ekskul bulanan</div>
               </div>
             </a>
           </div>
@@ -2636,6 +2781,141 @@ const GuruPages = {
     await renderGradeForm(activeEks.id);
     if (typeof FeatureGuides !== 'undefined') {
       FeatureGuides.attach(container, '#/guru/extracurriculars');
+    }
+  }
+,
+  async renderSalarySlip(container) {
+    Router.setTitle('Slip Gaji Pribadi', 'Rincian gaji dan rekap tunjangan bulanan resmi GTK.');
+    const user = Auth.userData || Auth.currentUser || {};
+    const uid = (Auth.currentUser && Auth.currentUser.uid) || user.uid;
+    const today = new Date();
+    const cutoff = AppConfig.getPayrollCutoffRange ? AppConfig.getPayrollCutoffRange(today) : {
+      startStr: '2026-09-29', endStr: '2026-10-28', monthLabel: 'Oktober 2026', cutoffLabel: '29 Sep 2026 s/d 28 Okt 2026', sD: new Date(2026, 8, 29), eD: new Date(2026, 9, 28)
+    };
+    const [directoryData, salariesData, rangeAttData, settings, ummiClassesData] = await Promise.all([
+      DB._readCollection ? DB._readCollection('personnel/directory', {}) : Promise.resolve({}),
+      DB._readCollection ? DB._readCollection('finance/salaries', {}) : Promise.resolve({}),
+      DB.getTeacherAttendanceRange(cutoff.startStr, cutoff.endStr),
+      DB.getSettings(),
+      DB._readCollection ? DB._readCollection('ummi_classes', {}) : Promise.resolve({})
+    ]);
+    const dirList = DB.toArray(directoryData);
+    const cleanUserName = (user.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const empProfile = dirList.find(d => d.userId === uid || (d.name && d.name.toLowerCase().replace(/[^a-z0-9]/g, '') === cleanUserName)) || {};
+    const salaryList = DB.toArray(salariesData);
+    const matchedSalary = salaryList.find(s => (s.employeeId === uid || (empProfile.id && s.employeeId === empProfile.id)) && (!s.month || s.month === cutoff.startStr.slice(0, 7) || s.month === cutoff.endStr.slice(0, 7))) || null;
+    let onTimeCount = 0, lateCount = 0;
+    const isUmmi = AppConfig.isUserUmmi(user);
+    Object.entries(rangeAttData || {}).forEach(([dk, byTeacher]) => {
+      const att = byTeacher && byTeacher[uid];
+      if (att && att.time_in) {
+        const sched = AppConfig.getAttendanceSchedule ? AppConfig.getAttendanceSchedule(settings.attendanceRules, isUmmi, dk) : null;
+        const isLate = sched && AppConfig.isAttendanceLate ? AppConfig.isAttendanceLate(att.time_in, sched) : false;
+        if (isLate) lateCount++;
+        else onTimeCount++;
+      }
+    });
+    const totalPresent = onTimeCount + lateCount;
+    let totalWorkDays = 0;
+    const cur = new Date(cutoff.sD);
+    while (cur <= cutoff.eD) {
+      if (cur.getDay() !== 0) totalWorkDays++;
+      cur.setDate(cur.getDate() + 1);
+    }
+    const ummiList = DB.toArray(ummiClassesData);
+    const myUmmiRombel = ummiList.filter(c => c.teacherId === uid || (c.teacherName && cleanUserName && c.teacherName.toLowerCase().replace(/[^a-z0-9]/g, '').includes(cleanUserName)));
+    const slip = AppConfig.resolveSalarySlipData(user, empProfile, matchedSalary, {
+      totalPresent, onTimeCount, lateCount, totalWorkDays
+    }, {
+      ummiClassesCount: myUmmiRombel.length || 3
+    });
+    container.innerHTML = `
+      <div class="salary-slip-actions">
+        <button class="btn btn-outline" id="btn-print-slip"><i class="ph ph-printer"></i> Cetak Slip Gaji</button>
+      </div>
+      <div class="salary-slip-sheet">
+        <div class="salary-slip-notice">
+          <i class="ph ph-info"></i> <strong>Informasi Penggajian:</strong> ${AppConfig.escapeHtml(slip.noticeText)}
+        </div>
+        <div class="salary-slip-brand">
+          <img src="assets/images/logo-musada.png" alt="Logo Sekolah" class="salary-slip-logo" onerror="this.style.display='none'">
+          <div>
+            <h2 class="salary-slip-title">SD MUHAMMADIYAH 1 SEDATI</h2>
+            <p class="salary-slip-sub">Surat Bukti Rincian Honorarium & Gaji Pendidik / Tenaga Kependidikan</p>
+            <p class="salary-slip-sub">Periode: <strong>${cutoff.monthLabel}</strong> (${cutoff.cutoffLabel})</p>
+          </div>
+        </div>
+        <div class="salary-slip-info">
+          <div class="salary-slip-info-row"><span class="salary-slip-label">Nama Pegawai</span><span class="salary-slip-val">: ${AppConfig.escapeHtml(slip.name)}</span></div>
+          <div class="salary-slip-info-row"><span class="salary-slip-label">NBM / NUPTK</span><span class="salary-slip-val">: ${AppConfig.escapeHtml(slip.nbm)}</span></div>
+          <div class="salary-slip-info-row"><span class="salary-slip-label">Jabatan / Tugas</span><span class="salary-slip-val">: ${AppConfig.escapeHtml(slip.position)}</span></div>
+          <div class="salary-slip-info-row"><span class="salary-slip-label">Status Kepegawaian</span><span class="salary-slip-val">: ${AppConfig.escapeHtml(slip.empStatus)}</span></div>
+          <div class="salary-slip-info-row"><span class="salary-slip-label">Kehadiran (Cutoff)</span><span class="salary-slip-val">: ${slip.totalPresent} / ${slip.totalWorkDays} Hari (${slip.onTimeCount} Tepat, ${slip.lateCount} Terlambat)</span></div>
+          <div class="salary-slip-info-row"><span class="salary-slip-label">Status Pencairan</span><span class="salary-slip-val">: <span class="badge ${slip.badgeClass}">${AppConfig.escapeHtml(slip.statusText)}</span></span></div>
+        </div>
+        <table class="salary-slip-table">
+          <thead>
+            <tr>
+              <th>Rincian Penghasilan & Tunjangan</th>
+              <th class="text-right">Nominal (Rp)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>${AppConfig.escapeHtml(slip.basicLabel)}</td>
+              <td class="text-right">Rp ${slip.basicSalary.toLocaleString('id-ID')}</td>
+            </tr>
+            <tr>
+              <td>${AppConfig.escapeHtml(slip.functionalLabel)}</td>
+              <td class="text-right">Rp ${slip.functionalAllowance.toLocaleString('id-ID')}</td>
+            </tr>
+            <tr>
+              <td>${AppConfig.escapeHtml(slip.teachingLabel)}</td>
+              <td class="text-right">Rp ${slip.teachingAllowance.toLocaleString('id-ID')}</td>
+            </tr>
+            <tr>
+              <td><strong>Total Penghasilan Kotor</strong></td>
+              <td class="text-right"><strong>Rp ${slip.grossSalary.toLocaleString('id-ID')}</strong></td>
+            </tr>
+          </tbody>
+        </table>
+        <table class="salary-slip-table">
+          <thead>
+            <tr>
+              <th>Rincian Potongan</th>
+              <th class="text-right">Nominal (Rp)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>${AppConfig.escapeHtml(slip.deductionLabel)}</td>
+              <td class="text-right">Rp ${slip.deductions.toLocaleString('id-ID')}</td>
+            </tr>
+            <tr class="salary-slip-total-row">
+              <td><strong>TOTAL GAJI BERSIH (TAKE HOME PAY)</strong></td>
+              <td class="text-right"><strong>Rp ${slip.netSalary.toLocaleString('id-ID')}</strong></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="salary-slip-signatures">
+          <div class="salary-slip-sig-box">
+            <span>Penerima,</span>
+            <div class="salary-slip-sig-space"></div>
+            <strong>${AppConfig.escapeHtml(slip.name)}</strong>
+            <br><small class="text-muted">NBM: ${AppConfig.escapeHtml(slip.nbm)}</small>
+          </div>
+          <div class="salary-slip-sig-box">
+            <span>Sedati, 28 ${cutoff.monthLabel}<br>Waka Keuangan / Bendahara</span>
+            <div class="salary-slip-sig-space"></div>
+            <strong>Bendahara Keuangan</strong>
+            <br><small class="text-muted">SD Muhammadiyah 1 Sedati</small>
+          </div>
+        </div>
+      </div>
+    `;
+    const btnPrint = document.getElementById('btn-print-slip');
+    if (btnPrint) {
+      btnPrint.onclick = () => window.print();
     }
   }
 };

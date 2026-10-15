@@ -2281,3 +2281,30 @@ padding: 14px;
 .attendance-field{margin-bottom:0;min-width:0;}
 .attendance-date-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
 .attendance-date-actions .btn{font-size:12.5px;}
+.payroll-recap-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px;}
+.payroll-filter-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.payroll-stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:18px;}
+.payroll-stat-card{background:var(--surface,#fff);border:1px solid var(--border,#e5e7eb);border-radius:var(--radius-md,8px);padding:14px;display:flex;flex-direction:column;gap:4px;}
+.payroll-stat-label{font-size:12px;color:var(--text-muted,#6b7280);font-weight:500;}
+.payroll-stat-val{font-size:22px;font-weight:700;color:var(--text-main,#111827);}
+.payroll-tab-nav{display:inline-flex;gap:8px;border-bottom:1px solid var(--border,#e5e7eb);padding-bottom:10px;margin-bottom:16px;width:100%;}
+.payroll-tab-btn{background:none;border:none;padding:8px 16px;font-size:13.5px;font-weight:600;color:var(--text-muted,#6b7280);cursor:pointer;border-radius:6px;}
+.payroll-tab-btn.active{background:var(--primary-subtle,#eff6ff);color:var(--primary,#2563eb);}
+.salary-slip-sheet{background:#fff;border:1px solid var(--border,#e5e7eb);border-radius:var(--radius-md,8px);padding:24px;max-width:760px;margin:0 auto;box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);}
+.salary-slip-brand{display:flex;align-items:center;gap:16px;border-bottom:2px solid #1f2937;padding-bottom:16px;margin-bottom:16px;}
+.salary-slip-logo{width:56px;height:56px;object-fit:contain;}
+.salary-slip-title{font-size:16px;font-weight:700;margin:0;color:#111827;text-transform:uppercase;letter-spacing:0.5px;}
+.salary-slip-sub{font-size:12px;color:#4b5563;margin:2px 0 0 0;}
+.salary-slip-info{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:18px;font-size:12.5px;background:#f9fafb;padding:12px;border-radius:6px;border:1px solid #f3f4f6;}
+.salary-slip-info-row{display:flex;gap:6px;}
+.salary-slip-label{color:#6b7280;min-width:110px;}
+.salary-slip-val{font-weight:600;color:#111827;}
+.salary-slip-table{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:13px;}
+.salary-slip-table th{background:#f3f4f6;text-align:left;padding:8px 12px;border-bottom:1px solid #e5e7eb;font-weight:600;color:#374151;}
+.salary-slip-table td{padding:8px 12px;border-bottom:1px solid #f3f4f6;}
+.salary-slip-total-row td{font-weight:700;font-size:14px;background:#f0fdf4;color:#166534;border-top:2px solid #bbf7d0;}
+.salary-slip-signatures{display:flex;justify-content:space-between;margin-top:28px;padding-top:12px;font-size:12px;text-align:center;}
+.salary-slip-sig-box{min-width:160px;}
+.salary-slip-sig-space{height:54px;}
+.salary-slip-actions{display:flex;gap:10px;justify-content:flex-end;margin-bottom:16px;flex-wrap:wrap;}
+.salary-slip-notice{font-size:12px;color:#4b5563;background:#eff6ff;border-left:4px solid #2563eb;padding:10px 14px;border-radius:4px;margin-bottom:16px;line-height:1.5;}

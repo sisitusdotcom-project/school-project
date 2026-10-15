@@ -173,11 +173,15 @@
       ]
     },
     '#/guru/portfolio': { own: true,
-      node: 'guru/portfolio', noun: 'Portofolio Guru & Pembina', writeRoles: [R.GURU, R.GURU_EKSKUL, R.GURU_UMMI, R.TENDIK], dateField: 'date',
-      subtitle: 'Dokumen pencapaian dan rekam jejak guru.',
+      node: 'guru/portfolio', noun: 'Portofolio & Rekam Jejak Guru', writeRoles: [R.GURU, R.GURU_EKSKUL, R.GURU_UMMI, R.TENDIK], dateField: 'date',
+      subtitle: 'Dokumen pelatihan, sertifikasi kompetensi, workshop, dan rekam jejak guru/pembina.',
       fields: [
         date('date', 'Tanggal', { required: true }),
-        t('title', 'Judul / Kegiatan', { required: true }),
+        sel('category', 'Kategori', ['Pelatihan & Workshop', 'Sertifikasi Profesi', 'Portofolio Prestasi', 'Karya Inovasi', 'Lainnya'], { required: true, default: 'Pelatihan & Workshop' }),
+        t('title', 'Nama Pelatihan / Judul Portofolio', { required: true }),
+        t('organizer', 'Lembaga Penyelenggara'),
+        num('hours', 'Jumlah Jam (JP)'),
+        t('certificateNo', 'Nomor Sertifikat / Dokumen'),
         file('document', 'Dokumen Pendukung', 'guru_portfolio', { required: true }),
         area('description', 'Keterangan Tambahan')
       ]
@@ -322,7 +326,7 @@
     },
     '#/personnel/data': {
       node: 'personnel/directory', noun: 'Data Kepegawaian', writeRoles: PE, statusField: 'status', badges: { ...badges, Cuti: 'warning' },
-      subtitle: 'Direktori pegawai: guru dan tenaga kependidikan.',
+      subtitle: 'Direktori resmi SDM GTK SD Muhammadiyah 1 Sedati bersumber Dapodik.',
       summary: [
         { label: 'Total Pegawai', icon: 'ph-folder-user', tone: 'primary' },
         { label: 'Aktif', icon: 'ph-check-circle', tone: 'success', where: { status: 'Aktif' } },
@@ -330,66 +334,134 @@
       ],
       fields: [
         t('name', 'Nama Lengkap', { required: true }),
-        t('nip', 'NIP / NUPTK'),
-        t('position', 'Jabatan', { required: true }),
+        t('nbm', 'NBM (Nomor Baku Muhammadiyah)'),
+        t('nuptk', 'NUPTK'),
+        t('position', 'Jabatan / Tugas', { required: true }),
         sel('employmentStatus', 'Status Kepegawaian', ['PNS', 'GTY', 'GTT', 'Honorer', 'Tendik'], { required: true }),
-        t('phone', 'No. HP'),
+        t('phone', 'No. HP / WA'),
         t('education', 'Pendidikan Terakhir'),
-        date('joinDate', 'Tanggal Bergabung'),
+        date('joinDate', 'TMT Pengangkatan / Bergabung'),
         ref('userId', 'Akun Sistem (opsional)', 'user'),
         sel('status', 'Status', ['Aktif', 'Cuti', 'Nonaktif'], { required: true, default: 'Aktif' })
       ]
     },
     '#/personnel/evaluations': { wakaOnly: true,
-      node: 'personnel/evaluations', noun: 'Penilaian Kinerja (PKG)', writeRoles: PE, dateField: 'date', statusField: 'predicate', badges: { 'Sangat Baik': 'success', Baik: 'success', Cukup: 'warning', Kurang: 'danger' },
-      subtitle: 'Evaluasi kinerja tahunan kompetensi pedagogik, kepribadian, dan profesional guru.',
+      node: 'personnel/evaluations', noun: 'Penilaian Kinerja SDM', writeRoles: PE, dateField: 'date', statusField: 'statusRecommendation', badges: { 'Prioritas': 'success', 'Prospek': 'success', 'Lanjutan': 'info', 'Pemula': 'warning', 'Perlu Pembinaan': 'danger', 'Naik': 'success', 'Tetap': 'info' },
+      subtitle: 'Format Penilaian Kinerja SDM Majelis Dikdasmen & PNF PCM Sedati: Loyalitas, Kapasitas, dan Kapabilitas.',
       derive: (p) => {
-        const ped = Number(p.pedagogicScore) || 0;
-        const per = Number(p.personalityScore) || 0;
-        const pro = Number(p.professionalScore) || 0;
-        const avg = Math.round((ped + per + pro) / 3);
-        const pred = avg >= 85 ? 'Sangat Baik' : (avg >= 70 ? 'Baik' : (avg >= 55 ? 'Cukup' : 'Kurang'));
-        return { score: avg, predicate: pred };
+        const l1 = Number(p.loyaltyCountry) || 0;
+        const l2 = Number(p.loyaltyMuhammadiyah) || 0;
+        const l3 = Number(p.loyaltyAum) || 0;
+        const l4 = Number(p.loyaltyCommitment) || 0;
+        const avgLoyalty = Math.round((l1 + l2 + l3 + l4) / 4);
+        const c1 = Number(p.capacityExemplary) || 0;
+        const c2 = Number(p.capacityTeamwork) || 0;
+        const c3 = Number(p.capacityLeadership) || 0;
+        const c4 = Number(p.capacityDiscipline) || 0;
+        const c5 = Number(p.capacityInnovation) || 0;
+        const c6 = Number(p.capacityResponsibility) || 0;
+        const c7 = Number(p.capacityIntegrity) || 0;
+        const c8 = Number(p.capacitySelfDev) || 0;
+        const avgCapacity = Math.round((c1 + c2 + c3 + c4 + c5 + c6 + c7 + c8) / 8);
+        const avgCapability = Number(p.capabilitySop) || 0;
+        const avgTotal = Math.round((avgLoyalty + avgCapacity + avgCapability) / 3);
+        const isPass = (avgLoyalty >= 75) && (avgCapacity >= 75) && (avgCapability >= 75);
+        let pred = 'Pemula';
+        if (!isPass) {
+          pred = 'Perlu Pembinaan';
+        } else if (avgTotal >= 90) {
+          pred = 'Prioritas';
+        } else if (avgTotal >= 85) {
+          pred = 'Prospek';
+        } else if (avgTotal >= 81) {
+          pred = 'Lanjutan';
+        }
+        const recStatus = p.statusRecommendation || (isPass && avgTotal >= 85 ? 'Naik' : 'Tetap');
+        return {
+          avgLoyalty: avgLoyalty,
+          avgCapacity: avgCapacity,
+          avgCapability: avgCapability,
+          score: avgTotal,
+          predicate: pred,
+          statusRecommendation: recStatus
+        };
       },
       summary: [
         { label: 'Total Penilaian', icon: 'ph-chart-line-up', tone: 'primary' },
-        { label: 'Sangat Baik', icon: 'ph-star', tone: 'success', where: { predicate: 'Sangat Baik' } },
-        { label: 'Perlu Pembinaan', icon: 'ph-warning', tone: 'danger', where: { predicate: ['Cukup', 'Kurang'] } }
+        { label: 'Rekomendasi Naik', icon: 'ph-arrow-up-right', tone: 'success', where: { statusRecommendation: 'Naik' } },
+        { label: 'Perlu Pembinaan', icon: 'ph-warning', tone: 'danger', where: { predicate: 'Perlu Pembinaan' } }
       ],
       fields: [
         date('date', 'Tanggal Penilaian', { required: true }),
-        ref('employeeId', 'Pegawai GTK', 'employee', { required: true }),
-        t('period', 'Periode Penilaian', { required: true }),
-        num('pedagogicScore', 'Kompetensi Pedagogik (0-100)', { required: true }),
-        num('personalityScore', 'Kompetensi Kepribadian & Sosial (0-100)', { required: true }),
-        num('professionalScore', 'Kompetensi Profesional (0-100)', { required: true }),
-        num('score', 'Skor Rata-rata PKG', { readonly: true }),
-        sel('predicate', 'Predikat Akhir', ['Sangat Baik', 'Baik', 'Cukup', 'Kurang'], { readonly: true }),
-        area('note', 'Catatan & Rencana Pengembangan Keprofesian')
+        ref('employeeId', 'Pegawai SDM', 'employee', { required: true }),
+        t('period', 'Periode Penilaian (contoh: Semester Ganjil 2026/2027)', { required: true }),
+        num('loyaltyCountry', '1.1 Loyalitas thd Negara (1-100, Lulus >= 75)', { required: true }),
+        num('loyaltyMuhammadiyah', '1.2 Loyalitas thd Perserikatan (1-100, Lulus >= 75)', { required: true }),
+        num('loyaltyAum', '1.3 Loyalitas thd AUM (1-100, Lulus >= 75)', { required: true }),
+        num('loyaltyCommitment', '1.4 Kepatuhan & Komitmen (1-100, Lulus >= 75)', { required: true }),
+        num('avgLoyalty', 'Rata-rata Loyalitas', { readonly: true }),
+        num('capacityExemplary', '2.1 Keteladanan / Uswah Hasanah (1-100, Lulus >= 75)', { required: true }),
+        num('capacityTeamwork', '2.2 Team Work / Kolektif Kolegial (1-100, Lulus >= 75)', { required: true }),
+        num('capacityLeadership', '2.3 Leadership (1-100, Lulus >= 75)', { required: true }),
+        num('capacityDiscipline', '2.4 Kedisiplinan (1-100, Lulus >= 75)', { required: true }),
+        num('capacityInnovation', '2.5 Inovasi & Kreasi (1-100, Lulus >= 75)', { required: true }),
+        num('capacityResponsibility', '2.6 Tanggung Jawab / Responsibility (1-100, Lulus >= 75)', { required: true }),
+        num('capacityIntegrity', '2.7 Kejujuran (1-100, Lulus >= 75)', { required: true }),
+        num('capacitySelfDev', '2.8 Pengembangan Diri (1-100, Lulus >= 75)', { required: true }),
+        num('avgCapacity', 'Rata-rata Kapasitas', { readonly: true }),
+        num('capabilitySop', '3.1 Pelaksanaan Jobdesk & SOP SDM (1-100, Lulus >= 75)', { required: true }),
+        num('avgCapability', 'Rata-rata Kapabilitas', { readonly: true }),
+        num('score', 'Rata-rata Total Nilai Kinerja', { readonly: true }),
+        sel('predicate', 'Kategori Kinerja SDM', ['Prioritas', 'Prospek', 'Lanjutan', 'Pemula', 'Perlu Pembinaan'], { readonly: true }),
+        sel('statusRecommendation', 'Status Rekomendasi (Naik / Tetap)', ['Naik', 'Tetap'], { required: true, default: 'Tetap' }),
+        area('note', 'Catatan Pembinaan & Evaluasi SDM')
       ]
     },
-    '#/personnel/training': { own: true,
-      node: 'personnel/training', noun: 'Pelatihan & Kompetensi', writeRoles: [R.PERSONNEL, R.GURU, R.TENDIK], dateField: 'date', statusField: 'status', badges,
-      subtitle: 'Riwayat pelatihan, workshop, dan sertifikasi kompetensi pegawai GTK.',
+    '#/personnel/portfolio': { own: true,
+      node: 'personnel/portfolio', noun: 'Portofolio & Kompetensi', writeRoles: [R.PERSONNEL, R.GURU, R.TENDIK], dateField: 'date', statusField: 'status', badges,
+      subtitle: 'Riwayat pelatihan, workshop, sertifikasi kompetensi, dan rekam jejak portofolio SDM.',
       summary: [
-        { label: 'Total Pelatihan', icon: 'ph-certificate', tone: 'primary' },
-        { label: 'Total Jam', icon: 'ph-clock', tone: 'warning', sum: 'hours' },
+        { label: 'Total Portofolio', icon: 'ph-folder-star', tone: 'primary' },
+        { label: 'Total Jam (JP)', icon: 'ph-clock', tone: 'warning', sum: 'hours' },
         { label: 'Selesai', icon: 'ph-check-circle', tone: 'success', where: { status: 'Selesai' } }
       ],
       fields: [
-        date('date', 'Tanggal', { required: true }),
-        ref('employeeId', 'Pegawai', 'employee', { required: true }),
-        t('title', 'Nama Pelatihan', { required: true }),
-        t('organizer', 'Penyelenggara'),
-        num('hours', 'Jam Pelajaran'),
-        t('certificateNo', 'No. Sertifikat'),
-        sel('status', 'Status', ['Direncanakan', 'Berjalan', 'Selesai'], { required: true }),
-        file('certificateUrl', 'Berkas Sertifikat Pelatihan', 'personnel_certificates', { accept: '.pdf,image/*' })
+        date('date', 'Tanggal Perolehan / Kegiatan', { required: true }),
+        ref('employeeId', 'Pegawai GTK', 'employee', { required: true }),
+        sel('category', 'Kategori', ['Pelatihan & Workshop', 'Sertifikasi Profesi', 'Portofolio Prestasi', 'Karya Inovasi / Publikasi', 'Lainnya'], { required: true, default: 'Pelatihan & Workshop' }),
+        t('title', 'Nama Pelatihan / Judul Portofolio', { required: true }),
+        t('organizer', 'Lembaga Penyelenggara / Penerbit'),
+        num('hours', 'Jumlah Jam (JP)'),
+        t('certificateNo', 'Nomor Sertifikat / SK'),
+        sel('status', 'Status', ['Direncanakan', 'Sedang Berjalan', 'Selesai'], { required: true, default: 'Selesai' }),
+        file('document', 'Berkas Sertifikat / Portofolio', 'personnel_portfolio', { accept: '.pdf,image/*' }),
+        area('description', 'Keterangan Capaian & Deskripsi')
       ]
     },
-    '#/personnel/welfare': {
-      node: 'personnel/welfare', noun: 'Kesejahteraan Staf', writeRoles: PE, dateField: 'date', statusField: 'status', badges,
-      subtitle: 'Penetapan hak tunjangan sosial, apresiasi, santunan duka/sakit, dan persalinan pegawai.',
+    '#/personnel/training': { own: true,
+      node: 'personnel/portfolio', noun: 'Portofolio & Kompetensi', writeRoles: [R.PERSONNEL, R.GURU, R.TENDIK], dateField: 'date', statusField: 'status', badges,
+      subtitle: 'Riwayat pelatihan, workshop, sertifikasi kompetensi, dan rekam jejak portofolio SDM.',
+      summary: [
+        { label: 'Total Portofolio', icon: 'ph-folder-star', tone: 'primary' },
+        { label: 'Total Jam (JP)', icon: 'ph-clock', tone: 'warning', sum: 'hours' },
+        { label: 'Selesai', icon: 'ph-check-circle', tone: 'success', where: { status: 'Selesai' } }
+      ],
+      fields: [
+        date('date', 'Tanggal Perolehan / Kegiatan', { required: true }),
+        ref('employeeId', 'Pegawai GTK', 'employee', { required: true }),
+        sel('category', 'Kategori', ['Pelatihan & Workshop', 'Sertifikasi Profesi', 'Portofolio Prestasi', 'Karya Inovasi / Publikasi', 'Lainnya'], { required: true, default: 'Pelatihan & Workshop' }),
+        t('title', 'Nama Pelatihan / Judul Portofolio', { required: true }),
+        t('organizer', 'Lembaga Penyelenggara / Penerbit'),
+        num('hours', 'Jumlah Jam (JP)'),
+        t('certificateNo', 'Nomor Sertifikat / SK'),
+        sel('status', 'Status', ['Direncanakan', 'Sedang Berjalan', 'Selesai'], { required: true, default: 'Selesai' }),
+        file('document', 'Berkas Sertifikat / Portofolio', 'personnel_portfolio', { accept: '.pdf,image/*' }),
+        area('description', 'Keterangan Capaian & Deskripsi')
+      ]
+    },
+    '#/finance/welfare': {
+      node: 'finance/welfare', noun: 'Kesejahteraan Pegawai', writeRoles: [R.FINANCE, R.BENDAHARA, R.ADMIN], dateField: 'date', statusField: 'status', badges,
+      subtitle: 'Penetapan hak tunjangan sosial, apresiasi, santunan duka/sakit, dan persalinan pegawai oleh Keuangan.',
       summary: [
         { label: 'Total Catatan', icon: 'ph-heart', tone: 'primary' },
         { label: 'Total Nominal', icon: 'ph-wallet', tone: 'success', sum: 'amount', money: true },
@@ -417,11 +489,29 @@
             amount: Number(p.amount) || 0,
             method: 'Transfer',
             createdAt: firebase.database.ServerValue.TIMESTAMP,
-            sourceModule: 'personnel/welfare',
+            sourceModule: 'finance/welfare',
             sourceId: id
           });
         }
       }
+    },
+    '#/personnel/welfare': {
+      node: 'finance/welfare', noun: 'Kesejahteraan Pegawai', writeRoles: [R.FINANCE, R.BENDAHARA, R.ADMIN], dateField: 'date', statusField: 'status', badges,
+      subtitle: 'Penetapan hak tunjangan sosial, apresiasi, santunan duka/sakit, dan persalinan pegawai oleh Keuangan.',
+      summary: [
+        { label: 'Total Catatan', icon: 'ph-heart', tone: 'primary' },
+        { label: 'Total Nominal', icon: 'ph-wallet', tone: 'success', sum: 'amount', money: true },
+        { label: 'Disetujui', icon: 'ph-check-circle', tone: 'success', where: { status: 'Disetujui Waka' } }
+      ],
+      fields: [
+        date('date', 'Tanggal SK / Pengajuan', { required: true }),
+        ref('employeeId', 'Pegawai GTK', 'employee', { required: true }),
+        sel('type', 'Jenis Kesejahteraan', ['Santunan Sakit', 'Santunan Duka', 'Bantuan Persalinan', 'Apresiasi Prestasi', 'Tunjangan Hari Raya', 'Lainnya'], { required: true }),
+        money('amount', 'Nominal Bantuan', { required: true }),
+        sel('status', 'Status Persetujuan', ['Diajukan', 'Disetujui Waka', 'Dicairkan Keuangan', 'Ditolak'], { required: true }),
+        file('document', 'Berkas Pendukung / Surat Dokter', 'welfare_docs'),
+        area('note', 'Keterangan / Alasan')
+      ]
     },
     '#/personnel/publications': {
       node: 'personnel/announcements', noun: 'Publikasi & Informasi', writeRoles: PE, dateField: 'date', statusField: 'audience', badges: {},

@@ -123,15 +123,29 @@ const PersonnelPages = {
             <a href="#/personnel/evaluations" class="quick-nav-card">
               <div class="quick-nav-icon"><i class="ph ph-chart-line-up"></i></div>
               <div class="quick-nav-info">
-                <div class="quick-nav-title">Penilaian Kinerja (PKG)</div>
-                <div class="quick-nav-desc">Rubrik evaluasi SKP tahunan</div>
+                <div class="quick-nav-title">Penilaian Kinerja SDM</div>
+                <div class="quick-nav-desc">Rubrik 3 pilar Majelis Dikdasmen</div>
               </div>
             </a>
-            <a href="#/personnel/welfare" class="quick-nav-card">
-              <div class="quick-nav-icon"><i class="ph ph-hand-heart"></i></div>
+            <a href="#/personnel/portfolio" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-folder-star"></i></div>
               <div class="quick-nav-info">
-                <div class="quick-nav-title">Kesejahteraan Staf</div>
-                <div class="quick-nav-desc">Santunan sosial & apresiasi</div>
+                <div class="quick-nav-title">Portofolio & Kompetensi</div>
+                <div class="quick-nav-desc">Rekam jejak pelatihan, diklat & sertifikasi</div>
+              </div>
+            </a>
+            <a href="#/admin/attendance" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-clock"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Pantau Disiplin GTK</div>
+                <div class="quick-nav-desc">Monitoring presensi & rekap gaji cutoff 29-28</div>
+              </div>
+            </a>
+            <a href="#/gtk/salary-slip" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-receipt"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Slip Gaji Pribadi</div>
+                <div class="quick-nav-desc">Rincian honorarium & gaji staf personalia</div>
               </div>
             </a>
             <a href="#/personnel/complaints" class="quick-nav-card">

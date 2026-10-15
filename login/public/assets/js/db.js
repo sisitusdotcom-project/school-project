@@ -154,6 +154,11 @@ const DB = {
   async getTeacherAttendanceByDate(dateStr) {
     return this._readCollection(`teacher_attendance/${dateStr}`, {});
   },
+  async getTeacherAttendanceRange(startDate, endDate) {
+    if (!isDBReady()) return {};
+    const snap = await db.ref('teacher_attendance').orderByKey().startAt(startDate).endAt(endDate).once('value');
+    return snap.val() || {};
+  },
   async getTeacherAttendanceHistory(teacherId, limit = 60) {
     if (!isDBReady()) return [];
     const snap = await db.ref('teacher_attendance').limitToLast(limit).once('value');

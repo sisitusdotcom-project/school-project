@@ -14,6 +14,7 @@ const App = {
       [AppConfig.ROLES.GURU]: GuruPages.renderDashboard,
       [AppConfig.ROLES.GURU_EKSKUL]: GuruPages.renderEkstraDashboard,
       [AppConfig.ROLES.GURU_UMMI]: GuruPages.renderUmmiDashboard,
+      [AppConfig.ROLES.TENDIK]: GuruPages.renderTendikDashboard,
       [AppConfig.ROLES.KOMITE]: typeof KomitePages !== 'undefined' ? KomitePages.renderDashboard : null,
       [AppConfig.ROLES.KEPSEK]: KepsekPages.renderDashboard,
       [AppConfig.ROLES.ORTU]: OrtuPages.renderDashboard,
@@ -48,11 +49,15 @@ const App = {
     if (path.startsWith('#/guru/observe/')) path = '#/guru/classes';
     if (path.startsWith('#/guru/student-attendance/')) path = '#/guru/student-attendance';
     if (path.startsWith('#/guru/classes/')) path = '#/guru/classes';
+    if (path === '#/personnel/training') path = '#/personnel/portfolio';
+    if (path === '#/personnel/welfare') path = '#/finance/welfare';
     const assignments = Auth.currentAssignments || [];
     if (role === AppConfig.ROLES.GURU || role === AppConfig.ROLES.GURU_EKSKUL || role === AppConfig.ROLES.GURU_UMMI) {
       const guruAllowed = [
         '#/attendance',
         '#/guru/academic',
+        '#/gtk/salary-slip',
+        '#/gtk/official-travel',
         '#/curriculum/syllabus',
         '#/guru/portfolio',
         '#/guru/observations',
@@ -177,6 +182,7 @@ const App = {
           '#/admin/characters': typeof AdminPages !== 'undefined' ? AdminPages.renderCharacters : null,
           '#/admin/extracurriculars': typeof AdminPages !== 'undefined' ? AdminPages.renderExtracurriculars : null,
           '#/admin/attendance': typeof AdminPages !== 'undefined' ? AdminPages.renderAttendance : null,
+          '#/gtk/salary-slip': typeof GuruPages !== 'undefined' ? GuruPages.renderSalarySlip : null,
           '#/attendance': typeof GuruPages !== 'undefined' ? GuruPages.renderTeacherAttendance : null,
           '#/guru/attendance': typeof GuruPages !== 'undefined' ? GuruPages.renderTeacherAttendance : null,
           '#/guru/student-attendance': typeof GuruPages !== 'undefined' ? GuruPages.renderStudentAttendance : null,

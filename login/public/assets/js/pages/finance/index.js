@@ -64,6 +64,43 @@ const FinancePages = {
           <div><p class="stat-value">${pendingBills}</p><p class="stat-label text-muted">Tagihan tertunda</p></div>
         </div>
       </section>
+      <section class="card section-spacer">
+        <div class="card-header">
+          <h3 class="card-title"><i class="ph ph-lightning"></i> Menu Operasional Keuangan & Penggajian</h3>
+        </div>
+        <div class="card-body">
+          <div class="quick-nav-grid">
+            <a href="#/finance/salaries" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-money"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Penghitungan Gaji GTK</div>
+                <div class="quick-nav-desc">Penyusunan gaji pokok & tunjangan</div>
+              </div>
+            </a>
+            <a href="#/admin/attendance" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-clock"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Rekap Presensi Penggajian (29-28)</div>
+                <div class="quick-nav-desc">Kalkulasi disiplin bahan gaji bulanan</div>
+              </div>
+            </a>
+            <a href="#/finance/welfare" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-heart"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Kesejahteraan Pegawai</div>
+                <div class="quick-nav-desc">Santunan duka, sakit & persalinan</div>
+              </div>
+            </a>
+            <a href="#/gtk/salary-slip" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-receipt"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Slip Gaji Pribadi</div>
+                <div class="quick-nav-desc">Pratinjau & cetak slip gaji staf keuangan</div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </section>
       <div class="card-grid section-spacer">
         <div class="card">
           <div class="card-header">

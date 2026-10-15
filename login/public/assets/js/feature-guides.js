@@ -25,24 +25,24 @@ const FeatureGuides = {
       usage: 'Pilih tab unit untuk memfilter personil. Klik tombol Atur Penugasan untuk mencentang tugas tambahan guru/tendik.'
     },
     '#/personnel/data': {
-      func: 'Buku induk profil kepegawaian resmi GTK (NIP, NUPTK, status kepegawaian, riwayat pendidikan, dan nomor kontak).',
+      func: 'Buku induk profil kepegawaian resmi GTK (NBM, NUPTK, status kepegawaian, riwayat pendidikan, dan nomor kontak).',
       from: 'Staf Personalia & GTK Mandiri',
       to: 'Arsip Sekolah, Yayasan, dan Kepala Sekolah',
       usage: 'Klik Tambah untuk mendaftarkan biodata staf baru, atau klik ikon edit untuk memperbarui pangkat/kontak.'
     },
     '#/admin/attendance': {
-      func: 'Monitoring rekapitulasi kehadiran realtime seluruh guru dan karyawan sekolah.',
+      func: 'Monitoring rekapitulasi kehadiran GTK realtime dan rekapitulasi presensi bahan penggajian bulanan (periode cutoff 29 s/d 28).',
       from: 'Sistem Presensi GPS GTK',
       to: 'Waka Humas & Personalia serta Kepala Sekolah',
       usage: 'Pilih tanggal atau bulan untuk mengecek jam kedatangan, keterlambatan, dan status kehadiran staf.'
     },
     '#/personnel/evaluations': {
-      func: 'Penilaian Kinerja Guru (PKG) tahunan dengan rubrik 3 pilar: Pedagogik, Kepribadian, dan Profesional.',
+      func: 'Penilaian Kinerja SDM Majelis Dikdasmen & PNF PCM Sedati dengan rubrik 3 pilar: Loyalitas (4 item), Kapasitas (8 item), dan Kapabilitas (Jobdesk/SOP).',
       from: 'Kepala Sekolah & Asesor Penilai',
       to: 'Guru yang Dinilai & Arsip Kepegawaian',
       usage: 'Pilih nama guru yang dinilai, isi skor 1-4 pada setiap pilar instrumen, dan simpan untuk menerbitkan SKP.'
     },
-    '#/personnel/training': {
+    '#/personnel/portfolio': {
       func: 'Pelacakan keikutsertaan workshop, seminar, dan portofolio sertifikat pengembangan keprofesian berkelanjutan.',
       from: 'Guru Mandiri & Bagian SDM',
       to: 'GTK & Arsip Sekolah (Khusus: own: true)',
@@ -311,6 +311,18 @@ const FeatureGuides = {
       from: 'Guru Pengampu Mata Pelajaran',
       to: 'Wali Kelas & Ledger E-Rapor Siswa',
       usage: 'Pilih rombel dan mata pelajaran Anda, isi skor capaian kompetensi siswa, dan sistem otomatis menghitung rata-rata.'
+    },
+        '#/gtk/salary-slip': {
+      func: 'Rincian resmi penerimaan honorarium dan gaji GTK per bulan berdasarkan kehadiran disiplin cutoff 29 s/d 28.',
+      from: 'Bagian Keuangan & Sistem Presensi Sekolah',
+      to: 'Seluruh Pendidik & Tenaga Kependidikan (GTK)',
+      usage: 'Pilih periode penggajian untuk melihat rincian gaji pokok, tunjangan, dan potongan, lalu klik Cetak Slip Gaji untuk mencetak dokumen.'
+    },
+    '#/gtk/official-travel': {
+      func: 'Pengajuan surat tugas dinas, detail instansi pengundang, armada, dan unggah foto kegiatan serta laporan kegiatan.',
+      from: 'Pegawai GTK Mandiri',
+      to: 'Waka Humas & Personalia (Penetapan Vakasi)',
+      usage: 'Isi formulir perjalanan dinas lengkap dengan waktu keberangkatan/kepulangan dan unggah berkas surat tugas.'
     },
     '#/guru/portfolio': {
       func: 'Portofolio pendidik mandiri: penyimpanan berkas ijazah, sertifikat pendidik, karya inovasi pembelajaran, dan diklat.',
