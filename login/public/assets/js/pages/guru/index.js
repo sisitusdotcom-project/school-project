@@ -289,7 +289,7 @@ const GuruPages = {
     }).join('');
     container.innerHTML = `
       <div class="card" style="margin-bottom:16px">
-        <p class="text-muted" style="font-size:13px">Ketuk angka untuk memberi nilai: <strong>1</strong> (Perlu Bimbingan) — <strong>4</strong> (Sangat Baik). Nilai langsung tersimpan ke database.</p>
+        <p class="text-muted" style="font-size:13px">Ketuk angka untuk memberi nilai: <strong>1</strong> (Perlu Bimbingan) — <strong>4</strong> (Sangat Baik). Nilai langsung tersimpan otomatis.</p>
       </div>
       <div class="card-grid">${studentCards}</div>
       ${GuruPages._obsModal(charArr)}
@@ -2133,7 +2133,7 @@ const GuruPages = {
         </div>
         <div class="card stat-card">
           <div class="stat-icon stat-icon--success"><i class="ph ph-users-three"></i></div>
-          <div><p class="stat-value">${totalEnrolled}</p><p class="stat-label text-muted">Peserta Terdaftar (SSOT)</p></div>
+          <div><p class="stat-value">${totalEnrolled}</p><p class="stat-label text-muted">Peserta Resmi Terdaftar</p></div>
         </div>
         <div class="card stat-card">
           <div class="stat-icon stat-icon--danger"><i class="ph ph-calendar-check"></i></div>
@@ -2265,7 +2265,7 @@ const GuruPages = {
         <section class="card-grid" style="margin-bottom:16px;">
           <div class="card stat-card">
             <div class="stat-icon stat-icon--primary"><i class="ph ph-users-three"></i></div>
-            <div><p class="stat-value">${enrolledStudents.length}</p><p class="stat-label text-muted">Peserta Terdaftar (SSOT)</p></div>
+            <div><p class="stat-value">${enrolledStudents.length}</p><p class="stat-label text-muted">Peserta Resmi Terdaftar</p></div>
           </div>
           <div class="card stat-card">
             <div class="stat-icon stat-icon--success"><i class="ph ph-calendar-check"></i></div>
@@ -2333,7 +2333,7 @@ const GuruPages = {
         <div class="modal-header">
           <div>
             <h3 class="modal-title">Tambah Presensi Pertemuan</h3>
-            <p class="text-muted class-teaching-note">${AppConfig.escapeHtml(currentEks.name)} · SSOT Peserta Resmi</p>
+            <p class="text-muted class-teaching-note">${AppConfig.escapeHtml(currentEks.name)} · Daftar Peserta Resmi</p>
           </div>
           <button class="btn-icon" data-close-modal="modal-add-ekstra-att"><i class="ph ph-x"></i></button>
         </div>

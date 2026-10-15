@@ -141,7 +141,7 @@
       ]
     },
     '#/curriculum/grades': {
-      node: 'curriculum/grades', noun: 'Database Nilai', writeRoles: CU,
+      node: 'curriculum/grades', noun: 'Rekapitulasi Nilai', writeRoles: CU,
       subtitle: 'Arsip nilai harian, STS, SAS, dan ASAJ.',
       summary: [
         { label: 'Total Arsip Nilai', icon: 'ph-exam', tone: 'primary' }
@@ -946,8 +946,8 @@
         { key: 'createdAt', label: 'Waktu', type: 'timestamp', readonly: true },
         { key: 'name', label: 'Pengguna', type: 'text', readonly: true },
         { key: 'role', label: 'Peran', type: 'text', readonly: true },
-        { key: 'action', label: 'Aksi (CRUD)', type: 'text', readonly: true },
-        { key: 'node', label: 'Koleksi (Tabel)', type: 'text', readonly: true },
+        { key: 'action', label: 'Aktivitas', type: 'text', readonly: true },
+        { key: 'node', label: 'Kategori Data', type: 'text', readonly: true },
         { key: 'recordId', label: 'ID Data', type: 'text', readonly: true }
       ]
     },
@@ -969,14 +969,14 @@
     },
     '#/it-admin/integration': {
       node: 'it_admin/api_keys', noun: 'Integrasi API & CBT', writeRoles: [R.ADMIN], units: ['TIM_IT'], statusField: 'status', badges: { Aktif: 'success', Nonaktif: 'danger' },
-      subtitle: 'Kredensial dan endpoint untuk integrasi sistem pihak ketiga.',
+      subtitle: 'Koneksi dan tautan integrasi aplikasi pihak ketiga.',
       summary: [
         { label: 'Total Layanan', icon: 'ph-plugs', tone: 'primary' }
       ],
       fields: [
         t('service', 'Nama Layanan / Aplikasi', { required: true }),
-        t('endpoint', 'URL Endpoint'),
-        t('apiKey', 'API Key / Token (Opsional)'),
+        t('endpoint', 'Tautan Layanan (URL)'),
+        t('apiKey', 'Kunci Akses / Token (Opsional)'),
         sel('status', 'Status', ['Aktif', 'Nonaktif'], { required: true, default: 'Aktif' }),
         area('notes', 'Deskripsi Integrasi')
       ]

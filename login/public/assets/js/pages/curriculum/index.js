@@ -85,7 +85,7 @@ const CurriculumPages = {
             <a href="#/curriculum/grades" class="quick-nav-card">
               <div class="quick-nav-icon"><i class="ph ph-chart-bar"></i></div>
               <div class="quick-nav-info">
-                <div class="quick-nav-title">Database Nilai</div>
+                <div class="quick-nav-title">Rekapitulasi Nilai</div>
                 <div class="quick-nav-desc">Rekap capaian akademik murid</div>
               </div>
             </a>

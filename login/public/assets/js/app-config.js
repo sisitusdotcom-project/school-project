@@ -271,7 +271,7 @@
       { hash: '#/curriculum/questions', icon: 'ph-file-code', text: 'Bank Soal', group: 'Kurikulum: Pelaksanaan KBM' },
       { hash: '#/curriculum/journals', icon: 'ph-notebook', text: 'Jurnal Pembelajaran', group: 'Kurikulum: Pelaksanaan KBM' },
       { hash: '#/admin/attendance', icon: 'ph-clock', text: 'Pantau Kehadiran', group: 'Kurikulum: Pelaksanaan KBM' },
-      { hash: '#/curriculum/grades', icon: 'ph-exam', text: 'Database Nilai', group: 'Kurikulum: Supervisi & Evaluasi' },
+      { hash: '#/curriculum/grades', icon: 'ph-exam', text: 'Rekapitulasi Nilai', group: 'Kurikulum: Supervisi & Evaluasi' },
       { hash: '#/curriculum/evaluations', icon: 'ph-exam', text: 'Sistem Penilaian', group: 'Kurikulum: Supervisi & Evaluasi' },
       { hash: '#/curriculum/supervision', icon: 'ph-chalkboard-teacher', text: 'Supervisi Guru', group: 'Kurikulum: Supervisi & Evaluasi' }
     ],
@@ -282,7 +282,7 @@
       { hash: '#/curriculum/monitoring', icon: 'ph-eye', text: 'Pemantauan KBM', group: 'Kurikulum: Pelaksanaan KBM' },
       { hash: '#/curriculum/questions', icon: 'ph-file-code', text: 'Bank Soal', group: 'Kurikulum: Pelaksanaan KBM' },
       { hash: '#/curriculum/journals', icon: 'ph-notebook', text: 'Jurnal Pembelajaran', group: 'Kurikulum: Pelaksanaan KBM' },
-      { hash: '#/curriculum/grades', icon: 'ph-exam', text: 'Database Nilai', group: 'Kurikulum: Supervisi & Evaluasi' }
+      { hash: '#/curriculum/grades', icon: 'ph-exam', text: 'Rekapitulasi Nilai', group: 'Kurikulum: Supervisi & Evaluasi' }
     ],
     'WAKA_KEUANGAN': [
       { hash: '#/finance', icon: 'ph-wallet', text: 'Dashboard Keuangan', group: 'Keuangan: Umum' },

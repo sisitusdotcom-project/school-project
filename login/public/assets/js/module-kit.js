@@ -762,7 +762,7 @@ const ModuleKit = {
       <section class="card section-block">
         <div class="card-header mk-header"><h3 class="card-title"><i class="ph ph-cloud-arrow-down"></i> Cadangkan Data</h3></div>
         <div class="card-body">
-          <p class="text-muted">Pilih koleksi yang akan diunduh sebagai berkas JSON. Restore dilakukan manual oleh admin melalui Firebase Console demi keamanan.</p>
+          <p class="text-muted">Pilih koleksi data yang akan diunduh sebagai berkas cadangan. Pemulihan data dilakukan melalui pusat kontrol admin demi keamanan.</p>
           <div class="checkbox-grid mk-multi" id="bk-nodes">
             ${def.nodes.map((node) => `<label class="checkbox-card"><input type="checkbox" value="${this.esc(node)}" checked><span>${this.esc(node)}</span></label>`).join('')}
           </div>

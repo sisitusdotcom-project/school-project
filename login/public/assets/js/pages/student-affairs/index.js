@@ -92,7 +92,7 @@ const StudentAffairsPages = {
               <div class="quick-nav-icon"><i class="ph ph-users"></i></div>
               <div class="quick-nav-info">
                 <div class="quick-nav-title">Penelusuran Alumni</div>
-                <div class="quick-nav-desc">Database lulusan sekolah</div>
+                <div class="quick-nav-desc">Buku induk alumni sekolah</div>
               </div>
             </a>
           </div>

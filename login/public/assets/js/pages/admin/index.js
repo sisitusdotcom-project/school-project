@@ -89,7 +89,7 @@ const AdminPages = {
               <div class="quick-nav-icon"><i class="ph ph-cloud-arrow-down"></i></div>
               <div class="quick-nav-info">
                 <div class="quick-nav-title">Backup & Restore</div>
-                <div class="quick-nav-desc">Pencadangan database sistem</div>
+                <div class="quick-nav-desc">Pencadangan data sekolah</div>
               </div>
             </a>
           </div>
@@ -1137,7 +1137,7 @@ const AdminPages = {
     document.getElementById('modal-sub').classList.add('active');
   },
   async renderExtracurriculars(container) {
-    Router.setTitle('Ekstrakurikuler', 'Kelola daftar ekstrakurikuler sekolah dan pemetaan peserta SSOT.');
+    Router.setTitle('Ekstrakurikuler', 'Kelola daftar ekstrakurikuler sekolah dan pemetaan peserta resmi.');
     const [ekskuls, users, classes, allStudents] = await Promise.all([
       DB.getExtracurriculars(),
       DB.getAllUsers(),
@@ -1170,7 +1170,7 @@ const AdminPages = {
           <button class="btn btn-primary" id="btn-add-eks"><i class="ph ph-plus"></i> Tambah</button>
         </div>
         <div class="table-responsive">
-          <table class="table"><thead><tr><th style="width:50px">No</th><th>Nama Ekstrakurikuler</th><th>Guru Pembina</th><th style="width:140px">Peserta (SSOT)</th><th style="width:100px">Aksi</th></tr></thead>
+          <table class="table"><thead><tr><th style="width:50px">No</th><th>Nama Ekstrakurikuler</th><th>Guru Pembina</th><th style="width:140px">Jumlah Peserta</th><th style="width:100px">Aksi</th></tr></thead>
           <tbody>${rows}</tbody></table>
         </div>
       </div>
@@ -1268,7 +1268,7 @@ const AdminPages = {
         <div class="modal-header">
           <div>
             <h3 class="modal-title" id="modal-eks-stu-title">Kelola Peserta Ekstrakurikuler</h3>
-            <p class="text-muted class-teaching-note" id="modal-eks-stu-sub">Pemetaan resmi murid peserta ekstrakurikuler (SSOT Kesiswaan)</p>
+            <p class="text-muted class-teaching-note" id="modal-eks-stu-sub">Pemetaan resmi murid peserta ekstrakurikuler (Data Kesiswaan)</p>
           </div>
           <button class="btn-icon" data-close-modal="modal-eks-students"><i class="ph ph-x"></i></button>
         </div>

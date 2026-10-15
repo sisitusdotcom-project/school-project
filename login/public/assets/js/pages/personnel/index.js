@@ -59,18 +59,18 @@ const PersonnelPages = {
           dynamicNote = `Batas Masuk ${inEndVal} | Pulang ${outStartVal}`;
         }
         return `<tr>
-  <td><strong>${d.label}</strong><div class="text-muted" style="font-size:11px;">${dynamicNote}</div></td>
+  <td><strong>${d.label}</strong><div class="text-muted sched-day-note">${dynamicNote}</div></td>
   <td>
-    <select class="form-control sched-${group}-status" data-day="${d.key}" style="font-size:12px; padding:4px 6px;">
+    <select class="form-control sched-status-select sched-${group}-status" data-day="${d.key}">
       <option value="active" ${status === 'active' ? 'selected' : ''}>Wajib Masuk</option>
       <option value="optional" ${status === 'optional' ? 'selected' : ''}>Opsional (Pembinaan)</option>
       <option value="off" ${status === 'off' ? 'selected' : ''}>Libur</option>
     </select>
   </td>
-  <td><input type="time" class="form-control sched-${group}-in-start" data-day="${d.key}" value="${inStartVal}"></td>
-  <td><input type="time" class="form-control sched-${group}-in-end" data-day="${d.key}" value="${inEndVal}"></td>
-  <td><input type="time" class="form-control sched-${group}-out-start" data-day="${d.key}" value="${outStartVal}"></td>
-  <td><input type="time" class="form-control sched-${group}-out-end" data-day="${d.key}" value="${outEndVal}"></td>
+  <td><input type="time" class="form-control sched-time-input sched-${group}-in-start" data-day="${d.key}" value="${inStartVal}"></td>
+  <td><input type="time" class="form-control sched-time-input sched-${group}-in-end" data-day="${d.key}" value="${inEndVal}"></td>
+  <td><input type="time" class="form-control sched-time-input sched-${group}-out-start" data-day="${d.key}" value="${outStartVal}"></td>
+  <td><input type="time" class="form-control sched-time-input sched-${group}-out-end" data-day="${d.key}" value="${outEndVal}"></td>
 </tr>`;
       }).join('');
     };
@@ -176,33 +176,33 @@ const PersonnelPages = {
       <section class="card section-spacer">
         <div class="card-header mk-header">
           <h3 class="card-title"><i class="ph ph-clock"></i> Pengaturan Jam Operasional Mingguan GTK & Guru Ummi (Senin - Sabtu)</h3>
-          <div style="display:inline-flex; gap:6px;">
-            <span class="badge badge-success"><i class="ph ph-repeat"></i> Otomatis Berulang Tiap Minggu</span>
-            <span class="badge badge-primary">Konfigurasi Presensi</span>
+          <div class="badge-group">
+            <span class="badge badge-success"><i class="ph ph-repeat"></i> Otomatis Mingguan</span>
+            <span class="badge badge-primary">Jadwal Resmi</span>
           </div>
         </div>
         <div class="card-body">
           <form id="form-attendance-time-settings">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:10px;">
-              <div style="display:inline-flex; gap:8px;">
+            <div class="sched-toolbar">
+              <div class="sched-tab-group">
                 <button type="button" class="btn btn-sm btn-primary sched-tab-btn active" id="btn-tab-gtk"><i class="ph ph-briefcase"></i> Jadwal GTK / Tendik</button>
                 <button type="button" class="btn btn-sm btn-outline sched-tab-btn" id="btn-tab-ummi"><i class="ph ph-book-open"></i> Jadwal Guru Ummi</button>
               </div>
-              <div style="display:inline-flex; align-items:center; gap:10px; flex-wrap:wrap;">
-                <button type="button" class="btn btn-sm btn-outline" id="btn-reset-default-sched"><i class="ph ph-arrow-counter-clockwise"></i> Terapkan Jadwal Default Resmi</button>
-                <label style="display:inline-flex; align-items:center; gap:8px; font-size:12px; cursor:pointer;" title="Jika dicentang, guru bisa absen kapan saja tanpa dibatasi jam buka/tutup presensi.">
+              <div class="sched-actions-row">
+                <button type="button" class="btn btn-sm btn-outline sched-reset-btn" id="btn-reset-default-sched"><i class="ph ph-arrow-counter-clockwise"></i> Terapkan Jadwal Default Resmi</button>
+                <label class="sched-flexible-toggle" title="Jika dicentang, guru bisa absen kapan saja tanpa dibatasi jam buka/tutup presensi.">
                   <input type="checkbox" id="set-flexible-time" ${settings.attendanceRules?.allowFlexibleTime ? 'checked' : ''}>
                   <span><strong>Mode Fleksibel:</strong> Bolehkan absensi kapan saja (jam bebas / tanpa batas jam buka)</span>
                 </label>
               </div>
             </div>
-            <div class="panel-callout" style="padding:10px 14px; margin-bottom:14px; font-size:12px; border-left:4px solid var(--primary,#2563eb); background:var(--bg-subtle,#f8fafc);">
-              <div style="margin-bottom:4px;"><i class="ph ph-check-circle" style="color:var(--success,#10b981);"></i> <strong>Sistem Otomatis (Tidak Perlu Diatur Tiap Hari):</strong> Template jadwal Senin s/d Sabtu ini cukup disimpan <strong>sekali saja</strong> dan akan berlaku otomatis setiap minggunya. Personalia <strong>TIDAK PERLU</strong> mengatur ulang setiap hari.</div>
-              <div style="margin-bottom:4px;"><i class="ph ph-info"></i> <strong>Aturan Keterlambatan:</strong> Batas akhir absen = jam yang tertulis. Lewat 1 menit (misal 06.46 bagi GTK atau 07.16 bagi Ummi) otomatis terhitung terlambat. Hari Sabtu bersifat opsional (pembinaan). Guru Ummi hari Jumat libur.</div>
+            <div class="panel-callout attendance-guide-callout">
+              <div><i class="ph ph-check-circle attendance-guide-callout-success"></i> <strong>Sistem Otomatis (Tidak Perlu Diatur Tiap Hari):</strong> Template jadwal Senin s/d Sabtu ini cukup disimpan <strong>sekali saja</strong> dan akan berlaku otomatis setiap minggunya. Personalia <strong>TIDAK PERLU</strong> mengatur ulang setiap hari.</div>
+              <div><i class="ph ph-info"></i> <strong>Aturan Keterlambatan:</strong> Batas akhir absen = jam yang tertulis. Lewat 1 menit (misal 06.46 bagi GTK atau 07.16 bagi Ummi) otomatis terhitung terlambat. Hari Sabtu bersifat opsional (pembinaan). Guru Ummi hari Jumat libur.</div>
               <div><i class="ph ph-sliders"></i> <strong>Mode Fleksibel:</strong> Biarkan tidak dicentang untuk hari kerja normal agar jam disiplin ditegakkan. Centang hanya jika ada agenda khusus (ujian, rapat luar, dsb) di mana pengajar hadir/pulang di jam bebas.</div>
             </div>
             <div id="pane-sched-gtk">
-              <h4 style="font-size:13px; margin:0 0 8px 0; color:var(--text-main);">Jadwal Guru & Tenaga Kependidikan (GTK / Tendik)</h4>
+              <h4 class="sched-pane-title">Jadwal Guru & Tenaga Kependidikan (GTK / Tendik)</h4>
               <div class="table-wrap">
                 <table class="table">
                   <thead><tr><th>Hari & Catatan</th><th>Status Hari</th><th>Mulai Masuk</th><th>Batas Masuk</th><th>Mulai Pulang</th><th>Batas Pulang</th></tr></thead>
@@ -210,8 +210,8 @@ const PersonnelPages = {
                 </table>
               </div>
             </div>
-            <div id="pane-sched-ummi" style="display:none;">
-              <h4 style="font-size:13px; margin:0 0 8px 0; color:var(--text-main);">Jadwal Khusus Guru Ummi / Qur'an</h4>
+            <div id="pane-sched-ummi" class="hidden">
+              <h4 class="sched-pane-title">Jadwal Khusus Guru Ummi / Qur'an</h4>
               <div class="table-wrap">
                 <table class="table">
                   <thead><tr><th>Hari & Catatan</th><th>Status Hari</th><th>Mulai Masuk</th><th>Batas Masuk</th><th>Mulai Pulang</th><th>Batas Pulang</th></tr></thead>
@@ -219,7 +219,7 @@ const PersonnelPages = {
                 </table>
               </div>
             </div>
-            <button type="submit" class="btn btn-primary" style="margin-top:14px;"><i class="ph ph-floppy-disk"></i> Simpan Seluruh Jadwal Presensi</button>
+            <button type="submit" class="btn btn-primary sched-save-btn"><i class="ph ph-floppy-disk"></i> Simpan Seluruh Jadwal Presensi</button>
           </form>
         </div>
       </section>
@@ -229,20 +229,22 @@ const PersonnelPages = {
           <span class="badge badge-outline">Bisa Dikosongkan (Aktif Terus)</span>
         </div>
         <div class="card-body">
-          <p class="text-muted" style="font-size:12px; margin:0 0 12px 0;">
+          <p class="text-muted attendance-date-desc">
             <i class="ph ph-info"></i> <strong>Keterangan untuk Personalia:</strong> Bagian ini bersifat <em>opsional</em>. Biarkan kedua tanggal kosong agar presensi sekolah aktif otomatis sepanjang tahun tanpa perlu diatur ulang (sangat direkomendasikan). Anda hanya perlu mengisi tanggal jika ingin membatasi gerbang presensi hanya buka pada rentang tanggal tertentu (misalnya menjelang libur panjang sekolah).
           </p>
-          <form id="form-attendance-date-settings" class="inline-form" style="gap:10px; align-items:flex-end;">
-            <div class="form-group compact-field" style="margin-bottom:0;">
-              <label>Mulai Berlaku (Opsional)</label>
-              <input id="set-date-start" type="date" value="${settings.attendanceRules?.attendanceStartDate || ''}">
+          <form id="form-attendance-date-settings" class="attendance-date-form">
+            <div class="attendance-date-inputs">
+              <div class="form-group compact-field attendance-field">
+                <label>Mulai Berlaku (Opsional)</label>
+                <input id="set-date-start" type="date" value="${settings.attendanceRules?.attendanceStartDate || ''}">
+              </div>
+              <div class="form-group compact-field attendance-field">
+                <label>Sampai Tanggal (Opsional)</label>
+                <input id="set-date-end" type="date" value="${settings.attendanceRules?.attendanceEndDate || ''}">
+              </div>
             </div>
-            <div class="form-group compact-field" style="margin-bottom:0;">
-              <label>Sampai Tanggal (Opsional)</label>
-              <input id="set-date-end" type="date" value="${settings.attendanceRules?.attendanceEndDate || ''}">
-            </div>
-            <div style="display:inline-flex; gap:8px;">
-              <button type="button" id="btn-clear-date-settings" class="btn btn-outline" style="font-size:12px;"><i class="ph ph-arrows-counter-clockwise"></i> Kosongkan (Aktif Terus)</button>
+            <div class="attendance-date-actions">
+              <button type="button" id="btn-clear-date-settings" class="btn btn-outline"><i class="ph ph-arrows-counter-clockwise"></i> Kosongkan (Aktif Terus)</button>
               <button type="submit" class="btn btn-primary"><i class="ph ph-floppy-disk"></i> Simpan Rentang Tanggal</button>
             </div>
           </form>
@@ -310,14 +312,14 @@ const PersonnelPages = {
       tabGtk.onclick = () => {
         tabGtk.className = 'btn btn-sm btn-primary sched-tab-btn active';
         tabUmmi.className = 'btn btn-sm btn-outline sched-tab-btn';
-        paneGtk.style.display = 'block';
-        paneUmmi.style.display = 'none';
+        paneGtk.classList.remove('hidden');
+        paneUmmi.classList.add('hidden');
       };
       tabUmmi.onclick = () => {
         tabUmmi.className = 'btn btn-sm btn-primary sched-tab-btn active';
         tabGtk.className = 'btn btn-sm btn-outline sched-tab-btn';
-        paneUmmi.style.display = 'block';
-        paneGtk.style.display = 'none';
+        paneUmmi.classList.remove('hidden');
+        paneGtk.classList.add('hidden');
       };
     }
     bindSettingsForm('form-attendance-time-settings', () => {
