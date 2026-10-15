@@ -55,7 +55,10 @@ for (let i = 0; i < linesSiswa.length; i++) {
       if (kelas) currentClass = kelas;
       if (!nama || nama.toLowerCase() === 'nama' || !no.match(/^\d+$/)) continue;
       const cleanNisn = nisn ? nisn.replace(/\s+/g, '') : (noInduk || (Date.now() + '_' + no));
-      const uid = `SISWA_${cleanNisn}`;
+      let uid = `SISWA_${cleanNisn}`;
+      if (rtdb.students[uid]) {
+        uid = `SISWA_${noInduk || cleanNisn}`;
+      }
       let classId = 'CLASS_' + currentClass.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase();
       classId = classId.replace(/_+/g, '_');
       rtdb.users[uid] = {
