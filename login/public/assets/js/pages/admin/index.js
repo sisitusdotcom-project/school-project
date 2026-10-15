@@ -399,15 +399,36 @@ const AdminPages = {
       const id = document.getElementById('usr-id').value || null;
       const pwd = document.getElementById('usr-password').value;
       const assignments = Array.from(document.querySelectorAll('#usr-assignments-group input[type="checkbox"]:checked')).map((cb) => cb.value);
+      const name = document.getElementById('usr-name').value.trim();
+      let email = document.getElementById('usr-email').value.trim();
+      if (!email) {
+        email = `${name.toLowerCase().replace(/[^a-z0-9]/g, '')}@musada.sch.id`;
+      }
       const data = {
-        name: document.getElementById('usr-name').value.trim(),
-        email: document.getElementById('usr-email').value.trim(),
+        name,
+        email,
         role: document.getElementById('usr-role').value,
         assignments: assignments
       };
       if (pwd) data.password = pwd;
       try {
-        await DB.saveUser(id, data);
+        if (!id) {
+          if (!pwd || pwd.length < 6) throw new Error('Password minimal 6 karakter.');
+          const secApp = firebase.initializeApp(firebaseConfig, 'SecAuth_' + Date.now());
+          let newUid = null;
+          try {
+            const cred = await secApp.auth().createUserWithEmailAndPassword(email, pwd);
+            newUid = cred.user.uid;
+            await cred.user.updateProfile({ displayName: name });
+          } finally {
+            await secApp.delete();
+          }
+          if (newUid) {
+            await DB.createUserInDB(newUid, data);
+          }
+        } else {
+          await DB.saveUser(id, data);
+        }
         App.closeModal('modal-usr');
         AdminPages.renderUsers(container);
       } catch (err) {
