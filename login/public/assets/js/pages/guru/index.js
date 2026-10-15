@@ -610,6 +610,17 @@ const GuruPages = {
         try {
           await Promise.all(promises);
           btn.innerHTML = '<i class="ph ph-check"></i> Tersimpan';
+          const targetClass = classArr.find((c) => c.id === classId);
+          if (typeof NotificationService !== 'undefined' && targetClass && targetClass.teacherId && targetClass.teacherId !== uid) {
+            const subName = (subArr.find((s) => s.id === subjectId) || {}).name || 'Mata Pelajaran';
+            NotificationService.send({
+              recipientUid: targetClass.teacherId,
+              title: 'Nilai Siswa Diperbarui',
+              message: `Nilai mapel ${subName} untuk ${targetClass.name} telah disimpan oleh guru pengampu.`,
+              link: `#/guru/academic?classId=${classId}&subjectId=${subjectId}`,
+              type: 'info'
+            });
+          }
           setTimeout(() => {
             btn.disabled = false;
             btn.innerHTML = '<i class="ph ph-floppy-disk"></i> Simpan Semua Nilai';

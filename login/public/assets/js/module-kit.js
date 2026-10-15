@@ -646,13 +646,25 @@ const ModuleKit = {
         this.audit(state.editing ? 'update' : 'create', def.node, recordId);
         if (typeof NotificationService !== 'undefined') {
           if (def.node === 'curriculum/documents') {
-            if (payload.status === 'Disetujui (ACC)' || payload.status === 'Perlu Revisi') {
+            if (!isApprover) {
+              NotificationService.sendToRole({
+                unit: ['WAKA_KURIKULUM', 'STAF_KURIKULUM'],
+                title: 'Modul Ajar Baru Diajukan',
+                message: `${payload.teacherIdName || (Auth.userData && Auth.userData.name) || 'Guru'} mengunggah ${payload.docType || 'Modul Ajar'} (${payload.title || ''}) untuk diverifikasi.`,
+                link: '#/curriculum/syllabus',
+                type: 'info',
+                excludeUid: uid
+              });
+            } else if (payload.teacherId) {
+              const isAcc = payload.status === 'Disetujui (ACC)';
               NotificationService.send({
                 recipientUid: payload.teacherId,
-                title: payload.status === 'Disetujui (ACC)' ? 'Perangkat Ajar Disetujui (ACC)' : 'Perangkat Ajar Perlu Revisi',
-                message: `Perangkat ${payload.docType || 'Modul Ajar'} Anda telah diverifikasi Kurikulum (${payload.status}).`,
+                title: isAcc ? 'Perangkat Ajar Disetujui (ACC)' : 'Perangkat Ajar Perlu Revisi',
+                message: isAcc
+                  ? `Perangkat ${payload.docType || 'Modul Ajar'} (${payload.title || ''}) Anda telah disetujui Kurikulum.`
+                  : `Perangkat ${payload.docType || 'Modul Ajar'} (${payload.title || ''}) memerlukan revisi dari Kurikulum.`,
                 link: '#/curriculum/syllabus',
-                type: payload.status === 'Disetujui (ACC)' ? 'success' : 'warning'
+                type: isAcc ? 'success' : 'warning'
               });
             }
           } else if (def.node === 'student_affairs/leaves') {
@@ -669,32 +681,51 @@ const ModuleKit = {
                         recipientUid: cls.teacherId,
                         title: 'Pengajuan Izin Siswa Baru',
                         message: `Wali murid an. ${sName} (${cls.name}) mengajukan ${payload.type || 'izin'} (${payload.startDate}).`,
-                        link: '#/student-affairs/leaves',
+                        link: `#/guru/student-attendance/${classId}`,
                         type: 'info'
                       });
                     }
                   });
                 }
               });
+            } else if (payload.createdBy && payload.createdBy !== uid) {
+              NotificationService.send({
+                recipientUid: payload.createdBy,
+                title: `Izin Siswa ${payload.status || 'Diverifikasi'}`,
+                message: `Pengajuan ${payload.type || 'izin'} anak Anda telah ${payload.status === 'Disetujui' ? 'disetujui' : payload.status}.`,
+                link: '#/ortu/leaves',
+                type: payload.status === 'Disetujui' ? 'success' : 'info'
+              });
             }
           } else if (def.node === 'personnel/official_travel') {
             if (!isApprover) {
               NotificationService.sendToRole({
-                unit: 'WAKA_HUMAS_PERSONALIA',
-                role: 'personnel',
-                title: 'Pengajuan Perjalanan Dinas Baru',
-                message: `${payload.gtkIdName || 'GTK'} mengajukan tugas perjalanan dinas ke ${payload.location || ''}.`,
+                unit: ['WAKA_HUMAS_PERSONALIA', 'STAF_HUMAS_PERSONALIA'],
+                title: 'Pengajuan Tugas Dinas Baru',
+                message: `${payload.gtkIdName || (Auth.userData && Auth.userData.name) || 'GTK'} mengajukan tugas dinas ke ${payload.location || ''}.`,
                 link: '#/humas/official-travel',
-                type: 'info'
+                type: 'info',
+                excludeUid: uid
               });
             } else if (payload.gtkId) {
+              const isAcc = payload.status === 'Disetujui';
               NotificationService.send({
                 recipientUid: payload.gtkId,
                 title: `Perjalanan Dinas ${payload.status || 'Diverifikasi'}`,
-                message: `Tugas perjalanan dinas ke ${payload.location || ''} telah diverifikasi Humas. Status: ${payload.status}. Vakasi: ${this.money(payload.vakasi || 0)}.`,
+                message: `Tugas dinas ke ${payload.location || ''} telah diverifikasi Humas. Status: ${payload.status}. Vakasi: ${this.money(payload.vakasi || 0)}.`,
                 link: '#/gtk/official-travel',
-                type: payload.status === 'Disetujui' ? 'success' : 'info'
+                type: isAcc ? 'success' : 'info'
               });
+              if (isAcc && Number(payload.vakasi) > 0) {
+                NotificationService.sendToRole({
+                  unit: ['WAKA_KEUANGAN', 'STAF_KEUANGAN'],
+                  title: 'Vakasi Tugas Dinas',
+                  message: `Vakasi an. ${payload.gtkIdName || 'GTK'} sebesar ${this.money(payload.vakasi)} siap dicairkan.`,
+                  link: '#/finance/ledger',
+                  type: 'info',
+                  excludeUid: uid
+                });
+              }
             }
           }
         }
