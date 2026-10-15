@@ -566,15 +566,58 @@
     const prefixes = ['GURU_KELAS_', 'GURU_MAPEL_', 'TIM_B_INGGRIS'];
     return prefixes.some(prefix => a.startsWith(prefix));
   }
+  function isUserUmmi(userOrRole, maybeAssignments) {
+    if (!userOrRole) return false;
+    const role = typeof userOrRole === 'object' ? userOrRole.role : userOrRole;
+    const assigns = typeof userOrRole === 'object' ? getRoleAssignments(userOrRole) : (maybeAssignments || []);
+    if (role === ROLES.GURU_UMMI) return true;
+    return assigns.some(a => a === 'TIM_UMMI' || a === 'KOORD_UMMI' || (typeof a === 'string' && a.startsWith('GURU_UMMI')));
+  }
+  function isUserEkstra(userOrRole, maybeAssignments) {
+    if (!userOrRole) return false;
+    const role = typeof userOrRole === 'object' ? userOrRole.role : userOrRole;
+    const assigns = typeof userOrRole === 'object' ? getRoleAssignments(userOrRole) : (maybeAssignments || []);
+    if (role === ROLES.GURU_EKSKUL) return true;
+    return assigns.some(a => typeof a === 'string' && a.startsWith('GURU_EKSTRA_'));
+  }
+  function isTeacher(userOrRole) {
+    if (!userOrRole) return false;
+    const role = typeof userOrRole === 'object' ? userOrRole.role : userOrRole;
+    if (role === ROLES.GURU || role === ROLES.GURU_UMMI || role === ROLES.GURU_EKSKUL) return true;
+    if (typeof userOrRole === 'object') {
+      return getRoleAssignments(userOrRole).some(isTeachingAssignment);
+    }
+    return false;
+  }
+  function isGTK(userOrRole) {
+    if (!userOrRole) return false;
+    const role = typeof userOrRole === 'object' ? userOrRole.role : userOrRole;
+    if (!role || role === ROLES.ORTU) return false;
+    return [ROLES.GURU, ROLES.GURU_UMMI, ROLES.GURU_EKSKUL, ROLES.TENDIK, ROLES.KEPSEK, ROLES.ADMIN, ROLES.PERSONNEL, ROLES.FINANCE, ROLES.CURRICULUM, ROLES.STUDENT_AFFAIRS, ROLES.FACILITIES, ROLES.IT_ADMIN, ROLES.KOMITE].includes(role);
+  }
+  function isUserInRole(user = {}, targetRole = '') {
+    if (!targetRole) return true;
+    if (!user) return false;
+    if (targetRole === ROLES.GURU_UMMI) {
+      return isUserUmmi(user);
+    }
+    if (targetRole === ROLES.GURU_EKSKUL) {
+      return isUserEkstra(user);
+    }
+    if (targetRole === ROLES.GURU) {
+      return isTeacher(user);
+    }
+    return user.role === targetRole;
+  }
   function isPureGuruEkstra(role, assignments = []) {
     const list = Array.isArray(assignments) ? assignments : [];
-    const hasEkstra = list.some(a => a && a.startsWith('GURU_EKSTRA_')) || role === ROLES.GURU_EKSKUL;
+    const hasEkstra = isUserEkstra(role, list);
     const hasAcademic = list.some(isAcademicTeachingAssignment);
     return hasEkstra && !hasAcademic && role !== ROLES.TENDIK && role !== ROLES.ADMIN && role !== ROLES.KEPSEK;
   }
   function isPureGuruUmmi(role, assignments = []) {
     const list = Array.isArray(assignments) ? assignments : [];
-    const hasUmmi = list.some(a => a === 'GURU_UMMI' || a === 'TIM_UMMI' || a === 'KOORD_UMMI') || role === ROLES.GURU_UMMI;
+    const hasUmmi = isUserUmmi(role, list);
     const hasAcademic = list.some(isAcademicTeachingAssignment);
     return hasUmmi && !hasAcademic && role !== ROLES.TENDIK && role !== ROLES.ADMIN && role !== ROLES.KEPSEK;
   }
@@ -594,13 +637,13 @@
   }
   function getRoleNav(role, assignments = []) {
     let baseNav = [...(NAV_ITEMS[role] || [])];
-    const isEkstra = assignments.some(a => a.startsWith('GURU_EKSTRA_')) || role === ROLES.GURU_EKSKUL;
+    const isEkstra = isUserEkstra(role, assignments);
     const isPure = isPureGuruEkstra(role, assignments);
     const isPureUmmi = isPureGuruUmmi(role, assignments);
     const isGuru = !isPure && !isPureUmmi && (role === ROLES.GURU || assignments.some(isAcademicTeachingAssignment));
     const isWaliKelas = assignments.some(a => a.startsWith('GURU_KELAS_'));
     const isGuruEkstra = isEkstra;
-    const isTimUmmi = assignments.some(a => a === 'GURU_UMMI' || a === 'TIM_UMMI' || a === 'KOORD_UMMI') || role === ROLES.GURU_UMMI;
+    const isTimUmmi = isUserUmmi(role, assignments);
     const isTimInggris = assignments.some(a => a === 'TIM_B_INGGRIS');
     if (isPureUmmi) {
       baseNav = [
@@ -645,6 +688,10 @@
         return 'badge-warning';
       case ROLES.GURU:
         return 'badge-success';
+      case ROLES.GURU_UMMI:
+        return 'badge-info';
+      case ROLES.GURU_EKSKUL:
+        return 'badge-primary';
       case ROLES.TENDIK:
         return 'badge-primary';
       case ROLES.KOMITE:
@@ -751,6 +798,11 @@
     getAssignmentBadgeClass,
     isTeachingAssignment,
     isAcademicTeachingAssignment,
+    isUserUmmi,
+    isUserEkstra,
+    isTeacher,
+    isGTK,
+    isUserInRole,
     isPureGuruEkstra,
     isPureGuruUmmi,
     formatUserName,

@@ -2,11 +2,11 @@ window.AdminAssignmentsModule = {
   async render(container) {
     Router.setTitle('Distribusi Penugasan GTK', 'Peta pembagian tugas struktural dan amanah tambahan seluruh pendidik & tenaga kependidikan.');
     const users = DB.toArray(await DB.getAllUsers());
-    const gtkList = users.filter(u => u.role === AppConfig.ROLES.GURU || u.role === AppConfig.ROLES.TENDIK || u.role === AppConfig.ROLES.KEPSEK || u.role === AppConfig.ROLES.ADMIN).sort((a, b) => a.name.localeCompare(b.name));
+    const gtkList = users.filter(u => AppConfig.isGTK(u)).sort((a, b) => a.name.localeCompare(b.name));
     const countWaka = gtkList.filter(u => (u.assignments || []).some(a => a.startsWith('WAKA_'))).length;
-    const countUmmi = gtkList.filter(u => (u.assignments || []).some(a => a === 'KOORD_UMMI' || a === 'TIM_UMMI')).length;
+    const countUmmi = gtkList.filter(u => AppConfig.isUserUmmi(u)).length;
     const countWali = gtkList.filter(u => (u.assignments || []).some(a => a.startsWith('GURU_KELAS_'))).length;
-    const countEkskul = gtkList.filter(u => (u.assignments || []).some(a => a.startsWith('GURU_EKSTRA_'))).length;
+    const countEkskul = gtkList.filter(u => AppConfig.isUserEkstra(u)).length;
     let activeFilter = 'ALL';
     let searchQuery = '';
     const renderTable = () => {
@@ -22,9 +22,9 @@ window.AdminAssignmentsModule = {
         if (activeFilter === 'HUMAS') return assigns.some(a => a.includes('HUMAS'));
         if (activeFilter === 'KEUANGAN') return assigns.some(a => a.includes('KEUANGAN'));
         if (activeFilter === 'SARPRAS') return assigns.some(a => a.includes('SARPRAS'));
-        if (activeFilter === 'UMMI') return assigns.some(a => a === 'KOORD_UMMI' || a === 'TIM_UMMI');
+        if (activeFilter === 'UMMI') return AppConfig.isUserUmmi(u);
         if (activeFilter === 'WALI') return assigns.some(a => a.startsWith('GURU_KELAS_'));
-        if (activeFilter === 'EKSKUL') return assigns.some(a => a.startsWith('GURU_EKSTRA_'));
+        if (activeFilter === 'EKSKUL') return AppConfig.isUserEkstra(u);
         if (activeFilter === 'IT') return assigns.some(a => a === 'TIM_IT');
         return true;
       });

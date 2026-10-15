@@ -43,10 +43,7 @@ const UMMIPages = {
     ]);
     const roomArr = DB.toArray(roomsData);
     const classArr = DB.toArray(ummiClasses);
-    const guruUmmi = DB.toArray(users).filter(u => {
-      const assignments = AppConfig.getRoleAssignments(u);
-      return assignments.includes('GURU_UMMI') || assignments.includes('TIM_UMMI') || assignments.includes('KOORD_UMMI');
-    });
+    const guruUmmi = DB.toArray(users).filter(u => AppConfig.isUserUmmi(u));
     const rows = classArr.length ? classArr.map((c, idx) => {
       const teacher = guruUmmi.find(g => g.id === c.teacherId);
       const studentCount = Object.keys(c.students || {}).length;
@@ -869,10 +866,7 @@ const UMMIPages = {
       DB.getSettings()
     ]);
     const examArr = DB.toArray(snapExams).sort((a, b) => (b.requestedAt || 0) - (a.requestedAt || 0));
-    const guruUmmi = DB.toArray(users).filter(u => {
-      const assignments = AppConfig.getRoleAssignments(u);
-      return assignments.includes('GURU_UMMI') || assignments.includes('TIM_UMMI') || assignments.includes('KOORD_UMMI');
-    });
+    const guruUmmi = DB.toArray(users).filter(u => AppConfig.isUserUmmi(u));
     const pendingCount = examArr.filter(e => e.status === 'Menunggu ACC').length;
     const scheduledCount = examArr.filter(e => e.status === 'Dijadwalkan').length;
     const passedCount = examArr.filter(e => e.status === 'Lolos').length;

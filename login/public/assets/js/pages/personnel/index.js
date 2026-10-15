@@ -12,8 +12,8 @@ const PersonnelPages = {
       DB.getTeacherAttendanceByDate(todayStr).catch(() => ({}))
     ]);
     const allUsers = DB.toArray(usersData);
-    const gtkList = allUsers.filter((u) => u && u.role !== 'ortu');
-    const guruCount = gtkList.filter((u) => u.role === 'guru').length;
+    const gtkList = allUsers.filter((u) => AppConfig.isGTK(u));
+    const guruCount = gtkList.filter((u) => AppConfig.isTeacher(u)).length;
     const tendikCount = gtkList.filter((u) => u.role === 'tendik').length;
     const totalGtk = gtkList.length;
     const attList = DB.toArray(attendanceData);

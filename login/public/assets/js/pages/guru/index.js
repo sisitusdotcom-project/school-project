@@ -1457,7 +1457,7 @@ const GuruPages = {
         DB.getTeacherAttendanceHistory(teacherId, 60),
         DB.getSettings()
       ]);
-      const isUmmi = Auth.currentRole === 'guruUmmi' || (Auth.currentAssignments || []).some(a => a.startsWith('GURU_UMMI') || a === 'TIM_UMMI' || a === 'KOORD_UMMI');
+      const isUmmi = AppConfig.isUserUmmi(Auth.userData || Auth.currentUser);
       const sched = AppConfig.getAttendanceSchedule ? AppConfig.getAttendanceSchedule(settings?.attendanceRules, isUmmi, new Date()) : {
         inStart: '06:00', inEnd: isUmmi ? '07:15' : '06:45', outStart: isUmmi ? '12:30' : '14:30', outEnd: '17:30', label: `${isUmmi ? 'Guru Ummi' : 'GTK'}: Masuk 06:00`
       };
@@ -1739,7 +1739,7 @@ const GuruPages = {
       btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Memproses...';
       try {
         const compressedProof = await compressImageDataUrl(capturedProofDataUrl, 1600, 0.82);
-        const isUmmi = Auth.currentRole === 'guruUmmi' || (Auth.currentAssignments || []).some(a => a.startsWith('GURU_UMMI') || a === 'TIM_UMMI' || a === 'KOORD_UMMI');
+        const isUmmi = AppConfig.isUserUmmi(Auth.userData || Auth.currentUser);
         const result = await DB.submitTeacherAttendanceToWorker({
           dateStr,
           teacherId,

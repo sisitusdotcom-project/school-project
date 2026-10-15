@@ -453,7 +453,7 @@ const NotificationService = {
     const isSar = assignments.includes('WAKA_SARPRAS') || assignments.includes('STAF_SARPRAS');
     const isWali = assignments.some((a) => a.startsWith('GURU_KELAS_'));
     const isKoordUmmi = assignments.includes('KOORD_UMMI');
-    const isGuruUmmi = assignments.includes('TIM_UMMI') || assignments.includes('GURU_UMMI') || (Auth.currentRole === 'guruUmmi');
+    const isGuruUmmi = AppConfig.isUserUmmi(Auth.userData || Auth.currentUser);
     const setBadge = (route, count) => {
       const el = document.querySelector(`.nav-counter-badge[data-route="${route}"]`);
       if (el) {

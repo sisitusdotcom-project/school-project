@@ -13,7 +13,7 @@ const AdminPages = {
     const classArr = DB.toArray(classes);
     const charArr = DB.toArray(chars);
     const studentArr = DB.toArray(students);
-    const guruCount = userArr.filter(u => u.role === AppConfig.ROLES.GURU || AppConfig.getRoleAssignments(u).some(AppConfig.isTeachingAssignment)).length;
+    const guruCount = userArr.filter(u => AppConfig.isTeacher(u)).length;
     const ortuCount = userArr.filter(u => u.role === AppConfig.ROLES.ORTU).length;
     const summaryCards = [
       { label: 'Pengguna aktif', value: userArr.length, tone: 'primary', icon: 'ph-users' },
@@ -215,7 +215,7 @@ const AdminPages = {
       const roleFilter = document.getElementById('filter-role')?.value || '';
       const filtered = userArr.filter(u => {
         const matchSearch = (u.name || '').toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q);
-        const matchRole = roleFilter ? u.role === roleFilter : true;
+        const matchRole = AppConfig.isUserInRole(u, roleFilter);
         return matchSearch && matchRole;
       });
       const rows = filtered.length ? filtered.map(u => {
@@ -448,7 +448,7 @@ const AdminPages = {
     ]);
     const classArr = DB.toArray(classes);
     const isKurikulum = Auth.currentRole === AppConfig.ROLES.ADMIN || Auth.currentAssignments.includes('WAKA_KURIKULUM');
-    const guruArr = DB.toArray(users).filter(u => u.role === AppConfig.ROLES.GURU || AppConfig.getRoleAssignments(u).some(AppConfig.isTeachingAssignment));
+    const guruArr = DB.toArray(users).filter(u => AppConfig.isTeacher(u));
     const subArr = DB.toArray(subjects).sort((a, b) => (a.order || 0) - (b.order || 0));
     const studentArr = DB.toArray(students);
     const rows = classArr.length ? classArr.map(c => {
@@ -1394,13 +1394,13 @@ const AdminPages = {
     ]);
     const classArr = DB.toArray(classes);
     const studentArr = DB.toArray(students);
-    const teacherArr = DB.toArray(users).filter(u => u.role === AppConfig.ROLES.GURU || AppConfig.getRoleAssignments(u).some(AppConfig.isTeachingAssignment));
+    const teacherArr = DB.toArray(users).filter(u => AppConfig.isTeacher(u));
     const renderTeacherRows = (dateStr, teacherData, attendanceData) => teacherArr.map(g => {
       const att = attendanceData[g.id] || {};
       const status = att.time_in ? (att.time_out ? 'Selesai' : 'Datang') : 'Belum hadir';
       const timeIn = att.time_in || '-';
       const timeOut = att.time_out || '-';
-      const isUmmi = g.role === AppConfig.ROLES.GURU_UMMI || (AppConfig.getRoleAssignments(g) || []).some(a => a.startsWith('GURU_UMMI') || a === 'TIM_UMMI' || a === 'KOORD_UMMI');
+      const isUmmi = AppConfig.isUserUmmi(g);
       const sched = AppConfig.getAttendanceSchedule ? AppConfig.getAttendanceSchedule(settings.attendanceRules, isUmmi, dateStr) : null;
       let lateBadge = '';
       if (att.time_in && sched) {
