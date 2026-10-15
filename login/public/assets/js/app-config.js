@@ -131,7 +131,8 @@
       { hash: '#/guru/academic', icon: 'ph-check-square', text: 'Input Nilai Mapel', group: 'Tugas Utama Guru' },
       { hash: '#/curriculum/syllabus', icon: 'ph-upload-simple', text: 'Upload Perangkat Ajar', group: 'Tugas Utama Guru' },
       { hash: '#/guru/portfolio', icon: 'ph-folder', text: 'Portofolio Guru', group: 'Tugas Utama Guru' },
-      { hash: '#/guru/observations', icon: 'ph-note-pencil', text: 'Riwayat Observasi', group: 'Tugas Utama Guru' }
+      { hash: '#/guru/observations', icon: 'ph-note-pencil', text: 'Riwayat Observasi', group: 'Tugas Utama Guru' },
+      { hash: '#/gtk/official-travel', icon: 'ph-airplane-takeoff', text: 'Perjalanan Dinas', group: 'Tugas Utama Guru' }
     ],
     'WALI_KELAS': [
       { hash: '#/guru/student-attendance', icon: 'ph-users-three', text: 'Absensi Siswa', group: 'Tupoksi Wali Kelas' },
@@ -147,6 +148,7 @@
       { hash: '#/student-affairs', icon: 'ph-users-three', text: 'Monitoring Kesiswaan' },
       { hash: '#/finance', icon: 'ph-wallet', text: 'Monitoring Keuangan' },
       { hash: '#/personnel', icon: 'ph-briefcase', text: 'Monitoring Humas & Personalia' },
+      { hash: '#/humas/official-travel', icon: 'ph-airplane-takeoff', text: 'Verifikasi Tugas Dinas', group: 'Monitoring Humas & Personalia' },
       { hash: '#/facilities', icon: 'ph-building-office', text: 'Monitoring Sarpras' },
       { hash: '#/komite/activities', icon: 'ph-users-three', text: 'Kegiatan Paguyuban', group: 'Monitoring Komite & Paguyuban' },
       { hash: '#/komite/finance-paguyuban', icon: 'ph-wallet', text: 'Keuangan Paguyuban', group: 'Monitoring Komite & Paguyuban' }
@@ -155,14 +157,16 @@
       { hash: '#/dashboard', icon: 'ph-squares-four', text: 'Beranda' },
       { hash: '#/attendance', icon: 'ph-map-pin', text: 'Presensi Kehadiran' },
       { hash: '#/tendik/performance', icon: 'ph-clipboard-text', text: 'Laporan Kinerja', group: 'Tupoksi Tenaga Kependidikan' },
-      { hash: '#/tendik/portfolio', icon: 'ph-folder', text: 'Portofolio', group: 'Tupoksi Tenaga Kependidikan' }
+      { hash: '#/tendik/portfolio', icon: 'ph-folder', text: 'Portofolio', group: 'Tupoksi Tenaga Kependidikan' },
+      { hash: '#/gtk/official-travel', icon: 'ph-airplane-takeoff', text: 'Perjalanan Dinas', group: 'Tupoksi Tenaga Kependidikan' }
     ],
     [ROLES.GURU_EKSKUL]: [
       { hash: '#/dashboard', icon: 'ph-squares-four', text: 'Beranda' }
     ],
     [ROLES.GURU_UMMI]: [
       { hash: '#/dashboard', icon: 'ph-squares-four', text: 'Beranda' },
-      { hash: '#/attendance', icon: 'ph-map-pin', text: 'Presensi Kehadiran' }
+      { hash: '#/attendance', icon: 'ph-map-pin', text: 'Presensi Kehadiran' },
+      { hash: '#/gtk/official-travel', icon: 'ph-airplane-takeoff', text: 'Perjalanan Dinas', group: 'Guru Ummi' }
     ],
     [ROLES.KOMITE]: [
       { hash: '#/dashboard', icon: 'ph-squares-four', text: 'Beranda' },
@@ -207,6 +211,8 @@
       { hash: '#/personnel/evaluations', icon: 'ph-chart-line-up', text: 'Penilaian Kinerja (PKG)', group: 'Humas & Personalia: Kinerja & Kesejahteraan' },
       { hash: '#/personnel/training', icon: 'ph-certificate', text: 'Pelatihan & Kompetensi', group: 'Humas & Personalia: Kinerja & Kesejahteraan' },
       { hash: '#/personnel/welfare', icon: 'ph-heart', text: 'Kesejahteraan Staf', group: 'Humas & Personalia: Kinerja & Kesejahteraan' },
+      { hash: '#/humas/official-travel', icon: 'ph-airplane-takeoff', text: 'Verifikasi Tugas Dinas', group: 'Humas & Personalia: Kinerja & Kesejahteraan' },
+      { hash: '#/humas/official-travel', icon: 'ph-airplane-takeoff', text: 'Verifikasi Tugas Dinas', group: 'Humas & Personalia: Kinerja & Kesejahteraan' },
       { hash: '#/personnel/publications', icon: 'ph-megaphone', text: 'Publikasi & Informasi', group: 'Humas & Personalia: Komunikasi Publik & Aduan' },
       { hash: '#/personnel/complaints', icon: 'ph-chats', text: 'Layanan Pengaduan', group: 'Humas & Personalia: Komunikasi Publik & Aduan' },
       { hash: '#/personnel/documents', icon: 'ph-folder', text: 'Dokumen Kerja Sama', group: 'Humas & Personalia: Kemitraan & Dokumen' },
@@ -220,6 +226,8 @@
       { hash: '#/personnel/data', icon: 'ph-folder-user', text: 'Data Kepegawaian', group: 'Humas & Personalia: Administrasi SDM' },
       { hash: '#/personnel/training', icon: 'ph-certificate', text: 'Pelatihan & Kompetensi', group: 'Humas & Personalia: Kinerja & Kesejahteraan' },
       { hash: '#/personnel/welfare', icon: 'ph-heart', text: 'Kesejahteraan Staf', group: 'Humas & Personalia: Kinerja & Kesejahteraan' },
+      { hash: '#/humas/official-travel', icon: 'ph-airplane-takeoff', text: 'Verifikasi Tugas Dinas', group: 'Humas & Personalia: Kinerja & Kesejahteraan' },
+      { hash: '#/humas/official-travel', icon: 'ph-airplane-takeoff', text: 'Verifikasi Tugas Dinas', group: 'Humas & Personalia: Kinerja & Kesejahteraan' },
       { hash: '#/personnel/publications', icon: 'ph-megaphone', text: 'Publikasi & Informasi', group: 'Humas & Personalia: Komunikasi Publik & Aduan' },
       { hash: '#/personnel/complaints', icon: 'ph-chats', text: 'Layanan Pengaduan', group: 'Humas & Personalia: Komunikasi Publik & Aduan' },
       { hash: '#/personnel/documents', icon: 'ph-folder', text: 'Dokumen Kerja Sama', group: 'Humas & Personalia: Kemitraan & Dokumen' },
@@ -361,12 +369,30 @@
     currentAcademicYear: '2026/2027',
     currentSemester: '1',
     attendanceRules: Object.freeze({
-      checkInStart: '07:00',
-      checkInEnd: '09:00',
-      checkOutStart: '15:00',
-      checkOutEnd: '17:00',
+      checkInStart: '06:30',
+      checkInEnd: '07:00',
+      checkOutStart: '15:30',
+      checkOutEnd: '17:30',
       attendanceStartDate: '',
-      attendanceEndDate: ''
+      attendanceEndDate: '',
+      schedules: Object.freeze({
+        gtk: Object.freeze({
+          senin: { inStart: '06:30', inEnd: '07:00', outStart: '15:30', outEnd: '17:30' },
+          selasa: { inStart: '06:30', inEnd: '07:00', outStart: '15:30', outEnd: '17:30' },
+          rabu: { inStart: '06:30', inEnd: '07:00', outStart: '15:30', outEnd: '17:30' },
+          kamis: { inStart: '06:30', inEnd: '07:00', outStart: '15:30', outEnd: '17:30' },
+          jumat: { inStart: '06:30', inEnd: '07:00', outStart: '14:30', outEnd: '16:30' },
+          sabtu: { inStart: '06:30', inEnd: '07:00', outStart: '12:30', outEnd: '14:30' }
+        }),
+        ummi: Object.freeze({
+          senin: { inStart: '06:30', inEnd: '07:00', outStart: '09:30', outEnd: '11:30' },
+          selasa: { inStart: '06:30', inEnd: '07:00', outStart: '09:30', outEnd: '11:30' },
+          rabu: { inStart: '06:30', inEnd: '07:00', outStart: '09:30', outEnd: '11:30' },
+          kamis: { inStart: '06:30', inEnd: '07:00', outStart: '09:30', outEnd: '11:30' },
+          jumat: { inStart: '06:30', inEnd: '07:00', outStart: '09:30', outEnd: '11:30' },
+          sabtu: { inStart: '06:30', inEnd: '07:00', outStart: '09:30', outEnd: '11:30' }
+        })
+      })
     })
   });
   function escapeHtml(unsafe) {
@@ -595,9 +621,9 @@
     googleDriveUploadUrl: 'https://script.google.com/macros/s/AKfycbwHNSb34p_FcX_dTQuw87viaZ9joh2rT3KdtMLBVvwpocWzyF3HICPUPRfPuy63LDsNsw/exec',
     attendanceWorkerUrl: 'https://musada-absensi.sisitusdotcom.workers.dev/',
     attendanceGeofence: Object.freeze({
-      lat: -7.3983706788877965,
-      lng: 112.74834269927545,
-      radiusMeters: 60
+      lat: -7.378448579234777,
+      lng: 112.75929775962251,
+      radiusMeters: 50
     })
   });
   const runtimeConfig = {

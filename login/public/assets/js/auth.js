@@ -18,6 +18,7 @@ const Auth = {
           this.currentRole = userData.role;
           this.currentAssignments = AppConfig.normalizeAssignments(userData.assignments || userData.unitRoles || []);
           this.updateProfileUI();
+          if (typeof NotificationService !== 'undefined') NotificationService.init(user.uid);
           if (userData.role === AppConfig.ROLES.ADMIN) DB.backfillUnitFlags().catch((err) => console.error(err));
           const appShell = document.getElementById('app-shell');
           const loginView = document.getElementById('login-view');
@@ -38,6 +39,7 @@ const Auth = {
       this.currentRole = null;
       this.currentAssignments = [];
       this.userData = null;
+      if (typeof NotificationService !== 'undefined') NotificationService.init(null);
       const appShell = document.getElementById('app-shell');
       const loginView = document.getElementById('login-view');
       const loading = document.getElementById('app-loading');

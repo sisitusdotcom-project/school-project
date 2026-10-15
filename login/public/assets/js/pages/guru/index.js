@@ -1,7 +1,7 @@
 const ATTENDANCE_GEOFENCE = window.APP_ATTENDANCE_GEOFENCE || window.AppConfig?.attendanceGeofence || {
-  lat: -7.3983706788877965,
-  lng: 112.74834269927545,
-  radiusMeters: 60
+  lat: -7.378448579234777,
+  lng: 112.75929775962251,
+  radiusMeters: 50
 };
 const GuruPages = {
   async renderDashboard(container) {
@@ -502,42 +502,107 @@ const GuruPages = {
           competency: ''
         };
       }
-      const rows = studentArr.map((s, idx) => `
-        <div class="card" style="margin-bottom: 12px; padding: 12px;">
-          <h4 style="margin-top:0; margin-bottom:12px; font-size:15px">${idx + 1}. ${AppConfig.escapeHtml(s.name)}</h4>
-          <div style="display:flex; gap:16px; flex-wrap:wrap">
-            <div class="form-group" style="flex: 0 0 100px; margin-bottom:0">
-              <label>Nilai Akhir</label>
-              <input type="number" class="ac-score" data-stu="${s.id}" value="${grades[s.id].score || ''}" placeholder="0-100" min="0" max="100">
+      const existingClassComp = studentArr.map((s) => grades[s.id]?.competency).find((c) => Boolean(c)) || '';
+      const rows = studentArr.map((s, idx) => {
+        const g = grades[s.id] || {};
+        return `
+        <div class="card section-block" style="margin-bottom: 12px; padding: 12px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <h4 style="margin:0; font-size:14px;">${idx + 1}. ${AppConfig.escapeHtml(s.name)}</h4>
+            <span class="text-muted" style="font-size:12px;">NISN: ${s.nisn || '-'}</span>
+          </div>
+          <div class="grade-input-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(110px, 1fr)); gap:10px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label style="font-size:11px;">Penilaian Harian (PH)</label>
+              <input type="number" class="ac-ph" data-stu="${s.id}" value="${g.ph || ''}" placeholder="75-100" min="75" max="100">
             </div>
-            <div class="form-group" style="flex: 1; min-width:250px; margin-bottom:0">
-              <label>Capaian Kompetensi</label>
-              <textarea class="ac-comp" data-stu="${s.id}" rows="2" placeholder="Contoh: Ananda sangat baik dalam...">${grades[s.id].competency || ''}</textarea>
+            <div class="form-group" style="margin-bottom:0;">
+              <label style="font-size:11px;">STS 1 (Ganjil)</label>
+              <input type="number" class="ac-sts1" data-stu="${s.id}" value="${g.sts1 || ''}" placeholder="75-100" min="75" max="100">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label style="font-size:11px;">SAS (Semester 1)</label>
+              <input type="number" class="ac-sas" data-stu="${s.id}" value="${g.sas || ''}" placeholder="75-100" min="75" max="100">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label style="font-size:11px;">STS 2 (Genap)</label>
+              <input type="number" class="ac-sts2" data-stu="${s.id}" value="${g.sts2 || ''}" placeholder="75-100" min="75" max="100">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label style="font-size:11px;">SAT (Akhir Tahun)</label>
+              <input type="number" class="ac-sat" data-stu="${s.id}" value="${g.sat || ''}" placeholder="75-100" min="75" max="100">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label style="font-size:11px;">Nilai Akhir Rapor</label>
+              <input type="number" class="ac-score" data-stu="${s.id}" value="${g.score || ''}" placeholder="75-100" min="75" max="100">
             </div>
           </div>
-        </div>
-      `).join('');
+        </div>`;
+      }).join('');
       acContainer.innerHTML = `
+        <div class="card section-block" style="margin-bottom: 16px; border-left: 4px solid var(--primary);">
+          <div class="card-body">
+            <h4 style="margin: 0 0 6px 0; font-size: 14px;"><i class="ph ph-notepad"></i> Capaian Kompetensi (CP/TP) Satu Rombel</h4>
+            <p class="text-muted" style="font-size: 12px; margin-bottom: 8px;">Deskripsi Capaian Kompetensi ini otomatis berlaku seragam untuk semua siswa dalam satu rombel kelas ini pada e-rapor.</p>
+            <textarea id="ac-class-comp" rows="2" style="width:100%; font-size:13px;" placeholder="Contoh: Menunjukkan penguasaan materi yang sangat baik dalam memahami konsep serta terampil menyelesaikan permasalahan...">${AppConfig.escapeHtml(existingClassComp)}</textarea>
+          </div>
+        </div>
         <div style="margin-bottom: 16px;">
           ${rows}
         </div>
         <button id="btn-save-academic" class="btn btn-primary" style="width:100%"><i class="ph ph-floppy-disk"></i> Simpan Semua Nilai</button>
       `;
+      acContainer.querySelectorAll('.ac-ph, .ac-sts1, .ac-sas, .ac-sts2, .ac-sat').forEach((inp) => {
+        inp.oninput = (ev) => {
+          const card = ev.target.closest('.card');
+          const ph = Number(card.querySelector('.ac-ph').value);
+          const sts1 = Number(card.querySelector('.ac-sts1').value);
+          const sas = Number(card.querySelector('.ac-sas').value);
+          const sts2 = Number(card.querySelector('.ac-sts2').value);
+          const sat = Number(card.querySelector('.ac-sat').value);
+          const nums = [ph, sts1, sas, sts2, sat].filter((v) => Number.isFinite(v) && v >= 75);
+          if (nums.length) {
+            const avg = Math.round(nums.reduce((a, b) => a + b, 0) / nums.length);
+            card.querySelector('.ac-score').value = avg;
+          }
+        };
+      });
       document.getElementById('btn-save-academic').onclick = async (e) => {
         const btn = e.target;
+        const classCompVal = document.getElementById('ac-class-comp').value.trim();
+        const scoreCards = acContainer.querySelectorAll('.grade-input-grid');
+        for (const card of scoreCards) {
+          const inputs = card.querySelectorAll('input[type="number"]');
+          for (const inp of inputs) {
+            const v = Number(inp.value);
+            if (inp.value && (v < 75 || v > 100)) {
+              alert('Skala nilai harus berada di rentang 75 sampai 100.');
+              inp.focus();
+              return;
+            }
+          }
+        }
         btn.disabled = true;
         btn.innerHTML = '<i class="ph ph-spinner"></i> Menyimpan...';
-        const scores = document.querySelectorAll('.ac-score');
-        const comps = document.querySelectorAll('.ac-comp');
         const promises = [];
         for (let i = 0; i < studentArr.length; i++) {
           const stuId = studentArr[i].id;
-          const score = scores[i].value;
-          const comp = comps[i].value.trim();
-          if (score || comp) {
+          const card = scoreCards[i];
+          const ph = card.querySelector('.ac-ph').value;
+          const sts1 = card.querySelector('.ac-sts1').value;
+          const sas = card.querySelector('.ac-sas').value;
+          const sts2 = card.querySelector('.ac-sts2').value;
+          const sat = card.querySelector('.ac-sat').value;
+          const score = card.querySelector('.ac-score').value;
+          if (score || ph || sts1 || sas || sts2 || sat || classCompVal) {
             promises.push(DB.saveAcademicGrade(year, sem, stuId, subjectId, {
+              ph: ph ? parseInt(ph) : null,
+              sts1: sts1 ? parseInt(sts1) : null,
+              sas: sas ? parseInt(sas) : null,
+              sts2: sts2 ? parseInt(sts2) : null,
+              sat: sat ? parseInt(sat) : null,
               score: score ? parseInt(score) : null,
-              competency: comp,
+              competency: classCompVal,
               updatedBy: Auth.currentUser.uid
             }));
           }
@@ -921,9 +986,9 @@ const GuruPages = {
   async renderTeacherAttendance(container) {
     Router.setTitle('Presensi Kehadiran', 'Rekam kehadiran harian Anda di area sekolah.');
     const geofence = window.APP_ATTENDANCE_GEOFENCE || window.AppConfig?.attendanceGeofence || ATTENDANCE_GEOFENCE;
-    const schoolLat = Number(geofence?.lat ?? -7.3983706788877965);
-    const schoolLng = Number(geofence?.lng ?? 112.74834269927545);
-    const maxRadius = Number(geofence?.radiusMeters ?? 60);
+    const schoolLat = Number(geofence?.lat ?? -7.378448579234777);
+    const schoolLng = Number(geofence?.lng ?? 112.75929775962251);
+    const maxRadius = Number(geofence?.radiusMeters ?? 50);
     const maxAccuracy = 200;
     const hasLocalGeofence = Number.isFinite(schoolLat) && Number.isFinite(schoolLng) && Number.isFinite(maxRadius) && maxRadius > 0;
     const hostName = window.location.host;
@@ -986,11 +1051,28 @@ const GuruPages = {
         </div>
       </div>
       <div class="card attendance-history-card">
-        <h4 class="attendance-history-title">Riwayat Hari Ini</h4>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <h4 class="attendance-history-title" style="margin:0;">Riwayat Hari Ini</h4>
+          <span id="att-schedule-badge" class="badge badge-primary" style="font-size:11px;">Jadwal Aktif</span>
+        </div>
         <div id="att-history-container">
           <p class="text-muted attendance-history-empty">Memuat data...</p>
         </div>
       </div>
+      <section class="card section-block" style="margin-top:16px;">
+        <div class="card-header mk-header">
+          <h3 class="card-title"><i class="ph ph-calendar-check"></i> Rekap & Riwayat Presensi Saya</h3>
+        </div>
+        <div class="card-body">
+          <div class="card-grid section-spacer" id="att-rekap-stats" style="margin-bottom:16px;"></div>
+          <div class="table-wrap">
+            <table class="table">
+              <thead><tr><th>Tanggal</th><th>Jam Datang</th><th>Jam Pulang</th><th>Status</th><th>Bukti</th></tr></thead>
+              <tbody id="att-full-history-tbody"><tr><td colspan="5" class="text-muted">Memuat data rekap...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
     `;
     const statusIcon = document.getElementById('geo-status-icon');
     const statusTitle = document.getElementById('geo-status-title');
@@ -1105,7 +1187,21 @@ const GuruPages = {
     const dateStr = today.toISOString().slice(0, 10);
     const teacherId = Auth.currentUser.uid;
     const loadHistory = async () => {
-      const myAtt = await DB.getTeacherAttendance(dateStr, teacherId);
+      const [myAtt, fullHist, settings] = await Promise.all([
+        DB.getTeacherAttendance(dateStr, teacherId),
+        DB.getTeacherAttendanceHistory(teacherId, 60),
+        DB.getSettings()
+      ]);
+      const isUmmi = Auth.currentRole === 'guruUmmi' || (Auth.currentAssignments || []).some(a => a.startsWith('GURU_UMMI') || a === 'TIM_UMMI' || a === 'KOORD_UMMI');
+      const days = ['minggu', 'senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu'];
+      const dayKey = days[new Date().getDay()];
+      const sched = settings?.attendanceRules?.schedules?.[isUmmi ? 'ummi' : 'gtk']?.[dayKey] || {
+        inStart: '06:30', inEnd: '07:00', outStart: isUmmi ? '09:30' : (dayKey === 'jumat' ? '14:30' : (dayKey === 'sabtu' ? '12:30' : '15:30')), outEnd: isUmmi ? '11:30' : (dayKey === 'jumat' ? '16:30' : (dayKey === 'sabtu' ? '14:30' : '17:30'))
+      };
+      const schedBadge = document.getElementById('att-schedule-badge');
+      if (schedBadge) {
+        schedBadge.textContent = `${isUmmi ? 'Guru Ummi' : 'GTK'}: Masuk ${sched.inStart}-${sched.inEnd} | Pulang ${sched.outStart}`;
+      }
       if (!myAtt) {
         histContainer.innerHTML = '<p class="text-muted" style="font-size: 13px; margin: 0;">Belum ada rekam presensi hari ini.</p>';
       } else {
@@ -1130,6 +1226,47 @@ const GuruPages = {
           btnCheckout.style.display = 'none';
           statusTitle.innerText = "Presensi Selesai";
           statusText.innerText = "Anda sudah menyelesaikan presensi hari ini.";
+        }
+      }
+      const fullTbody = document.getElementById('att-full-history-tbody');
+      const statsGrid = document.getElementById('att-rekap-stats');
+      if (fullTbody && fullHist) {
+        let onTimeCount = 0;
+        let lateCount = 0;
+        const rowsHtml = fullHist.map((h) => {
+          let statusBadge = '<span class="badge badge-warning">Terlambat</span>';
+          if (h.time_in && h.time_in <= (sched.inEnd || '07:00')) {
+            statusBadge = '<span class="badge badge-success">Tepat Waktu</span>';
+            onTimeCount++;
+          } else {
+            lateCount++;
+          }
+          const proofBtn = h.proof_url
+            ? `<button type="button" class="btn btn-xs btn-outline mk-preview-btn" data-preview-url="${AppConfig.escapeHtml(h.proof_url)}" data-preview-title="Bukti Presensi ${h.date}"><i class="ph ph-eye"></i> Bukti</button>`
+            : '-';
+          return `<tr>
+            <td><strong>${h.date}</strong></td>
+            <td>${h.time_in || '-'}</td>
+            <td>${h.time_out || '-'}</td>
+            <td>${statusBadge}</td>
+            <td>${proofBtn}</td>
+          </tr>`;
+        }).join('') || '<tr><td colspan="5" class="text-muted">Belum ada riwayat kehadiran sebelumnya.</td></tr>';
+        fullTbody.innerHTML = rowsHtml;
+        if (statsGrid) {
+          statsGrid.innerHTML = `
+            <div class="card stat-card">
+              <div class="stat-icon stat-icon--primary"><i class="ph ph-calendar-check"></i></div>
+              <div><p class="stat-value">${fullHist.length}</p><p class="stat-label text-muted">Total Kehadiran</p></div>
+            </div>
+            <div class="card stat-card">
+              <div class="stat-icon stat-icon--success"><i class="ph ph-check-circle"></i></div>
+              <div><p class="stat-value">${onTimeCount}</p><p class="stat-label text-muted">Tepat Waktu</p></div>
+            </div>
+            <div class="card stat-card">
+              <div class="stat-icon stat-icon--warning"><i class="ph ph-clock-countdown"></i></div>
+              <div><p class="stat-value">${lateCount}</p><p class="stat-label text-muted">Terlambat</p></div>
+            </div>`;
         }
       }
     };
@@ -1298,8 +1435,8 @@ const GuruPages = {
       const teacherName = Auth.currentUser?.displayName || Auth.currentUser?.email || 'Guru';
       const nowStr = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
       const dateStrFormat = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-      const waText = `Assalamu'alaikum Admin IT / Humas & Personalia MUSADA,\n\nSaya *${teacherName}* ingin mengonfirmasi kehadiran hari ini (*${dateStrFormat}* pukul *${nowStr}* WIB) karena mengalami kendala izin atau deteksi lokasi GPS pada perangkat saya.\n\nMohon bantuan verifikasi presensi. Terima kasih.`;
-      reportWaBtn.href = `https://wa.me/6285964399398?text=${encodeURIComponent(waText)}`;
+      const waText = `Assalamu'alaikum Bu Siti (Staf Personalia MUSADA),\n\nSaya *${teacherName}* ingin mengonfirmasi kehadiran hari ini (*${dateStrFormat}* pukul *${nowStr}* WIB) karena mengalami kendala izin atau deteksi lokasi GPS pada perangkat saya.\n\nMohon bantuan verifikasi presensi. Terima kasih.`;
+      reportWaBtn.href = `https://wa.me/6285704845822?text=${encodeURIComponent(waText)}`;
     }
     if (navigator.permissions && navigator.permissions.query) {
       navigator.permissions.query({ name: 'geolocation' }).then(perm => {
@@ -1393,13 +1530,28 @@ const GuruPages = {
       container.innerHTML = `<div class="card"><p class="text-muted">Belum ada siswa di kelas ini.</p></div>`;
       return;
     }
-    const attData = await DB.getDailyStudentAttendance(dateStr, classId);
+    const currentMonth = dateStr.slice(0, 7);
+    const [attData, monthlyLeaves] = await Promise.all([
+      DB.getDailyStudentAttendance(dateStr, classId),
+      DB.getClassMonthlyLeaves(classId, currentMonth)
+    ]);
+    const todayLeaves = {};
+    (monthlyLeaves || []).forEach((l) => {
+      if (l.startDate <= dateStr && (!l.endDate || l.endDate >= dateStr) && l.status !== 'Ditolak') {
+        todayLeaves[l.studentId] = l;
+      }
+    });
     const rows = studentArr.map((s, idx) => {
-      const currentAtt = attData[s.id] || 'H'; 
+      const hasOrtuLeave = todayLeaves[s.id];
+      const defaultVal = hasOrtuLeave ? (hasOrtuLeave.type === 'Sakit' ? 'S' : 'I') : 'H';
+      const currentAtt = attData[s.id] || defaultVal;
+      const leaveBadge = hasOrtuLeave
+        ? `<span class="badge badge-success" style="font-size:11px; margin-left:6px;"><i class="ph ph-envelope-simple"></i> Izin Ortu (${AppConfig.escapeHtml(hasOrtuLeave.type)})</span>`
+        : '';
       return `
         <div class="card student-att-row">
           <div class="student-att-col">
-            <p class="student-att-name">${idx + 1}. ${AppConfig.escapeHtml(s.name)}</p>
+            <p class="student-att-name">${idx + 1}. ${AppConfig.escapeHtml(s.name)}${leaveBadge}</p>
           </div>
           <div class="att-toggle-group" data-stu="${s.id}">
             <button type="button" class="att-btn ${currentAtt === 'H' ? 'active-h' : ''}" data-val="H">H</button>
@@ -1410,10 +1562,47 @@ const GuruPages = {
         </div>
       `;
     }).join('');
+    const sakitTotal = (monthlyLeaves || []).filter((l) => l.type === 'Sakit').length;
+    const izinTotal = (monthlyLeaves || []).filter((l) => l.type !== 'Sakit').length;
+    const leaveRows = (monthlyLeaves || []).map((l) => {
+      const st = studentArr.find((x) => x.id === l.studentId);
+      const proofBtn = l.document
+        ? `<button type="button" class="btn btn-xs btn-outline mk-preview-btn" data-preview-url="${AppConfig.escapeHtml(l.document)}" data-preview-title="Surat Izin ${st ? st.name : ''}"><i class="ph ph-file-text"></i> Bukti</button>`
+        : '-';
+      return `<tr>
+        <td><strong>${st ? AppConfig.escapeHtml(st.name) : l.studentId}</strong></td>
+        <td>${l.startDate} s/d ${l.endDate || l.startDate}</td>
+        <td><span class="badge ${l.type === 'Sakit' ? 'badge-danger' : 'badge-warning'}">${AppConfig.escapeHtml(l.type || 'Izin')}</span></td>
+        <td>${AppConfig.escapeHtml(l.reason || '-')}</td>
+        <td>${proofBtn}</td>
+        <td><span class="badge ${l.status === 'Disetujui' ? 'badge-success' : 'badge-warning'}">${AppConfig.escapeHtml(l.status || 'Diajukan')}</span></td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="6" class="text-muted">Belum ada pengajuan izin siswa pada bulan ini.</td></tr>';
     container.innerHTML = `
-      <div class="attendance-back-bar"><a href="#/guru/student-attendance" class="btn btn-outline"><i class="ph ph-arrow-left"></i> Kembali</a></div>
-      <div class="card attendance-info-banner">
-        <p>Ketuk inisial untuk mengubah status: <strong>H</strong> (Hadir), <strong>S</strong> (Sakit), <strong>I</strong> (Izin), <strong>A</strong> (Alpa).</p>
+      <div class="attendance-back-bar" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+        <a href="#/guru/student-attendance" class="btn btn-outline"><i class="ph ph-arrow-left"></i> Kembali</a>
+        <button type="button" id="btn-toggle-leave-recap" class="btn btn-outline btn-sm"><i class="ph ph-calendar"></i> Akumulasi Izin Bulan Ini (${(monthlyLeaves || []).length})</button>
+      </div>
+      <section id="section-leave-recap" class="card section-block" style="display:none; margin-top:12px;">
+        <div class="card-header mk-header">
+          <h3 class="card-title"><i class="ph ph-first-aid"></i> Akumulasi Perizinan Siswa (Bulan ${currentMonth})</h3>
+        </div>
+        <div class="card-body">
+          <div class="card-grid section-spacer" style="margin-bottom:12px;">
+            <div class="card stat-card"><div class="stat-icon stat-icon--primary"><i class="ph ph-calendar-x"></i></div><div><p class="stat-value">${(monthlyLeaves || []).length}</p><p class="stat-label text-muted">Total Izin/Sakit</p></div></div>
+            <div class="card stat-card"><div class="stat-icon stat-icon--danger"><i class="ph ph-first-aid"></i></div><div><p class="stat-value">${sakitTotal}</p><p class="stat-label text-muted">Sakit</p></div></div>
+            <div class="card stat-card"><div class="stat-icon stat-icon--warning"><i class="ph ph-clock"></i></div><div><p class="stat-value">${izinTotal}</p><p class="stat-label text-muted">Izin Keperluan</p></div></div>
+          </div>
+          <div class="table-wrap">
+            <table class="table">
+              <thead><tr><th>Nama Siswa</th><th>Rentang Tanggal</th><th>Jenis</th><th>Keterangan</th><th>Bukti Surat</th><th>Status</th></tr></thead>
+              <tbody>${leaveRows}</tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+      <div class="card attendance-info-banner" style="margin-top:12px;">
+        <p>Siswa yang telah diajukan izin oleh wali murid otomatis terdeteksi. Ketuk inisial untuk mengubah status manual jika diperlukan: <strong>H</strong> (Hadir), <strong>S</strong> (Sakit), <strong>I</strong> (Izin), <strong>A</strong> (Alpa).</p>
       </div>
       <div id="student-list-container">
         ${rows}
@@ -1424,6 +1613,13 @@ const GuruPages = {
         </button>
       </div>
     `;
+    const toggleRecapBtn = document.getElementById('btn-toggle-leave-recap');
+    const recapSection = document.getElementById('section-leave-recap');
+    if (toggleRecapBtn && recapSection) {
+      toggleRecapBtn.onclick = () => {
+        recapSection.style.display = recapSection.style.display === 'none' ? 'block' : 'none';
+      };
+    }
     document.getElementById('student-list-container').addEventListener('click', (e) => {
       if (e.target.classList.contains('att-btn')) {
         const group = e.target.closest('.att-toggle-group');

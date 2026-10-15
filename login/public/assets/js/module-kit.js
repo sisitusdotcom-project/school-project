@@ -491,6 +491,26 @@ const ModuleKit = {
         rf.readOnly = !isApprover;
         rf.placeholder = isApprover ? 'Catatan telaah atau instruksi revisi dari kurikulum...' : '(Hanya dapat diisi oleh peninjau Kurikulum)';
       }
+      const gtkField = form.querySelector('#mk-f-gtkId');
+      if (gtkField) {
+        if (!isApprover) {
+          gtkField.value = row ? (row.gtkId || uid) : uid;
+          gtkField.disabled = true;
+        } else {
+          gtkField.disabled = false;
+        }
+      }
+      const vakasiField = form.querySelector('#mk-f-vakasi');
+      if (vakasiField) {
+        vakasiField.disabled = !isApprover;
+        vakasiField.readOnly = !isApprover;
+      }
+      const humasFeedback = form.querySelector('#mk-f-humasFeedback');
+      if (humasFeedback) {
+        humasFeedback.disabled = !isApprover;
+        humasFeedback.readOnly = !isApprover;
+        humasFeedback.placeholder = isApprover ? 'Catatan telaah atau instruksi verifikasi Humas...' : '(Hanya dapat diisi oleh peninjau Humas)';
+      }
       App.openModal(modalId);
     };
     const closeForm = () => App.closeModal(modalId);
@@ -599,6 +619,18 @@ const ModuleKit = {
         if (!isApprover && def.fields.some((f) => f.key === 'reviewerFeedback')) {
           payload.reviewerFeedback = currentRow ? (currentRow.reviewerFeedback || '') : '';
         }
+        if (!isApprover && def.fields.some((f) => f.key === 'gtkId')) {
+          payload.gtkId = currentRow ? (currentRow.gtkId || uid) : uid;
+          if (refs.teacher && refs.teacher[payload.gtkId]) {
+            payload.gtkIdName = refs.teacher[payload.gtkId];
+          }
+        }
+        if (!isApprover && def.fields.some((f) => f.key === 'vakasi')) {
+          payload.vakasi = currentRow ? (currentRow.vakasi || 0) : 0;
+        }
+        if (!isApprover && def.fields.some((f) => f.key === 'humasFeedback')) {
+          payload.humasFeedback = currentRow ? (currentRow.humasFeedback || '') : '';
+        }
         const ctx = refs.__ctx;
         const derived = def.derive ? def.derive(payload, ctx) : {};
         const stamp = firebase.database.ServerValue.TIMESTAMP;
@@ -612,6 +644,60 @@ const ModuleKit = {
         }
         if (def.after) await def.after({ ...payload, ...derived }, ctx, recordId);
         this.audit(state.editing ? 'update' : 'create', def.node, recordId);
+        if (typeof NotificationService !== 'undefined') {
+          if (def.node === 'curriculum/documents') {
+            if (payload.status === 'Disetujui (ACC)' || payload.status === 'Perlu Revisi') {
+              NotificationService.send({
+                recipientUid: payload.teacherId,
+                title: payload.status === 'Disetujui (ACC)' ? 'Perangkat Ajar Disetujui (ACC)' : 'Perangkat Ajar Perlu Revisi',
+                message: `Perangkat ${payload.docType || 'Modul Ajar'} Anda telah diverifikasi Kurikulum (${payload.status}).`,
+                link: '#/curriculum/syllabus',
+                type: payload.status === 'Disetujui (ACC)' ? 'success' : 'warning'
+              });
+            }
+          } else if (def.node === 'student_affairs/leaves') {
+            if (isOrtu) {
+              DB.getAllStudents().then((allStudents) => {
+                const stu = (allStudents || {})[payload.studentId];
+                const sName = stu ? (stu.name || payload.studentId) : payload.studentId;
+                const classId = stu?.classId || refs.__ctx?.meta?.studentClass?.[payload.studentId];
+                if (classId) {
+                  DB.getClasses().then((classes) => {
+                    const cls = (classes || {})[classId];
+                    if (cls && cls.teacherId) {
+                      NotificationService.send({
+                        recipientUid: cls.teacherId,
+                        title: 'Pengajuan Izin Siswa Baru',
+                        message: `Wali murid an. ${sName} (${cls.name}) mengajukan ${payload.type || 'izin'} (${payload.startDate}).`,
+                        link: '#/student-affairs/leaves',
+                        type: 'info'
+                      });
+                    }
+                  });
+                }
+              });
+            }
+          } else if (def.node === 'personnel/official_travel') {
+            if (!isApprover) {
+              NotificationService.sendToRole({
+                unit: 'WAKA_HUMAS_PERSONALIA',
+                role: 'personnel',
+                title: 'Pengajuan Perjalanan Dinas Baru',
+                message: `${payload.gtkIdName || 'GTK'} mengajukan tugas perjalanan dinas ke ${payload.location || ''}.`,
+                link: '#/humas/official-travel',
+                type: 'info'
+              });
+            } else if (payload.gtkId) {
+              NotificationService.send({
+                recipientUid: payload.gtkId,
+                title: `Perjalanan Dinas ${payload.status || 'Diverifikasi'}`,
+                message: `Tugas perjalanan dinas ke ${payload.location || ''} telah diverifikasi Humas. Status: ${payload.status}. Vakasi: ${this.money(payload.vakasi || 0)}.`,
+                link: '#/gtk/official-travel',
+                type: payload.status === 'Disetujui' ? 'success' : 'info'
+              });
+            }
+          }
+        }
         closeForm();
         state.rows = await loadRows();
         paint();

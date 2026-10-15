@@ -1,7 +1,7 @@
 const DEFAULT_SCHOOL_LOCATION = {
-  lat: -7.3983706788877965,
-  lng: 112.74834269927545,
-  radiusMeters: 60
+  lat: -7.378448579234777,
+  lng: 112.75929775962251,
+  radiusMeters: 50
 };
 const DEFAULT_ATTENDANCE_RULES = Object.freeze({
   checkInStart: '07:00',

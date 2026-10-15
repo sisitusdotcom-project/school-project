@@ -143,6 +143,34 @@ const DB = {
   async getTeacherAttendanceByDate(dateStr) {
     return this._readCollection(`teacher_attendance/${dateStr}`, {});
   },
+  async getTeacherAttendanceHistory(teacherId, limit = 60) {
+    if (!isDBReady()) return [];
+    const snap = await db.ref('teacher_attendance').limitToLast(limit).once('value');
+    const val = snap.val() || {};
+    const history = [];
+    Object.entries(val).forEach(([dateStr, byTeacher]) => {
+      if (byTeacher && byTeacher[teacherId]) {
+        history.push({ date: dateStr, ...byTeacher[teacherId] });
+      }
+    });
+    return history.sort((a, b) => b.date.localeCompare(a.date));
+  },
+  async getClassMonthlyLeaves(classId, monthStr) {
+    if (!isDBReady()) return [];
+    const snap = await db.ref('student_affairs/leaves').once('value');
+    const val = snap.val() || {};
+    const students = await this.getStudentsByClass(classId);
+    const stuIds = new Set(Object.keys(students || {}));
+    const leaves = [];
+    Object.values(val).forEach((l) => {
+      if (l && stuIds.has(l.studentId)) {
+        if (!monthStr || (l.startDate && l.startDate.startsWith(monthStr))) {
+          leaves.push(l);
+        }
+      }
+    });
+    return leaves;
+  },
   async saveTeacherAttendance(dateStr, teacherId, data) {
     if (!isDBReady()) return;
     const isAdmin = this._currentUserIsAdmin();

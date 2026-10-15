@@ -2093,3 +2093,23 @@ td[colspan] > .text-muted {
 .attendance-wa-report-btn{display:inline-flex;align-items:center;gap:6px;text-decoration:none;}
 .badge-info{background:var(--primary-light,#e0f2fe);color:var(--primary,#0284c7);}
 .komite-lead-text{margin:0 0 12px 0;}
+.notif-btn{position:relative;display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:8px;border:1px solid var(--border);background:var(--bg-card);color:var(--text-main);cursor:pointer;transition:all .2s;}
+.notif-btn:hover{background:var(--bg-hover,#f8fafc);border-color:var(--border-strong);}
+.notif-badge{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;border-radius:999px;background:var(--danger,#ef4444);color:#fff;font-size:10px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;padding:0 4px;border:2px solid var(--bg-card,#fff);line-height:1;}
+.notif-dropdown{position:absolute;top:calc(100% + 8px);right:0;width:340px;max-width:calc(100vw - 28px);background:var(--bg-card,#fff);border:1px solid var(--border-color,#e2e8f0);border-radius:12px;box-shadow:0 12px 28px -4px rgba(0,0,0,0.15);z-index:1000;display:flex;flex-direction:column;overflow:hidden;}
+.notif-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border-color,#e2e8f0);font-weight:600;font-size:13.5px;background:var(--bg-body,#f8fafc);}
+.notif-list{max-height:360px;overflow-y:auto;display:flex;flex-direction:column;}
+.notif-item{padding:10px 14px;border-bottom:1px solid var(--border-color,#f1f5f9);display:flex;flex-direction:column;gap:3px;text-decoration:none;color:inherit;transition:background .15s ease;cursor:pointer;}
+.notif-item:hover{background:var(--bg-hover,#f8fafc);}
+.notif-item.unread{background:rgba(37,99,235,0.06);border-left:3px solid var(--primary,#2563eb);}
+.notif-item-title{font-size:12.5px;font-weight:600;color:var(--text-main,#0f172a);display:flex;align-items:center;justify-content:space-between;}
+.notif-item-message{font-size:12px;color:var(--text-muted,#64748b);line-height:1.4;word-break:break-word;}
+.notif-item-time{font-size:11px;color:var(--text-muted,#94a3b8);margin-top:2px;}
+.notif-empty{padding:24px 16px;text-align:center;font-size:13px;color:var(--text-muted,#94a3b8);}
+.notif-footer{padding:8px 12px;border-top:1px solid var(--border-color,#e2e8f0);background:var(--bg-body,#f8fafc);text-align:center;}
+.notif-mark-read-btn{font-size:12px;color:var(--primary,#2563eb);background:none;border:none;cursor:pointer;font-weight:600;}
+.notif-mark-read-btn:hover{text-decoration:underline;}
+.grade-num-input{width:100%;min-width:60px;padding:6px 8px;font-size:13px;text-align:center;border:1px solid var(--border-color);border-radius:6px;background:var(--bg-card);color:var(--text-main);}
+.grade-num-input:focus{border-color:var(--primary);outline:none;box-shadow:0 0 0 2px rgba(37,99,235,0.15);}
+.grade-final-badge{font-weight:700;font-size:13.5px;padding:4px 8px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;}
+.travel-vakasi-tag{display:inline-flex;align-items:center;gap:4px;font-weight:700;color:#047857;background:#ecfdf5;padding:3px 8px;border-radius:6px;font-size:12px;}

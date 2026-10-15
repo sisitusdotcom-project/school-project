@@ -92,8 +92,11 @@
       <div class="brand-logo-small">
         <img src="../../assets/img/logo/logo.webp" alt="Logo Musada">
         <span class="brand-logo-text"><strong>SMS MUSADA</strong><span>(Sistem Manajemen Sekolah)</span><small>SD Muhammadiyah 1 Sedati</small></span>
-      </div><button
-        class="btn-icon" id="btn-menu-toggle" aria-label="Buka menu navigasi"><i class="ph ph-list"></i></button>
+      </div>
+      <div class="mobile-header-actions">
+        <button class="btn-icon page-notif-btn" id="btn-notif-toggle-mobile" aria-label="Notifikasi"><i class="ph ph-bell"></i><span class="notif-badge" id="notif-badge-mobile" style="display:none">0</span></button>
+        <button class="btn-icon" id="btn-menu-toggle" aria-label="Buka menu navigasi"><i class="ph ph-list"></i></button>
+      </div>
     </header>
     <aside id="sidebar" class="sidebar">
       <div class="sidebar-header">
@@ -118,6 +121,19 @@
           <p id="page-subtitle" class="text-muted">Selamat datang di sistem penilaian karakter.</p>
         </div>
         <div class="page-user">
+          <div class="page-notif-wrap" id="page-notif-wrap">
+            <button class="btn-icon page-notif-btn" id="btn-notif-toggle" aria-label="Notifikasi">
+              <i class="ph ph-bell"></i>
+              <span class="notif-badge" id="notif-badge" style="display:none">0</span>
+            </button>
+            <div class="notif-dropdown" id="notif-dropdown">
+              <div class="notif-header">
+                <strong><i class="ph ph-bell"></i> Notifikasi</strong>
+                <button type="button" class="btn btn-sm btn-outline" id="btn-notif-read-all">Tandai dibaca</button>
+              </div>
+              <div class="notif-list" id="notif-list"></div>
+            </div>
+          </div>
           <button class="page-user__profile" id="page-user-profile" aria-label="Buka profil pengguna">
             <div class="page-user__text">
               <span class="page-user__greeting" id="page-user-greeting">Selamat pagi,</span>
@@ -182,6 +198,7 @@
   <script src="assets/js/pages/kepsek/index.js"></script>
   <script src="assets/js/pages/guru/ummi.js"></script>
   <script src="assets/js/pages/komite/index.js"></script>
+  <script src="assets/js/notifications.js"></script>
   <script src="assets/js/app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>

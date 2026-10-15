@@ -1003,8 +1003,11 @@
       ]
     },
     '#/student-affairs/leaves': {
-      node: 'student_affairs/leaves', noun: 'Perizinan Siswa', writeRoles: [R.STUDENT_AFFAIRS, R.GURU, R.ORTU], dateField: 'startDate', statusField: 'status', badges: { Disetujui: 'success', Diajukan: 'warning', Ditolak: 'danger' },
-      subtitle: 'Pengajuan dan verifikasi surat izin sakit dan dispensasi siswa.',
+      node: 'student_affairs/leaves', noun: 'Perizinan Siswa', writeRoles: [R.ORTU, R.STUDENT_AFFAIRS], dateField: 'startDate', statusField: 'status', badges: { Disetujui: 'success', Diajukan: 'warning', Ditolak: 'danger' },
+      approverRoles: [R.STUDENT_AFFAIRS, R.GURU],
+      approverUnits: ['WALI_KELAS', 'WAKA_KESISWAAN', 'STAF_KESISWAAN', 'WAKA_KURIKULUM'],
+      seeAllUnits: ['WALI_KELAS', 'WAKA_KESISWAAN', 'STAF_KESISWAAN', 'WAKA_KURIKULUM'],
+      subtitle: 'Pengajuan izin sakit/keperluan oleh wali murid dan verifikasi wali kelas & kesiswaan.',
       summary: [
         { label: 'Total Pengajuan', icon: 'ph-calendar-x', tone: 'primary' },
         { label: 'Sakit', icon: 'ph-first-aid', tone: 'danger', where: { type: 'Sakit' } },
@@ -1018,6 +1021,65 @@
         file('document', 'Foto Surat Dokter / Surat Izin Ortu', 'student_leaves'),
         sel('status', 'Status Persetujuan', ['Diajukan', 'Disetujui', 'Ditolak'], { required: true }),
         area('reason', 'Alasan / Keterangan', { required: true })
+      ]
+    },
+    '#/gtk/official-travel': {
+      own: true,
+      node: 'personnel/official_travel', noun: 'Perjalanan Dinas GTK', writeRoles: [R.GURU, R.GURU_EKSKUL, R.GURU_UMMI, R.TENDIK, R.PERSONNEL, R.PUBLIC_RELATIONS, R.ADMIN, R.KEPSEK], dateField: 'date', statusField: 'status',
+      badges: { Disetujui: 'success', Diajukan: 'warning', 'Perlu Revisi': 'warning', Ditolak: 'danger' },
+      approverRoles: [R.PERSONNEL],
+      approverUnits: ['WAKA_HUMAS_PERSONALIA', 'STAF_HUMAS_PERSONALIA'],
+      seeAllUnits: ['WAKA_HUMAS_PERSONALIA', 'STAF_HUMAS_PERSONALIA'],
+      subtitle: 'Pengajuan tugas khusus / perjalanan dinas GTK serta penetapan hak transport/vakasi oleh Humas.',
+      summary: [
+        { label: 'Total Tugas', icon: 'ph-airplane-takeoff', tone: 'primary' },
+        { label: 'Menunggu Verifikasi', icon: 'ph-hourglass', tone: 'warning', where: { status: 'Diajukan' } },
+        { label: 'Disetujui Humas', icon: 'ph-check-circle', tone: 'success', where: { status: 'Disetujui' } },
+        { label: 'Total Vakasi', icon: 'ph-wallet', tone: 'success', sum: 'vakasi', money: true }
+      ],
+      fields: [
+        date('date', 'Tanggal Kegiatan', { required: true }),
+        ref('gtkId', 'Nama GTK', 'teacher', { required: true }),
+        t('invitingInstitution', 'Lembaga yang Mengundang', { required: true }),
+        t('location', 'Lokasi Acara', { required: true }),
+        t('eventTheme', 'Tema / Nama Acara', { required: true }),
+        time('departureTime', 'Jam Berangkat', { required: true }),
+        time('returnTime', 'Jam Pulang', { required: true }),
+        sel('transportation', 'Kendaraan', ['Kendaraan Pribadi (Motor)', 'Kendaraan Pribadi (Mobil)', 'Kendaraan Sekolah', 'Transportasi Umum'], { required: true }),
+        file('assignmentLetterUrl', 'Surat Tugas / Perjalanan Dinas', 'official_travel_letters', { required: true, accept: '.pdf,image/*' }),
+        file('activityPhotoUrl', 'Foto Kegiatan di Lokasi', 'official_travel_photos', { required: true, accept: 'image/*' }),
+        sel('status', 'Status Verifikasi Humas', ['Diajukan', 'Disetujui', 'Perlu Revisi', 'Ditolak'], { required: true, default: 'Diajukan' }),
+        money('vakasi', 'Besaran Vakasi (Rp)', { default: 0 }),
+        area('humasFeedback', 'Catatan Verifikasi Humas')
+      ]
+    },
+    '#/humas/official-travel': {
+      node: 'personnel/official_travel', noun: 'Verifikasi Perjalanan Dinas', writeRoles: [R.PERSONNEL, R.ADMIN, R.KEPSEK], dateField: 'date', statusField: 'status',
+      badges: { Disetujui: 'success', Diajukan: 'warning', 'Perlu Revisi': 'warning', Ditolak: 'danger' },
+      approverRoles: [R.PERSONNEL],
+      approverUnits: ['WAKA_HUMAS_PERSONALIA', 'STAF_HUMAS_PERSONALIA'],
+      seeAllUnits: ['WAKA_HUMAS_PERSONALIA', 'STAF_HUMAS_PERSONALIA'],
+      subtitle: 'Telaah tugas dinas GTK, verifikasi surat tugas, foto kegiatan dan penetapan nominal vakasi.',
+      summary: [
+        { label: 'Total Tugas', icon: 'ph-airplane-takeoff', tone: 'primary' },
+        { label: 'Menunggu Verifikasi', icon: 'ph-hourglass', tone: 'warning', where: { status: 'Diajukan' } },
+        { label: 'Disetujui', icon: 'ph-check-circle', tone: 'success', where: { status: 'Disetujui' } },
+        { label: 'Total Realisasi Vakasi', icon: 'ph-wallet', tone: 'success', sum: 'vakasi', money: true }
+      ],
+      fields: [
+        date('date', 'Tanggal Kegiatan', { required: true }),
+        ref('gtkId', 'Nama GTK', 'teacher', { required: true }),
+        t('invitingInstitution', 'Lembaga yang Mengundang', { required: true }),
+        t('location', 'Lokasi Acara', { required: true }),
+        t('eventTheme', 'Tema / Nama Acara', { required: true }),
+        time('departureTime', 'Jam Berangkat', { required: true }),
+        time('returnTime', 'Jam Pulang', { required: true }),
+        sel('transportation', 'Kendaraan', ['Kendaraan Pribadi (Motor)', 'Kendaraan Pribadi (Mobil)', 'Kendaraan Sekolah', 'Transportasi Umum'], { required: true }),
+        file('assignmentLetterUrl', 'Surat Tugas / Perjalanan Dinas', 'official_travel_letters', { required: true, accept: '.pdf,image/*' }),
+        file('activityPhotoUrl', 'Foto Kegiatan di Lokasi', 'official_travel_photos', { required: true, accept: 'image/*' }),
+        sel('status', 'Status Verifikasi Humas', ['Diajukan', 'Disetujui', 'Perlu Revisi', 'Ditolak'], { required: true, default: 'Diajukan' }),
+        money('vakasi', 'Besaran Vakasi (Rp)', { default: 0 }),
+        area('humasFeedback', 'Catatan Verifikasi Humas')
       ]
     },
     '#/finance/student-bills': {

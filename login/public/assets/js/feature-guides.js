@@ -629,6 +629,20 @@ const FeatureGuides = {
       to: 'Tim IT & Administrator',
       rel: 'Audit & Telemetri Infrastruktur',
       usage: 'Pantau grafik kesehatan server, status latensi Firebase, dan kuota penyimpanan berkas Google Drive.'
+    },
+    '#/gtk/official-travel': {
+      func: 'Pengajuan dan pencatatan riwayat perjalanan dinas / tugas luar mandiri oleh GTK (lembaga pengundang, tujuan, surat tugas bertanda tangan, dan foto kegiatan).',
+      from: 'GTK yang Bertugas (Mandiri)',
+      to: 'Waka Humas & Personalia serta Bendahara Keuangan',
+      rel: 'personnel/official_travel (Dasar peninjauan tugas dinas dan penetapan hak vakasi)',
+      usage: 'Klik tombol Ajukan Tugas Dinas, lengkapi data instansi, tema, waktu, kendaraan, unggah surat tugas dinas bertanda tangan dan foto kegiatan di lokasi.'
+    },
+    '#/humas/official-travel': {
+      func: 'Verifikasi tugas dinas GTK, peninjauan kelengkapan bukti surat tugas dan foto kegiatan, serta penetapan nominal vakasi GTK.',
+      from: 'Waka / Staf Humas Personalia',
+      to: 'GTK Pelaksana & Bagian Keuangan',
+      rel: 'personnel/official_travel (Status verifikasi dan pencairan vakasi)',
+      usage: 'Tinjau bukti berkas surat tugas dan foto kegiatan GTK, klik Verifikasi / Revisi dan tetapkan besaran nominal vakasi yang berhak diterima.'
     }
   },
   get(routePath) {
