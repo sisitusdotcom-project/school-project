@@ -366,32 +366,53 @@
       { hash: '#/guru/english/progress', icon: 'ph-translate', text: 'Jurnal Progres Speaking', group: 'English Lab' }
     ]
   });
+  const SCHEDULE_DAY_DEFS = Object.freeze({
+    gtk: Object.freeze([
+      { key: 'senin', label: 'Senin', note: 'Batas Masuk 06.45 | Pulang 14.30', status: 'active', inStart: '06:00', inEnd: '06:45', outStart: '14:30', outEnd: '17:30' },
+      { key: 'selasa', label: 'Selasa', note: 'Batas Masuk 06.45 | Pulang 15.15', status: 'active', inStart: '06:00', inEnd: '06:45', outStart: '15:15', outEnd: '17:30' },
+      { key: 'rabu', label: 'Rabu', note: 'Batas Masuk 06.45 | Pulang 15.15', status: 'active', inStart: '06:00', inEnd: '06:45', outStart: '15:15', outEnd: '17:30' },
+      { key: 'kamis', label: 'Kamis', note: 'Batas Masuk 06.45 | Pulang 14.45', status: 'active', inStart: '06:00', inEnd: '06:45', outStart: '14:45', outEnd: '17:30' },
+      { key: 'jumat', label: 'Jumat', note: 'Batas Masuk 06.45 | Pulang 12.45', status: 'active', inStart: '06:00', inEnd: '06:45', outStart: '12:45', outEnd: '17:30' },
+      { key: 'sabtu', label: 'Sabtu', note: 'Batas Masuk 08.00 | Opsional (Pembinaan)', status: 'optional', inStart: '07:00', inEnd: '08:00', outStart: '11:00', outEnd: '13:00' }
+    ]),
+    ummi: Object.freeze([
+      { key: 'senin', label: 'Senin', note: 'Batas Masuk 07.15 | Pulang 12.30', status: 'active', inStart: '06:00', inEnd: '07:15', outStart: '12:30', outEnd: '15:00' },
+      { key: 'selasa', label: 'Selasa', note: 'Batas Masuk 07.15 | Pulang 12.30', status: 'active', inStart: '06:00', inEnd: '07:15', outStart: '12:30', outEnd: '15:00' },
+      { key: 'rabu', label: 'Rabu', note: 'Batas Masuk 07.15 | Pulang 12.30', status: 'active', inStart: '06:00', inEnd: '07:15', outStart: '12:30', outEnd: '15:00' },
+      { key: 'kamis', label: 'Kamis', note: 'Batas Masuk 07.00 | Pulang 12.00', status: 'active', inStart: '06:00', inEnd: '07:00', outStart: '12:00', outEnd: '15:00' },
+      { key: 'jumat', label: 'Jumat', note: 'Libur (Tidak Ada Absen)', status: 'off', inStart: '06:00', inEnd: '07:00', outStart: '11:00', outEnd: '13:00' },
+      { key: 'sabtu', label: 'Sabtu', note: 'Batas Masuk 08.00 | Opsional (Pembinaan Tanpa Terlambat)', status: 'optional', inStart: '06:00', inEnd: '08:00', outStart: '10:00', outEnd: '13:00' }
+    ])
+  });
   const DEFAULT_SETTINGS = Object.freeze({
     currentAcademicYear: '2026/2027',
     currentSemester: '1',
     attendanceRules: Object.freeze({
-      checkInStart: '06:30',
-      checkInEnd: '07:00',
-      checkOutStart: '15:30',
+      scheduleVersion: 2,
+      checkInStart: '06:00',
+      checkInEnd: '06:45',
+      checkOutStart: '14:30',
       checkOutEnd: '17:30',
       attendanceStartDate: '',
       attendanceEndDate: '',
       schedules: Object.freeze({
         gtk: Object.freeze({
-          senin: { inStart: '06:30', inEnd: '07:00', outStart: '15:30', outEnd: '17:30' },
-          selasa: { inStart: '06:30', inEnd: '07:00', outStart: '15:30', outEnd: '17:30' },
-          rabu: { inStart: '06:30', inEnd: '07:00', outStart: '15:30', outEnd: '17:30' },
-          kamis: { inStart: '06:30', inEnd: '07:00', outStart: '15:30', outEnd: '17:30' },
-          jumat: { inStart: '06:30', inEnd: '07:00', outStart: '14:30', outEnd: '16:30' },
-          sabtu: { inStart: '06:30', inEnd: '07:00', outStart: '12:30', outEnd: '14:30' }
+          senin: { inStart: '06:00', inEnd: '06:45', outStart: '14:30', outEnd: '17:30', isOff: false, isOptional: false },
+          selasa: { inStart: '06:00', inEnd: '06:45', outStart: '15:15', outEnd: '17:30', isOff: false, isOptional: false },
+          rabu: { inStart: '06:00', inEnd: '06:45', outStart: '15:15', outEnd: '17:30', isOff: false, isOptional: false },
+          kamis: { inStart: '06:00', inEnd: '06:45', outStart: '14:45', outEnd: '17:30', isOff: false, isOptional: false },
+          jumat: { inStart: '06:00', inEnd: '06:45', outStart: '12:45', outEnd: '17:30', isOff: false, isOptional: false },
+          sabtu: { inStart: '07:00', inEnd: '08:00', outStart: '11:00', outEnd: '13:00', isOff: false, isOptional: true },
+          minggu: { inStart: '06:00', inEnd: '07:00', outStart: '12:00', outEnd: '14:00', isOff: true, isOptional: true }
         }),
         ummi: Object.freeze({
-          senin: { inStart: '06:30', inEnd: '07:00', outStart: '09:30', outEnd: '11:30' },
-          selasa: { inStart: '06:30', inEnd: '07:00', outStart: '09:30', outEnd: '11:30' },
-          rabu: { inStart: '06:30', inEnd: '07:00', outStart: '09:30', outEnd: '11:30' },
-          kamis: { inStart: '06:30', inEnd: '07:00', outStart: '09:30', outEnd: '11:30' },
-          jumat: { inStart: '06:30', inEnd: '07:00', outStart: '09:30', outEnd: '11:30' },
-          sabtu: { inStart: '06:30', inEnd: '07:00', outStart: '09:30', outEnd: '11:30' }
+          senin: { inStart: '06:00', inEnd: '07:15', outStart: '12:30', outEnd: '15:00', isOff: false, isOptional: false },
+          selasa: { inStart: '06:00', inEnd: '07:15', outStart: '12:30', outEnd: '15:00', isOff: false, isOptional: false },
+          rabu: { inStart: '06:00', inEnd: '07:15', outStart: '12:30', outEnd: '15:00', isOff: false, isOptional: false },
+          kamis: { inStart: '06:00', inEnd: '07:00', outStart: '12:00', outEnd: '15:00', isOff: false, isOptional: false },
+          jumat: { inStart: '06:00', inEnd: '07:00', outStart: '11:00', outEnd: '13:00', isOff: true, isOptional: false },
+          sabtu: { inStart: '06:00', inEnd: '08:00', outStart: '10:00', outEnd: '13:00', isOff: false, isOptional: true, noLatePenalty: true },
+          minggu: { inStart: '06:00', inEnd: '07:00', outStart: '12:00', outEnd: '14:00', isOff: true, isOptional: true }
         })
       })
     })
@@ -411,6 +432,12 @@
     const currentAcademicYear = source.currentAcademicYear || source.academicYear || DEFAULT_SETTINGS.currentAcademicYear;
     const currentSemester = source.currentSemester || (source.semester === 'Genap' || source.semester === '2' ? '2' : '1');
     const semesterName = currentSemester === '2' ? 'Genap' : 'Ganjil';
+    const isOldSchedule = !attendanceRules.scheduleVersion || attendanceRules.scheduleVersion < 2 || attendanceRules.schedules?.gtk?.senin?.inStart === '06:30' || attendanceRules.schedules?.gtk?.senin?.outStart === '15:30';
+    let resolvedSchedules = isOldSchedule ? DEFAULT_SETTINGS.attendanceRules.schedules : (attendanceRules.schedules || DEFAULT_SETTINGS.attendanceRules.schedules);
+    if (resolvedSchedules?.ummi?.senin?.outStart === '12:32') {
+      resolvedSchedules = JSON.parse(JSON.stringify(resolvedSchedules));
+      resolvedSchedules.ummi.senin.outStart = '12:30';
+    }
     return {
       ...DEFAULT_SETTINGS,
       ...source,
@@ -420,7 +447,13 @@
       semester: semesterName,
       attendanceRules: {
         ...DEFAULT_SETTINGS.attendanceRules,
-        ...attendanceRules
+        ...attendanceRules,
+        scheduleVersion: 2,
+        checkInStart: isOldSchedule ? DEFAULT_SETTINGS.attendanceRules.checkInStart : (attendanceRules.checkInStart || DEFAULT_SETTINGS.attendanceRules.checkInStart),
+        checkInEnd: isOldSchedule ? DEFAULT_SETTINGS.attendanceRules.checkInEnd : (attendanceRules.checkInEnd || DEFAULT_SETTINGS.attendanceRules.checkInEnd),
+        checkOutStart: isOldSchedule ? DEFAULT_SETTINGS.attendanceRules.checkOutStart : (attendanceRules.checkOutStart || DEFAULT_SETTINGS.attendanceRules.checkOutStart),
+        checkOutEnd: isOldSchedule ? DEFAULT_SETTINGS.attendanceRules.checkOutEnd : (attendanceRules.checkOutEnd || DEFAULT_SETTINGS.attendanceRules.checkOutEnd),
+        schedules: resolvedSchedules
       }
     };
   }
@@ -474,16 +507,37 @@
     const groupKey = isUmmi ? 'ummi' : 'gtk';
     const schedules = rules.schedules || DEFAULT_SETTINGS.attendanceRules.schedules;
     const groupSched = schedules[groupKey] || DEFAULT_SETTINGS.attendanceRules.schedules[groupKey] || {};
-    const daySched = groupSched[dayKey] || (groupKey === 'ummi' ? { inStart: '06:30', inEnd: '07:00', outStart: '09:30', outEnd: '11:30' } : { inStart: '06:30', inEnd: '07:00', outStart: '15:30', outEnd: '17:30' });
+    const defGroup = DEFAULT_SETTINGS.attendanceRules.schedules[groupKey] || {};
+    const daySched = groupSched[dayKey] || defGroup[dayKey] || {};
+    const isOff = daySched.isOff === true;
+    const isOptional = daySched.isOptional === true;
+    const noLatePenalty = daySched.noLatePenalty === true || (isOptional && isUmmi);
+    let label = '';
+    if (isOff) {
+      label = `${isUmmi ? 'Guru Ummi' : 'GTK'}: Hari Libur (Tidak Ada Presensi)`;
+    } else if (isOptional) {
+      label = isUmmi ? 'Guru Ummi: Sabtu Opsional (Pembinaan)' : 'GTK: Sabtu Opsional (Masuk 07.00-08.00 | Pulang Bebas)';
+    } else {
+      label = `${isUmmi ? 'Guru Ummi' : 'GTK'}: Masuk ${daySched.inStart}-${daySched.inEnd} | Pulang ${daySched.outStart}`;
+    }
     return {
       dayKey,
       groupKey,
-      inStart: daySched.inStart || '06:30',
-      inEnd: daySched.inEnd || '07:00',
-      outStart: daySched.outStart || (groupKey === 'ummi' ? '09:30' : '15:30'),
-      outEnd: daySched.outEnd || (groupKey === 'ummi' ? '11:30' : '17:30'),
-      label: `${isUmmi ? 'Guru Ummi' : 'GTK'}: Masuk ${daySched.inStart || '06:30'}-${daySched.inEnd || '07:00'} | Pulang ${daySched.outStart || (groupKey === 'ummi' ? '09:30' : '15:30')}`
+      inStart: daySched.inStart || '06:00',
+      inEnd: daySched.inEnd || (groupKey === 'ummi' ? '07:15' : '06:45'),
+      outStart: daySched.outStart || (groupKey === 'ummi' ? '12:30' : '14:30'),
+      outEnd: daySched.outEnd || '17:30',
+      isOff,
+      isOptional,
+      noLatePenalty,
+      label
     };
+  }
+  function isAttendanceLate(timeIn, sched) {
+    if (!timeIn || !sched) return false;
+    if (sched.isOff || sched.noLatePenalty) return false;
+    const limit = sched.inEnd || '06:45';
+    return timeIn > limit;
   }
   function calculateGradeSummary(chapters = [], sts1 = null, sas = null, sts2 = null, sat = null) {
     const validCh = (chapters || []).filter(c => Number.isFinite(Number(c.score)) && Number(c.score) >= 75);
@@ -682,6 +736,7 @@
     buildTeachingLabels,
     NAV_ITEMS,
     DEFAULT_SETTINGS,
+    SCHEDULE_DAY_DEFS,
     APP_DEFAULTS,
     escapeHtml,
     normalizeSettings,
@@ -704,6 +759,7 @@
     getClassPhase,
     hasAnyUnit,
     getAttendanceSchedule,
+    isAttendanceLate,
     calculateGradeSummary
   });
 })();

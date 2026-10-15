@@ -106,7 +106,18 @@ const DB = {
     if (!isDBReady()) return defaultSettings;
     const snap = await db.ref('settings').once('value');
     const current = snap.val() || {};
-    return AppConfig.normalizeSettings(current);
+    const normalized = AppConfig.normalizeSettings(current);
+    if (!current.attendanceRules?.scheduleVersion || current.attendanceRules?.scheduleVersion < 2 || current.attendanceRules?.schedules?.gtk?.senin?.inStart === '06:30' || current.attendanceRules?.schedules?.gtk?.senin?.outStart === '15:30' || current.attendanceRules?.schedules?.ummi?.senin?.outStart === '12:32') {
+      db.ref('settings/attendanceRules').update({
+        scheduleVersion: 2,
+        schedules: normalized.attendanceRules.schedules,
+        checkInStart: normalized.attendanceRules.checkInStart,
+        checkInEnd: normalized.attendanceRules.checkInEnd,
+        checkOutStart: normalized.attendanceRules.checkOutStart,
+        checkOutEnd: normalized.attendanceRules.checkOutEnd
+      }).catch(() => {});
+    }
+    return normalized;
   },
   async updateSettings(data) {
     if (!isDBReady()) return;

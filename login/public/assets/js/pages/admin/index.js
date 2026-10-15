@@ -1400,13 +1400,20 @@ const AdminPages = {
       const status = att.time_in ? (att.time_out ? 'Selesai' : 'Datang') : 'Belum hadir';
       const timeIn = att.time_in || '-';
       const timeOut = att.time_out || '-';
+      const isUmmi = g.role === AppConfig.ROLES.GURU_UMMI || (AppConfig.getRoleAssignments(g) || []).some(a => a.startsWith('GURU_UMMI') || a === 'TIM_UMMI' || a === 'KOORD_UMMI');
+      const sched = AppConfig.getAttendanceSchedule ? AppConfig.getAttendanceSchedule(settings.attendanceRules, isUmmi, dateStr) : null;
+      let lateBadge = '';
+      if (att.time_in && sched) {
+        const isLate = AppConfig.isAttendanceLate ? AppConfig.isAttendanceLate(att.time_in, sched) : false;
+        lateBadge = isLate ? ' <span class="badge badge-warning" style="font-size:10px;">Terlambat</span>' : ' <span class="badge badge-success" style="font-size:10px;">Tepat Waktu</span>';
+      }
       const proofBtn = att.proof_url
         ? `<button class="btn btn-outline btn-sm" data-proof-date="${dateStr}" data-proof-teacher="${g.id}" data-proof-url="${att.proof_url}"><i class="ph ph-eye"></i> Lihat bukti</button>`
         : '<span class="text-muted">Tidak ada bukti</span>';
       return `
         <tr>
           <td>${AppConfig.escapeHtml(g.name)}</td>
-          <td><span class="badge ${att.time_in ? 'badge-success' : 'badge-warning'}">${status}</span></td>
+          <td><span class="badge ${att.time_in ? 'badge-success' : 'badge-warning'}">${status}</span>${lateBadge}</td>
           <td>${timeIn}</td>
           <td>${timeOut}</td>
           <td>${proofBtn}</td>

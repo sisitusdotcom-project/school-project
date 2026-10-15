@@ -289,14 +289,28 @@ export default {
       const isUmmi = body.isUmmi || body.roleGroup === 'ummi';
       const groupKey = isUmmi ? 'ummi' : 'gtk';
       const sched = attendanceRules.schedules?.[groupKey]?.[currentDayKey] || {};
-      const validWindowStart = type === 'in' ? (sched.inStart || attendanceRules.checkInStart) : (sched.outStart || attendanceRules.checkOutStart);
-      const validWindowEnd = type === 'in' ? (sched.inEnd || attendanceRules.checkInEnd) : (sched.outEnd || attendanceRules.checkOutEnd);
       const allowFlexible = attendanceRules.allowFlexibleTime === true;
-      if (!allowFlexible && validWindowStart && validWindowEnd && !isTimeInWindow(currentTimeText, validWindowStart, validWindowEnd)) {
+      if (!allowFlexible && sched.isOff) {
         return jsonResponse(403, {
           status: 'error',
-          message: `Waktu absensi ${windowName} (${currentTimeText}) saat ini di luar jadwal ${isUmmi ? 'Guru Ummi' : 'GTK'} hari ${currentDayKey} (${validWindowStart}-${validWindowEnd}).`
+          message: `Hari ini (${currentDayKey}) adalah hari libur untuk ${isUmmi ? 'Guru Ummi' : 'GTK'}. Presensi tidak dibuka.`
         }, request);
+      }
+      const inStart = sched.inStart || (currentDayKey === 'sabtu' && !isUmmi ? '07:00' : '06:00');
+      const outStart = sched.outStart || (groupKey === 'ummi' ? '12:00' : (currentDayKey === 'jumat' ? '12:45' : '14:30'));
+      if (!allowFlexible) {
+        if (type === 'in' && timeToMinutes(currentTimeText) < timeToMinutes(inStart)) {
+          return jsonResponse(403, {
+            status: 'error',
+            message: `Presensi datang hari ${currentDayKey} baru dibuka mulai pukul ${inStart}. Saat ini pukul ${currentTimeText}.`
+          }, request);
+        }
+        if (type === 'out' && timeToMinutes(currentTimeText) < timeToMinutes(outStart)) {
+          return jsonResponse(403, {
+            status: 'error',
+            message: `Presensi pulang hari ${currentDayKey} belum dapat dilakukan sebelum pukul ${outStart}. Saat ini pukul ${currentTimeText}.`
+          }, request);
+        }
       }
       const distance = getDistanceMeters(location.lat, location.lng, schoolLocation.lat, schoolLocation.lng);
       const radius = Number(schoolLocation.radiusMeters);

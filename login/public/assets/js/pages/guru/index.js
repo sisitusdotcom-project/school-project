@@ -1459,11 +1459,21 @@ const GuruPages = {
       ]);
       const isUmmi = Auth.currentRole === 'guruUmmi' || (Auth.currentAssignments || []).some(a => a.startsWith('GURU_UMMI') || a === 'TIM_UMMI' || a === 'KOORD_UMMI');
       const sched = AppConfig.getAttendanceSchedule ? AppConfig.getAttendanceSchedule(settings?.attendanceRules, isUmmi, new Date()) : {
-        inStart: '06:30', inEnd: '07:00', outStart: isUmmi ? '09:30' : '15:30', outEnd: isUmmi ? '11:30' : '17:30', label: `${isUmmi ? 'Guru Ummi' : 'GTK'}: Masuk 06:30-07:00`
+        inStart: '06:00', inEnd: isUmmi ? '07:15' : '06:45', outStart: isUmmi ? '12:30' : '14:30', outEnd: '17:30', label: `${isUmmi ? 'Guru Ummi' : 'GTK'}: Masuk 06:00`
       };
       const schedBadge = document.getElementById('att-schedule-badge');
       if (schedBadge) {
         schedBadge.textContent = sched.label;
+      }
+      if (sched.isOff) {
+        statusTitle.innerText = "Hari Libur";
+        statusText.innerText = `Hari ini (${sched.dayKey}) adalah hari libur untuk ${isUmmi ? 'Guru Ummi' : 'GTK'}. Tidak ada kewajiban presensi.`;
+        statusIcon.style.background = '#F3F4F6';
+        statusIcon.style.color = '#6B7280';
+        statusIcon.innerHTML = '<i class="ph ph-calendar-x" style="font-size: 32px;"></i>';
+      } else if (sched.isOptional) {
+        statusTitle.innerText = "Sabtu Opsional";
+        statusText.innerText = `Hari ini (${sched.dayKey}) jadwal presensi opsional untuk pembinaan.${isUmmi ? ' Tidak ada hitungan keterlambatan.' : ' Presensi masuk dibuka 07.00-08.00 WIB, pulang bebas.'}`;
       }
       if (!myAtt) {
         histContainer.innerHTML = '<p class="text-muted" style="font-size: 13px; margin: 0;">Belum ada rekam presensi hari ini.</p>';
@@ -1498,7 +1508,11 @@ const GuruPages = {
         let lateCount = 0;
         const rowsHtml = fullHist.map((h) => {
           let statusBadge = '<span class="badge badge-warning">Terlambat</span>';
-          if (h.time_in && h.time_in <= (sched.inEnd || '07:00')) {
+          const isLate = AppConfig.isAttendanceLate ? AppConfig.isAttendanceLate(h.time_in, sched) : (h.time_in > (sched.inEnd || '06:45'));
+          if (sched.noLatePenalty || (sched.isOptional && isUmmi)) {
+            statusBadge = '<span class="badge badge-success">Hadir (Pembinaan)</span>';
+            onTimeCount++;
+          } else if (!isLate && h.time_in) {
             statusBadge = '<span class="badge badge-success">Tepat Waktu</span>';
             onTimeCount++;
           } else {

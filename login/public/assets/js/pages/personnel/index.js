@@ -19,6 +19,53 @@ const PersonnelPages = {
     const attList = DB.toArray(attendanceData);
     const hadirToday = attList.filter((a) => a && (a.time_in || a.status === 'Hadir')).length;
     const settings = settingsData || {};
+    const scheduleDefs = AppConfig.SCHEDULE_DAY_DEFS || {
+      gtk: [
+        { key: 'senin', label: 'Senin', note: 'Batas Masuk 06.45 | Pulang 14.30', status: 'active', inStart: '06:00', inEnd: '06:45', outStart: '14:30', outEnd: '17:30' },
+        { key: 'selasa', label: 'Selasa', note: 'Batas Masuk 06.45 | Pulang 15.15', status: 'active', inStart: '06:00', inEnd: '06:45', outStart: '15:15', outEnd: '17:30' },
+        { key: 'rabu', label: 'Rabu', note: 'Batas Masuk 06.45 | Pulang 15.15', status: 'active', inStart: '06:00', inEnd: '06:45', outStart: '15:15', outEnd: '17:30' },
+        { key: 'kamis', label: 'Kamis', note: 'Batas Masuk 06.45 | Pulang 14.45', status: 'active', inStart: '06:00', inEnd: '06:45', outStart: '14:45', outEnd: '17:30' },
+        { key: 'jumat', label: 'Jumat', note: 'Batas Masuk 06.45 | Pulang 12.45', status: 'active', inStart: '06:00', inEnd: '06:45', outStart: '12:45', outEnd: '17:30' },
+        { key: 'sabtu', label: 'Sabtu', note: 'Batas Masuk 08.00 | Opsional (Pembinaan)', status: 'optional', inStart: '07:00', inEnd: '08:00', outStart: '11:00', outEnd: '13:00' }
+      ],
+      ummi: [
+        { key: 'senin', label: 'Senin', note: 'Batas Masuk 07.15 | Pulang 12.30', status: 'active', inStart: '06:00', inEnd: '07:15', outStart: '12:30', outEnd: '15:00' },
+        { key: 'selasa', label: 'Selasa', note: 'Batas Masuk 07.15 | Pulang 12.30', status: 'active', inStart: '06:00', inEnd: '07:15', outStart: '12:30', outEnd: '15:00' },
+        { key: 'rabu', label: 'Rabu', note: 'Batas Masuk 07.15 | Pulang 12.30', status: 'active', inStart: '06:00', inEnd: '07:15', outStart: '12:30', outEnd: '15:00' },
+        { key: 'kamis', label: 'Kamis', note: 'Batas Masuk 07.00 | Pulang 12.00', status: 'active', inStart: '06:00', inEnd: '07:00', outStart: '12:00', outEnd: '15:00' },
+        { key: 'jumat', label: 'Jumat', note: 'Libur (Tidak Ada Absen)', status: 'off', inStart: '06:00', inEnd: '07:00', outStart: '11:00', outEnd: '13:00' },
+        { key: 'sabtu', label: 'Sabtu', note: 'Batas Masuk 08.00 | Opsional (Pembinaan Tanpa Terlambat)', status: 'optional', inStart: '06:00', inEnd: '08:00', outStart: '10:00', outEnd: '13:00' }
+      ]
+    };
+    const renderScheduleRows = (group) => {
+      const defs = scheduleDefs[group] || [];
+      const currentGroup = settings.attendanceRules?.schedules?.[group] || {};
+      return defs.map((d) => {
+        const cur = currentGroup[d.key] || {};
+        let status = d.status;
+        if (cur.isOff) status = 'off';
+        else if (cur.isOptional) status = 'optional';
+        else if (cur.inStart || cur.inEnd) status = 'active';
+        const inStartVal = cur.inStart || d.inStart;
+        const inEndVal = cur.inEnd || d.inEnd;
+        const outStartVal = cur.outStart || d.outStart;
+        const outEndVal = cur.outEnd || d.outEnd;
+        return `<tr>
+  <td><strong>${d.label}</strong><div class="text-muted" style="font-size:11px;">${d.note}</div></td>
+  <td>
+    <select class="form-control sched-${group}-status" data-day="${d.key}" style="font-size:12px; padding:4px 6px;">
+      <option value="active" ${status === 'active' ? 'selected' : ''}>Wajib Masuk</option>
+      <option value="optional" ${status === 'optional' ? 'selected' : ''}>Opsional (Pembinaan)</option>
+      <option value="off" ${status === 'off' ? 'selected' : ''}>Libur</option>
+    </select>
+  </td>
+  <td><input type="time" class="form-control sched-${group}-in-start" data-day="${d.key}" value="${inStartVal}"></td>
+  <td><input type="time" class="form-control sched-${group}-in-end" data-day="${d.key}" value="${inEndVal}"></td>
+  <td><input type="time" class="form-control sched-${group}-out-start" data-day="${d.key}" value="${outStartVal}"></td>
+  <td><input type="time" class="form-control sched-${group}-out-end" data-day="${d.key}" value="${outEndVal}"></td>
+</tr>`;
+      }).join('');
+    };
     container.innerHTML = `
       <section class="card-grid section-spacer">
         <div class="card stat-card">
@@ -121,7 +168,7 @@ const PersonnelPages = {
       <section class="card section-spacer">
         <div class="card-header mk-header">
           <h3 class="card-title"><i class="ph ph-clock"></i> Pengaturan Jam Operasional Absensi GTK & Guru Ummi (Senin - Sabtu)</h3>
-          <span class="badge badge-primary">Konfigurasi Jadwal</span>
+          <span class="badge badge-primary">Konfigurasi Jadwal SSOT</span>
         </div>
         <div class="card-body">
           <form id="form-attendance-time-settings">
@@ -130,102 +177,36 @@ const PersonnelPages = {
                 <button type="button" class="btn btn-sm btn-primary sched-tab-btn active" id="btn-tab-gtk"><i class="ph ph-briefcase"></i> Jadwal GTK / Tendik</button>
                 <button type="button" class="btn btn-sm btn-outline sched-tab-btn" id="btn-tab-ummi"><i class="ph ph-book-open"></i> Jadwal Guru Ummi</button>
               </div>
-              <label style="display:inline-flex; align-items:center; gap:8px; font-size:12px; cursor:pointer;">
-                <input type="checkbox" id="set-flexible-time" ${settings.attendanceRules?.allowFlexibleTime ? 'checked' : ''}>
-                <span><strong>Mode Fleksibel:</strong> Bolehkan absensi bila jam hadir/pulang bervariasi</span>
-              </label>
+              <div style="display:inline-flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                <button type="button" class="btn btn-sm btn-outline" id="btn-reset-default-sched"><i class="ph ph-arrow-counter-clockwise"></i> Terapkan Jadwal Default Resmi</button>
+                <label style="display:inline-flex; align-items:center; gap:8px; font-size:12px; cursor:pointer;">
+                  <input type="checkbox" id="set-flexible-time" ${settings.attendanceRules?.allowFlexibleTime ? 'checked' : ''}>
+                  <span><strong>Mode Fleksibel:</strong> Bolehkan absensi jika jam hadir/pulang bervariasi</span>
+                </label>
+              </div>
+            </div>
+            <div class="panel-callout" style="padding:10px 14px; margin-bottom:14px; font-size:12px; border-left:4px solid var(--primary,#2563eb); background:var(--bg-subtle,#f8fafc);">
+              <i class="ph ph-info"></i> <strong>Aturan Keterlambatan:</strong> Batas akhir absen = jam yang tertulis. Lewat 1 menit (misal 06.46 bagi GTK atau 07.16 bagi Ummi) otomatis terhitung terlambat. Hari Sabtu bersifat opsional (pembinaan). Guru Ummi hari Jumat libur.
             </div>
             <div id="pane-sched-gtk">
-              <h4 style="font-size:13px; margin:0 0 8px 0; color:var(--text-muted);">Jadwal Guru & Tenaga Kependidikan (GTK)</h4>
+              <h4 style="font-size:13px; margin:0 0 8px 0; color:var(--text-main);">Jadwal Guru & Tenaga Kependidikan (GTK / Tendik)</h4>
               <div class="table-wrap">
                 <table class="table">
-                  <thead><tr><th>Hari</th><th>Masuk Mulai</th><th>Batas Masuk</th><th>Pulang Mulai</th><th>Batas Pulang</th></tr></thead>
-                  <tbody><tr>
-  <td><strong>Senin</strong></td>
-  <td><input type="time" class="form-control sched-gtk-in-start" data-day="senin" value="${settings.attendanceRules?.schedules?.gtk?.senin?.inStart || (AppConfig.DEFAULT_SETTINGS.attendanceRules.schedules.gtk.senin?.inStart || '06:30')}"></td>
-  <td><input type="time" class="form-control sched-gtk-in-end" data-day="senin" value="${settings.attendanceRules?.schedules?.gtk?.senin?.inEnd || (AppConfig.DEFAULT_SETTINGS.attendanceRules.schedules.gtk.senin?.inEnd || '07:00')}"></td>
-  <td><input type="time" class="form-control sched-gtk-out-start" data-day="senin" value="${settings.attendanceRules?.schedules?.gtk?.senin?.outStart || (AppConfig.DEFAULT_SETTINGS.attendanceRules.schedules.gtk.senin?.outStart || '15:30')}"></td>
-  <td><input type="time" class="form-control sched-gtk-out-end" data-day="senin" value="${settings.attendanceRules?.schedules?.gtk?.senin?.outEnd || (AppConfig.DEFAULT_SETTINGS.attendanceRules.schedules.gtk.senin?.outEnd || '17:30')}"></td>
-</tr><tr>
-  <td><strong>Selasa</strong></td>
-  <td><input type="time" class="form-control sched-gtk-in-start" data-day="selasa" value="${settings.attendanceRules?.schedules?.gtk?.selasa?.inStart || (AppConfig.DEFAULT_SETTINGS.attendanceRules.schedules.gtk.selasa?.inStart || '06:30')}"></td>
-  <td><input type="time" class="form-control sched-gtk-in-end" data-day="selasa" value="${settings.attendanceRules?.schedules?.gtk?.selasa?.inEnd || (AppConfig.DEFAULT_SETTINGS.attendanceRules.schedules.gtk.selasa?.inEnd || '07:00')}"></td>
-  <td><input type="time" class="form-control sched-gtk-out-start" data-day="selasa" value="${settings.attendanceRules?.schedules?.gtk?.selasa?.outStart || (AppConfig.DEFAULT_SETTINGS.attendanceRules.schedules.gtk.selasa?.outStart || '15:30')}"></td>
-  <td><input type="time" class="form-control sched-gtk-out-end" data-day="selasa" value="${settings.attendanceRules?.schedules?.gtk?.selasa?.outEnd || (AppConfig.DEFAULT_SETTINGS.attendanceRules.schedules.gtk.selasa?.outEnd || '17:30')}"></td>
-</tr><tr>
-  <td><strong>Rabu</strong></td>
-  <td><input type="time" class="form-control sched-gtk-in-start" data-day="rabu" value="${settings.attendanceRules?.schedules?.gtk?.rabu?.inStart || (AppConfig.DEFAULT_SETTINGS.attendanceRules.schedules.gtk.rabu?.inStart || '06:30')}"></td>
-  <td><input type="time" class="form-control sched-gtk-in-end" data-day="rabu" value="${settings.attendanceRules?.schedules?.gtk?.rabu?.inEnd || (AppConfig.DEFAULT_SETTINGS.attendanceRules.schedules.gtk.rabu?.inEnd || '07:00')}"></td>
-  <td><input type="time" class="form-control sched-gtk-out-start" data-day="rabu" value="${settings.attendanceRules?.schedules?.gtk?.rabu?.outStart || (AppConfig.DEFAULT_SETTINGS.attendanceRules.schedules.gtk.rabu?.outStart || '15:30')}"></td>
-  <td><input type="time" class="form-control sched-gtk-out-end" data-day="rabu" value="${settings.attendanceRules?.schedules?.gtk?.rabu?.outEnd || (AppConfig.DEFAULT_SETTINGS.attendanceRules.schedules.gtk.rabu?.outEnd || '17:30')}"></td>
-</tr><tr>
-  <td><strong>Kamis</strong></td>
-  <td><input type="time" class="form-control sched-gtk-in-start" data-day="kamis" value="${settings.attendanceRules?.schedules?.gtk?.kamis?.inStart || (AppConfig.DEFAULT_SETTINGS.attendanceRules.schedules.gtk.kamis?.inStart || '06:30')}"></td>
-  <td><input type="time" class="form-control sched-gtk-in-end" data-day="kamis" value="${settings.attendanceRules?.schedules?.gtk?.kamis?.inEnd || (AppConfig.DEFAULT_SETTINGS.attendanceRules.schedules.gtk.kamis?.inEnd || '07:00')}"></td>
-  <td><input type="time" class="form-control sched-gtk-out-start" data-day="kamis" value="${settings.attendanceRules?.schedules?.gtk?.kamis?.outStart || (AppConfig.DEFAULT_SETTINGS.attendanceRules.schedules.gtk.kamis?.outStart || '15:30')}"></td>
-  <td><input type="time" class="form-control sched-gtk-out-end" data-day="kamis" value="${settings.attendanceRules?.schedules?.gtk?.kamis?.outEnd || (AppConfig.DEFAULT_SETTINGS.attendanceRules.schedules.gtk.kamis?.outEnd || '17:30')}"></td>
-</tr><tr>
-  <td><strong>Jumat</strong></td>
-  <td><input type="time" class="form-control sched-gtk-in-start" data-day="jumat" value="${settings.attendanceRules?.schedules?.gtk?.jumat?.inStart || (AppConfig.DEFAULT_SETTINGS.attendanceRules.schedules.gtk.jumat?.inStart || '06:30')}"></td>
-  <td><input type="time" class="form-control sched-gtk-in-end" data-day="jumat" value="${settings.attendanceRules?.schedules?.gtk?.jumat?.inEnd || (AppConfig.DEFAULT_SETTINGS.attendanceRules.schedules.gtk.jumat?.inEnd || '07:00')}"></td>
-  <td><input type="time" class="form-control sched-gtk-out-start" data-day="jumat" value="${settings.attendanceRules?.schedules?.gtk?.jumat?.outStart || (AppConfig.DEFAULT_SETTINGS.attendanceRules.schedules.gtk.jumat?.outStart || '14:30')}"></td>
-  <td><input type="time" class="form-control sched-gtk-out-end" data-day="jumat" value="${settings.attendanceRules?.schedules?.gtk?.jumat?.outEnd || (AppConfig.DEFAULT_SETTINGS.attendanceRules.schedules.gtk.jumat?.outEnd || '16:30')}"></td>
-</tr><tr>
-  <td><strong>Sabtu</strong></td>
-  <td><input type="time" class="form-control sched-gtk-in-start" data-day="sabtu" value="${settings.attendanceRules?.schedules?.gtk?.sabtu?.inStart || (AppConfig.DEFAULT_SETTINGS.attendanceRules.schedules.gtk.sabtu?.inStart || '06:30')}"></td>
-  <td><input type="time" class="form-control sched-gtk-in-end" data-day="sabtu" value="${settings.attendanceRules?.schedules?.gtk?.sabtu?.inEnd || (AppConfig.DEFAULT_SETTINGS.attendanceRules.schedules.gtk.sabtu?.inEnd || '07:00')}"></td>
-  <td><input type="time" class="form-control sched-gtk-out-start" data-day="sabtu" value="${settings.attendanceRules?.schedules?.gtk?.sabtu?.outStart || (AppConfig.DEFAULT_SETTINGS.attendanceRules.schedules.gtk.sabtu?.outStart || '12:30')}"></td>
-  <td><input type="time" class="form-control sched-gtk-out-end" data-day="sabtu" value="${settings.attendanceRules?.schedules?.gtk?.sabtu?.outEnd || (AppConfig.DEFAULT_SETTINGS.attendanceRules.schedules.gtk.sabtu?.outEnd || '14:30')}"></td>
-</tr></tbody>
+                  <thead><tr><th>Hari & Catatan</th><th>Status Hari</th><th>Mulai Masuk</th><th>Batas Masuk</th><th>Mulai Pulang</th><th>Batas Pulang</th></tr></thead>
+                  <tbody>${renderScheduleRows('gtk')}</tbody>
                 </table>
               </div>
             </div>
             <div id="pane-sched-ummi" style="display:none;">
-              <h4 style="font-size:13px; margin:0 0 8px 0; color:var(--text-muted);">Jadwal Khusus Guru Ummi / Qur'an</h4>
+              <h4 style="font-size:13px; margin:0 0 8px 0; color:var(--text-main);">Jadwal Khusus Guru Ummi / Qur'an</h4>
               <div class="table-wrap">
                 <table class="table">
-                  <thead><tr><th>Hari</th><th>Masuk Mulai</th><th>Batas Masuk</th><th>Pulang Mulai</th><th>Batas Pulang</th></tr></thead>
-                  <tbody><tr>
-  <td><strong>Senin</strong></td>
-  <td><input type="time" class="form-control sched-ummi-in-start" data-day="senin" value="${settings.attendanceRules?.schedules?.ummi?.senin?.inStart || (AppConfig.DEFAULT_SETTINGS.attendanceRules.schedules.ummi.senin?.inStart || '06:30')}"></td>
-  <td><input type="time" class="form-control sched-ummi-in-end" data-day="senin" value="${settings.attendanceRules?.schedules?.ummi?.senin?.inEnd || (AppConfig.DEFAULT_SETTINGS.attendanceRules.schedules.ummi.senin?.inEnd || '07:00')}"></td>
-  <td><input type="time" class="form-control sched-ummi-out-start" data-day="senin" value="${settings.attendanceRules?.schedules?.ummi?.senin?.outStart || (AppConfig.DEFAULT_SETTINGS.attendanceRules.schedules.ummi.senin?.outStart || '09:30')}"></td>
-  <td><input type="time" class="form-control sched-ummi-out-end" data-day="senin" value="${settings.attendanceRules?.schedules?.ummi?.senin?.outEnd || (AppConfig.DEFAULT_SETTINGS.attendanceRules.schedules.ummi.senin?.outEnd || '11:30')}"></td>
-</tr><tr>
-  <td><strong>Selasa</strong></td>
-  <td><input type="time" class="form-control sched-ummi-in-start" data-day="selasa" value="${settings.attendanceRules?.schedules?.ummi?.selasa?.inStart || (AppConfig.DEFAULT_SETTINGS.attendanceRules.schedules.ummi.selasa?.inStart || '06:30')}"></td>
-  <td><input type="time" class="form-control sched-ummi-in-end" data-day="selasa" value="${settings.attendanceRules?.schedules?.ummi?.selasa?.inEnd || (AppConfig.DEFAULT_SETTINGS.attendanceRules.schedules.ummi.selasa?.inEnd || '07:00')}"></td>
-  <td><input type="time" class="form-control sched-ummi-out-start" data-day="selasa" value="${settings.attendanceRules?.schedules?.ummi?.selasa?.outStart || (AppConfig.DEFAULT_SETTINGS.attendanceRules.schedules.ummi.selasa?.outStart || '09:30')}"></td>
-  <td><input type="time" class="form-control sched-ummi-out-end" data-day="selasa" value="${settings.attendanceRules?.schedules?.ummi?.selasa?.outEnd || (AppConfig.DEFAULT_SETTINGS.attendanceRules.schedules.ummi.selasa?.outEnd || '11:30')}"></td>
-</tr><tr>
-  <td><strong>Rabu</strong></td>
-  <td><input type="time" class="form-control sched-ummi-in-start" data-day="rabu" value="${settings.attendanceRules?.schedules?.ummi?.rabu?.inStart || (AppConfig.DEFAULT_SETTINGS.attendanceRules.schedules.ummi.rabu?.inStart || '06:30')}"></td>
-  <td><input type="time" class="form-control sched-ummi-in-end" data-day="rabu" value="${settings.attendanceRules?.schedules?.ummi?.rabu?.inEnd || (AppConfig.DEFAULT_SETTINGS.attendanceRules.schedules.ummi.rabu?.inEnd || '07:00')}"></td>
-  <td><input type="time" class="form-control sched-ummi-out-start" data-day="rabu" value="${settings.attendanceRules?.schedules?.ummi?.rabu?.outStart || (AppConfig.DEFAULT_SETTINGS.attendanceRules.schedules.ummi.rabu?.outStart || '09:30')}"></td>
-  <td><input type="time" class="form-control sched-ummi-out-end" data-day="rabu" value="${settings.attendanceRules?.schedules?.ummi?.rabu?.outEnd || (AppConfig.DEFAULT_SETTINGS.attendanceRules.schedules.ummi.rabu?.outEnd || '11:30')}"></td>
-</tr><tr>
-  <td><strong>Kamis</strong></td>
-  <td><input type="time" class="form-control sched-ummi-in-start" data-day="kamis" value="${settings.attendanceRules?.schedules?.ummi?.kamis?.inStart || (AppConfig.DEFAULT_SETTINGS.attendanceRules.schedules.ummi.kamis?.inStart || '06:30')}"></td>
-  <td><input type="time" class="form-control sched-ummi-in-end" data-day="kamis" value="${settings.attendanceRules?.schedules?.ummi?.kamis?.inEnd || (AppConfig.DEFAULT_SETTINGS.attendanceRules.schedules.ummi.kamis?.inEnd || '07:00')}"></td>
-  <td><input type="time" class="form-control sched-ummi-out-start" data-day="kamis" value="${settings.attendanceRules?.schedules?.ummi?.kamis?.outStart || (AppConfig.DEFAULT_SETTINGS.attendanceRules.schedules.ummi.kamis?.outStart || '09:30')}"></td>
-  <td><input type="time" class="form-control sched-ummi-out-end" data-day="kamis" value="${settings.attendanceRules?.schedules?.ummi?.kamis?.outEnd || (AppConfig.DEFAULT_SETTINGS.attendanceRules.schedules.ummi.kamis?.outEnd || '11:30')}"></td>
-</tr><tr>
-  <td><strong>Jumat</strong></td>
-  <td><input type="time" class="form-control sched-ummi-in-start" data-day="jumat" value="${settings.attendanceRules?.schedules?.ummi?.jumat?.inStart || (AppConfig.DEFAULT_SETTINGS.attendanceRules.schedules.ummi.jumat?.inStart || '06:30')}"></td>
-  <td><input type="time" class="form-control sched-ummi-in-end" data-day="jumat" value="${settings.attendanceRules?.schedules?.ummi?.jumat?.inEnd || (AppConfig.DEFAULT_SETTINGS.attendanceRules.schedules.ummi.jumat?.inEnd || '07:00')}"></td>
-  <td><input type="time" class="form-control sched-ummi-out-start" data-day="jumat" value="${settings.attendanceRules?.schedules?.ummi?.jumat?.outStart || (AppConfig.DEFAULT_SETTINGS.attendanceRules.schedules.ummi.jumat?.outStart || '09:30')}"></td>
-  <td><input type="time" class="form-control sched-ummi-out-end" data-day="jumat" value="${settings.attendanceRules?.schedules?.ummi?.jumat?.outEnd || (AppConfig.DEFAULT_SETTINGS.attendanceRules.schedules.ummi.jumat?.outEnd || '11:30')}"></td>
-</tr><tr>
-  <td><strong>Sabtu</strong></td>
-  <td><input type="time" class="form-control sched-ummi-in-start" data-day="sabtu" value="${settings.attendanceRules?.schedules?.ummi?.sabtu?.inStart || (AppConfig.DEFAULT_SETTINGS.attendanceRules.schedules.ummi.sabtu?.inStart || '06:30')}"></td>
-  <td><input type="time" class="form-control sched-ummi-in-end" data-day="sabtu" value="${settings.attendanceRules?.schedules?.ummi?.sabtu?.inEnd || (AppConfig.DEFAULT_SETTINGS.attendanceRules.schedules.ummi.sabtu?.inEnd || '07:00')}"></td>
-  <td><input type="time" class="form-control sched-ummi-out-start" data-day="sabtu" value="${settings.attendanceRules?.schedules?.ummi?.sabtu?.outStart || (AppConfig.DEFAULT_SETTINGS.attendanceRules.schedules.ummi.sabtu?.outStart || '09:30')}"></td>
-  <td><input type="time" class="form-control sched-ummi-out-end" data-day="sabtu" value="${settings.attendanceRules?.schedules?.ummi?.sabtu?.outEnd || (AppConfig.DEFAULT_SETTINGS.attendanceRules.schedules.ummi.sabtu?.outEnd || '11:30')}"></td>
-</tr></tbody>
+                  <thead><tr><th>Hari & Catatan</th><th>Status Hari</th><th>Mulai Masuk</th><th>Batas Masuk</th><th>Mulai Pulang</th><th>Batas Pulang</th></tr></thead>
+                  <tbody>${renderScheduleRows('ummi')}</tbody>
                 </table>
               </div>
             </div>
-            <button type="submit" class="btn btn-primary" style="margin-top:14px;"><i class="ph ph-floppy-disk"></i> Simpan Seluruh Jadwal Presensi</button>
+                        <button type="submit" class="btn btn-primary" style="margin-top:14px;"><i class="ph ph-floppy-disk"></i> Simpan Seluruh Jadwal Presensi</button>
           </form>
         </div>
       </section>
@@ -285,6 +266,26 @@ const PersonnelPages = {
     const tabUmmi = document.getElementById('btn-tab-ummi');
     const paneGtk = document.getElementById('pane-sched-gtk');
     const paneUmmi = document.getElementById('pane-sched-ummi');
+    const btnResetSched = document.getElementById('btn-reset-default-sched');
+    if (btnResetSched) {
+      btnResetSched.onclick = () => {
+        ['gtk', 'ummi'].forEach((group) => {
+          (scheduleDefs[group] || []).forEach((d) => {
+            const sel = document.querySelector(`.sched-${group}-status[data-day="${d.key}"]`);
+            if (sel) sel.value = d.status;
+            const inS = document.querySelector(`.sched-${group}-in-start[data-day="${d.key}"]`);
+            if (inS) inS.value = d.inStart;
+            const inE = document.querySelector(`.sched-${group}-in-end[data-day="${d.key}"]`);
+            if (inE) inE.value = d.inEnd;
+            const outS = document.querySelector(`.sched-${group}-out-start[data-day="${d.key}"]`);
+            if (outS) outS.value = d.outStart;
+            const outE = document.querySelector(`.sched-${group}-out-end[data-day="${d.key}"]`);
+            if (outE) outE.value = d.outEnd;
+          });
+        });
+        alert('Jadwal default resmi telah dimuat ke formulir! Silakan klik "Simpan Seluruh Jadwal Presensi" di bawah.');
+      };
+    }
     if (tabGtk && tabUmmi && paneGtk && paneUmmi) {
       tabGtk.onclick = () => {
         tabGtk.className = 'btn btn-sm btn-primary sched-tab-btn active';
@@ -300,21 +301,43 @@ const PersonnelPages = {
       };
     }
     bindSettingsForm('form-attendance-time-settings', () => {
-      const days = ['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu'];
       const gtkSched = {};
       const ummiSched = {};
-      days.forEach(day => {
-        const gtkInStart = document.querySelector(`.sched-gtk-in-start[data-day="${day}"]`)?.value || '06:30';
-        const gtkInEnd = document.querySelector(`.sched-gtk-in-end[data-day="${day}"]`)?.value || '07:00';
-        const gtkOutStart = document.querySelector(`.sched-gtk-out-start[data-day="${day}"]`)?.value || '15:30';
-        const gtkOutEnd = document.querySelector(`.sched-gtk-out-end[data-day="${day}"]`)?.value || '17:30';
-        gtkSched[day] = { inStart: gtkInStart, inEnd: gtkInEnd, outStart: gtkOutStart, outEnd: gtkOutEnd };
-        const ummiInStart = document.querySelector(`.sched-ummi-in-start[data-day="${day}"]`)?.value || '06:30';
-        const ummiInEnd = document.querySelector(`.sched-ummi-in-end[data-day="${day}"]`)?.value || '07:00';
-        const ummiOutStart = document.querySelector(`.sched-ummi-out-start[data-day="${day}"]`)?.value || '09:30';
-        const ummiOutEnd = document.querySelector(`.sched-ummi-out-end[data-day="${day}"]`)?.value || '11:30';
-        ummiSched[day] = { inStart: ummiInStart, inEnd: ummiInEnd, outStart: ummiOutStart, outEnd: ummiOutEnd };
+      (scheduleDefs.gtk || []).forEach((d) => {
+        const day = d.key;
+        const status = document.querySelector(`.sched-gtk-status[data-day="${day}"]`)?.value || d.status;
+        const inStart = document.querySelector(`.sched-gtk-in-start[data-day="${day}"]`)?.value || d.inStart;
+        const inEnd = document.querySelector(`.sched-gtk-in-end[data-day="${day}"]`)?.value || d.inEnd;
+        const outStart = document.querySelector(`.sched-gtk-out-start[data-day="${day}"]`)?.value || d.outStart;
+        const outEnd = document.querySelector(`.sched-gtk-out-end[data-day="${day}"]`)?.value || d.outEnd;
+        gtkSched[day] = {
+          inStart,
+          inEnd,
+          outStart,
+          outEnd,
+          isOff: status === 'off',
+          isOptional: status === 'optional'
+        };
       });
+      (scheduleDefs.ummi || []).forEach((d) => {
+        const day = d.key;
+        const status = document.querySelector(`.sched-ummi-status[data-day="${day}"]`)?.value || d.status;
+        const inStart = document.querySelector(`.sched-ummi-in-start[data-day="${day}"]`)?.value || d.inStart;
+        const inEnd = document.querySelector(`.sched-ummi-in-end[data-day="${day}"]`)?.value || d.inEnd;
+        const outStart = document.querySelector(`.sched-ummi-out-start[data-day="${day}"]`)?.value || d.outStart;
+        const outEnd = document.querySelector(`.sched-ummi-out-end[data-day="${day}"]`)?.value || d.outEnd;
+        ummiSched[day] = {
+          inStart,
+          inEnd,
+          outStart,
+          outEnd,
+          isOff: status === 'off',
+          isOptional: status === 'optional',
+          noLatePenalty: status === 'optional'
+        };
+      });
+      gtkSched['minggu'] = { inStart: '06:00', inEnd: '07:00', outStart: '12:00', outEnd: '14:00', isOff: true, isOptional: true };
+      ummiSched['minggu'] = { inStart: '06:00', inEnd: '07:00', outStart: '12:00', outEnd: '14:00', isOff: true, isOptional: true };
       const allowFlexible = document.getElementById('set-flexible-time')?.checked || false;
       return {
         allowFlexibleTime: allowFlexible,
@@ -322,13 +345,13 @@ const PersonnelPages = {
           gtk: gtkSched,
           ummi: ummiSched
         },
-        checkInStart: gtkSched.senin?.inStart || '06:30',
-        checkInEnd: gtkSched.senin?.inEnd || '07:00',
-        checkOutStart: gtkSched.senin?.outStart || '15:30',
+        checkInStart: gtkSched.senin?.inStart || '06:00',
+        checkInEnd: gtkSched.senin?.inEnd || '06:45',
+        checkOutStart: gtkSched.senin?.outStart || '14:30',
         checkOutEnd: gtkSched.senin?.outEnd || '17:30'
       };
     });
-    bindSettingsForm('form-attendance-date-settings', () => ({
+        bindSettingsForm('form-attendance-date-settings', () => ({
       attendanceStartDate: document.getElementById('set-date-start').value,
       attendanceEndDate: document.getElementById('set-date-end').value
     }));
