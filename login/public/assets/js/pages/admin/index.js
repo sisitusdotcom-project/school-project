@@ -220,15 +220,27 @@ const AdminPages = {
       });
       const rows = filtered.length ? filtered.map(u => {
         const teachingLabels = DB.buildTeachingLabels(u.id, classes, subjects);
+        const teachingText = teachingLabels.map(label => AppConfig.escapeHtml(label)).join(', ');
+        const isLongTeaching = teachingText.length > 36;
+        const teachingHtml = teachingLabels.length ? (isLongTeaching ? `
+            <div class="user-teaching-marquee-box" title="${teachingText}">
+              <div class="user-teaching-marquee-track">
+                <span class="user-teaching-marquee-item"><i class="ph ph-book-open"></i> ${teachingText} &nbsp;&bull;&nbsp;&nbsp;</span>
+                <span class="user-teaching-marquee-item"><i class="ph ph-book-open"></i> ${teachingText} &nbsp;&bull;&nbsp;&nbsp;</span>
+              </div>
+            </div>` : `
+            <div class="user-teaching-static-box" title="${teachingText}">
+              <i class="ph ph-book-open"></i> ${teachingText}
+            </div>`) : '';
         return `
         <tr>
-          <td>
+          <td class="user-cell">
             <strong>${AppConfig.escapeHtml(u.name)}</strong><br>
             <small class="text-muted">
               Email: ${u.email || '-'}<br>
               <span class="user-id-subtext">Default: ${u.id.toLowerCase().replace(/[^a-z0-9]/g, '')}@musada.sch.id</span>
             </small>
-            ${teachingLabels.length ? `<div class="mt-4"><small class="text-muted"><i class="ph ph-book-open"></i> ${teachingLabels.map(label => AppConfig.escapeHtml(label)).join(', ')}</small></div>` : ''}
+            ${teachingHtml}
           </td>
           <td>
             <div class="user-badges-container">
@@ -294,7 +306,7 @@ const AdminPages = {
       </div>
       <div class="card">
         <div class="table-responsive">
-          <table class="table"><thead><tr><th>Nama / Email</th><th>Peran</th><th class="table-col-md">Aksi</th></tr></thead>
+          <table class="table"><thead><tr><th class="table-col-user">Nama / Email</th><th>Peran</th><th class="table-col-md">Aksi</th></tr></thead>
           <tbody id="tbody-users"></tbody></table>
         </div>
       </div>
