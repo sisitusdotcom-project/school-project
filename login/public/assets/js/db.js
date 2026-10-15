@@ -107,7 +107,7 @@ const DB = {
     const snap = await db.ref('settings').once('value');
     const current = snap.val() || {};
     const normalized = AppConfig.normalizeSettings(current);
-    if (!current.attendanceRules?.scheduleVersion || current.attendanceRules?.scheduleVersion < 2 || current.attendanceRules?.schedules?.gtk?.senin?.inStart === '06:30' || current.attendanceRules?.schedules?.gtk?.senin?.outStart === '15:30' || current.attendanceRules?.schedules?.ummi?.senin?.outStart === '12:32') {
+    if (!current.attendanceRules?.schedules || (current.attendanceRules?.schedules?.gtk?.senin?.inStart === '06:30' && current.attendanceRules?.schedules?.gtk?.senin?.outStart === '15:30')) {
       db.ref('settings/attendanceRules').update({
         scheduleVersion: 2,
         schedules: normalized.attendanceRules.schedules,

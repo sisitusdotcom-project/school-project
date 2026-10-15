@@ -50,8 +50,16 @@ const PersonnelPages = {
         const inEndVal = cur.inEnd || d.inEnd;
         const outStartVal = cur.outStart || d.outStart;
         const outEndVal = cur.outEnd || d.outEnd;
+        let dynamicNote = d.note;
+        if (status === 'off') {
+          dynamicNote = 'Libur (Tidak Ada Absen)';
+        } else if (status === 'optional') {
+          dynamicNote = `Batas Masuk ${inEndVal} | Opsional (Pembinaan)`;
+        } else if (inEndVal && outStartVal) {
+          dynamicNote = `Batas Masuk ${inEndVal} | Pulang ${outStartVal}`;
+        }
         return `<tr>
-  <td><strong>${d.label}</strong><div class="text-muted" style="font-size:11px;">${d.note}</div></td>
+  <td><strong>${d.label}</strong><div class="text-muted" style="font-size:11px;">${dynamicNote}</div></td>
   <td>
     <select class="form-control sched-${group}-status" data-day="${d.key}" style="font-size:12px; padding:4px 6px;">
       <option value="active" ${status === 'active' ? 'selected' : ''}>Wajib Masuk</option>
@@ -238,7 +246,7 @@ const PersonnelPages = {
         e.preventDefault();
         const isConfirmed = confirm('Anda akan memperbarui konfigurasi presensi GTK untuk seluruh sistem madrasah. Lanjutkan?');
         if (!isConfirmed) return;
-        const btn = form.querySelector('button');
+        const btn = form.querySelector('button[type="submit"]') || form.querySelector('button');
         const originalHtml = btn.innerHTML;
         btn.disabled = true;
         btn.innerHTML = '<i class="ph ph-spinner"></i> Menyimpan...';
@@ -340,6 +348,7 @@ const PersonnelPages = {
       ummiSched['minggu'] = { inStart: '06:00', inEnd: '07:00', outStart: '12:00', outEnd: '14:00', isOff: true, isOptional: true };
       const allowFlexible = document.getElementById('set-flexible-time')?.checked || false;
       return {
+        scheduleVersion: 2,
         allowFlexibleTime: allowFlexible,
         schedules: {
           gtk: gtkSched,

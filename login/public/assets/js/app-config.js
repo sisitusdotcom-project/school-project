@@ -432,8 +432,9 @@
     const currentAcademicYear = source.currentAcademicYear || source.academicYear || DEFAULT_SETTINGS.currentAcademicYear;
     const currentSemester = source.currentSemester || (source.semester === 'Genap' || source.semester === '2' ? '2' : '1');
     const semesterName = currentSemester === '2' ? 'Genap' : 'Ganjil';
-    const isOldSchedule = !attendanceRules.scheduleVersion || attendanceRules.scheduleVersion < 2 || attendanceRules.schedules?.gtk?.senin?.inStart === '06:30' || attendanceRules.schedules?.gtk?.senin?.outStart === '15:30';
-    let resolvedSchedules = isOldSchedule ? DEFAULT_SETTINGS.attendanceRules.schedules : (attendanceRules.schedules || DEFAULT_SETTINGS.attendanceRules.schedules);
+    const hasSchedules = attendanceRules.schedules && typeof attendanceRules.schedules === 'object' && Object.keys(attendanceRules.schedules).length > 0;
+    const isAncientLegacy = attendanceRules.schedules?.gtk?.senin?.inStart === '06:30' && attendanceRules.schedules?.gtk?.senin?.outStart === '15:30' && (!attendanceRules.scheduleVersion || attendanceRules.scheduleVersion < 2);
+    let resolvedSchedules = (hasSchedules && !isAncientLegacy) ? attendanceRules.schedules : DEFAULT_SETTINGS.attendanceRules.schedules;
     if (resolvedSchedules?.ummi?.senin?.outStart === '12:32') {
       resolvedSchedules = JSON.parse(JSON.stringify(resolvedSchedules));
       resolvedSchedules.ummi.senin.outStart = '12:30';
@@ -449,10 +450,10 @@
         ...DEFAULT_SETTINGS.attendanceRules,
         ...attendanceRules,
         scheduleVersion: 2,
-        checkInStart: isOldSchedule ? DEFAULT_SETTINGS.attendanceRules.checkInStart : (attendanceRules.checkInStart || DEFAULT_SETTINGS.attendanceRules.checkInStart),
-        checkInEnd: isOldSchedule ? DEFAULT_SETTINGS.attendanceRules.checkInEnd : (attendanceRules.checkInEnd || DEFAULT_SETTINGS.attendanceRules.checkInEnd),
-        checkOutStart: isOldSchedule ? DEFAULT_SETTINGS.attendanceRules.checkOutStart : (attendanceRules.checkOutStart || DEFAULT_SETTINGS.attendanceRules.checkOutStart),
-        checkOutEnd: isOldSchedule ? DEFAULT_SETTINGS.attendanceRules.checkOutEnd : (attendanceRules.checkOutEnd || DEFAULT_SETTINGS.attendanceRules.checkOutEnd),
+        checkInStart: attendanceRules.checkInStart || resolvedSchedules.gtk?.senin?.inStart || DEFAULT_SETTINGS.attendanceRules.checkInStart,
+        checkInEnd: attendanceRules.checkInEnd || resolvedSchedules.gtk?.senin?.inEnd || DEFAULT_SETTINGS.attendanceRules.checkInEnd,
+        checkOutStart: attendanceRules.checkOutStart || resolvedSchedules.gtk?.senin?.outStart || DEFAULT_SETTINGS.attendanceRules.checkOutStart,
+        checkOutEnd: attendanceRules.checkOutEnd || resolvedSchedules.gtk?.senin?.outEnd || DEFAULT_SETTINGS.attendanceRules.checkOutEnd,
         schedules: resolvedSchedules
       }
     };
