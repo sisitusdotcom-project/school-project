@@ -1,6 +1,6 @@
 const KomitePages = {
   async renderDashboard(container) {
-    Router.setTitle('Dashboard Komite & Paguyuban', 'Pusat koordinasi agenda kegiatan dan transparansi kas paguyuban madrasah.');
+    Router.setTitle('Dashboard Komite & Paguyuban', 'Pusat koordinasi agenda kegiatan dan transparansi kas paguyuban sekolah.');
     const [activitiesData, financeData] = await Promise.all([
       ModuleKit.fetchObject('komite/activities').catch(() => ({})),
       ModuleKit.fetchObject('komite/finance-paguyuban').catch(() => ({}))
@@ -59,10 +59,10 @@ const KomitePages = {
       </section>
       <section class="card">
         <div class="card-header">
-          <h3 class="card-title"><i class="ph ph-handshake"></i> Sinergi Koordinasi Madrasah</h3>
+          <h3 class="card-title"><i class="ph ph-handshake"></i> Sinergi Koordinasi Sekolah</h3>
         </div>
         <div class="card-body">
-          <p class="text-muted komite-lead-text">Seluruh data kegiatan dan kas paguyuban tersinkronisasi langsung secara terpusat untuk transparansi madrasah:</p>
+          <p class="text-muted komite-lead-text">Seluruh data kegiatan dan kas paguyuban tersinkronisasi langsung secara terpusat untuk transparansi sekolah:</p>
           <div class="quick-nav-grid">
             <div class="quick-nav-card">
               <div class="quick-nav-icon"><i class="ph ph-briefcase"></i></div>

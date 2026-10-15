@@ -2,7 +2,7 @@ const PersonnelPages = {
   async renderDashboard(container) {
     const role = Auth.currentRole || AppConfig.ROLES.ADMIN;
     const assignments = Auth.currentAssignments || [];
-    Router.setTitle('Humas & Personalia', 'Pusat komando administrasi kepegawaian, disiplin kerja, dan kemitraan madrasah.');
+    Router.setTitle('Humas & Personalia', 'Pusat komando administrasi kepegawaian, disiplin kerja, dan kemitraan sekolah.');
     const isAdmin = role === AppConfig.ROLES.ADMIN;
     const isWaka = isAdmin || assignments.includes('WAKA_HUMAS_PERSONALIA');
     const todayStr = new Date().toISOString().split('T')[0];
@@ -175,8 +175,11 @@ const PersonnelPages = {
       ${isWaka ? `
       <section class="card section-spacer">
         <div class="card-header mk-header">
-          <h3 class="card-title"><i class="ph ph-clock"></i> Pengaturan Jam Operasional Absensi GTK & Guru Ummi (Senin - Sabtu)</h3>
-          <span class="badge badge-primary">Konfigurasi Jadwal SSOT</span>
+          <h3 class="card-title"><i class="ph ph-clock"></i> Pengaturan Jam Operasional Mingguan GTK & Guru Ummi (Senin - Sabtu)</h3>
+          <div style="display:inline-flex; gap:6px;">
+            <span class="badge badge-success"><i class="ph ph-repeat"></i> Otomatis Berulang Tiap Minggu</span>
+            <span class="badge badge-primary">Konfigurasi Presensi</span>
+          </div>
         </div>
         <div class="card-body">
           <form id="form-attendance-time-settings">
@@ -187,14 +190,16 @@ const PersonnelPages = {
               </div>
               <div style="display:inline-flex; align-items:center; gap:10px; flex-wrap:wrap;">
                 <button type="button" class="btn btn-sm btn-outline" id="btn-reset-default-sched"><i class="ph ph-arrow-counter-clockwise"></i> Terapkan Jadwal Default Resmi</button>
-                <label style="display:inline-flex; align-items:center; gap:8px; font-size:12px; cursor:pointer;">
+                <label style="display:inline-flex; align-items:center; gap:8px; font-size:12px; cursor:pointer;" title="Jika dicentang, guru bisa absen kapan saja tanpa dibatasi jam buka/tutup presensi.">
                   <input type="checkbox" id="set-flexible-time" ${settings.attendanceRules?.allowFlexibleTime ? 'checked' : ''}>
-                  <span><strong>Mode Fleksibel:</strong> Bolehkan absensi jika jam hadir/pulang bervariasi</span>
+                  <span><strong>Mode Fleksibel:</strong> Bolehkan absensi kapan saja (jam bebas / tanpa batas jam buka)</span>
                 </label>
               </div>
             </div>
             <div class="panel-callout" style="padding:10px 14px; margin-bottom:14px; font-size:12px; border-left:4px solid var(--primary,#2563eb); background:var(--bg-subtle,#f8fafc);">
-              <i class="ph ph-info"></i> <strong>Aturan Keterlambatan:</strong> Batas akhir absen = jam yang tertulis. Lewat 1 menit (misal 06.46 bagi GTK atau 07.16 bagi Ummi) otomatis terhitung terlambat. Hari Sabtu bersifat opsional (pembinaan). Guru Ummi hari Jumat libur.
+              <div style="margin-bottom:4px;"><i class="ph ph-check-circle" style="color:var(--success,#10b981);"></i> <strong>Sistem Otomatis (Tidak Perlu Diatur Tiap Hari):</strong> Template jadwal Senin s/d Sabtu ini cukup disimpan <strong>sekali saja</strong> dan akan berlaku otomatis setiap minggunya. Personalia <strong>TIDAK PERLU</strong> mengatur ulang setiap hari.</div>
+              <div style="margin-bottom:4px;"><i class="ph ph-info"></i> <strong>Aturan Keterlambatan:</strong> Batas akhir absen = jam yang tertulis. Lewat 1 menit (misal 06.46 bagi GTK atau 07.16 bagi Ummi) otomatis terhitung terlambat. Hari Sabtu bersifat opsional (pembinaan). Guru Ummi hari Jumat libur.</div>
+              <div><i class="ph ph-sliders"></i> <strong>Mode Fleksibel:</strong> Biarkan tidak dicentang untuk hari kerja normal agar jam disiplin ditegakkan. Centang hanya jika ada agenda khusus (ujian, rapat luar, dsb) di mana pengajar hadir/pulang di jam bebas.</div>
             </div>
             <div id="pane-sched-gtk">
               <h4 style="font-size:13px; margin:0 0 8px 0; color:var(--text-main);">Jadwal Guru & Tenaga Kependidikan (GTK / Tendik)</h4>
@@ -214,25 +219,32 @@ const PersonnelPages = {
                 </table>
               </div>
             </div>
-                        <button type="submit" class="btn btn-primary" style="margin-top:14px;"><i class="ph ph-floppy-disk"></i> Simpan Seluruh Jadwal Presensi</button>
+            <button type="submit" class="btn btn-primary" style="margin-top:14px;"><i class="ph ph-floppy-disk"></i> Simpan Seluruh Jadwal Presensi</button>
           </form>
         </div>
       </section>
       <section class="card">
-        <div class="card-header">
-          <h3 class="card-title"><i class="ph ph-calendar-blank"></i> Periode Rekapitulasi Presensi Kepegawaian</h3>
+        <div class="card-header mk-header">
+          <h3 class="card-title"><i class="ph ph-calendar-blank"></i> Batasan Rentang Tanggal Presensi (Opsional)</h3>
+          <span class="badge badge-outline">Bisa Dikosongkan (Aktif Terus)</span>
         </div>
         <div class="card-body">
-          <form id="form-attendance-date-settings" class="inline-form">
-            <div class="form-group compact-field">
-              <label>Mulai Berlaku</label>
+          <p class="text-muted" style="font-size:12px; margin:0 0 12px 0;">
+            <i class="ph ph-info"></i> <strong>Keterangan untuk Personalia:</strong> Bagian ini bersifat <em>opsional</em>. Biarkan kedua tanggal kosong agar presensi sekolah aktif otomatis sepanjang tahun tanpa perlu diatur ulang (sangat direkomendasikan). Anda hanya perlu mengisi tanggal jika ingin membatasi gerbang presensi hanya buka pada rentang tanggal tertentu (misalnya menjelang libur panjang sekolah).
+          </p>
+          <form id="form-attendance-date-settings" class="inline-form" style="gap:10px; align-items:flex-end;">
+            <div class="form-group compact-field" style="margin-bottom:0;">
+              <label>Mulai Berlaku (Opsional)</label>
               <input id="set-date-start" type="date" value="${settings.attendanceRules?.attendanceStartDate || ''}">
             </div>
-            <div class="form-group compact-field">
-              <label>Sampai Tanggal</label>
+            <div class="form-group compact-field" style="margin-bottom:0;">
+              <label>Sampai Tanggal (Opsional)</label>
               <input id="set-date-end" type="date" value="${settings.attendanceRules?.attendanceEndDate || ''}">
             </div>
-            <button type="submit" class="btn btn-primary"><i class="ph ph-floppy-disk"></i> Simpan Periode</button>
+            <div style="display:inline-flex; gap:8px;">
+              <button type="button" id="btn-clear-date-settings" class="btn btn-outline" style="font-size:12px;"><i class="ph ph-arrows-counter-clockwise"></i> Kosongkan (Aktif Terus)</button>
+              <button type="submit" class="btn btn-primary"><i class="ph ph-floppy-disk"></i> Simpan Rentang Tanggal</button>
+            </div>
           </form>
         </div>
       </section>
@@ -244,7 +256,7 @@ const PersonnelPages = {
       if (!form) return;
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const isConfirmed = confirm('Anda akan memperbarui konfigurasi presensi GTK untuk seluruh sistem madrasah. Lanjutkan?');
+        const isConfirmed = confirm('Anda akan memperbarui konfigurasi presensi GTK untuk seluruh sistem sekolah. Lanjutkan?');
         if (!isConfirmed) return;
         const btn = form.querySelector('button[type="submit"]') || form.querySelector('button');
         const originalHtml = btn.innerHTML;
@@ -360,9 +372,26 @@ const PersonnelPages = {
         checkOutEnd: gtkSched.senin?.outEnd || '17:30'
       };
     });
-        bindSettingsForm('form-attendance-date-settings', () => ({
+    bindSettingsForm('form-attendance-date-settings', () => ({
       attendanceStartDate: document.getElementById('set-date-start').value,
       attendanceEndDate: document.getElementById('set-date-end').value
     }));
+    const btnClearDates = document.getElementById('btn-clear-date-settings');
+    if (btnClearDates) {
+      btnClearDates.onclick = async () => {
+        const isConfirmed = confirm('Kosongkan batasan tanggal? Presensi akan aktif berkelanjutan sepanjang tahun tanpa perlu diatur ulang.');
+        if (!isConfirmed) return;
+        document.getElementById('set-date-start').value = '';
+        document.getElementById('set-date-end').value = '';
+        const current = await DB.getSettings();
+        const updatedRules = {
+          ...(current.attendanceRules || {}),
+          attendanceStartDate: '',
+          attendanceEndDate: ''
+        };
+        await DB.updateSettings({ attendanceRules: updatedRules });
+        alert('Batasan tanggal presensi telah dikosongkan. Presensi sekarang aktif berkelanjutan sepanjang tahun.');
+      };
+    }
   }
 };

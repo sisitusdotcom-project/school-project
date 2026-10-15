@@ -378,7 +378,7 @@ Untuk memastikan seluruh pengguna (Pendidik, Tenaga Kependidikan, Pimpinan, Oran
 | | (c) FUNGSI FITUR        | <-> DISTRIBUSI DATA               | (>) CARA PENGGUNAAN             | |
 | | Penjelasan tujuan nyata | Dari : [Producer Data]            | Langkah taktis operasional      | |
 | | fungsional modul dalam  | Untuk: [Consumer Data]            | tombol, filter, pencarian, dan  | |
-| | operasional madrasah.   | Relasi: [Node SSOT & Dampak Hilir]| ekspor laporan.                 | |
+| | operasional sekolah.   | Relasi: [Node SSOT & Dampak Hilir]| ekspor laporan.                 | |
 | +-------------------------+-----------------------------------+---------------------------------+ |
 +---------------------------------------------------------------------------------------------------+
 ```

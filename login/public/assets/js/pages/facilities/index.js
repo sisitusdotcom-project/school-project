@@ -1,6 +1,6 @@
 const FacilitiesPages = {
   async renderDashboard(container) {
-    Router.setTitle('Sarana & Prasarana', 'Pusat pengelolaan inventaris aset, pemeliharaan fasilitas, dan perencanaan kebutuhan madrasah.');
+    Router.setTitle('Sarana & Prasarana', 'Pusat pengelolaan inventaris aset, pemeliharaan fasilitas, dan perencanaan kebutuhan sekolah.');
     const [assetsData, roomsData, maintenanceData] = await Promise.all([
       DB.getFacilityAssets(),
       DB.getFacilityRooms(),
@@ -39,7 +39,7 @@ const FacilitiesPages = {
               <div class="quick-nav-icon"><i class="ph ph-archive-box"></i></div>
               <div class="quick-nav-info">
                 <div class="quick-nav-title">Buku Inventaris (Aset)</div>
-                <div class="quick-nav-desc">Pencatatan sarana madrasah</div>
+                <div class="quick-nav-desc">Pencatatan sarana sekolah</div>
               </div>
             </a>
             <a href="#/facilities/planning" class="quick-nav-card">

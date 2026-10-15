@@ -1,11 +1,11 @@
 const FeatureGuides = {
   items: {
     '#/dashboard': {
-      func: 'Ringkasan eksekutif seluruh metrik penting madrasah (total murid, kehadiran GTK, keuangan, dan status operasional).',
+      func: 'Ringkasan eksekutif seluruh metrik penting sekolah (total murid, kehadiran GTK, keuangan, dan status operasional).',
       from: 'Sistem Terpadu (Agregasi Seluruh Unit)',
       to: 'Kepala Sekolah & Seluruh Dewan Guru / Staf',
       rel: 'Multi-Node Data (attendance_records, finance/ledger, students, classes)',
-      usage: 'Pantau kartu metrik utama dan grafik harian untuk evaluasi cepat kondisi madrasah.'
+      usage: 'Pantau kartu metrik utama dan grafik harian untuk evaluasi cepat kondisi sekolah.'
     },
     '#/attendance': {
       func: 'Pencatatan kehadiran mandiri pendidik dan tenaga kependidikan berbasis titik koordinat radius sekolah (geofence GPS).',
@@ -64,8 +64,8 @@ const FeatureGuides = {
       usage: 'Pilih pegawai penerima, isi nominal hak santunan. Jika status diset Dicairkan, kas pengeluaran otomatis tercatat di BKU.'
     },
     '#/personnel/publications': {
-      func: 'Papan pengumuman digital madrasah untuk edaran resmi, hari libur, dan jadwal kegiatan penting.',
-      from: 'Tim Humas Madrasah',
+      func: 'Papan pengumuman digital sekolah untuk edaran resmi, hari libur, dan jadwal kegiatan penting.',
+      from: 'Tim Humas Sekolah',
       to: 'Seluruh Warga Sekolah (Guru, Tendik, Orang Tua)',
       rel: 'personnel/announcements (Tampil di dashboard publik/internal)',
       usage: 'Klik Tambah Informasi untuk mempublikasikan berita atau surat edaran sekolah.'
@@ -79,8 +79,8 @@ const FeatureGuides = {
     },
     '#/personnel/partnerships': {
       func: 'Pencatatan kemitraan strategis kelembagaan dengan instansi eksternal (Puskesmas, Polsek, Bank, Universitas).',
-      from: 'Tim Humas Madrasah',
-      to: 'Pihak Mitra & Pimpinan Madrasah',
+      from: 'Tim Humas Sekolah',
+      to: 'Pihak Mitra & Pimpinan Sekolah',
       rel: 'personnel/partnerships & personnel/documents (Arsip legal MoU)',
       usage: 'Tambahkan data MoU, nama instansi mitra, ruang lingkup program, dan masa berlaku kemitraan.'
     },
@@ -162,7 +162,7 @@ const FeatureGuides = {
       usage: 'Pilih rombel dan mata pelajaran untuk melihat sebaran nilai formatif dan sumatif siswa secara menyeluruh.'
     },
     '#/curriculum/evaluations': {
-      func: 'Kebijakan sistem penilaian madrasah (bobot formatif, sumatif tengah semester, dan sumatif akhir semester).',
+      func: 'Kebijakan sistem penilaian sekolah (bobot formatif, sumatif tengah semester, dan sumatif akhir semester).',
       from: 'Waka Kurikulum',
       to: 'Seluruh Dewan Guru',
       rel: 'curriculum/assessment_policies (Acuan formula penghitungan rapor)',
@@ -242,7 +242,7 @@ const FeatureGuides = {
       func: 'Jurnal harian penerimaan dan pengeluaran kas sekolah dengan nomor bukti nota kontan / transfer.',
       from: 'Bendahara Sekolah',
       to: 'Buku Kas Umum (BKU)',
-      rel: 'finance/ledger (SSOT Seluruh Mutasi Kas Madrasah)',
+      rel: 'finance/ledger (SSOT Seluruh Mutasi Kas Sekolah)',
       usage: 'Catat setiap mutasi uang masuk atau uang keluar operasional. Transaksi ini menjadi basis saldo berjalan BKU.'
     },
     '#/finance/cashbook': {
@@ -303,7 +303,7 @@ const FeatureGuides = {
     },
     '#/facilities/inventory': {
       func: 'Buku induk inventaris barang sekolah: kode registrasi aset, jumlah unit, ruangan lokasi, dan kondisi fisik.',
-      from: 'Tim Sarpras Madrasah',
+      from: 'Tim Sarpras Sekolah',
       to: 'Warga Sekolah, Auditor Sarpras, dan Pimpinan',
       rel: 'facilities/assets (Master seluruh inventaris fisik sekolah)',
       usage: 'Daftarkan barang inventaris baru, pilih lokasi ruangan, catat kondisi fisik (Baik/Rusak), dan simpan.'
@@ -311,7 +311,7 @@ const FeatureGuides = {
     '#/facilities/dapodik': {
       func: 'Data legalitas sarpras Dapodik: dimensi luas ruangan, kapasitas tampung, tahun pembangunan, dan kelayakan ruang.',
       from: 'Staf Sarpras & Operator Dapodik',
-      to: 'Dapodik Kemdikbud & Arsip Madrasah',
+      to: 'Dapodik Kemdikbud & Arsip Sekolah',
       rel: 'facilities/rooms (Data resmi sarana gedung sekolah)',
       usage: 'Perbarui data luas bangunan kelas, laboratorium, perpustakaan, atau toilet sesuai standar teknis Dapodik.'
     },
@@ -435,7 +435,7 @@ const FeatureGuides = {
       usage: 'Lihat ringkasan aktivitas ananda hari ini, ajukan permohonan izin jika sakit, dan cek tagihan SPP online.'
     },
     '#/curriculum': {
-      func: 'Dashboard eksekutif pemantauan operasional akademik & kurikulum madrasah (kalender akademik, kelengkapan modul ajar, dan rekapitulasi KBM).',
+      func: 'Dashboard eksekutif pemantauan operasional akademik & kurikulum sekolah (kalender akademik, kelengkapan modul ajar, dan rekapitulasi KBM).',
       from: 'Dewan Guru & Staf Kurikulum (Modul Ajar, Nilai, Presensi)',
       to: 'Waka Kurikulum & Kepala Sekolah',
       rel: 'Multi-Node Kurikulum (curriculum/*, academic_grades, teaching_schedules)',
@@ -449,14 +449,14 @@ const FeatureGuides = {
       usage: 'Tinjau tren kedisiplinan murid, pantau rekapitulasi perizinan harian, dan pantau progres pendaftaran murid baru.'
     },
     '#/finance': {
-      func: 'Ikhtisar neraca keuangan madrasah (realisasi RKAS, arus kas masuk/keluar, penerimaan SPP/infak, dan serapan dana BOS).',
+      func: 'Ikhtisar neraca keuangan sekolah (realisasi RKAS, arus kas masuk/keluar, penerimaan SPP/infak, dan serapan dana BOS).',
       from: 'Bendahara Sekolah & Petugas Kasir SPP',
       to: 'Waka Keuangan & Kepala Sekolah',
       rel: 'Multi-Node Keuangan (finance/ledger, student_bills, bos_reports)',
       usage: 'Cek saldo kas tunai/bank terkini, grafik penerimaan harian, dan bandingkan serapan pos anggaran terhadap pagu RKAS.'
     },
     '#/personnel': {
-      func: 'Pusat informasi manajemen SDM dan kehumasan (rekapitulasi absensi GTK hari ini, status kinerja guru, aduan publik, dan agenda madrasah).',
+      func: 'Pusat informasi manajemen SDM dan kehumasan (rekapitulasi absensi GTK hari ini, status kinerja guru, aduan publik, dan agenda sekolah).',
       from: 'Staf Humas, Presensi GTK, dan Sistem Pengaduan',
       to: 'Waka Humas & Personalia serta Kepala Sekolah',
       rel: 'Multi-Node SDM & Humas (personnel/*, attendance_records, evaluations)',
@@ -519,15 +519,15 @@ const FeatureGuides = {
       usage: 'Jadwalkan majelis tasmi, tentukan target juz yang disimak, tunjuk guru penyimak, dan cetak sertifikat syahadah setelah lulus.'
     },
     '#/facilities/electronics': {
-      func: 'Registrasi dan kontrol perawatan perangkat elektronik madrasah (AC, proyektor LCD, printer, audio speaker, dan PC lab).',
+      func: 'Registrasi dan kontrol perawatan perangkat elektronik sekolah (AC, proyektor LCD, printer, audio speaker, dan PC lab).',
       from: 'Teknisi Sarpras & Tim IT',
       to: 'Waka Sarpras & Pengguna Ruang',
       rel: 'facilities/electronics (Jadwal servis berkala & riwayat suku cadang)',
       usage: 'Catat nomor seri barang, jadwal servis berkala, dan status fungsi (Normal / Perlu Servis / Rusak Berat).'
     },
     '#/facilities/planning': {
-      func: 'Perencanaan kebutuhan fasilitas madrasah jangka pendek dan menengah berdasarkan usulan unit kerja dan rombel baru.',
-      from: 'Unit Kerja Madrasah & Tim Sarpras',
+      func: 'Perencanaan kebutuhan fasilitas sekolah jangka pendek dan menengah berdasarkan usulan unit kerja dan rombel baru.',
+      from: 'Unit Kerja Sekolah & Tim Sarpras',
       to: 'Waka Sarpras, Kepala Sekolah, & Bendahara RKAS',
       rel: 'facilities/planning (Dasar penetapan pos belanja sarpras di RKAS)',
       usage: 'Input usulan pengadaan sarana/prasarana, sertakan estimasi urgensi (Tinggi/Sedang/Rendah) dan prakiraan anggaran.'
@@ -540,15 +540,15 @@ const FeatureGuides = {
       usage: 'Tinjau pos belanja inventaris yang disetujui, pastikan spesifikasi barang dan volume sesuai alokasi plafon kas.'
     },
     '#/facilities/safety': {
-      func: 'Checklist inspeksi berkala keamanan lingkungan fisik madrasah (APAR, instalasi kabel listrik, pagar pengaman, CCTV, dan sanitasi).',
+      func: 'Checklist inspeksi berkala keamanan lingkungan fisik sekolah (APAR, instalasi kabel listrik, pagar pengaman, CCTV, dan sanitasi).',
       from: 'Petugas Keamanan & Staf K3 Sarpras',
       to: 'Waka Sarpras & Kepala Sekolah',
-      rel: 'facilities/safety (Arsip pemenuhan standar akreditasi K3 madrasah)',
+      rel: 'facilities/safety (Arsip pemenuhan standar akreditasi K3 sekolah)',
       usage: 'Lakukan inspeksi berkala per zona gedung, centang kondisi keamanan, dan laporkan potensi bahaya untuk segera ditangani.'
     },
     '#/finance/transparency': {
       func: 'Papan informasi akuntabilitas dan publikasi realisasi penerimaan serta penggunaan dana sekolah (BOS, Komite, Infaq) kepada publik/wali murid.',
-      from: 'Bendahara Madrasah',
+      from: 'Bendahara Sekolah',
       to: 'Wali Murid, Komite Sekolah, & Publik',
       rel: 'finance/transparency (Laporan ringkas yang disanitasi dari data sensitif BKU)',
       usage: 'Terbitkan laporan infografis realisasi kas semesteran agar orang tua murid dapat melihat amanah dana secara transparan.'
@@ -568,14 +568,14 @@ const FeatureGuides = {
       usage: 'Unggah sertifikat pelatihan administrasi atau piagam penghargaan kerja sebagai portofolio kepegawaian.'
     },
     '#/komite/activities': {
-      func: 'Dokumentasi program kerja bersama antara komite, paguyuban kelas, dan madrasah (Parenting, Class Meeting, Bakti Sosial).',
+      func: 'Dokumentasi program kerja bersama antara komite, paguyuban kelas, dan sekolah (Parenting, Class Meeting, Bakti Sosial).',
       from: 'Pengurus Komite & Paguyuban Kelas',
-      to: 'Seluruh Wali Murid & Pimpinan Madrasah',
+      to: 'Seluruh Wali Murid & Pimpinan Sekolah',
       rel: 'komite/activities',
       usage: 'Input agenda kegiatan orang tua murid, unggah dokumentasi foto/laporan ringkas kegiatan paguyuban.'
     },
     '#/komite/finance-komite': {
-      func: 'Pencatatan kas mandiri komite madrasah (iuran sukarela, bantuan sarana belajar, dana santunan) terpisah dari rekening resmi madrasah.',
+      func: 'Pencatatan kas mandiri komite sekolah (iuran sukarela, bantuan sarana belajar, dana santunan) terpisah dari rekening resmi sekolah.',
       from: 'Bendahara Komite Sekolah',
       to: 'Pengurus Komite & Anggota Wali Murid',
       rel: 'komite/finance_records (Otonomi dana perwakilan orang tua murid)',
@@ -590,7 +590,7 @@ const FeatureGuides = {
     },
     '#/it-admin/sync': {
       func: 'Pemetaan dan sinkronisasi data profil murid, rombel, dan guru dengan format ekspor/impor Dapodik & EMIS Kemenag.',
-      from: 'Operator Data Madrasah',
+      from: 'Operator Data Sekolah',
       to: 'Pusat Data Kemendikbudristek & Kemenag',
       rel: 'students, personnel/directory, classes (SSOT Verifikasi Data Nasional)',
       usage: 'Periksa kelengkapan NISN/NUPTK warga sekolah, lalu jalankan sinkronisasi atau ekspor berkas data master Dapodik/EMIS.'
@@ -598,7 +598,7 @@ const FeatureGuides = {
     '#/it-admin/backup': {
       func: 'Pencadangan snapshot database berkala ke penyimpanan lokal atau cloud Google Drive untuk proteksi bencana (disaster recovery).',
       from: 'Tim Administrator IT',
-      to: 'Keamanan & Keberlanjutan Data Madrasah',
+      to: 'Keamanan & Keberlanjutan Data Sekolah',
       rel: 'Snapshot Cloud Realtime Database & Storage',
       usage: 'Klik Buat Cadangan Baru untuk mengunduh snapshot data JSON terkini, atau pilih berkas cadangan untuk pemulihan darurat.'
     },
@@ -795,7 +795,7 @@ const FeatureGuides = {
       'Klik tombol \'Setujui\' untuk memvalidasi perizinan. Status izin ini akan otomatis terhubung ke lembar absensi harian wali kelas.'
     ],
     '#/finance/cashbook': [
-      'Buku Kas Umum (BKU) menyajikan catatan mutasi penerimaan dan pengeluaran madrasah secara kronologis.',
+      'Buku Kas Umum (BKU) menyajikan catatan mutasi penerimaan dan pengeluaran sekolah secara kronologis.',
       'Gunakan filter tanggal atau rentang bulan untuk memeriksa pembukuan periode tertentu.',
       'Periksa kolom Saldo Berjalan untuk memastikan kesesuaian antara kas fisik/bank dengan catatan di sistem.',
       'Klik tombol \'Cetak BKU\' atau \'Export Excel\' untuk mencetak laporan pertanggungjawaban kas resmi.'
@@ -819,9 +819,9 @@ const FeatureGuides = {
       'Ubah status pendaftaran menjadi \'Diterima\' setelah calon murid dinyatakan lolos tahap observasi dan pemetaan.'
     ],
     '#/dashboard': [
-      'Halaman beranda eksekutif menampilkan ringkasan metrik utama madrasah sesuai peran Anda.',
+      'Halaman beranda eksekutif menampilkan ringkasan metrik utama sekolah sesuai peran Anda.',
       'Gunakan kartu-kartu navigasi cepat untuk langsung berpindah ke menu operasional yang sering Anda gunakan.',
-      'Pantau statistik harian dan pengumuman kedinasan madrasah secara berkala.'
+      'Pantau statistik harian dan pengumuman kedinasan sekolah secara berkala.'
     ],
     '#/ortu/dashboard': [
       'Memantau perkembangan belajar, capaian tahfidz, dan rekap presensi ananda secara langsung dari gawai Anda.',
@@ -832,12 +832,12 @@ const FeatureGuides = {
       'Klik tombol Tambah di sudut kanan atas untuk membuka formulir perizinan siswa.',
       'Pilih nama Ananda dan tentukan rentang tanggal mulai hingga selesai izin/sakit.',
       'Pilih jenis perizinan (Sakit / Izin Keluarga / Dispensasi) dan unggah foto surat keterangan dokter atau surat izin orang tua.',
-      'Tuliskan alasan izin secara jelas, lalu tekan Simpan. Permohonan akan berstatus Diajukan dan diverifikasi oleh pihak madrasah.'
+      'Tuliskan alasan izin secara jelas, lalu tekan Simpan. Permohonan akan berstatus Diajukan dan diverifikasi oleh pihak sekolah.'
     ],
     '#/finance/student-bills': [
       'Tinjau seluruh riwayat tagihan bulanan SPP Ananda beserta status pembayarannya (Lunas / Belum Lunas / Bebas Beasiswa).',
       'Gunakan kotak pencarian atau filter status untuk mencari bulan tagihan tertentu.',
-      'Klik tombol Buka pada kolom bukti pembayaran untuk melihat salinan kwitansi resmi dari madrasah.',
+      'Klik tombol Buka pada kolom bukti pembayaran untuk melihat salinan kwitansi resmi dari sekolah.',
       'Tekan tombol Excel untuk mengunduh rekapitulasi data tagihan ke dalam format spreadsheet.'
     ]
   },
@@ -898,7 +898,7 @@ const FeatureGuides = {
                 <a href="${nav.hash}" class="btn btn-primary btn-sm"><i class="ph ph-arrow-square-out"></i> Buka Fitur</a>
               </div>
               <div class="guide-purpose-box">
-                <p class="guide-purpose-text">${AppConfig.escapeHtml(guide.func || 'Modul operasional madrasah.')}</p>
+                <p class="guide-purpose-text">${AppConfig.escapeHtml(guide.func || 'Modul operasional sekolah.')}</p>
               </div>
               <div class="guide-steps-list">
                 ${stepsHtml}

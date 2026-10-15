@@ -184,7 +184,7 @@
     },
     '#/komite/activities': {
       node: 'komite/activities', noun: 'Kegiatan Paguyuban', writeRoles: [R.KOMITE, R.PERSONNEL], dateField: 'date',
-      subtitle: 'Data agenda dan kegiatan paguyuban wali murid bersama madrasah.',
+      subtitle: 'Data agenda dan kegiatan paguyuban wali murid bersama sekolah.',
       summary: [
         { label: 'Total Kegiatan', icon: 'ph-calendar-check', tone: 'primary' }
       ],
