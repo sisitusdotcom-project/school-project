@@ -571,13 +571,24 @@ const UMMIPages = {
     const params = new URLSearchParams(qs);
     let activeClassId = params.get('classId') || myClasses[0].id;
     let activeCls = myClasses.find(c => c.id === activeClassId) || myClasses[0];
+    let viewContainer = container.querySelector('#ummi-progress-view');
+    if (!viewContainer) {
+      const guideBanner = container.querySelector('#feature-guide-banner');
+      container.innerHTML = '';
+      if (guideBanner) {
+        container.appendChild(guideBanner);
+      }
+      viewContainer = document.createElement('div');
+      viewContainer.id = 'ummi-progress-view';
+      container.appendChild(viewContainer);
+    }
     const renderJournalView = async (selectedClassId, selectedStudentId) => {
       activeCls = myClasses.find(c => c.id === selectedClassId) || myClasses[0];
       const enrolledIds = Object.keys(activeCls.students || {});
       const enrolledStudents = enrolledIds.map(id => studentMap[id]).filter(Boolean).sort((a, b) => a.name.localeCompare(b.name));
       const clsOpts = myClasses.map(c => `<option value="${c.id}" ${c.id === activeCls.id ? 'selected' : ''}>${AppConfig.escapeHtml(c.name)} (${AppConfig.escapeHtml(c.level || 'Jilid')})</option>`).join('');
       if (!enrolledStudents.length) {
-        container.innerHTML = `
+        viewContainer.innerHTML = `
           <div class="card toolbar-panel ummi-toolbar-card">
             <div class="ummi-toolbar">
               <div class="ummi-toolbar-item">
@@ -589,6 +600,9 @@ const UMMIPages = {
           <div class="card"><p class="text-muted">Belum ada santri di rombel ini. Koordinator dapat menambahkan santri lewat menu Pemetaan Rombel.</p></div>
         `;
         document.getElementById('sel-jurnal-cls').onchange = (e) => renderJournalView(e.target.value);
+        if (typeof FeatureGuides !== 'undefined') {
+          FeatureGuides.attach(container, '#/guru/ummi/progress');
+        }
         return;
       }
       let activeStudent = enrolledStudents.find(s => s.id === selectedStudentId) || enrolledStudents[0];
@@ -619,7 +633,7 @@ const UMMIPages = {
           </tr>
         `;
       }).join('') : '<tr><td colspan="10" class="text-center text-muted">Belum ada riwayat tatap muka. Masukkan sesi pembelajaran hari ini pada form di bawah.</td></tr>';
-      container.innerHTML = `
+      viewContainer.innerHTML = `
         <div class="card toolbar-panel ummi-toolbar-card">
           <div class="ummi-toolbar">
             <div class="ummi-toolbar-group">
@@ -792,7 +806,7 @@ const UMMIPages = {
           btn.innerHTML = '<i class="ph ph-paper-plane-tilt"></i> Kirim ke Koordinator';
         }
       };
-      container.querySelectorAll('[data-del-journal]').forEach(btn => {
+      viewContainer.querySelectorAll('[data-del-journal]').forEach(btn => {
         btn.onclick = async () => {
           const jid = btn.dataset.delJournal;
           if (!confirm('Yakin ingin menghapus sesi jurnal ini?')) return;
@@ -838,8 +852,14 @@ const UMMIPages = {
           btn.innerHTML = '<i class="ph ph-floppy-disk"></i> Simpan Sesi & Perbarui Capaian BTQ';
         }
       };
+      if (typeof FeatureGuides !== 'undefined') {
+        FeatureGuides.attach(container, '#/guru/ummi/progress');
+      }
     };
-    renderJournalView(activeClassId, params.get('studentId'));
+    await renderJournalView(activeClassId, params.get('studentId'));
+    if (typeof FeatureGuides !== 'undefined') {
+      FeatureGuides.attach(container, '#/guru/ummi/progress');
+    }
   },
   async renderExams(container) {
     Router.setTitle('Antrean Ujian Jilid & Munaqosyah', 'Monitoring dan pengujian kelayakan kenaikan jilid santri.');

@@ -2527,13 +2527,24 @@ const GuruPages = {
     const sem = settings.currentSemester || '1';
     let activeEks = myEks[0];
     const studentMap = DB.toArray(allStudents).reduce((acc, s) => { acc[s.id] = s; return acc; }, {});
+    let viewContainer = container.querySelector('#ekskul-grades-view');
+    if (!viewContainer) {
+      const guideBanner = container.querySelector('#feature-guide-banner');
+      container.innerHTML = '';
+      if (guideBanner) {
+        container.appendChild(guideBanner);
+      }
+      viewContainer = document.createElement('div');
+      viewContainer.id = 'ekskul-grades-view';
+      container.appendChild(viewContainer);
+    }
     const renderGradeForm = async (selectedId) => {
       activeEks = myEks.find(e => e.id === selectedId) || myEks[0];
       const enrolledIds = Object.keys(activeEks.students || {});
       const enrolledStudents = enrolledIds.map(id => studentMap[id]).filter(Boolean).sort((a, b) => a.name.localeCompare(b.name));
       const eksOpts = myEks.map(e => `<option value="${e.id}" ${e.id === activeEks.id ? 'selected' : ''}>${AppConfig.escapeHtml(e.name)}</option>`).join('');
       if (!enrolledStudents.length) {
-        container.innerHTML = `
+        viewContainer.innerHTML = `
           <div class="card" style="margin-bottom:16px;">
             <div style="display:flex;gap:12px;align-items:center;">
               <label style="font-weight:600;margin:0;">Ekstrakurikuler:</label>
@@ -2543,9 +2554,12 @@ const GuruPages = {
           <div class="card"><p class="text-muted">Belum ada murid yang didaftarkan pada ekstrakurikuler ini oleh Kesiswaan/Admin.</p></div>
         `;
         document.getElementById('sel-grade-eks').onchange = (e) => renderGradeForm(e.target.value);
+        if (typeof FeatureGuides !== 'undefined') {
+          FeatureGuides.attach(container, '#/guru/extracurriculars');
+        }
         return;
       }
-      container.innerHTML = `<div class="loader" style="margin:40px auto;"></div>`;
+      viewContainer.innerHTML = `<div class="loader" style="margin:40px auto;"></div>`;
       const gradesData = {};
       await Promise.all(enrolledStudents.map(async (s) => {
         const dt = await DB.getStudentExtracurriculars(year, sem, s.id);
@@ -2615,7 +2629,13 @@ const GuruPages = {
           btn.innerHTML = '<i class="ph ph-floppy-disk"></i> Simpan Semua Nilai E-Rapor Ekskul';
         }, 2000);
       };
+      if (typeof FeatureGuides !== 'undefined') {
+        FeatureGuides.attach(container, '#/guru/extracurriculars');
+      }
     };
-    renderGradeForm(activeEks.id);
+    await renderGradeForm(activeEks.id);
+    if (typeof FeatureGuides !== 'undefined') {
+      FeatureGuides.attach(container, '#/guru/extracurriculars');
+    }
   }
 };
