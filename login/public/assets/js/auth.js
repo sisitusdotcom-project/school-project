@@ -162,9 +162,12 @@ const Auth = {
       const item = document.createElement('a');
       item.href = link.hash;
       item.className = 'btn-nav';
-      item.innerHTML = `<i class="ph ${link.icon}"></i><span>${link.text}</span>`;
+      item.innerHTML = `<i class="ph ${link.icon}"></i><span>${link.text}</span><span class="nav-counter-badge" data-route="${link.hash}"></span>`;
       nav.appendChild(item);
     });
+    if (typeof NotificationService !== 'undefined') {
+      NotificationService.updateActionBadges();
+    }
     const loading = document.getElementById('app-loading');
     if (loading) {
       loading.style.opacity = '0';

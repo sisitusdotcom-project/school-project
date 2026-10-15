@@ -284,12 +284,18 @@ export default {
       const jakartaNow = new Date(new Date(serverTimestamp).toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }));
       const currentTimeText = jakartaNow.toTimeString().slice(0, 5);
       const windowName = type === 'in' ? 'hadir' : 'pulang';
-      const validWindowStart = type === 'in' ? attendanceRules.checkInStart : attendanceRules.checkOutStart;
-      const validWindowEnd = type === 'in' ? attendanceRules.checkInEnd : attendanceRules.checkOutEnd;
-      if (!isTimeInWindow(currentTimeText, validWindowStart, validWindowEnd)) {
+      const dayNames = ['minggu', 'senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu'];
+      const currentDayKey = dayNames[jakartaNow.getDay()] || 'senin';
+      const isUmmi = body.isUmmi || body.roleGroup === 'ummi';
+      const groupKey = isUmmi ? 'ummi' : 'gtk';
+      const sched = attendanceRules.schedules?.[groupKey]?.[currentDayKey] || {};
+      const validWindowStart = type === 'in' ? (sched.inStart || attendanceRules.checkInStart) : (sched.outStart || attendanceRules.checkOutStart);
+      const validWindowEnd = type === 'in' ? (sched.inEnd || attendanceRules.checkInEnd) : (sched.outEnd || attendanceRules.checkOutEnd);
+      const allowFlexible = attendanceRules.allowFlexibleTime === true;
+      if (!allowFlexible && validWindowStart && validWindowEnd && !isTimeInWindow(currentTimeText, validWindowStart, validWindowEnd)) {
         return jsonResponse(403, {
           status: 'error',
-          message: `Waktu absensi ${windowName} saat ini belum sesuai jadwal admin.`
+          message: `Waktu absensi ${windowName} (${currentTimeText}) saat ini di luar jadwal ${isUmmi ? 'Guru Ummi' : 'GTK'} hari ${currentDayKey} (${validWindowStart}-${validWindowEnd}).`
         }, request);
       }
       const distance = getDistanceMeters(location.lat, location.lng, schoolLocation.lat, schoolLocation.lng);

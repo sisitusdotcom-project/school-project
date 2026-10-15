@@ -68,7 +68,28 @@ const OrtuPages = {
         const sasVal = g ? (g.sat || g.sas || '-') : '-';
         const scoreVal = g && g.score ? g.score : '-';
         const compVal = g && (g.competency || g.desc) ? AppConfig.escapeHtml(g.competency || g.desc) : '-';
-        return `<tr><td><strong>${AppConfig.escapeHtml(s.name)}</strong></td><td class="text-center">${phVal}</td><td class="text-center">${stsVal}</td><td class="text-center">${sasVal}</td><td class="text-center"><span class="badge ${scoreVal !== '-' ? 'badge-primary' : 'badge-neutral'}">${scoreVal}</span></td><td class="text-muted cocurr-desc">${compVal}</td></tr>`;
+        const chaptersList = g && Array.isArray(g.chapters) && g.chapters.length ? g.chapters.map(c => `
+          <div style="font-size:11.5px; margin-top:4px; padding:3px 6px; background:var(--bg-subtle,#f8fafc); border-radius:4px; border:1px solid var(--border-color,#e2e8f0);">
+            <strong style="color:var(--text-main);">${AppConfig.escapeHtml(c.title || 'Bab ' + c.chapterNo)}:</strong> Nilai PH: <strong>${c.score}</strong>
+            ${c.cp ? `<div class="text-muted" style="font-size:11px; margin-top:2px;">${AppConfig.escapeHtml(c.cp)}</div>` : ''}
+          </div>
+        `).join('') : '';
+        return `
+          <tr>
+            <td>
+              <strong>${AppConfig.escapeHtml(s.name)}</strong>
+              ${g && g.bestChapter ? `<div style="margin-top:4px;"><span class="badge badge-success" style="font-size:10px;"><i class="ph ph-trend-up"></i> Bab Terbaik: ${AppConfig.escapeHtml(g.bestChapter.title || 'Bab ' + g.bestChapter.chapterNo)} (${g.bestChapter.score})</span></div>` : ''}
+            </td>
+            <td class="text-center">${phVal}</td>
+            <td class="text-center">${stsVal}</td>
+            <td class="text-center">${sasVal}</td>
+            <td class="text-center"><span class="badge ${scoreVal !== '-' ? 'badge-primary' : 'badge-neutral'}">${scoreVal}</span></td>
+            <td class="cocurr-desc">
+              <div style="font-weight:600; color:var(--text-main); line-height:1.4;">${compVal}</div>
+              ${chaptersList ? `<div style="margin-top:8px;"><div style="font-size:11px; font-weight:700; color:var(--text-muted); margin-bottom:4px;"><i class="ph ph-books"></i> Nilai Harian per Bab:</div>${chaptersList}</div>` : ''}
+            </td>
+          </tr>
+        `;
       }).join('');
       const extraHtml = DB.toArray(stuExtra || {}).map(e => {
         const baseEx = exArr.find(x => x.id === e.extraId);
@@ -229,5 +250,58 @@ const OrtuPages = {
     if (targetTab) targetTab.classList.remove('hidden');
     const targetBtn = card.querySelector(`[data-target="tab-${tabName}-${studentId}"]`);
     if (targetBtn) targetBtn.classList.add('active');
+  },
+  async renderReportCard(container) {
+    Router.setTitle('Rapor Digital Siswa', 'Lembar Rapor Resmi Kurikulum Merdeka');
+    const myStudents = await DB.getStudentsByParent(Auth.currentUser.uid);
+    const studentArr = DB.toArray(myStudents);
+    if (!studentArr.length) {
+      container.innerHTML = `<div class="card panel-callout ortu-empty-panel"><div class="ortu-empty-icon"><i class="ph ph-users-three"></i></div><h3 class="ortu-empty-title">Akun belum terhubung</h3><p class="text-muted">Silakan hubungi wali kelas atau admin sekolah untuk menautkan akun ini ke data anak Anda.</p></div>`;
+      return;
+    }
+    const [settings, classes] = await Promise.all([
+      DB.getSettings(),
+      DB.getClasses()
+    ]);
+    const year = settings?.currentAcademicYear || '2024/2025';
+    const sem = settings?.currentSemester || 1;
+    let cardsHtml = '';
+    for (const student of studentArr) {
+      const cls = classes[student.classId] || {};
+      const finalization = await DB.getRaporFinalization(year, sem, student.classId);
+      const isFin = finalization && finalization.finalized;
+      cardsHtml += `
+        <div class="card section-block" style="margin-bottom:16px; padding:16px;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
+            <div>
+              <h3 style="margin:0 0 6px 0; font-size:16px;">${AppConfig.escapeHtml(student.name)}</h3>
+              <p class="text-muted" style="margin:0; font-size:13px;">
+                Kelas: <strong>${AppConfig.escapeHtml(cls.name || '-')}</strong> · NISN: <strong>${AppConfig.escapeHtml(student.nisn || '-')}</strong> · Tahun Ajaran: <strong>${AppConfig.escapeHtml(year)}</strong> (Semester ${sem})
+              </p>
+            </div>
+            <div>
+              ${isFin ? '<span class="badge badge-success" style="font-size:12px; padding:6px 12px;"><i class="ph ph-check-circle"></i> Siap Diunduh & Dicetak</span>' : '<span class="badge badge-warning" style="font-size:12px; padding:6px 12px;"><i class="ph ph-clock"></i> Proses Rekapitulasi Rapor</span>'}
+            </div>
+          </div>
+          <div style="margin-top:16px; padding-top:14px; border-top:1px solid var(--border-color,#e2e8f0); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+            <p class="text-muted" style="margin:0; font-size:12.5px;">
+              ${isFin ? 'Rapor semester ini telah difinalisasi oleh wali kelas. Anda dapat langsung mencetak lembar rapor format F4 resmi.' : 'Wali kelas sedang melakukan rekapitulasi nilai akhir. Lembar cetak rapor akan dapat diunduh setelah difinalisasi oleh sekolah.'}
+            </p>
+            <div style="display:inline-flex; gap:8px;">
+              <a href="print.html?id=${student.id}" target="_blank" class="btn ${isFin ? 'btn-primary' : 'btn-outline'}" style="display:inline-flex; align-items:center; gap:6px;">
+                <i class="ph ph-printer"></i> ${isFin ? 'Cetak Lembar Rapor F4' : 'Pratinjau Lembar Rapor'}
+              </a>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    container.innerHTML = `
+      <div style="margin-bottom:20px;">
+        <h2 style="font-size:18px; margin:0 0 6px 0;"><i class="ph ph-file-pdf"></i> Lembar Rapor Resmi Siswa</h2>
+        <p class="text-muted" style="margin:0; font-size:13px;">Akses dan cetak lembar e-rapor resmi Kurikulum Merdeka untuk putra-putri Anda.</p>
+      </div>
+      ${cardsHtml}
+    `;
   }
 };

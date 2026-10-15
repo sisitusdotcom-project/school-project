@@ -198,6 +198,7 @@ const App = {
           '#/guru/ummi/koord/tasmi': typeof UMMIPages !== 'undefined' ? UMMIPages.renderTasmiPlotting : null,
           '#/kepsek/reports': typeof KepsekPages !== 'undefined' ? KepsekPages.renderReports : null,
           '#/ortu/dashboard': typeof OrtuPages !== 'undefined' ? OrtuPages.renderDashboard : null,
+          '#/parent/report-card': typeof OrtuPages !== 'undefined' ? OrtuPages.renderReportCard : null,
           '#/finance': typeof FinancePages !== 'undefined' ? FinancePages.renderDashboard : null,
           '#/curriculum': typeof CurriculumPages !== 'undefined' ? CurriculumPages.renderDashboard : null,
           '#/student-affairs': typeof StudentAffairsPages !== 'undefined' ? StudentAffairsPages.renderDashboard : null,

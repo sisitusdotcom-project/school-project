@@ -486,151 +486,405 @@ const GuruPages = {
       if (!classId || !subjectId) return;
       const acContainer = document.getElementById('academic-container');
       acContainer.innerHTML = '<div class="loader" style="margin: 20px auto"></div>';
-      const students = await DB.getStudentsByClass(classId);
-      const studentArr = DB.toArray(students).sort((a, b) => a.name.localeCompare(b.name));
-      if (!studentArr.length) {
-        acContainer.innerHTML = `<div class="card"><p class="text-muted">Belum ada siswa di kelas ini.</p></div>`;
-        return;
-      }
+      const cls = classArr.find(c => c.id === classId);
+      const isWali = cls && cls.teacherId === uid;
+      const subjectTeacherUid = cls?.subjectTeachers?.[subjectId];
+      const isSubjectTeacher = subjectTeacherUid === uid || (!subjectTeacherUid && isWali);
+      const isReadOnly = isWali && !isSubjectTeacher && Boolean(subjectTeacherUid);
       const year = settings.currentAcademicYear;
       const sem = settings.currentSemester;
+      const [students, rawChapters, finalization] = await Promise.all([
+        DB.getStudentsByClass(classId),
+        DB.getSubjectChapters(year, sem, classId, subjectId),
+        DB.getRaporFinalization(year, sem, classId)
+      ]);
+      const studentArr = DB.toArray(students).sort((a, b) => a.name.localeCompare(b.name));
+      if (!studentArr.length) {
+        acContainer.innerHTML = '<div class="card"><p class="text-muted">Belum ada siswa di kelas ini.</p></div>';
+        return;
+      }
+      let currentChapters = Array.isArray(rawChapters) && rawChapters.length ? rawChapters : [
+        { chapterNo: 1, title: 'Bab 1', cp: 'Memahami materi pokok dan konsep dasar bab 1 dengan baik' },
+        { chapterNo: 2, title: 'Bab 2', cp: 'Mampu menyelesaikan latihan dan penerapan materi bab 2 secara mandiri' }
+      ];
       const grades = {};
       for (const s of studentArr) {
         const studentGrades = await DB.getAcademicGrades(year, sem, s.id);
-        grades[s.id] = studentGrades[subjectId] || {
-          score: '',
-          competency: ''
-        };
+        grades[s.id] = studentGrades[subjectId] || {};
       }
-      const existingClassComp = studentArr.map((s) => grades[s.id]?.competency).find((c) => Boolean(c)) || '';
-      const rows = studentArr.map((s, idx) => {
-        const g = grades[s.id] || {};
-        return `
-        <div class="card section-block" style="margin-bottom: 12px; padding: 12px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-            <h4 style="margin:0; font-size:14px;">${idx + 1}. ${AppConfig.escapeHtml(s.name)}</h4>
-            <span class="text-muted" style="font-size:12px;">NISN: ${s.nisn || '-'}</span>
-          </div>
-          <div class="grade-input-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(110px, 1fr)); gap:10px;">
-            <div class="form-group" style="margin-bottom:0;">
-              <label style="font-size:11px;">Penilaian Harian (PH)</label>
-              <input type="number" class="ac-ph" data-stu="${s.id}" value="${g.ph || ''}" placeholder="75-100" min="75" max="100">
+      const renderFullUi = () => {
+        let chManageHtml = '';
+        if (isReadOnly) {
+          chManageHtml = `
+            <div class="card section-block" style="margin-bottom:14px; border-left:4px solid var(--warning,#f59e0b);">
+              <div class="card-header mk-header" style="padding:10px 14px;">
+                <h4 style="margin:0;font-size:13.5px;"><i class="ph ph-lock"></i> Mode Peninjauan Wali Kelas (Read-Only Nilai Mapel)</h4>
+                <span class="badge badge-warning">Guru Mapel Pengampu</span>
+              </div>
+              <div class="card-body" style="padding:10px 14px; font-size:12.5px;">
+                <p class="text-muted" style="margin:0 0 8px 0;">Nilai PH per Bab, STS, dan SAS/SAT diinput langsung oleh guru pengampu mapel. Nilai ini otomatis direkap untuk rapor. Sebagai wali kelas, Anda dapat memeriksa dan menyesuaikan deskripsi Capaian Kompetensi (CP) rapor sebelum difinalisasi.</p>
+                <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                  ${currentChapters.map(c => `<span class="badge badge-outline" style="font-size:11px;"><strong>${AppConfig.escapeHtml(c.title || 'Bab ' + c.chapterNo)}:</strong> ${AppConfig.escapeHtml(c.cp || '-')}</span>`).join('')}
+                </div>
+              </div>
             </div>
-            <div class="form-group" style="margin-bottom:0;">
-              <label style="font-size:11px;">STS 1 (Ganjil)</label>
-              <input type="number" class="ac-sts1" data-stu="${s.id}" value="${g.sts1 || ''}" placeholder="75-100" min="75" max="100">
+          `;
+        } else {
+          chManageHtml = `
+            <div class="card section-block" style="margin-bottom:14px; border-left:4px solid var(--primary,#2563eb);">
+              <div class="card-header mk-header" style="padding:10px 14px;">
+                <h4 style="margin:0;font-size:13.5px;"><i class="ph ph-list-numbers"></i> Bab & Capaian Pembelajaran (CP/TP) yang Diujikan</h4>
+                <button type="button" class="btn btn-xs btn-outline" id="btn-add-chapter"><i class="ph ph-plus"></i> Tambah Bab</button>
+              </div>
+              <div class="card-body" style="padding:12px 14px;">
+                <p class="text-muted" style="font-size:12px; margin:0 0 10px 0;">Input judul bab dan kalimat Capaian Pembelajaran (CP/TP). Nilai per bab akan ditampilkan pada laporan wali kelas dan orang tua murid. CP pada bab bernilai terbaik otomatis disarankan sebagai deskripsi rapor.</p>
+                <div id="chapters-list-container" style="display:flex; flex-direction:column; gap:8px;">
+                  ${currentChapters.map((ch, idx) => `
+                    <div class="chapter-config-row" data-idx="${idx}" style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; background:var(--bg-subtle,#f8fafc); padding:8px 10px; border-radius:8px; border:1px solid var(--border-color,#e2e8f0);">
+                      <strong style="font-size:12px; min-width:55px;">Bab ${ch.chapterNo}:</strong>
+                      <input type="text" class="ch-title-inp" data-idx="${idx}" value="${AppConfig.escapeHtml(ch.title || '')}" placeholder="Judul / Materi Bab" style="flex:1; min-width:140px; font-size:12px; padding:4px 8px; border-radius:6px; border:1px solid var(--border-color);">
+                      <input type="text" class="ch-cp-inp" data-idx="${idx}" value="${AppConfig.escapeHtml(ch.cp || '')}" placeholder="Deskripsi Capaian Pembelajaran (CP/TP)" style="flex:2; min-width:200px; font-size:12px; padding:4px 8px; border-radius:6px; border:1px solid var(--border-color);">
+                      ${currentChapters.length > 1 ? `<button type="button" class="btn-icon btn-remove-ch" data-idx="${idx}" style="color:var(--danger,#ef4444);"><i class="ph ph-trash"></i></button>` : ''}
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
             </div>
-            <div class="form-group" style="margin-bottom:0;">
-              <label style="font-size:11px;">SAS (Semester 1)</label>
-              <input type="number" class="ac-sas" data-stu="${s.id}" value="${g.sas || ''}" placeholder="75-100" min="75" max="100">
+          `;
+        }
+        let finalizationCard = '';
+        if (isWali) {
+          const isFin = finalization && finalization.finalized;
+          finalizationCard = `
+            <div class="card section-block" style="margin-bottom:14px; background:${isFin ? '#ecfdf5' : '#fffbeb'}; border:1px solid ${isFin ? '#a7f3d0' : '#fde68a'}; padding:12px 16px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                <div>
+                  <h4 style="margin:0 0 4px 0; font-size:13.5px; color:${isFin ? '#065f46' : '#92400e'};">
+                    <i class="ph ph-${isFin ? 'check-circle' : 'clock'}"></i> Status Finalisasi Rapor Kelas ${AppConfig.escapeHtml(cls.name)}
+                  </h4>
+                  <p style="margin:0; font-size:12px; color:${isFin ? '#047857' : '#b45309'};">
+                    ${isFin ? 'Rapor kelas telah difinalisasi. Lembar rapor resmi siap diunduh & dicetak oleh wali murid.' : 'Rapor belum difinalisasi. Wali murid belum dapat mengunduh rapor cetak.'}
+                  </p>
+                </div>
+                <button type="button" id="btn-toggle-finalize-rapor" class="btn btn-sm ${isFin ? 'btn-outline-danger' : 'btn-success'}">
+                  <i class="ph ph-${isFin ? 'lock-key-open' : 'seal-check'}"></i> ${isFin ? 'Batalkan Finalisasi' : 'Finalisasi Rapor Kelas'}
+                </button>
+              </div>
             </div>
-            <div class="form-group" style="margin-bottom:0;">
-              <label style="font-size:11px;">STS 2 (Genap)</label>
-              <input type="number" class="ac-sts2" data-stu="${s.id}" value="${g.sts2 || ''}" placeholder="75-100" min="75" max="100">
-            </div>
-            <div class="form-group" style="margin-bottom:0;">
-              <label style="font-size:11px;">SAT (Akhir Tahun)</label>
-              <input type="number" class="ac-sat" data-stu="${s.id}" value="${g.sat || ''}" placeholder="75-100" min="75" max="100">
-            </div>
-            <div class="form-group" style="margin-bottom:0;">
-              <label style="font-size:11px;">Nilai Akhir Rapor</label>
-              <input type="number" class="ac-score" data-stu="${s.id}" value="${g.score || ''}" placeholder="75-100" min="75" max="100">
-            </div>
-          </div>
-        </div>`;
-      }).join('');
-      acContainer.innerHTML = `
-        <div class="card section-block" style="margin-bottom: 16px; border-left: 4px solid var(--primary);">
-          <div class="card-body">
-            <h4 style="margin: 0 0 6px 0; font-size: 14px;"><i class="ph ph-notepad"></i> Capaian Kompetensi (CP/TP) Satu Rombel</h4>
-            <p class="text-muted" style="font-size: 12px; margin-bottom: 8px;">Deskripsi Capaian Kompetensi ini otomatis berlaku seragam untuk semua siswa dalam satu rombel kelas ini pada e-rapor.</p>
-            <textarea id="ac-class-comp" rows="2" style="width:100%; font-size:13px;" placeholder="Contoh: Menunjukkan penguasaan materi yang sangat baik dalam memahami konsep serta terampil menyelesaikan permasalahan...">${AppConfig.escapeHtml(existingClassComp)}</textarea>
-          </div>
-        </div>
-        <div style="margin-bottom: 16px;">
-          ${rows}
-        </div>
-        <button id="btn-save-academic" class="btn btn-primary" style="width:100%"><i class="ph ph-floppy-disk"></i> Simpan Semua Nilai</button>
-      `;
-      acContainer.querySelectorAll('.ac-ph, .ac-sts1, .ac-sas, .ac-sts2, .ac-sat').forEach((inp) => {
-        inp.oninput = (ev) => {
-          const card = ev.target.closest('.card');
-          const ph = Number(card.querySelector('.ac-ph').value);
-          const sts1 = Number(card.querySelector('.ac-sts1').value);
-          const sas = Number(card.querySelector('.ac-sas').value);
-          const sts2 = Number(card.querySelector('.ac-sts2').value);
-          const sat = Number(card.querySelector('.ac-sat').value);
-          const nums = [ph, sts1, sas, sts2, sat].filter((v) => Number.isFinite(v) && v >= 75);
-          if (nums.length) {
-            const avg = Math.round(nums.reduce((a, b) => a + b, 0) / nums.length);
-            card.querySelector('.ac-score').value = avg;
-          }
-        };
-      });
-      document.getElementById('btn-save-academic').onclick = async (e) => {
-        const btn = e.target;
-        const classCompVal = document.getElementById('ac-class-comp').value.trim();
-        const scoreCards = acContainer.querySelectorAll('.grade-input-grid');
-        for (const card of scoreCards) {
-          const inputs = card.querySelectorAll('input[type="number"]');
-          for (const inp of inputs) {
-            const v = Number(inp.value);
-            if (inp.value && (v < 75 || v > 100)) {
-              alert('Skala nilai harus berada di rentang 75 sampai 100.');
-              inp.focus();
-              return;
+          `;
+        }
+        const studentCardsHtml = studentArr.map((s, idx) => {
+          const g = grades[s.id] || {};
+          const existingStudentChapters = g.chapters || [];
+          const chInputs = currentChapters.map((ch) => {
+            const chScoreObj = existingStudentChapters.find(sc => sc.chapterNo === ch.chapterNo);
+            const val = chScoreObj ? chScoreObj.score : (ch.chapterNo === 1 && g.ph ? g.ph : '');
+            return `
+              <div class="form-group" style="margin-bottom:0; min-width:85px; flex:1;">
+                <label style="font-size:11px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${AppConfig.escapeHtml(ch.title || 'Bab ' + ch.chapterNo)}">${AppConfig.escapeHtml(ch.title || 'Bab ' + ch.chapterNo)}</label>
+                <input type="number" class="ac-ch-score" data-stu="${s.id}" data-chno="${ch.chapterNo}" value="${val || ''}" placeholder="75-100" min="75" max="100" ${isReadOnly ? 'disabled' : ''}>
+              </div>
+            `;
+          }).join('');
+          const validChScores = currentChapters.map(ch => {
+            const found = existingStudentChapters.find(sc => sc.chapterNo === ch.chapterNo);
+            return found && Number.isFinite(Number(found.score)) && Number(found.score) >= 75 ? Number(found.score) : null;
+          }).filter(v => v !== null);
+          const computedPh = validChScores.length ? Math.round(validChScores.reduce((a, b) => a + b, 0) / validChScores.length) : (g.ph || '');
+          let bestChText = 'Belum diisi';
+          if (validChScores.length) {
+            let maxScore = -1;
+            let maxCh = null;
+            currentChapters.forEach(ch => {
+              const found = existingStudentChapters.find(sc => sc.chapterNo === ch.chapterNo);
+              const scoreNum = found ? Number(found.score) : null;
+              if (Number.isFinite(scoreNum) && scoreNum > maxScore) {
+                maxScore = scoreNum;
+                maxCh = ch;
+              }
+            });
+            if (maxCh) {
+              bestChText = `${maxCh.title || 'Bab ' + maxCh.chapterNo} (${maxScore})`;
             }
           }
-        }
-        btn.disabled = true;
-        btn.innerHTML = '<i class="ph ph-spinner"></i> Menyimpan...';
-        const promises = [];
-        for (let i = 0; i < studentArr.length; i++) {
-          const stuId = studentArr[i].id;
-          const card = scoreCards[i];
-          const ph = card.querySelector('.ac-ph').value;
-          const sts1 = card.querySelector('.ac-sts1').value;
-          const sas = card.querySelector('.ac-sas').value;
-          const sts2 = card.querySelector('.ac-sts2').value;
-          const sat = card.querySelector('.ac-sat').value;
-          const score = card.querySelector('.ac-score').value;
-          if (score || ph || sts1 || sas || sts2 || sat || classCompVal) {
-            promises.push(DB.saveAcademicGrade(year, sem, stuId, subjectId, {
-              ph: ph ? parseInt(ph) : null,
-              sts1: sts1 ? parseInt(sts1) : null,
-              sas: sas ? parseInt(sas) : null,
-              sts2: sts2 ? parseInt(sts2) : null,
-              sat: sat ? parseInt(sat) : null,
-              score: score ? parseInt(score) : null,
-              competency: classCompVal,
-              updatedBy: Auth.currentUser.uid
-            }));
-          }
-        }
-        try {
-          await Promise.all(promises);
-          btn.innerHTML = '<i class="ph ph-check"></i> Tersimpan';
-          const targetClass = classArr.find((c) => c.id === classId);
-          if (typeof NotificationService !== 'undefined' && targetClass && targetClass.teacherId && targetClass.teacherId !== uid) {
-            const subName = (subArr.find((s) => s.id === subjectId) || {}).name || 'Mata Pelajaran';
-            NotificationService.send({
-              recipientUid: targetClass.teacherId,
-              title: 'Nilai Siswa Diperbarui',
-              message: `Nilai mapel ${subName} untuk ${targetClass.name} telah disimpan oleh guru pengampu.`,
-              link: `#/guru/academic?classId=${classId}&subjectId=${subjectId}`,
-              type: 'info'
-            });
-          }
-          setTimeout(() => {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="ph ph-floppy-disk"></i> Simpan Semua Nilai';
-          }, 2000);
-        } catch (err) {
-          alert('Gagal menyimpan nilai.');
-          btn.disabled = false;
-          btn.innerHTML = '<i class="ph ph-floppy-disk"></i> Simpan Semua Nilai';
-        }
+          const defaultCpText = g.competency || (bestChText !== 'Belum diisi' ? `Menunjukkan penguasaan sangat baik pada materi ${bestChText}.` : 'Menunjukkan penguasaan materi yang baik.');
+          return `
+            <div class="card section-block stu-grade-card" data-stu="${s.id}" style="margin-bottom:12px; padding:12px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:6px;">
+                <h4 style="margin:0; font-size:14px;">${idx + 1}. ${AppConfig.escapeHtml(s.name)}</h4>
+                <div style="display:inline-flex; align-items:center; gap:8px;">
+                  <span class="text-muted" style="font-size:12px;">NISN: ${s.nisn || '-'}</span>
+                  <span class="badge badge-success ac-best-badge" data-stu="${s.id}" style="font-size:11px;"><i class="ph ph-trend-up"></i> Terbaik: ${AppConfig.escapeHtml(bestChText)}</span>
+                </div>
+              </div>
+              <div style="background:var(--bg-card,#fff); border:1px solid var(--border-color,#e2e8f0); border-radius:8px; padding:10px; margin-bottom:10px;">
+                <div style="font-size:11.5px; font-weight:700; color:var(--text-muted); margin-bottom:6px;"><i class="ph ph-exam"></i> Penilaian Harian (PH) per Bab:</div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                  ${chInputs}
+                  <div class="form-group" style="margin-bottom:0; min-width:85px;">
+                    <label style="font-size:11px; font-weight:700; color:var(--primary);">Rata-rata PH</label>
+                    <input type="number" class="ac-ph-avg" data-stu="${s.id}" value="${computedPh || ''}" placeholder="PH" readonly style="background:var(--bg-subtle,#f1f5f9); font-weight:700;">
+                  </div>
+                </div>
+              </div>
+              <div class="grade-input-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(100px, 1fr)); gap:8px; margin-bottom:10px;">
+                <div class="form-group" style="margin-bottom:0;">
+                  <label style="font-size:11px;">STS 1 (Ganjil)</label>
+                  <input type="number" class="ac-sts1" data-stu="${s.id}" value="${g.sts1 || ''}" placeholder="75-100" min="75" max="100" ${isReadOnly ? 'disabled' : ''}>
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                  <label style="font-size:11px;">SAS (Semester 1)</label>
+                  <input type="number" class="ac-sas" data-stu="${s.id}" value="${g.sas || ''}" placeholder="75-100" min="75" max="100" ${isReadOnly ? 'disabled' : ''}>
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                  <label style="font-size:11px;">STS 2 (Genap)</label>
+                  <input type="number" class="ac-sts2" data-stu="${s.id}" value="${g.sts2 || ''}" placeholder="75-100" min="75" max="100" ${isReadOnly ? 'disabled' : ''}>
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                  <label style="font-size:11px;">SAT (Akhir Tahun)</label>
+                  <input type="number" class="ac-sat" data-stu="${s.id}" value="${g.sat || ''}" placeholder="75-100" min="75" max="100" ${isReadOnly ? 'disabled' : ''}>
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                  <label style="font-size:11px; font-weight:700; color:var(--primary);">Nilai Akhir Rapor</label>
+                  <input type="number" class="ac-score" data-stu="${s.id}" value="${g.score || ''}" placeholder="75-100" min="75" max="100">
+                </div>
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label style="font-size:11.5px; display:flex; justify-content:space-between; align-items:center;">
+                  <span><strong>Capaian Kompetensi (CP Rapor Siswa)</strong></span>
+                  <span class="text-muted" style="font-size:11px;">Otomatis dari Bab Tertinggi (Bisa Diedit Wali Kelas)</span>
+                </label>
+                <textarea class="ac-comp-text" data-stu="${s.id}" rows="2" style="width:100%; font-size:12.5px; border-radius:6px; border:1px solid var(--border-color); padding:6px 8px;">${AppConfig.escapeHtml(defaultCpText)}</textarea>
+              </div>
+            </div>
+          `;
+        }).join('');
+        acContainer.innerHTML = `
+          ${finalizationCard}
+          ${chManageHtml}
+          <div style="margin-bottom:16px;">
+            ${studentCardsHtml}
+          </div>
+          <button id="btn-save-academic" class="btn btn-primary" style="width:100%; padding:12px; font-size:14px;"><i class="ph ph-floppy-disk"></i> Simpan Semua Nilai & Capaian Rapor</button>
+        `;
+        bindEvents();
       };
+      const bindEvents = () => {
+        const btnAddCh = document.getElementById('btn-add-chapter');
+        if (btnAddCh) {
+          btnAddCh.onclick = () => {
+            const nextNo = currentChapters.length + 1;
+            currentChapters.push({
+              chapterNo: nextNo,
+              title: `Bab ${nextNo}`,
+              cp: `Mampu memahami dan menerapkan kompetensi pada materi bab ${nextNo}`
+            });
+            renderFullUi();
+          };
+        }
+        acContainer.querySelectorAll('.btn-remove-ch').forEach(btn => {
+          btn.onclick = () => {
+            const idx = Number(btn.getAttribute('data-idx'));
+            if (currentChapters.length > 1) {
+              currentChapters.splice(idx, 1);
+              currentChapters.forEach((c, i) => c.chapterNo = i + 1);
+              renderFullUi();
+            }
+          };
+        });
+        acContainer.querySelectorAll('.ch-title-inp').forEach(inp => {
+          inp.onchange = (e) => {
+            const idx = Number(e.target.getAttribute('data-idx'));
+            if (currentChapters[idx]) currentChapters[idx].title = e.target.value.trim();
+          };
+        });
+        acContainer.querySelectorAll('.ch-cp-inp').forEach(inp => {
+          inp.onchange = (e) => {
+            const idx = Number(e.target.getAttribute('data-idx'));
+            if (currentChapters[idx]) currentChapters[idx].cp = e.target.value.trim();
+          };
+        });
+        const btnToggleFinalize = document.getElementById('btn-toggle-finalize-rapor');
+        if (btnToggleFinalize) {
+          btnToggleFinalize.onclick = async () => {
+            const currentFin = finalization && finalization.finalized;
+            const confirmMsg = currentFin ? 'Batalkan status finalisasi rapor kelas ini?' : 'Finalisasi rapor kelas ini? Wali murid akan dapat melihat dan mencetak lembar rapor.';
+            if (!confirm(confirmMsg)) return;
+            btnToggleFinalize.disabled = true;
+            try {
+              await DB.saveRaporFinalization(year, sem, classId, {
+                finalized: !currentFin,
+                finalizedBy: uid,
+                className: cls.name
+              });
+              if (!currentFin && typeof NotificationService !== 'undefined') {
+                const parents = await DB.getStudentsByClass(classId);
+                const parentArr = DB.toArray(parents);
+                parentArr.forEach(st => {
+                  if (st.parentUid) {
+                    NotificationService.send({
+                      recipientUid: st.parentUid,
+                      title: 'Rapor Digital Siswa Siap',
+                      message: `Rapor semester ${sem} T.A ${year} untuk ananda ${st.name} telah difinalisasi dan siap dicetak.`,
+                      link: '#/parent/report-card',
+                      type: 'success'
+                    });
+                  }
+                });
+              }
+              document.getElementById('filter-academic').dispatchEvent(new Event('submit', { cancelable: true }));
+            } catch (err) {
+              alert('Gagal memperbarui status finalisasi rapor.');
+              btnToggleFinalize.disabled = false;
+            }
+          };
+        }
+        acContainer.querySelectorAll('.stu-grade-card').forEach(card => {
+          const stuId = card.getAttribute('data-stu');
+          const chScoreInputs = card.querySelectorAll('.ac-ch-score');
+          const sts1Inp = card.querySelector('.ac-sts1');
+          const sasInp = card.querySelector('.ac-sas');
+          const sts2Inp = card.querySelector('.ac-sts2');
+          const satInp = card.querySelector('.ac-sat');
+          const phAvgInp = card.querySelector('.ac-ph-avg');
+          const scoreInp = card.querySelector('.ac-score');
+          const compText = card.querySelector('.ac-comp-text');
+          const bestBadge = card.querySelector('.ac-best-badge');
+          const recalculateStudent = () => {
+            const chScores = [];
+            chScoreInputs.forEach(inp => {
+              const chNo = Number(inp.getAttribute('data-chno'));
+              const v = Number(inp.value);
+              if (inp.value && Number.isFinite(v) && v >= 75) {
+                chScores.push({ chapterNo: chNo, score: v });
+              }
+            });
+            let phAvg = null;
+            let bestCh = null;
+            if (chScores.length) {
+              phAvg = Math.round(chScores.reduce((acc, c) => acc + c.score, 0) / chScores.length);
+              chScores.sort((a, b) => b.score - a.score);
+              const foundCh = currentChapters.find(c => c.chapterNo === chScores[0].chapterNo);
+              bestCh = {
+                chapterNo: chScores[0].chapterNo,
+                score: chScores[0].score,
+                title: foundCh?.title || `Bab ${chScores[0].chapterNo}`,
+                cp: foundCh?.cp || ''
+              };
+            }
+            if (phAvgInp) phAvgInp.value = phAvg || '';
+            if (bestBadge) {
+              bestBadge.innerHTML = bestCh ? `<i class="ph ph-trend-up"></i> Terbaik: ${AppConfig.escapeHtml(bestCh.title)} (${bestCh.score})` : '<i class="ph ph-trend-up"></i> Belum diisi';
+            }
+            const sts1Val = Number(sts1Inp?.value);
+            const sasVal = Number(sasInp?.value);
+            const sts2Val = Number(sts2Inp?.value);
+            const satVal = Number(satInp?.value);
+            const validExams = [phAvg, sts1Val, sasVal, sts2Val, satVal].filter(v => Number.isFinite(v) && v >= 75);
+            if (validExams.length && scoreInp) {
+              scoreInp.value = Math.round(validExams.reduce((a, b) => a + b, 0) / validExams.length);
+            }
+            if (bestCh && compText && (!compText.value.trim() || compText.value.startsWith('Menunjukkan penguasaan'))) {
+              compText.value = bestCh.cp ? `Menunjukkan penguasaan materi yang sangat baik dalam ${bestCh.cp}.` : `Menunjukkan penguasaan materi yang sangat baik pada ${bestCh.title}.`;
+            }
+          };
+          chScoreInputs.forEach(inp => inp.oninput = recalculateStudent);
+          [sts1Inp, sasInp, sts2Inp, satInp].forEach(inp => {
+            if (inp) inp.oninput = recalculateStudent;
+          });
+        });
+        document.getElementById('btn-save-academic').onclick = async (e) => {
+          const btn = e.target;
+          for (const card of acContainer.querySelectorAll('.stu-grade-card')) {
+            const inputs = card.querySelectorAll('input[type="number"]');
+            for (const inp of inputs) {
+              if (inp.readOnly || inp.disabled) continue;
+              const v = Number(inp.value);
+              if (inp.value && (v < 75 || v > 100)) {
+                alert('Skala nilai harus berada di rentang 75 sampai 100.');
+                inp.focus();
+                return;
+              }
+            }
+          }
+          btn.disabled = true;
+          btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Menyimpan...';
+          try {
+            if (!isReadOnly) {
+              await DB.saveSubjectChapters(year, sem, classId, subjectId, currentChapters);
+            }
+            const promises = [];
+            for (const s of studentArr) {
+              const card = acContainer.querySelector(`.stu-grade-card[data-stu="${s.id}"]`);
+              if (!card) continue;
+              const studentChapters = [];
+              card.querySelectorAll('.ac-ch-score').forEach(inp => {
+                const chNo = Number(inp.getAttribute('data-chno'));
+                const val = Number(inp.value);
+                const chObj = currentChapters.find(c => c.chapterNo === chNo);
+                if (inp.value && Number.isFinite(val)) {
+                  studentChapters.push({
+                    chapterNo: chNo,
+                    title: chObj?.title || `Bab ${chNo}`,
+                    cp: chObj?.cp || '',
+                    score: val
+                  });
+                }
+              });
+              const phVal = card.querySelector('.ac-ph-avg')?.value;
+              const sts1Val = card.querySelector('.ac-sts1')?.value;
+              const sasVal = card.querySelector('.ac-sas')?.value;
+              const sts2Val = card.querySelector('.ac-sts2')?.value;
+              const satVal = card.querySelector('.ac-sat')?.value;
+              const scoreVal = card.querySelector('.ac-score')?.value;
+              const compVal = card.querySelector('.ac-comp-text')?.value.trim();
+              let bestCh = null;
+              if (studentChapters.length) {
+                const sorted = [...studentChapters].sort((a, b) => b.score - a.score);
+                bestCh = sorted[0];
+              }
+              if (scoreVal || phVal || sts1Val || sasVal || sts2Val || satVal || compVal || studentChapters.length) {
+                promises.push(DB.saveAcademicGrade(year, sem, s.id, subjectId, {
+                  chapters: studentChapters,
+                  ph: phVal ? parseInt(phVal) : null,
+                  bestChapter: bestCh,
+                  sts1: sts1Val ? parseInt(sts1Val) : null,
+                  sas: sasVal ? parseInt(sasVal) : null,
+                  sts2: sts2Val ? parseInt(sts2Val) : null,
+                  sat: satVal ? parseInt(satVal) : null,
+                  score: scoreVal ? parseInt(scoreVal) : null,
+                  competency: compVal,
+                  descPositive: compVal,
+                  updatedBy: uid,
+                  updatedByRole: isReadOnly ? 'WALI_KELAS' : 'GURU_MAPEL'
+                }));
+              }
+            }
+            await Promise.all(promises);
+            btn.innerHTML = '<i class="ph ph-check"></i> Tersimpan';
+            if (typeof NotificationService !== 'undefined' && !isReadOnly && cls?.teacherId && cls.teacherId !== uid) {
+              const subObj = subArr.find(s => s.id === subjectId);
+              NotificationService.send({
+                recipientUid: cls.teacherId,
+                title: 'Nilai Siswa Diperbarui',
+                message: `Nilai mapel ${subObj?.name || 'Mata Pelajaran'} (${cls.name}) telah disimpan oleh guru pengampu.`,
+                link: `#/guru/academic?classId=${classId}&subjectId=${subjectId}`,
+                type: 'info'
+              });
+            }
+            setTimeout(() => {
+              btn.disabled = false;
+              btn.innerHTML = '<i class="ph ph-floppy-disk"></i> Simpan Semua Nilai & Capaian Rapor';
+            }, 2000);
+          } catch (err) {
+            console.error('Error saving grades:', err);
+            alert('Gagal menyimpan nilai.');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="ph ph-floppy-disk"></i> Simpan Semua Nilai & Capaian Rapor';
+          }
+        };
+      };
+      renderFullUi();
     };
     if (preClassId && classArr.some(c => c.id === preClassId)) {
       document.getElementById('ac-class').value = preClassId;
@@ -1204,14 +1458,12 @@ const GuruPages = {
         DB.getSettings()
       ]);
       const isUmmi = Auth.currentRole === 'guruUmmi' || (Auth.currentAssignments || []).some(a => a.startsWith('GURU_UMMI') || a === 'TIM_UMMI' || a === 'KOORD_UMMI');
-      const days = ['minggu', 'senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu'];
-      const dayKey = days[new Date().getDay()];
-      const sched = settings?.attendanceRules?.schedules?.[isUmmi ? 'ummi' : 'gtk']?.[dayKey] || {
-        inStart: '06:30', inEnd: '07:00', outStart: isUmmi ? '09:30' : (dayKey === 'jumat' ? '14:30' : (dayKey === 'sabtu' ? '12:30' : '15:30')), outEnd: isUmmi ? '11:30' : (dayKey === 'jumat' ? '16:30' : (dayKey === 'sabtu' ? '14:30' : '17:30'))
+      const sched = AppConfig.getAttendanceSchedule ? AppConfig.getAttendanceSchedule(settings?.attendanceRules, isUmmi, new Date()) : {
+        inStart: '06:30', inEnd: '07:00', outStart: isUmmi ? '09:30' : '15:30', outEnd: isUmmi ? '11:30' : '17:30', label: `${isUmmi ? 'Guru Ummi' : 'GTK'}: Masuk 06:30-07:00`
       };
       const schedBadge = document.getElementById('att-schedule-badge');
       if (schedBadge) {
-        schedBadge.textContent = `${isUmmi ? 'Guru Ummi' : 'GTK'}: Masuk ${sched.inStart}-${sched.inEnd} | Pulang ${sched.outStart}`;
+        schedBadge.textContent = sched.label;
       }
       if (!myAtt) {
         histContainer.innerHTML = '<p class="text-muted" style="font-size: 13px; margin: 0;">Belum ada rekam presensi hari ini.</p>';
@@ -1473,13 +1725,16 @@ const GuruPages = {
       btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Memproses...';
       try {
         const compressedProof = await compressImageDataUrl(capturedProofDataUrl, 1600, 0.82);
+        const isUmmi = Auth.currentRole === 'guruUmmi' || (Auth.currentAssignments || []).some(a => a.startsWith('GURU_UMMI') || a === 'TIM_UMMI' || a === 'KOORD_UMMI');
         const result = await DB.submitTeacherAttendanceToWorker({
           dateStr,
           teacherId,
           type,
           photoDataUrl: compressedProof,
           location: currentLocation,
-          accuracy: currentAccuracy
+          accuracy: currentAccuracy,
+          isUmmi,
+          roleGroup: isUmmi ? 'ummi' : 'gtk'
         });
         const payload = type === 'in'
           ? { time_in: result.serverTimestamp ? new Date(result.serverTimestamp).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }), location_in: result.location || currentLocation }

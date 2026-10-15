@@ -563,6 +563,9 @@
   }
 }
 @media (max-width:1023px) {
+  .desktop-only {
+    display: none !important
+  }
   .mobile-header .brand-logo-small {
     gap: 7px;
   }

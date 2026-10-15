@@ -2124,10 +2124,14 @@ td[colspan] > .text-muted {
 .notif-empty{padding:32px 16px;text-align:center;font-size:13px;color:var(--text-muted,#94a3b8);display:flex;flex-direction:column;align-items:center;gap:8px;}
 .notif-empty i{font-size:32px;opacity:.5;}
 .notif-empty p{margin:0;}
-@media(max-width:768px){
+@media(max-width:1023px){
+#btn-notif-toggle,.desktop-only{display:none!important;}
 .notif-dropdown{position:fixed;top:62px;left:10px;right:10px;width:auto;max-width:none;max-height:calc(100dvh - 80px);border-radius:14px;box-shadow:0 20px 45px rgba(0,0,0,0.25);}
 }
 .grade-num-input{width:100%;min-width:60px;padding:6px 8px;font-size:13px;text-align:center;border:1px solid var(--border-color);border-radius:6px;background:var(--bg-card);color:var(--text-main);}
 .grade-num-input:focus{border-color:var(--primary);outline:none;box-shadow:0 0 0 2px rgba(37,99,235,0.15);}
 .grade-final-badge{font-weight:700;font-size:13.5px;padding:4px 8px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;}
 .travel-vakasi-tag{display:inline-flex;align-items:center;gap:4px;font-weight:700;color:#047857;background:#ecfdf5;padding:3px 8px;border-radius:6px;font-size:12px;}
+.nav-counter-badge{margin-left:auto;font-size:11px;font-weight:700;padding:2px 7px;border-radius:999px;background:var(--danger,#ef4444);color:#fff;display:none;line-height:1.2;flex-shrink:0;box-shadow:0 2px 4px rgba(239,68,68,0.35);}
+.nav-counter-badge.active{display:inline-flex;align-items:center;justify-content:center;}
+.notif-action-tag{display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:700;padding:2px 6px;border-radius:4px;background:#fef2f2;color:#dc2626;border:1px solid rgba(220,38,38,0.2);margin-top:3px;align-self:flex-start;}

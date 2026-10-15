@@ -231,6 +231,13 @@ const UMMIPages = {
         } else {
           await DB.saveUmmiClass(null, { ...data, students: {} });
         }
+        if (typeof NotificationService !== 'undefined' && data.teacherId) {
+          NotificationService.notifyUmmiMappingUpdated({
+            className: data.name,
+            room: data.room,
+            teacherId: data.teacherId
+          });
+        }
         App.closeModal('modal-ummi');
         UMMIPages.renderUmmiMapping(container);
       } catch (err) {
@@ -515,6 +522,15 @@ const UMMIPages = {
           requestedAt: Date.now(),
           status: 'Menunggu ACC'
         });
+        if (typeof NotificationService !== 'undefined') {
+          NotificationService.notifyUmmiExamRequested({
+            studentName: sname,
+            currentLevel: curLvl,
+            targetLevel: targetLvl,
+            requestedByName: Auth.userData?.name || Auth.currentUser?.displayName || 'Guru Ummi',
+            requestedBy: Auth.currentUser.uid
+          });
+        }
         App.closeModal('modal-req-exam');
         alert('Pengajuan ujian kenaikan jilid berhasil dikirim ke Koordinator Ummi!');
       } catch (err) {
@@ -758,6 +774,15 @@ const UMMIPages = {
             requestedAt: Date.now(),
             status: 'Menunggu ACC'
           });
+          if (typeof NotificationService !== 'undefined') {
+            NotificationService.notifyUmmiExamRequested({
+              studentName: activeStudent.name,
+              currentLevel: curStudentLevel,
+              targetLevel: targetLvl,
+              requestedByName: Auth.userData?.name || Auth.currentUser?.displayName || 'Guru Ummi',
+              requestedBy: uid
+            });
+          }
           App.closeModal('modal-req-exam');
           alert('Pengajuan ujian kenaikan jilid berhasil dikirim ke Koordinator Ummi!');
         } catch (err) {
@@ -1071,6 +1096,16 @@ const UMMIPages = {
           examinerId: examinerId,
           examinerName: examinerName
         });
+        if (typeof NotificationService !== 'undefined') {
+          NotificationService.notifyUmmiExamScheduled({
+            studentName: target.studentName,
+            targetLevel: target.targetLevel,
+            scheduledDate: dateVal,
+            examinerName: examinerName,
+            examinerId: examinerId,
+            requestedBy: target.requestedBy
+          });
+        }
         App.closeModal('modal-acc-exam');
         UMMIPages.renderExams(container);
       } catch (err) {
@@ -1114,6 +1149,16 @@ const UMMIPages = {
           ummiClassId: cid,
           completedAt: Date.now()
         });
+        if (typeof NotificationService !== 'undefined') {
+          NotificationService.notifyUmmiExamResult({
+            studentName: target.studentName || document.getElementById('res-stu-name').value,
+            targetLevel: targetLvl,
+            decision: decision,
+            score: score,
+            requestedBy: target.requestedBy,
+            studentId: sid
+          });
+        }
         App.closeModal('modal-result-exam');
         if (decision === 'Lolos') {
           alert(`Selamat! Santri berhasil lulus dan tingkat jilid resmi dinaikkan ke ${targetLvl}. Nilai rapor BTQ otomatis diperbarui.`);

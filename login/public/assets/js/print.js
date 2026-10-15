@@ -78,9 +78,9 @@ async function generateReport(studentId, container) {
               <td>${startNo}.${idx + 1} ${sub.name}</td>
               <td class="text-center">${grade.score || ''}</td>
               <td class="capaian-box">
-                  ${grade.descPositive ? '<p>' + grade.descPositive + '</p>' : ''}
+                  ${grade.descPositive ? '<p>' + grade.descPositive + '</p>' : (grade.competency ? '<p>' + grade.competency + '</p>' : '')}
                   ${grade.descNegative ? '<p>' + grade.descNegative + '</p>' : ''}
-                  ${!grade.descPositive && !grade.descNegative ? '<p>-</p>' : ''}
+                  ${!grade.descPositive && !grade.descNegative && !grade.competency ? '<p>-</p>' : ''}
               </td>
           </tr>
         `;
@@ -102,9 +102,9 @@ async function generateReport(studentId, container) {
               <td>${sub.name}</td>
               <td class="text-center">${grade.score || ''}</td>
               <td class="capaian-box">
-                  ${grade.descPositive ? '<p>' + grade.descPositive + '</p>' : ''}
+                  ${grade.descPositive ? '<p>' + grade.descPositive + '</p>' : (grade.competency ? '<p>' + grade.competency + '</p>' : '')}
                   ${grade.descNegative ? '<p>' + grade.descNegative + '</p>' : ''}
-                  ${!grade.descPositive && !grade.descNegative ? '<p>-</p>' : ''}
+                  ${!grade.descPositive && !grade.descNegative && !grade.competency ? '<p>-</p>' : ''}
               </td>
           </tr>
         `;
@@ -132,9 +132,9 @@ async function generateReport(studentId, container) {
             <td>${sub.name}</td>
             <td class="text-center">${grade.score || ''}</td>
             <td class="capaian-box">
-                ${grade.descPositive ? '<p>' + grade.descPositive + '</p>' : ''}
+                ${grade.descPositive ? '<p>' + grade.descPositive + '</p>' : (grade.competency ? '<p>' + grade.competency + '</p>' : '')}
                 ${grade.descNegative ? '<p>' + grade.descNegative + '</p>' : ''}
-                ${!grade.descPositive && !grade.descNegative ? '<p>-</p>' : ''}
+                ${!grade.descPositive && !grade.descNegative && !grade.competency ? '<p>-</p>' : ''}
             </td>
         </tr>
       `;

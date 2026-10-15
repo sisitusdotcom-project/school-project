@@ -188,7 +188,7 @@ const DB = {
     await this.saveTeacherAttendance(dateStr, teacherId, { proof_url: fileUrl });
     return fileUrl;
   },
-  async submitTeacherAttendanceToWorker({ dateStr, teacherId, type, photoDataUrl, location, accuracy }) {
+  async submitTeacherAttendanceToWorker({ dateStr, teacherId, type, photoDataUrl, location, accuracy, isUmmi, roleGroup }) {
     const workerUrl = (window.CLOUDFLARE_ATTENDANCE_WORKER_URL || '').trim();
     if (!workerUrl || workerUrl.includes('your-subdomain')) {
       const fallbackProof = await this.saveTeacherAttendanceProof(dateStr, teacherId, photoDataUrl, 'image/jpeg');
@@ -216,6 +216,8 @@ const DB = {
         photoDataUrl,
         location,
         accuracy,
+        isUmmi: !!isUmmi,
+        roleGroup: roleGroup || (isUmmi ? 'ummi' : 'gtk'),
         clientTimestamp: new Date().toISOString()
       })
     });
@@ -713,6 +715,23 @@ const DB = {
   },
   async getAllAcademicGrades(year, sem) {
     return this._readCollection(this._raporPath('academic_grades', year, sem), {});
+  },
+  async getSubjectChapters(year, sem, classId, subjectId) {
+    return this._read(`subject_chapters/${year}/${sem}/${classId}/${subjectId}`, []);
+  },
+  async saveSubjectChapters(year, sem, classId, subjectId, chapters) {
+    if (!isDBReady()) return;
+    await db.ref(`subject_chapters/${year}/${sem}/${classId}/${subjectId}`).set(chapters);
+  },
+  async getRaporFinalization(year, sem, classId) {
+    return this._read(`rapor_finalization/${year}/${sem}/${classId}`, null);
+  },
+  async saveRaporFinalization(year, sem, classId, data) {
+    if (!isDBReady()) return;
+    await db.ref(`rapor_finalization/${year}/${sem}/${classId}`).set({
+      ...data,
+      finalizedAt: firebase.database.ServerValue.TIMESTAMP
+    });
   },
   async saveAcademicGrade(year, sem, studentId, subjectId, data) {
     if (!isDBReady()) return;

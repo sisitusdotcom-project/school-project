@@ -175,6 +175,7 @@
     ],
     [ROLES.ORTU]: [
       { hash: '#/dashboard', icon: 'ph-graduation-cap', text: 'Perkembangan Anak' },
+      { hash: '#/parent/report-card', icon: 'ph-file-pdf', text: 'Rapor Digital Siswa' },
       { hash: '#/student-affairs/leaves', icon: 'ph-calendar-x', text: 'Permohonan Izin / Sakit' },
       { hash: '#/finance/student-bills', icon: 'ph-receipt', text: 'Riwayat Tagihan SPP' }
     ],
@@ -466,6 +467,41 @@
     const unitList = Array.isArray(units) ? units : [units];
     return unitList.some(u => assignments.includes(u));
   }
+  function getAttendanceSchedule(rules = {}, isUmmi = false, date = new Date()) {
+    const d = date instanceof Date ? date : new Date(date);
+    const dayNames = ['minggu', 'senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu'];
+    const dayKey = dayNames[d.getDay()] || 'senin';
+    const groupKey = isUmmi ? 'ummi' : 'gtk';
+    const schedules = rules.schedules || DEFAULT_SETTINGS.attendanceRules.schedules;
+    const groupSched = schedules[groupKey] || DEFAULT_SETTINGS.attendanceRules.schedules[groupKey] || {};
+    const daySched = groupSched[dayKey] || (groupKey === 'ummi' ? { inStart: '06:30', inEnd: '07:00', outStart: '09:30', outEnd: '11:30' } : { inStart: '06:30', inEnd: '07:00', outStart: '15:30', outEnd: '17:30' });
+    return {
+      dayKey,
+      groupKey,
+      inStart: daySched.inStart || '06:30',
+      inEnd: daySched.inEnd || '07:00',
+      outStart: daySched.outStart || (groupKey === 'ummi' ? '09:30' : '15:30'),
+      outEnd: daySched.outEnd || (groupKey === 'ummi' ? '11:30' : '17:30'),
+      label: `${isUmmi ? 'Guru Ummi' : 'GTK'}: Masuk ${daySched.inStart || '06:30'}-${daySched.inEnd || '07:00'} | Pulang ${daySched.outStart || (groupKey === 'ummi' ? '09:30' : '15:30')}`
+    };
+  }
+  function calculateGradeSummary(chapters = [], sts1 = null, sas = null, sts2 = null, sat = null) {
+    const validCh = (chapters || []).filter(c => Number.isFinite(Number(c.score)) && Number(c.score) >= 75);
+    const phAvg = validCh.length ? Math.round(validCh.reduce((acc, c) => acc + Number(c.score), 0) / validCh.length) : null;
+    let bestChapter = null;
+    if (validCh.length) {
+      bestChapter = [...validCh].sort((a, b) => Number(b.score) - Number(a.score))[0];
+    }
+    const examNums = [phAvg, sts1, sas, sts2, sat].map(v => Number(v)).filter(v => Number.isFinite(v) && v >= 75);
+    const finalScore = examNums.length ? Math.round(examNums.reduce((a, b) => a + b, 0) / examNums.length) : null;
+    const defaultCp = bestChapter ? `Menunjukkan penguasaan sangat baik dalam ${bestChapter.cp || bestChapter.title || 'materi pembelajaran'}.` : '';
+    return {
+      ph: phAvg,
+      bestChapter,
+      finalScore,
+      defaultCp
+    };
+  }
   function isAcademicTeachingAssignment(a) {
     if (!a) return false;
     return a.startsWith('GURU_KELAS_') || a.startsWith('GURU_MAPEL_');
@@ -666,6 +702,8 @@
     getStudentNisn,
     formatStudentIdentity,
     getClassPhase,
-    hasAnyUnit
+    hasAnyUnit,
+    getAttendanceSchedule,
+    calculateGradeSummary
   });
 })();
