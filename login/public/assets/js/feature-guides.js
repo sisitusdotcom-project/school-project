@@ -124,7 +124,7 @@ const FeatureGuides = {
       from: 'Guru Pengampu Mata Pelajaran / Kelas',
       to: 'Waka Kurikulum (Verifikator) & Guru Mandiri',
       rel: 'curriculum/documents (Status: Draft -> Diajukan -> Disetujui/Perlu Revisi)',
-      usage: 'Guru mengunggah tautan modul ajar miliknya; Kurikulum memeriksa berkas dan menyematkan status ACC atau catatan revisi.'
+      usage: 'Guru mengunggah berkas modul ajar langsung dari perangkat; Kurikulum memeriksa berkas dan menyematkan status ACC atau catatan revisi.'
     },
     '#/curriculum/monitoring': {
       func: 'Pemantauan keterlaksanaan KBM harian, ketepatan waktu masuk guru, dan penanganan jam kelas kosong.',

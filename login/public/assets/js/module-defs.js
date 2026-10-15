@@ -384,7 +384,7 @@
         num('hours', 'Jam Pelajaran'),
         t('certificateNo', 'No. Sertifikat'),
         sel('status', 'Status', ['Direncanakan', 'Berjalan', 'Selesai'], { required: true }),
-        link('certificateUrl', 'Tautan Sertifikat')
+        file('certificateUrl', 'Berkas Sertifikat Pelatihan', 'personnel_certificates', { accept: '.pdf,image/*' })
       ]
     },
     '#/personnel/welfare': {
@@ -700,7 +700,7 @@
     },
     '#/finance/archives': {
       node: 'finance/archives', noun: 'Arsip Bukti Transaksi', writeRoles: FI, dateField: 'date',
-      subtitle: 'Register dokumen bukti transaksi dengan tautan berkas.',
+      subtitle: 'Register dokumen bukti transaksi dengan unggahan berkas.',
       summary: [
         { label: 'Total Dokumen', icon: 'ph-archive-box', tone: 'primary' },
         { label: 'Total Nilai', icon: 'ph-wallet', tone: 'warning', sum: 'amount', money: true }
@@ -711,7 +711,7 @@
         sel('docType', 'Jenis', ['Kuitansi', 'Nota', 'Faktur', 'SPJ', 'Lainnya'], { required: true }),
         t('title', 'Perihal', { required: true }),
         money('amount', 'Nominal'),
-        link('fileUrl', 'Tautan Berkas (Drive)'),
+        file('fileUrl', 'Berkas Bukti Transaksi', 'finance_archives', { accept: '.pdf,image/*' }),
         area('note', 'Catatan')
       ]
     },
@@ -783,7 +783,7 @@
         sel('docType', 'Jenis Perangkat', ['Modul Ajar / RPP', 'Alur Tujuan Pembelajaran (ATP)', 'Program Tahunan (Prota)', 'Program Semester (Promes)', 'Silabus'], { required: true }),
         t('semester', 'Semester / Tahun Ajaran', { required: true }),
         sel('status', 'Status Verifikasi Kurikulum', ['Draft', 'Diajukan', 'Disetujui (ACC)', 'Perlu Revisi'], { required: true, default: 'Diajukan' }),
-        link('fileUrl', 'Tautan Berkas Modul (Drive/PDF)', { required: true }),
+        file('fileUrl', 'Berkas Modul / Perangkat Ajar', 'curriculum_syllabus', { required: true, accept: '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,image/*' }),
         area('note', 'Catatan Guru / Materi Pokok'),
         area('reviewerFeedback', 'Catatan Peninjau / Revisi Kurikulum')
       ]

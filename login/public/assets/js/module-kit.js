@@ -23,13 +23,30 @@ const ModuleKit = {
       return DB.getAllStudents();
     },
     class: () => DB.getClasses(),
-    subject: async () => {
-      const [subjects, ekskuls] = await Promise.all([DB.getSubjects(), DB.getExtracurriculars()]);
-      const out = { ...(subjects || {}) };
-      Object.entries(ekskuls || {}).forEach(([id, e]) => {
-        if (e) out[id] = { name: `[Ekskul] ${e.name}`, category: 'ekskul' };
+    subject: async (ctx) => {
+      const [subjects, classes] = await Promise.all([DB.getSubjects(), DB.getClasses()]);
+      const subMap = subjects || {};
+      if (ctx && ctx.meta) {
+        ctx.meta.allSubjects = subMap;
+        ctx.meta.classes = classes || {};
+      }
+      const isPriv = ctx && (ctx.admin || (typeof ModuleKit !== 'undefined' && ModuleKit.isPrivileged && ModuleKit.isPrivileged()));
+      if (isPriv) return subMap;
+      const uid = ctx ? ctx.uid : '';
+      const mySubjectIds = new Set();
+      Object.values(classes || {}).forEach((cls) => {
+        if (cls && cls.subjectTeachers) {
+          Object.entries(cls.subjectTeachers).forEach(([subId, tUid]) => {
+            if (tUid === uid) mySubjectIds.add(subId);
+          });
+        }
       });
-      return out;
+      if (!mySubjectIds.size) return subMap;
+      const filtered = {};
+      mySubjectIds.forEach((sid) => {
+        if (subMap[sid]) filtered[sid] = subMap[sid];
+      });
+      return Object.keys(filtered).length ? filtered : subMap;
     },
     user: async () => {
       const users = await DB.getAllUsers();
@@ -191,7 +208,9 @@ const ModuleKit = {
     if (field.type === 'multi') return `${Object.keys(value || {}).length} siswa`;
     if (field.ref) {
       if (row[`${field.key}Name`]) return this.esc(row[`${field.key}Name`]);
-      return this.esc((refs[field.ref] || {})[value] || '-');
+      const metaSubs = refs.__ctx?.meta?.allSubjects;
+      const refName = (refs[field.ref] || {})[value] || (metaSubs && metaSubs[value] ? metaSubs[value].name : '') || '-';
+      return this.esc(refName);
     }
     if (field.key === def.statusField && value) {
       const tone = (def.badges || {})[value] || 'warning';
@@ -202,8 +221,9 @@ const ModuleKit = {
       const text = String(value || '-');
       return this.esc(text.length > 80 ? `${text.slice(0, 80)}...` : text);
     }
-    if (field.type === 'link' && value) {
-      return `<a href="${this.esc(value)}" target="_blank" rel="noopener noreferrer">Buka</a>`;
+    if (field.type === 'file' || field.type === 'link') {
+      if (!value) return '<span class="text-muted">-</span>';
+      return `<button type="button" class="btn btn-sm btn-outline mk-preview-btn" data-preview-url="${this.esc(value)}" data-preview-title="${this.esc(row.title || row.docType || field.label || 'Berkas')}"><i class="ph ph-file-text"></i> Lihat Berkas</button>`;
     }
     return this.esc(value === undefined || value === '' ? '-' : value);
   },
@@ -212,6 +232,7 @@ const ModuleKit = {
     if (field.type === 'timestamp') return this.fmtStamp(value);
     if (field.type === 'multi') return Object.keys(value || {}).map((id) => (refs[field.ref] || {})[id] || id).join(', ');
     if (field.ref) return row[`${field.key}Name`] || (refs[field.ref] || {})[value] || '-';
+    if (field.type === 'file' || field.type === 'link') return value || '-';
     return value === undefined || value === '' ? '-' : value;
   },
   matchWhere(row, where) {
@@ -341,6 +362,13 @@ const ModuleKit = {
       });
     };
     paint();
+    container.addEventListener('click', (e) => {
+      const pBtn = e.target.closest('[data-preview-url]');
+      if (pBtn) {
+        e.preventDefault();
+        this.showFilePreview(pBtn.dataset.previewUrl, pBtn.dataset.previewTitle || 'Berkas');
+      }
+    });
     container.querySelector('#mk-search').addEventListener('input', (e) => {
       state.q = e.target.value.trim();
       paint();
@@ -384,6 +412,18 @@ const ModuleKit = {
           });
           return;
         }
+        if (f.type === 'file') {
+          const fileInput = form.querySelector(`#mk-f-${f.key}_file`);
+          if (fileInput) fileInput.value = '';
+          const curEl = form.querySelector(`#mk-f-${f.key}_current`);
+          if (curEl) {
+            if (row && row[f.key]) {
+              curEl.innerHTML = `<div class="mk-file-badge"><span class="text-success"><i class="ph ph-check-circle"></i> Berkas tersimpan</span><button type="button" class="btn btn-xs btn-outline" data-preview-url="${this.esc(row[f.key])}" data-preview-title="${this.esc(row.title || row.docType || f.label || 'Berkas')}"><i class="ph ph-eye"></i> Lihat Berkas</button></div>`;
+            } else {
+              curEl.innerHTML = '';
+            }
+          }
+        }
         el.value = value === undefined || value === null ? '' : value;
       });
       const isApprover = this.isApprover(def);
@@ -404,6 +444,35 @@ const ModuleKit = {
           tf.disabled = true;
         } else {
           tf.disabled = false;
+        }
+      }
+      const sfSub = form.querySelector('#mk-f-subjectId');
+      if (sfSub) {
+        const activeTeacherId = tf ? tf.value : (row ? (row.teacherId || uid) : uid);
+        const updateSubjectOptions = (tId) => {
+          const allSubjects = refs.__ctx?.meta?.allSubjects || refs.subject || {};
+          const classes = refs.__ctx?.meta?.classes || {};
+          let allowedIds = null;
+          if (tId && !isApprover) {
+            const taught = new Set();
+            Object.values(classes).forEach((cls) => {
+              if (cls && cls.subjectTeachers) {
+                Object.entries(cls.subjectTeachers).forEach(([subId, tUid]) => {
+                  if (tUid === tId) taught.add(subId);
+                });
+              }
+            });
+            if (taught.size > 0) allowedIds = taught;
+          }
+          const entries = Object.entries(allSubjects).filter(([id]) => !allowedIds || allowedIds.has(id));
+          entries.sort((a, b) => String(a[1].name || a[1]).localeCompare(String(b[1].name || b[1])));
+          const curVal = row ? (row.subjectId || '') : sfSub.value;
+          sfSub.innerHTML = '<option value="">-- Pilih --</option>' + entries.map(([id, s]) => `<option value="${this.esc(id)}">${this.esc(s.name || s)}</option>`).join('');
+          if (curVal && entries.some(([id]) => id === curVal)) sfSub.value = curVal;
+        };
+        updateSubjectOptions(activeTeacherId);
+        if (tf && isApprover) {
+          tf.onchange = () => updateSubjectOptions(tf.value);
         }
       }
       const rf = form.querySelector('#mk-f-reviewerFeedback');
@@ -578,8 +647,7 @@ const ModuleKit = {
     } else if (field.type === 'textarea') {
       control = `<textarea id="${id}" rows="3"${req}${dis}></textarea>`;
     } else if (field.type === 'file') {
-      control = `<input type="hidden" id="${id}"><input type="file" id="${id}_file" accept="${field.accept || '*/*'}">
-      <small class="text-muted d-block mt-1">Pilih file baru untuk mengunggah (maks 5MB).</small>`;
+      control = `<div class="mk-file-box"><input type="hidden" id="${id}"><input type="file" id="${id}_file" class="mk-file-input" accept="${field.accept || '*/*'}"><div class="mk-file-hint text-muted"><i class="ph ph-upload-simple"></i> Unggah berkas dari perangkat (PDF, Dokumen, atau Gambar)</div><div id="${id}_current" class="mk-file-current"></div></div>`;
     } else {
       const type = ['number', 'money'].includes(field.type) ? 'number' : (['date', 'time'].includes(field.type) ? field.type : 'text');
       const min = type === 'number' ? ' min="0" step="any"' : '';
@@ -800,5 +868,47 @@ const ModuleKit = {
       doc.save(`BKU_${state.month}.pdf`);
     });
     await load();
+  },
+  showFilePreview(rawUrl, title = 'Pratinjau Berkas') {
+    if (!rawUrl) return;
+    const url = rawUrl.trim();
+    const driveMatch = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/) || url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+    const driveId = driveMatch ? driveMatch[1] : null;
+    const isImage = /\.(jpg|jpeg|png|webp|gif|bmp)(\?.*)?$/i.test(url) || url.startsWith('data:image/');
+    let contentHtml = '';
+    if (isImage) {
+      const imgSrc = typeof DriveBridge !== 'undefined' ? DriveBridge.normalizeDriveImageUrl(url, 'w1200', url) : url;
+      contentHtml = `<div class="mk-preview-img-wrap"><img src="${this.esc(imgSrc)}" alt="${this.esc(title)}" class="mk-preview-img"></div>`;
+    } else if (driveId) {
+      contentHtml = `<div class="mk-preview-frame-wrap"><iframe src="https://drive.google.com/file/d/${this.esc(driveId)}/preview" class="mk-preview-frame" allow="autoplay"></iframe></div>`;
+    } else if (/\.pdf(\?.*)?$/i.test(url)) {
+      contentHtml = `<div class="mk-preview-frame-wrap"><iframe src="${this.esc(url)}" class="mk-preview-frame"></iframe></div>`;
+    } else {
+      contentHtml = `<div class="mk-preview-fallback"><i class="ph ph-file-arrow-down mk-preview-fallback-icon"></i><p class="text-muted">Pratinjau langsung tidak tersedia untuk format berkas ini.</p><a href="${this.esc(url)}" target="_blank" rel="noopener noreferrer" class="btn btn-primary"><i class="ph ph-arrow-square-out"></i> Buka / Unduh Berkas</a></div>`;
+    }
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay mk-preview-overlay active';
+    modal.innerHTML = `
+      <div class="modal modal-wide mk-preview-modal">
+        <div class="modal-header">
+          <h3 class="modal-title"><i class="ph ph-file-text"></i> ${this.esc(title)}</h3>
+          <button class="btn-icon" type="button" data-close-preview="1"><i class="ph ph-x"></i></button>
+        </div>
+        <div class="modal-body mk-preview-body">
+          ${contentHtml}
+        </div>
+        <div class="modal-footer">
+          <a href="${this.esc(url)}" target="_blank" rel="noopener noreferrer" class="btn btn-outline"><i class="ph ph-arrow-square-out"></i> Buka di Tab Baru</a>
+          <button type="button" class="btn btn-primary" data-close-preview="1">Tutup</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    modal.querySelectorAll('[data-close-preview]').forEach((el) => {
+      el.onclick = () => modal.remove();
+    });
+    modal.onclick = (e) => {
+      if (e.target === modal) modal.remove();
+    };
   }
 };
