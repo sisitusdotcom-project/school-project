@@ -139,9 +139,13 @@ const CurriculumPages = {
         btn.disabled = true;
         btn.innerHTML = '<i class="ph ph-spinner"></i> Menyimpan...';
         try {
+          const yearVal = document.getElementById('set-year').value.trim();
+          const semVal = document.getElementById('set-sem').value;
           await DB.updateSettings({
-            currentAcademicYear: document.getElementById('set-year').value.trim(),
-            currentSemester: document.getElementById('set-sem').value
+            academicYear: yearVal,
+            currentAcademicYear: yearVal,
+            semester: semVal === '2' ? 'Genap' : 'Ganjil',
+            currentSemester: semVal
           });
           btn.innerHTML = '<i class="ph ph-check"></i> Berhasil Disimpan';
         } catch (error) {

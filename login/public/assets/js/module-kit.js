@@ -177,7 +177,8 @@ const ModuleKit = {
   async loadRefs(def) {
     const kinds = [...new Set((def.fields || []).filter((f) => f.ref).map((f) => f.ref))];
     const ctx = { uid: Auth.currentUser ? Auth.currentUser.uid : '', admin: this.isPrivileged(def), meta: { studentClass: {} } };
-    const refs = {};
+    const [settings] = await Promise.all([DB.getSettings()]);
+    const refs = { __settings: settings };
     await Promise.all(kinds.map(async (kind) => {
       const data = (await this.REF_LOADERS[kind](ctx)) || {};
       refs[kind] = {};
@@ -404,7 +405,16 @@ const ModuleKit = {
       container.querySelector('#mk-modal-title').textContent = `${row ? 'Ubah' : 'Tambah'} ${def.noun || title}`;
       def.fields.forEach((f) => {
         const el = form.querySelector(`#mk-f-${f.key}`);
-        const value = row ? row[f.key] : (f.default !== undefined ? f.default : (f.type === 'date' ? this.today() : ''));
+        let value = row ? row[f.key] : (f.default !== undefined ? f.default : (f.type === 'date' ? this.today() : ''));
+        if (f.key === 'semester' && refs.__settings) {
+          const s = refs.__settings;
+          const y = s.currentAcademicYear || s.academicYear || '2026/2027';
+          const sem = (s.currentSemester === '2' || s.semester === 'Genap') ? 'Semester 2 (Genap)' : 'Semester 1 (Ganjil)';
+          const otherSem = sem === 'Semester 1 (Ganjil)' ? 'Semester 2 (Genap)' : 'Semester 1 (Ganjil)';
+          const opts = [`${sem} - T.A. ${y}`, `${otherSem} - T.A. ${y}`, `1 Tahun Penuh - T.A. ${y}`];
+          el.innerHTML = opts.map((o) => `<option value="${this.esc(o)}">${this.esc(o)}</option>`).join('');
+          if (!row) value = `${sem} - T.A. ${y}`;
+        }
         if (f.type === 'multi') {
           const chosen = value && typeof value === 'object' ? value : {};
           el.querySelectorAll('input[type="checkbox"]').forEach((cb) => {
@@ -643,7 +653,19 @@ const ModuleKit = {
       const options = Object.entries(refs[field.ref] || {}).sort((a, b) => String(a[1]).localeCompare(String(b[1])));
       control = `<select id="${id}"${req}${dis}><option value="">-- Pilih --</option>${options.map(([k, label]) => `<option value="${this.esc(k)}">${this.esc(label)}</option>`).join('')}</select>`;
     } else if (field.type === 'select') {
-      control = `<select id="${id}"${req}${dis}>${field.required ? '' : '<option value="">-- Pilih --</option>'}${this.optionList(field).map((o) => `<option value="${this.esc(o.value)}">${this.esc(o.label)}</option>`).join('')}</select>`;
+      let options = this.optionList(field);
+      if (field.key === 'semester' && (!options || !options.length) && refs.__settings) {
+        const s = refs.__settings;
+        const y = s.currentAcademicYear || s.academicYear || '2026/2027';
+        const sem = (s.currentSemester === '2' || s.semester === 'Genap') ? 'Semester 2 (Genap)' : 'Semester 1 (Ganjil)';
+        const otherSem = sem === 'Semester 1 (Ganjil)' ? 'Semester 2 (Genap)' : 'Semester 1 (Ganjil)';
+        options = [
+          { value: `${sem} - T.A. ${y}`, label: `${sem} - T.A. ${y}` },
+          { value: `${otherSem} - T.A. ${y}`, label: `${otherSem} - T.A. ${y}` },
+          { value: `1 Tahun Penuh - T.A. ${y}`, label: `1 Tahun Penuh - T.A. ${y}` }
+        ];
+      }
+      control = `<select id="${id}"${req}${dis}>${field.required ? '' : '<option value="">-- Pilih --</option>'}${options.map((o) => `<option value="${this.esc(o.value)}">${this.esc(o.label)}</option>`).join('')}</select>`;
     } else if (field.type === 'textarea') {
       control = `<textarea id="${id}" rows="3"${req}${dis}></textarea>`;
     } else if (field.type === 'file') {

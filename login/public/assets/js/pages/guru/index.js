@@ -1688,7 +1688,7 @@ const GuruPages = {
               <div class="quick-nav-icon"><i class="ph ph-upload-simple"></i></div>
               <div class="quick-nav-info">
                 <div class="quick-nav-title">Perangkat & Modul Ajar</div>
-                <div class="quick-nav-desc">Unggah modul ajar, silabus & panduan materi</div>
+                <div class="quick-nav-desc">Unggah modul ajar, ATP, prota & promes</div>
               </div>
             </a>
             <a href="#/guru/portfolio" class="quick-nav-card">

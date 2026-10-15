@@ -381,9 +381,16 @@
   function normalizeSettings(rawSettings = {}) {
     const source = rawSettings || {};
     const attendanceRules = source.attendanceRules || {};
+    const currentAcademicYear = source.currentAcademicYear || source.academicYear || DEFAULT_SETTINGS.currentAcademicYear;
+    const currentSemester = source.currentSemester || (source.semester === 'Genap' || source.semester === '2' ? '2' : '1');
+    const semesterName = currentSemester === '2' ? 'Genap' : 'Ganjil';
     return {
       ...DEFAULT_SETTINGS,
       ...source,
+      academicYear: currentAcademicYear,
+      currentAcademicYear,
+      currentSemester,
+      semester: semesterName,
       attendanceRules: {
         ...DEFAULT_SETTINGS.attendanceRules,
         ...attendanceRules

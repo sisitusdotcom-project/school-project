@@ -780,8 +780,8 @@
       fields: [
         ref('teacherId', 'Guru Pengunggah', 'teacher', { required: true }),
         ref('subjectId', 'Mata Pelajaran', 'subject', { required: true }),
-        sel('docType', 'Jenis Perangkat', ['Modul Ajar / RPP', 'Alur Tujuan Pembelajaran (ATP)', 'Program Tahunan (Prota)', 'Program Semester (Promes)', 'Silabus'], { required: true }),
-        t('semester', 'Semester / Tahun Ajaran', { required: true }),
+        sel('docType', 'Jenis Perangkat', ['Modul Ajar / RPP', 'Alur Tujuan Pembelajaran (ATP)', 'Program Tahunan (Prota)', 'Program Semester (Promes)'], { required: true }),
+        sel('semester', 'Semester / Tahun Ajaran', [], { required: true }),
         sel('status', 'Status Verifikasi Kurikulum', ['Draft', 'Diajukan', 'Disetujui (ACC)', 'Perlu Revisi'], { required: true, default: 'Diajukan' }),
         file('fileUrl', 'Berkas Modul / Perangkat Ajar', 'curriculum_syllabus', { required: true, accept: '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,image/*' }),
         area('note', 'Catatan Guru / Materi Pokok'),
