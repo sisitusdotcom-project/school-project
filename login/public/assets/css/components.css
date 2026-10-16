@@ -2290,10 +2290,17 @@ padding: 14px;
 .payroll-tab-nav{display:inline-flex;gap:8px;border-bottom:1px solid var(--border,#e5e7eb);padding-bottom:10px;margin-bottom:16px;width:100%;}
 .payroll-tab-btn{background:none;border:none;padding:8px 16px;font-size:13.5px;font-weight:600;color:var(--text-muted,#6b7280);cursor:pointer;border-radius:6px;}
 .payroll-tab-btn.active{background:var(--primary-subtle,#eff6ff);color:var(--primary,#2563eb);}
-.salary-slip-sheet{background:#fff;border:1px solid var(--border,#e5e7eb);border-radius:var(--radius-md,8px);padding:24px;max-width:760px;margin:0 auto;box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);min-width:0;width:100%;box-sizing:border-box;}
-.salary-slip-brand{display:flex;align-items:center;gap:16px;border-bottom:2px solid #1f2937;padding-bottom:16px;margin-bottom:16px;min-width:0;}
-.salary-slip-logo{width:56px;height:56px;object-fit:contain;flex-shrink:0;}
-.salary-slip-title{font-size:16px;font-weight:700;margin:0;color:#111827;text-transform:uppercase;letter-spacing:0.5px;}
+.salary-slip-sheet{background:#fff;border:1px solid var(--border,#e5e7eb);border-radius:var(--radius-md,8px);padding:24px 28px;max-width:780px;margin:0 auto;box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);min-width:0;width:100%;box-sizing:border-box;}
+.salary-slip-brand{display:flex;align-items:center;gap:18px;border-bottom:3px double #111827;padding-bottom:12px;margin-bottom:14px;min-width:0;}
+.salary-slip-logo{width:68px;height:68px;object-fit:contain;flex-shrink:0;}
+.salary-slip-brand-text{flex:1;min-width:0;text-align:center;}
+.salary-slip-org{font-size:11px;font-weight:700;color:#4b5563;text-transform:uppercase;letter-spacing:0.5px;line-height:1.2;margin:0 0 2px 0;}
+.salary-slip-pcm{font-size:10.5px;font-weight:700;color:#4b5563;text-transform:uppercase;letter-spacing:0.5px;line-height:1.2;margin:0 0 2px 0;}
+.salary-slip-title{font-size:18px;font-weight:800;margin:0 0 2px 0;color:#111827;text-transform:uppercase;letter-spacing:0.8px;}
+.salary-slip-meta{font-size:10.5px;color:#6b7280;margin:1px 0 0 0;line-height:1.3;}
+.salary-slip-doc-header{text-align:center;margin-bottom:16px;}
+.salary-slip-doc-title{font-size:13.5px;font-weight:700;color:#111827;text-transform:uppercase;letter-spacing:0.5px;margin:0 0 2px 0;text-decoration:underline;}
+.salary-slip-doc-sub{font-size:11.5px;color:#4b5563;margin:0;}
 .salary-slip-sub{font-size:12px;color:#4b5563;margin:2px 0 0 0;}
 .salary-slip-info{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 18px;margin-bottom:18px;font-size:12.5px;background:#f9fafb;padding:12px 14px;border-radius:6px;border:1px solid #f3f4f6;}
 .salary-slip-info>*{min-width:0;}
@@ -2352,10 +2359,17 @@ html,body{background:#fff !important;color:#000 !important;margin:0 !important;p
 .page-body,#page-container{margin:0 !important;padding:0 !important;width:100% !important;overflow:visible !important;}
 .mobile-header,#sidebar,.sidebar,.sidebar-backdrop,.page-header,.page-actions,.feature-guide-card,.feature-guide-toggle,.salary-slip-actions,.salary-slip-notice,#login-view,#app-loading,.modal-overlay,.fullscreen-overlay,.notification-panel{display:none !important;}
 .salary-slip-sheet{display:block !important;position:relative !important;width:100% !important;max-width:100% !important;margin:0 !important;padding:12px 16px !important;border:1px solid #111827 !important;border-radius:4px !important;box-shadow:none !important;background:#fff !important;page-break-inside:avoid !important;}
-.salary-slip-brand{display:flex !important;align-items:center !important;gap:16px !important;border-bottom:2px solid #111827 !important;padding-bottom:12px !important;margin-bottom:14px !important;}
-.salary-slip-logo{width:52px !important;height:52px !important;object-fit:contain !important;}
-.salary-slip-title{font-size:16px !important;font-weight:700 !important;color:#000 !important;letter-spacing:0.5px !important;margin:0 !important;}
-.salary-slip-sub{font-size:11.5px !important;color:#374151 !important;margin:2px 0 0 0 !important;}
+.salary-slip-brand{display:flex !important;align-items:center !important;gap:16px !important;border-bottom:3px double #000 !important;padding-bottom:10px !important;margin-bottom:12px !important;}
+.salary-slip-logo{width:62px !important;height:62px !important;object-fit:contain !important;}
+.salary-slip-brand-text{flex:1 !important;text-align:center !important;}
+.salary-slip-org{font-size:10.5px !important;font-weight:700 !important;color:#000 !important;text-transform:uppercase !important;margin:0 0 1px 0 !important;}
+.salary-slip-pcm{font-size:10px !important;font-weight:700 !important;color:#000 !important;text-transform:uppercase !important;margin:0 0 1px 0 !important;}
+.salary-slip-title{font-size:17px !important;font-weight:800 !important;color:#000 !important;letter-spacing:0.8px !important;margin:0 0 2px 0 !important;}
+.salary-slip-meta{font-size:9.5px !important;color:#1f2937 !important;margin:1px 0 0 0 !important;line-height:1.25 !important;}
+.salary-slip-doc-header{text-align:center !important;margin-bottom:12px !important;}
+.salary-slip-doc-title{font-size:13px !important;font-weight:700 !important;color:#000 !important;text-transform:uppercase !important;margin:0 0 2px 0 !important;text-decoration:underline !important;}
+.salary-slip-doc-sub{font-size:11px !important;color:#000 !important;margin:0 !important;}
+.salary-slip-sub{font-size:11px !important;color:#374151 !important;margin:2px 0 0 0 !important;}
 .salary-slip-info{display:grid !important;grid-template-columns:repeat(2,minmax(0,1fr)) !important;gap:6px 16px !important;background:#f9fafb !important;border:1px solid #d1d5db !important;padding:10px 14px !important;margin-bottom:14px !important;font-size:11.5px !important;}
 .salary-slip-info-row{display:flex !important;gap:4px !important;min-width:0 !important;}
 .salary-slip-label{color:#4b5563 !important;width:125px !important;flex-shrink:0 !important;font-weight:500 !important;}

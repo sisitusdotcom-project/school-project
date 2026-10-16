@@ -2838,12 +2838,18 @@ container.innerHTML = `
 <i class="ph ph-info"></i> <strong>Informasi Penggajian:</strong> ${AppConfig.escapeHtml(slip.noticeText)}
 </div>
 <div class="salary-slip-brand">
-<img src="assets/images/logo-musada.png" alt="Logo Sekolah" class="salary-slip-logo" onerror="this.style.display='none'">
-<div>
+<img src="assets/img/logo.webp" alt="Logo SD Muhammadiyah 1 Sedati" class="salary-slip-logo" onerror="this.src='../../assets/img/logo/logo.webp'">
+<div class="salary-slip-brand-text">
+<div class="salary-slip-org">MAJELIS PENDIDIKAN DASAR MENENGAH DAN PENDIDIKAN NONFORMAL</div>
+<div class="salary-slip-pcm">PIMPINAN CABANG MUHAMMADIYAH SEDATI</div>
 <h2 class="salary-slip-title">SD MUHAMMADIYAH 1 SEDATI</h2>
-<p class="salary-slip-sub">Surat Bukti Rincian Honorarium & Gaji Pendidik / Tenaga Kependidikan</p>
-<p class="salary-slip-sub">Periode: <strong>${cutoff.monthLabel}</strong> (${cutoff.cutoffLabel})</p>
+<p class="salary-slip-meta">Jl. H. Syukur No. 65, Sedati Gede, Kec. Sedati, Sidoarjo 61253 | Telp/WA: 0859-6439-9398</p>
+<p class="salary-slip-meta">Website: musada.sch.id | Email: sdmusada16@gmail.com</p>
 </div>
+</div>
+<div class="salary-slip-doc-header">
+<h3 class="salary-slip-doc-title">SURAT BUKTI RINCIAN HONORARIUM & GAJI PEGAWAI</h3>
+<p class="salary-slip-doc-sub">Periode: <strong>${cutoff.monthLabel}</strong> (${cutoff.cutoffLabel})</p>
 </div>
 <div class="salary-slip-info">
 <div class="salary-slip-info-row"><span class="salary-slip-label">Nama Pegawai</span><span class="salary-slip-sep">:</span><span class="salary-slip-val">${AppConfig.escapeHtml(slip.name)}</span></div>
