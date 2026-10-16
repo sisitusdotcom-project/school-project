@@ -22,7 +22,7 @@
     if (!window.speechSynthesis) return;
     try {
       window.speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(`Selamat datang di Perpustakaan Surya Pintar, ${nama}`);
+      const u = new SpeechSynthesisUtterance(`Selamat datang di MUSADA Library, ${nama}`);
       u.lang = 'id-ID';
       u.rate = 0.95;
       const voices = window.speechSynthesis.getVoices();
@@ -151,7 +151,7 @@
     document.getElementById('modalBookShelf').innerText = book.shelfCode || '-';
     document.getElementById('modalBookCode').innerText = book.code || '-';
     document.getElementById('modalBookStock').innerText = book.isEbook ? 'Tersedia Digital (Akses Online)' : `${book.stockAvailable} dari ${book.stockTotal} eksemplar`;
-    document.getElementById('modalBookDesc').innerText = book.description || 'Buku ini tersedia di Perpustakaan Surya Pintar SD Muhammadiyah 1 Sedati untuk dibaca atau dipinjam.';
+    document.getElementById('modalBookDesc').innerText = book.description || 'Buku ini tersedia di MUSADA Library SD Muhammadiyah 1 Sedati untuk dibaca atau dipinjam.';
     const btnRead = document.getElementById('btnReadEbook');
     const btnReserve = document.getElementById('btnReserveBook');
     if (btnRead) {

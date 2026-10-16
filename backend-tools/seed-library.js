@@ -171,7 +171,7 @@ async function run() {
     }
   }
   const settings = {
-    libraryName: 'Perpustakaan Surya Pintar',
+    libraryName: 'MUSADA Library',
     schoolName: 'SD Muhammadiyah 1 Sedati',
     tagline: 'Pusat Literasi Digital, Jendela Ilmu & Akhlak Mulia',
     openHours: 'Senin - Kamis: 07.00 - 15.00 WIB | Jumat: 07.00 - 11.00 WIB | Sabtu: 07.30 - 12.00 WIB',
