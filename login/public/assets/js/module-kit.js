@@ -363,13 +363,6 @@ const ModuleKit = {
       });
     };
     paint();
-    container.addEventListener('click', (e) => {
-      const pBtn = e.target.closest('[data-preview-url]');
-      if (pBtn) {
-        e.preventDefault();
-        this.showFilePreview(pBtn.dataset.previewUrl, pBtn.dataset.previewTitle || 'Berkas');
-      }
-    });
     container.querySelector('#mk-search').addEventListener('input', (e) => {
       state.q = e.target.value.trim();
       paint();
@@ -937,6 +930,7 @@ const ModuleKit = {
   },
   showFilePreview(rawUrl, title = 'Pratinjau Berkas') {
     if (!rawUrl) return;
+    document.querySelectorAll('.mk-preview-overlay').forEach((m) => m.remove());
     const url = rawUrl.trim();
     const driveMatch = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/) || url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
     const driveId = driveMatch ? driveMatch[1] : null;
@@ -969,12 +963,24 @@ const ModuleKit = {
         </div>
       </div>
     `;
-    document.body.appendChild(modal);
+    const closeModal = () => {
+      document.removeEventListener('keydown', keyHandler);
+      modal.remove();
+    };
+    const keyHandler = (e) => {
+      if (e.key === 'Escape') closeModal();
+    };
+    document.addEventListener('keydown', keyHandler);
     modal.querySelectorAll('[data-close-preview]').forEach((el) => {
-      el.onclick = () => modal.remove();
+      el.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        closeModal();
+      };
     });
     modal.onclick = (e) => {
-      if (e.target === modal) modal.remove();
+      if (e.target === modal) closeModal();
     };
+    document.body.appendChild(modal);
   }
 };

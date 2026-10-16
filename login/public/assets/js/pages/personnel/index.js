@@ -88,10 +88,10 @@ const PersonnelPages = {
           <div class="stat-icon stat-icon--warning"><i class="ph ph-briefcase"></i></div>
           <div><p class="stat-value">${tendikCount}</p><p class="stat-label text-muted">Tenaga Kependidikan</p></div>
         </div>
-        <div class="card stat-card">
+        <a href="#/admin/attendance" class="card stat-card" style="text-decoration:none; color:inherit;">
           <div class="stat-icon stat-icon--danger"><i class="ph ph-calendar-check"></i></div>
-          <div><p class="stat-value">${hadirToday} / ${totalGtk}</p><p class="stat-label text-muted">Presensi Masuk Hari Ini</p></div>
-        </div>
+          <div><p class="stat-value">${hadirToday} / ${totalGtk}</p><p class="stat-label text-muted">Presensi Masuk Hari Ini (Lihat Detail)</p></div>
+        </a>
       </section>
       <section class="card section-spacer">
         <div class="card-header">

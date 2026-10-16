@@ -1016,11 +1016,7 @@ radiusMeters: 50
 const APP_DEFAULTS = Object.freeze({
 googleDriveUploadUrl: 'https://script.google.com/macros/s/AKfycbwHNSb34p_FcX_dTQuw87viaZ9joh2rT3KdtMLBVvwpocWzyF3HICPUPRfPuy63LDsNsw/exec',
 attendanceWorkerUrl: 'https://musada-absensi.sisitusdotcom.workers.dev/',
-attendanceGeofence: Object.freeze({
-lat: -7.39827779479305,
-lng: 112.74845220581665,
-radiusMeters: 50
-})
+attendanceGeofence: ORIGINAL_SCHOOL_GEOFENCE
 });
 const runtimeConfig = {
 googleDriveUploadUrl: window.GOOGLE_DRIVE_UPLOAD_URL || APP_DEFAULTS.googleDriveUploadUrl,

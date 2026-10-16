@@ -1,6 +1,6 @@
 const ATTENDANCE_GEOFENCE = window.APP_ATTENDANCE_GEOFENCE || window.AppConfig?.attendanceGeofence || {
-lat: -7.39827779479305,
-lng: 112.74845220581665,
+lat: -7.378448579234777,
+lng: 112.75929775962251,
 radiusMeters: 50
 };
 const GuruPages = {
@@ -1265,9 +1265,9 @@ btn.disabled = false;
 async renderTeacherAttendance(container) {
 Router.setTitle('Presensi Kehadiran', 'Rekam kehadiran harian Anda di area sekolah.');
 const geofence = window.APP_ATTENDANCE_GEOFENCE || window.AppConfig?.attendanceGeofence || ATTENDANCE_GEOFENCE;
-const schoolLat = Number(geofence?.lat ?? -7.39827779479305);
-const schoolLng = Number(geofence?.lng ?? 112.74845220581665);
-const maxRadius = Number(geofence?.radiusMeters ?? 50);
+const schoolLat = Number(geofence?.lat ?? ATTENDANCE_GEOFENCE.lat);
+const schoolLng = Number(geofence?.lng ?? ATTENDANCE_GEOFENCE.lng);
+const maxRadius = Number(geofence?.radiusMeters ?? ATTENDANCE_GEOFENCE.radiusMeters);
 const maxAccuracy = 200;
 const hasLocalGeofence = Number.isFinite(schoolLat) && Number.isFinite(schoolLng) && Number.isFinite(maxRadius) && maxRadius > 0;
 const hostName = window.location.host;
@@ -1805,6 +1805,8 @@ btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Memproses...';
 try {
 const compressedProof = await compressImageDataUrl(capturedProofDataUrl, 1600, 0.82);
 const isUmmi = AppConfig.isUserUmmi(Auth.userData || Auth.currentUser);
+const lateInput = document.getElementById('attendance-late-reason-input');
+const lateReasonVal = (type === 'in' && lateInput) ? lateInput.value.trim() : '';
 const result = await DB.submitTeacherAttendanceToWorker({
 dateStr,
 teacherId,
@@ -1813,7 +1815,8 @@ photoDataUrl: compressedProof,
 location: currentLocation,
 accuracy: currentAccuracy,
 isUmmi,
-roleGroup: isUmmi ? 'ummi' : 'gtk'
+roleGroup: isUmmi ? 'ummi' : 'gtk',
+lateReason: lateReasonVal
 });
 const payload = type === 'in'
 ? { time_in: result.serverTimestamp ? new Date(result.serverTimestamp).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }), location_in: result.location || currentLocation }

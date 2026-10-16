@@ -206,7 +206,7 @@ const DB = {
     await this.saveTeacherAttendance(dateStr, teacherId, { proof_url: fileUrl });
     return fileUrl;
   },
-  async submitTeacherAttendanceToWorker({ dateStr, teacherId, type, photoDataUrl, location, accuracy, isUmmi, roleGroup }) {
+  async submitTeacherAttendanceToWorker({ dateStr, teacherId, type, photoDataUrl, location, accuracy, isUmmi, roleGroup, lateReason }) {
     const workerUrl = (window.CLOUDFLARE_ATTENDANCE_WORKER_URL || '').trim();
     if (!workerUrl || workerUrl.includes('your-subdomain')) {
       const fallbackProof = await this.saveTeacherAttendanceProof(dateStr, teacherId, photoDataUrl, 'image/jpeg');
@@ -214,7 +214,8 @@ const DB = {
         ...(type === 'in' ? { time_in: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) } : {}),
         ...(type === 'out' ? { time_out: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) } : {}),
         ...(location ? (type === 'in' ? { location_in: location } : { location_out: location }) : {}),
-        ...(fallbackProof ? { proof_url: fallbackProof } : {})
+        ...(fallbackProof ? { proof_url: fallbackProof } : {}),
+        ...(lateReason ? { late_reason: lateReason } : {})
       };
       await this.saveTeacherAttendance(dateStr, teacherId, payload);
       return { status: 'success', proof_url: fallbackProof, record: payload };
@@ -236,7 +237,8 @@ const DB = {
         accuracy,
         isUmmi: !!isUmmi,
         roleGroup: roleGroup || (isUmmi ? 'ummi' : 'gtk'),
-        clientTimestamp: new Date().toISOString()
+        clientTimestamp: new Date().toISOString(),
+        lateReason: lateReason || ''
       })
     });
     let result = {};

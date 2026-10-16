@@ -1480,7 +1480,7 @@ const lateReasonNote = att.late_reason ? `<br><small class="text-danger" style="
 lateBadge = isLate ? ` <span class="badge badge-warning">Terlambat</span>${lateReasonNote}` : ' <span class="badge badge-success">Tepat Waktu</span>';
 }
 const proofBtn = att.proof_url
-? `<button class="btn btn-outline btn-sm" data-proof-url="${att.proof_url}"><i class="ph ph-eye"></i> Lihat bukti</button>`
+? `<button type="button" class="btn btn-outline btn-sm mk-preview-btn" data-preview-url="${AppConfig.escapeHtml(att.proof_url)}" data-preview-title="Bukti Presensi ${AppConfig.escapeHtml(g.name)} (${selectedDailyDate})"><i class="ph ph-eye"></i> Lihat bukti</button>`
 : '<span class="text-muted">Tidak ada bukti</span>';
 return `
 <tr>
@@ -1641,32 +1641,6 @@ const btnPrint = document.getElementById('btn-print-recap');
 if (btnPrint) {
 btnPrint.onclick = () => window.print();
 }
-container.querySelectorAll('[data-proof-url]').forEach(btn => {
-btn.onclick = () => {
-const url = btn.dataset.proofUrl;
-const modal = document.createElement('div');
-modal.className = 'modal-overlay active';
-modal.innerHTML = `
-<div class="modal modal-wide">
-<div class="modal-header">
-<h3 class="modal-title">Bukti Presensi</h3>
-<button class="btn-icon" type="button" data-close-proof="1"><i class="ph ph-x"></i></button>
-</div>
-<div class="modal-body" style="text-align:center;">
-<img src="${DriveBridge.normalizeDriveImageUrl(url, 'w800', '')}" alt="Bukti presensi" style="max-width:100%; max-height:70vh; border-radius:10px; object-fit:contain; background:#f3f4f6;">
-</div>
-<div class="modal-footer">
-<a href="${DriveBridge.normalizeDriveImageUrl(url, 'w800', '')}" target="_blank" class="btn btn-primary">Buka ukuran penuh</a>
-<button type="button" class="btn btn-outline" data-close-proof="1">Tutup</button>
-</div>
-</div>
-`;
-document.body.appendChild(modal);
-modal.querySelectorAll('[data-close-proof]').forEach(el => {
-el.onclick = () => modal.remove();
-});
-};
-});
 };
 await renderContent();
 }

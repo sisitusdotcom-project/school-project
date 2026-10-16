@@ -80,7 +80,7 @@ const App = {
       if (guruAllowed.includes(path)) return true;
     }
     if (role === AppConfig.ROLES.KEPSEK) {
-      const kepsekPrefixes = ['#/dashboard', '#/attendance', '#/kepsek/', '#/curriculum', '#/student-affairs', '#/finance', '#/personnel', '#/facilities', '#/komite'];
+      const kepsekPrefixes = ['#/dashboard', '#/attendance', '#/admin/attendance', '#/kepsek/', '#/curriculum', '#/student-affairs', '#/finance', '#/personnel', '#/facilities', '#/komite'];
       if (kepsekPrefixes.some(p => path === p || path.startsWith(p + '/'))) return true;
     }
     if (role === AppConfig.ROLES.TENDIK) {
@@ -246,6 +246,16 @@ document.addEventListener('click', (e) => {
   const closeBtn = e.target.closest('[data-close-modal]');
   if (closeBtn) {
     App.closeModal(closeBtn.dataset.closeModal);
+    return;
+  }
+  const prevBtn = e.target.closest('[data-preview-url], [data-proof-url]');
+  if (prevBtn) {
+    e.preventDefault();
+    const url = prevBtn.dataset.previewUrl || prevBtn.dataset.proofUrl;
+    const title = prevBtn.dataset.previewTitle || 'Bukti Presensi / Berkas';
+    if (typeof ModuleKit !== 'undefined' && ModuleKit.showFilePreview) {
+      ModuleKit.showFilePreview(url, title);
+    }
   }
 });
 document.addEventListener('DOMContentLoaded', () => {
