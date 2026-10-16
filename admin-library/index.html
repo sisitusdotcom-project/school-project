@@ -1,680 +1,895 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MUSADA Library - Admin Dashboard</title>
-<link rel="apple-touch-icon" sizes="180x180" href="assets/img/favicon/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon/favicon-16x16.png">
-<link rel="icon" href="assets/img/favicon/favicon.ico">
-<script src="https://unpkg.com/html5-qrcode"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link rel="stylesheet" href="assets/css/style.css">
+  <meta charset="UTF-8">
+  <title>MUSADA Library - Admin Dashboard</title>
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/img/favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon/favicon-16x16.png">
+  <link rel="manifest" href="assets/img/favicon/site.webmanifest">
+  <link rel="icon" href="assets/img/favicon/favicon.ico">
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
-<div id="loginScreen" class="login-container">
-<div class="login-box">
-<div class="login-left">
-<div class="login-brand-group">
-<img src="assets/img/logo.webp" alt="Logo SD Muhammadiyah 1 Sedati" class="login-logo">
-<div class="login-brand-text">
-<h2 class="login-brand">MUSADA Library</h2>
-<p class="login-subbrand">SD Muhammadiyah 1 Sedati</p>
-</div>
-</div>
-<div class="analog-clock">
-<div class="clock-face">
-<div class="number number1"><span>1</span></div>
-<div class="number number2"><span>2</span></div>
-<div class="number number3"><span>3</span></div>
-<div class="number number4"><span>4</span></div>
-<div class="number number5"><span>5</span></div>
-<div class="number number6"><span>6</span></div>
-<div class="number number7"><span>7</span></div>
-<div class="number number8"><span>8</span></div>
-<div class="number number9"><span>9</span></div>
-<div class="number number10"><span>10</span></div>
-<div class="number number11"><span>11</span></div>
-<div class="number number12"><span>12</span></div>
-<div class="hand hour-hand" id="loginHourHand"></div>
-<div class="hand min-hand" id="loginMinHand"></div>
-<div class="hand second-hand" id="loginSecHand"></div>
-<div class="clock-center"></div>
-</div>
-</div>
-<div class="login-date" id="loginDateText">Memuat tanggal...</div>
-</div>
-<div class="login-right">
-<h3 class="login-welcome">Portal Petugas Perpustakaan</h3>
-<p class="login-instruction">Silakan masuk menggunakan akun pustakawan</p>
-<form id="loginForm">
-<div class="form-group">
-<label for="username">Username</label>
-<input type="text" id="username" name="username" placeholder="Masukkan username admin" required autofocus>
-</div>
-<div class="form-group">
-<label for="password">Password</label>
-<div class="password-wrapper">
-<input type="password" id="password" name="password" placeholder="Masukkan password" required>
-<button type="button" class="btn-toggle-password" id="btnTogglePassword" aria-label="Lihat Password">
-<i class="fas fa-eye" id="eyeIcon"></i>
-</button>
-</div>
-</div>
-<div class="login-actions">
-<button type="submit" class="btn-primary btn-login-submit"><i class="fas fa-sign-in-alt"></i> Masuk ke Dashboard</button>
-</div>
-</form>
-<div id="loginError" class="login-error-msg"></div>
-<div style="margin-top:20px; text-align:center;">
-<a href="https://library.musada.sch.id" style="font-size:13px; color:#2563EB; font-weight:600;"><i class="fas fa-arrow-left"></i> Kembali ke Portal Publik</a>
-</div>
-</div>
-</div>
-</div>
-<div id="dashboardScreen" class="dashboard-hidden">
-<div class="app-layout">
-<aside class="sidebar" id="mainSidebar">
-<div class="sidebar-brand">
-<img src="assets/img/logo.webp" alt="Logo" class="sidebar-logo">
-<div class="sidebar-brand-info">
-<h2 class="sidebar-title">MUSADA Library</h2>
-<div class="sidebar-subtitle">SD Muhammadiyah 1 Sedati</div>
-<div class="status-badge-sidebar"><i class="fas fa-circle"></i> Sistem Aktif (RTDB)</div>
-</div>
-</div>
-<nav class="sidebar-nav tabs">
-<button class="tab-btn active" data-tab="scanner"><i class="fas fa-qrcode"></i> Scanner</button>
-<button class="tab-btn" data-tab="statistik"><i class="fas fa-chart-bar"></i> Statistik</button>
-<button class="tab-btn" data-tab="transaksi"><i class="fas fa-exchange-alt"></i> Transaksi</button>
-<button class="tab-btn" data-tab="overdued"><i class="fas fa-exclamation-triangle"></i> Overdue</button>
-<button class="tab-btn" data-tab="anggota"><i class="fas fa-users"></i> Anggota</button>
-<button class="tab-btn" data-tab="buku"><i class="fas fa-book-open"></i> Buku</button>
-<button class="tab-btn" data-tab="qrgen"><i class="fas fa-print"></i> Cetak</button>
-<button class="tab-btn" data-tab="kunjungan"><i class="fas fa-calendar-check"></i> Kunjungan</button>
-<button class="tab-btn" data-tab="donasi"><i class="fas fa-hand-holding-heart"></i> Donasi</button>
-<button class="tab-btn" data-tab="admin"><i class="fas fa-user-cog"></i> Admin</button>
-</nav>
-<div class="sidebar-bottom">
-<div class="sidebar-clock" id="liveClock">
-<div class="analog-clock sidebar-analog-clock">
-<div class="clock-face">
-<div class="number number1"><span>1</span></div>
-<div class="number number2"><span>2</span></div>
-<div class="number number3"><span>3</span></div>
-<div class="number number4"><span>4</span></div>
-<div class="number number5"><span>5</span></div>
-<div class="number number6"><span>6</span></div>
-<div class="number number7"><span>7</span></div>
-<div class="number number8"><span>8</span></div>
-<div class="number number9"><span>9</span></div>
-<div class="number number10"><span>10</span></div>
-<div class="number number11"><span>11</span></div>
-<div class="number number12"><span>12</span></div>
-<div class="hand hour-hand" id="headerHourHand"></div>
-<div class="hand min-hand" id="headerMinHand"></div>
-<div class="hand second-hand" id="headerSecHand"></div>
-<div class="clock-center"></div>
-</div>
-</div>
-<div class="sidebar-date-container">
-<div class="sidebar-day-text" id="headerDayText">Memuat...</div>
-<div class="sidebar-date-text" id="headerDateText">Memuat waktu...</div>
-</div>
-</div>
-</div>
-</aside>
-<div class="main-wrapper">
-<header class="top-header">
-<div class="header-left">
-<button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle Menu"><i class="fas fa-bars"></i></button>
-<div class="header-breadcrumb">
-<span class="breadcrumb-item">Dashboard</span>
-<span class="breadcrumb-separator"><i class="fas fa-chevron-right"></i></span>
-<span class="breadcrumb-item active" id="currentTabTitle">Scanner</span>
-</div>
-</div>
-<div class="header-right">
-<a href="https://library.musada.sch.id" class="btn-public-preview" target="_blank" title="Buka Portal Publik"><i class="fas fa-globe"></i> Portal Publik</a>
-<div class="header-user-info">
-<span class="header-greeting" id="dynamicGreeting">Selamat pagi,</span>
-<span class="header-username" id="adminNameHeader">Admin</span>
-</div>
-<div class="header-user-avatar">
-<img src="assets/img/logo.webp" alt="Avatar Admin" id="headerAdminPhoto" class="avatar-img">
-</div>
-<button type="button" class="btn-logout" id="btnLogout" title="Keluar"><i class="fas fa-power-off"></i></button>
-</div>
-</header>
-<main class="content-area">
-<section id="tab-scanner" class="tab-pane active">
-<div class="scanner-grid">
-<div class="scanner-box">
-<div class="card-header-styled">
-<h3><i class="fas fa-camera"></i> Pemindai Barcode / QR Code</h3>
-<span class="status-indicator live"><i class="fas fa-circle"></i> Kamera Aktif</span>
-</div>
-<div class="scanner-view-wrapper">
-<div id="reader"></div>
-</div>
-<div class="scanner-manual-input">
-<input type="text" id="manualScanInput" placeholder="Ketik manual kode anggota / kode buku lalu tekan Enter...">
-<button type="button" id="btnManualScan" class="btn-primary"><i class="fas fa-search"></i> Proses</button>
-</div>
-</div>
-<div class="scanner-info-panel">
-<div class="card-info-box">
-<h4><i class="fas fa-user-circle"></i> Data Anggota Terpindai</h4>
-<div id="memberInfo" class="info-content-empty">Belum ada anggota yang dipindai</div>
-</div>
-<div class="card-info-box">
-<h4><i class="fas fa-book"></i> Data Buku Terpindai</h4>
-<div id="bookInfo" class="info-content-empty">Belum ada buku yang dipindai</div>
-</div>
-<div class="scanner-action-buttons">
-<button type="button" id="btnDirectBorrow" class="btn-success btn-lg" disabled><i class="fas fa-sign-out-alt"></i> Proses Peminjaman</button>
-<button type="button" id="btnDirectReturn" class="btn-warning btn-lg" disabled><i class="fas fa-sign-in-alt"></i> Proses Pengembalian</button>
-<button type="button" id="btnDirectVisit" class="btn-info btn-lg" disabled><i class="fas fa-user-check"></i> Catat Kunjungan</button>
-<button type="button" id="btnResetScan" class="btn-secondary"><i class="fas fa-redo"></i> Reset Scan</button>
-</div>
-</div>
-</div>
-</section>
-<section id="tab-statistik" class="tab-pane">
-<div class="stats-overview-grid">
-<div class="stat-card blue">
-<div class="stat-icon"><i class="fas fa-book"></i></div>
-<div class="stat-data">
-<h3 id="statCardTotalBuku">0</h3>
-<p>Total Judul Buku</p>
-</div>
-</div>
-<div class="stat-card green">
-<div class="stat-icon"><i class="fas fa-layer-group"></i></div>
-<div class="stat-data">
-<h3 id="statCardStokTersedia">0</h3>
-<p>Stok Tersedia</p>
-</div>
-</div>
-<div class="stat-card orange">
-<div class="stat-icon"><i class="fas fa-exchange-alt"></i></div>
-<div class="stat-data">
-<h3 id="statCardDipinjam">0</h3>
-<p>Buku Sedang Dipinjam</p>
-</div>
-</div>
-<div class="stat-card red">
-<div class="stat-icon"><i class="fas fa-clock"></i></div>
-<div class="stat-data">
-<h3 id="statCardOverdue">0</h3>
-<p>Peminjaman Overdue</p>
-</div>
-</div>
-<div class="stat-card teal">
-<div class="stat-icon"><i class="fas fa-users"></i></div>
-<div class="stat-data">
-<h3 id="statCardTotalAnggota">0</h3>
-<p>Total Anggota Terdaftar</p>
-</div>
-</div>
-<div class="stat-card purple">
-<div class="stat-icon"><i class="fas fa-walking"></i></div>
-<div class="stat-data">
-<h3 id="statCardKunjunganToday">0</h3>
-<p>Kunjungan Hari Ini</p>
-</div>
-</div>
-</div>
-</section>
-<section id="tab-transaksi" class="tab-pane">
-<div class="panel-card">
-<div class="panel-header">
-<h3><i class="fas fa-exchange-alt"></i> Riwayat Peminjaman & Pengembalian</h3>
-<div class="panel-actions">
-<button type="button" id="btnOpenBorrowModal" class="btn-primary"><i class="fas fa-plus"></i> Tambah Peminjaman</button>
-</div>
-</div>
-<div class="filter-bar">
-<input type="text" id="searchTransactionInput" class="form-control" placeholder="Cari no transaksi, kode anggota, atau kode buku...">
-<select id="filterTransactionStatus" class="form-control" style="max-width:180px;">
-<option value="ALL">Semua Status</option>
-<option value="DIPINJAM">Dipinjam</option>
-<option value="KEMBALI">Kembali</option>
-</select>
-</div>
-<div class="table-responsive">
-<table class="data-table">
-<thead>
-<tr>
-<th>No Transaksi</th>
-<th>Tgl Pinjam</th>
-<th>Kode Anggota</th>
-<th>Kode Buku</th>
-<th>Durasi</th>
-<th>Jatuh Tempo</th>
-<th>Tgl Kembali</th>
-<th>Status</th>
-<th>Aksi</th>
-</tr>
-</thead>
-<tbody id="transactionTableBody">
-<tr><td colspan="9" class="text-center">Memuat data transaksi...</td></tr>
-</tbody>
-</table>
-</div>
-</div>
-</section>
-<section id="tab-overdued" class="tab-pane">
-<div class="panel-card">
-<div class="panel-header">
-<h3><i class="fas fa-exclamation-triangle" style="color:#EF4444;"></i> Daftar Peminjaman Melewati Jatuh Tempo (Overdue)</h3>
-</div>
-<div class="table-responsive">
-<table class="data-table">
-<thead>
-<tr>
-<th>No Transaksi</th>
-<th>Peminjam</th>
-<th>Buku</th>
-<th>Tgl Pinjam</th>
-<th>Jatuh Tempo</th>
-<th>Hari Terlambat</th>
-<th>Denda</th>
-<th>Aksi</th>
-</tr>
-</thead>
-<tbody id="overdueTableBody">
-<tr><td colspan="8" class="text-center">Tidak ada peminjaman yang melewati jatuh tempo.</td></tr>
-</tbody>
-</table>
-</div>
-</div>
-</section>
-<section id="tab-anggota" class="tab-pane">
-<div class="panel-card">
-<div class="panel-header">
-<h3><i class="fas fa-users"></i> Bank Data Anggota Perpustakaan</h3>
-<div class="panel-actions">
-<button type="button" id="btnSyncFromMaster" class="btn-outline" title="Sinkronkan dengan data Siswa & GTK MUSADA"><i class="fas fa-sync-alt"></i> Sinkronisasi Siswa & GTK</button>
-<button type="button" id="btnOpenRombelModal" class="btn-outline"><i class="fas fa-graduation-cap"></i> Naik Kelas Rombel</button>
-<button type="button" id="btnOpenMemberModal" class="btn-primary"><i class="fas fa-plus"></i> Tambah Anggota</button>
-</div>
-</div>
-<div class="filter-bar">
-<input type="text" id="searchMemberInput" class="form-control" placeholder="Cari nama, kode anggota, atau kelas...">
-<select id="filterMemberType" class="form-control" style="max-width:160px;">
-<option value="ALL">Semua Kategori</option>
-<option value="Siswa">Siswa</option>
-<option value="GTK">GTK (Guru/Karyawan)</option>
-<option value="Umum">Umum / Wali Murid</option>
-</select>
-</div>
-<div class="table-responsive">
-<table class="data-table">
-<thead>
-<tr>
-<th>Kode</th>
-<th>Nama Lengkap</th>
-<th>Jenis Kelamin</th>
-<th>Kategori</th>
-<th>Keterangan / Kelas</th>
-<th>Status Cetak</th>
-<th>Aksi</th>
-</tr>
-</thead>
-<tbody id="memberTableBody">
-<tr><td colspan="7" class="text-center">Memuat data anggota...</td></tr>
-</tbody>
-</table>
-</div>
-</div>
-</section>
-<section id="tab-buku" class="tab-pane">
-<div class="panel-card">
-<div class="panel-header">
-<h3><i class="fas fa-book"></i> Bank Data Koleksi Buku & E-Book</h3>
-<div class="panel-actions">
-<button type="button" id="btnOpenBookModal" class="btn-primary"><i class="fas fa-plus"></i> Tambah Koleksi Buku</button>
-</div>
-</div>
-<div class="filter-bar">
-<input type="text" id="searchBookAdminInput" class="form-control" placeholder="Cari judul buku, pengarang, penerbit, nomor rak...">
-<select id="filterBookCategory" class="form-control" style="max-width:200px;">
-<option value="ALL">Semua Kategori</option>
-</select>
-</div>
-<div class="table-responsive">
-<table class="data-table">
-<thead>
-<tr>
-<th>Kode</th>
-<th>Rak</th>
-<th>Judul Buku</th>
-<th>Pengarang</th>
-<th>Penerbit</th>
-<th>Tahun</th>
-<th>Stok Tersedia</th>
-<th>Total</th>
-<th>Kategori</th>
-<th>Aksi</th>
-</tr>
-</thead>
-<tbody id="bookTableBody">
-<tr><td colspan="10" class="text-center">Memuat koleksi buku...</td></tr>
-</tbody>
-</table>
-</div>
-</div>
-</section>
-<section id="tab-qrgen" class="tab-pane">
-<div class="panel-card">
-<div class="panel-header">
-<h3><i class="fas fa-print"></i> Cetak Kartu Anggota & Barcode Label Buku</h3>
-<div class="panel-actions">
-<button type="button" id="btnPrintSelected" class="btn-primary"><i class="fas fa-print"></i> Cetak / Ekspor PDF</button>
-</div>
-</div>
-<div class="print-mode-selector">
-<label><input type="radio" name="printType" value="member" checked> Kartu Anggota</label>
-<label><input type="radio" name="printType" value="book"> Barcode Label Buku</label>
-</div>
-<div id="printPreviewContainer" class="print-preview-grid">
-<p class="text-muted">Pilih data untuk melihat pratinjau cetak barcode.</p>
-</div>
-</div>
-</section>
-<section id="tab-kunjungan" class="tab-pane">
-<div class="panel-card">
-<div class="panel-header">
-<h3><i class="fas fa-calendar-check"></i> Riwayat Presensi Kunjungan Perpustakaan</h3>
-</div>
-<div class="filter-bar">
-<input type="text" id="searchVisitInput" class="form-control" placeholder="Cari nama atau kode pengunjung...">
-<input type="date" id="filterVisitDate" class="form-control" style="max-width:180px;">
-</div>
-<div class="table-responsive">
-<table class="data-table">
-<thead>
-<tr>
-<th>Tanggal</th>
-<th>Waktu</th>
-<th>Kode Anggota</th>
-<th>Nama Pengunjung</th>
-<th>Kategori</th>
-<th>Tujuan Kunjungan</th>
-</tr>
-</thead>
-<tbody id="visitTableBody">
-<tr><td colspan="6" class="text-center">Memuat riwayat kunjungan...</td></tr>
-</tbody>
-</table>
-</div>
-</div>
-</section>
-<section id="tab-donasi" class="tab-pane">
-<div class="panel-card">
-<div class="panel-header">
-<h3><i class="fas fa-hand-holding-heart"></i> Manajemen & Verifikasi Donasi Publik</h3>
-</div>
-<div class="table-responsive">
-<table class="data-table">
-<thead>
-<tr>
-<th>Tanggal</th>
-<th>Tipe</th>
-<th>Nama Donatur</th>
-<th>Kontak</th>
-<th>Rincian Donasi</th>
-<th>Catatan</th>
-<th>Status</th>
-<th>Aksi</th>
-</tr>
-</thead>
-<tbody id="donationsTableBody">
-<tr><td colspan="8" class="text-center">Memuat daftar donasi...</td></tr>
-</tbody>
-</table>
-</div>
-</div>
-</section>
-<section id="tab-admin" class="tab-pane">
-<div class="admin-profile-layout">
-<div class="admin-profile-card">
-<div class="admin-avatar-large">
-<img src="assets/img/logo.webp" alt="Foto Admin" id="adminPhotoPreview" class="profile-photo-img">
-<div id="adminPhotoPlaceholder" class="profile-placeholder" style="display:none;"><i class="fas fa-user"></i></div>
-</div>
-<h3 id="adminDisplayNama">Admin MUSADA Library</h3>
-<p class="text-muted" id="adminDisplayUsername">admin</p>
-<p class="text-muted" id="adminDisplayEmail">admin@perpustakaan</p>
-<div style="margin-top:16px;">
-<label class="btn-outline btn-sm" for="photoUpload" style="cursor:pointer;"><i class="fas fa-camera"></i> Ganti Foto Profil</label>
-<input type="file" id="photoUpload" accept="image/*" style="display:none;">
-</div>
-</div>
-<div class="admin-settings-card">
-<div class="card-inner-section">
-<h4><i class="fas fa-user-edit"></i> Perbarui Data Profil</h4>
-<form id="updateProfileForm">
-<div class="form-group">
-<label for="updateNamaLengkap">Nama Lengkap</label>
-<input type="text" id="updateNamaLengkap" class="form-control" required>
-</div>
-<div class="form-group">
-<label for="updateEmail">Alamat Email</label>
-<input type="email" id="updateEmail" class="form-control" required>
-</div>
-<button type="submit" class="btn-primary"><i class="fas fa-save"></i> Simpan Perubahan Profil</button>
-</form>
-</div>
-<div class="card-inner-section" style="margin-top:24px; padding-top:20px; border-top:1px solid #E2E8F0;">
-<h4><i class="fas fa-key"></i> Ganti Password Akun</h4>
-<form id="changePasswordForm">
-<div class="form-group">
-<label for="oldPassword">Password Saat Ini</label>
-<input type="password" id="oldPassword" class="form-control" required>
-</div>
-<div class="form-group">
-<label for="newPassword">Password Baru</label>
-<input type="password" id="newPassword" class="form-control" required minlength="6">
-</div>
-<div class="form-group">
-<label for="confirmPassword">Konfirmasi Password Baru</label>
-<input type="password" id="confirmPassword" class="form-control" required minlength="6">
-</div>
-<button type="submit" class="btn-warning"><i class="fas fa-lock"></i> Ubah Password</button>
-</form>
-</div>
-</div>
-</div>
-</section>
-</main>
-</div>
-</div>
-</div>
-<div id="borrowModal" class="modal">
-<div class="modal-content">
-<div class="modal-header">
-<h2><i class="fas fa-sign-out-alt"></i> Peminjaman Buku</h2>
-<button type="button" class="modal-close" data-modal="borrowModal"><i class="fas fa-times"></i></button>
-</div>
-<form id="borrowForm">
-<div class="form-group">
-<label for="borrowMemberCode">Kode Anggota</label>
-<input type="text" id="borrowMemberCode" class="form-control" required placeholder="Contoh: S-001">
-</div>
-<div class="form-group">
-<label for="borrowBookCode">Kode Buku</label>
-<input type="text" id="borrowBookCode" class="form-control" required placeholder="Contoh: DA-1A-001">
-</div>
-<div class="form-group">
-<label for="borrowDuration">Durasi Peminjaman (Hari)</label>
-<input type="number" id="borrowDuration" class="form-control" value="7" min="1" max="30" required>
-</div>
-<div class="form-group">
-<label for="borrowNotes">Catatan (Opsional)</label>
-<input type="text" id="borrowNotes" class="form-control" placeholder="Keterangan tambahan...">
-</div>
-<div class="button-group">
-<button type="submit" class="btn-success"><i class="fas fa-check"></i> Simpan Peminjaman</button>
-<button type="button" class="btn-secondary modal-close" data-modal="borrowModal">Batal</button>
-</div>
-</form>
-</div>
-</div>
-<div id="returnModal" class="modal">
-<div class="modal-content">
-<div class="modal-header">
-<h2><i class="fas fa-sign-in-alt"></i> Konfirmasi Pengembalian Buku</h2>
-<button type="button" class="modal-close" data-modal="returnModal"><i class="fas fa-times"></i></button>
-</div>
-<div id="returnInfoBox" style="background:#F8FAFC; padding:16px; border-radius:8px; margin-bottom:16px;"></div>
-<div class="button-group">
-<button type="button" id="btnConfirmReturnAction" class="btn-success"><i class="fas fa-check-double"></i> Konfirmasi Pengembalian</button>
-<button type="button" class="btn-secondary modal-close" data-modal="returnModal">Batal</button>
-</div>
-</div>
-</div>
-<div id="bookModal" class="modal">
-<div class="modal-content">
-<div class="modal-header">
-<h2 id="bookModalTitle"><i class="fas fa-book"></i> Tambah Koleksi Buku</h2>
-<button type="button" class="modal-close" data-modal="bookModal"><i class="fas fa-times"></i></button>
-</div>
-<form id="bookForm">
-<input type="hidden" id="bookFormIsEdit" value="0">
-<div class="form-group">
-<label for="bookFormCode">Kode Buku</label>
-<input type="text" id="bookFormCode" class="form-control" required placeholder="Contoh: DA-1A-001">
-</div>
-<div class="form-group">
-<label for="bookFormShelf">Nomor / Kode Rak</label>
-<input type="text" id="bookFormShelf" class="form-control" required placeholder="Contoh: 1-A">
-</div>
-<div class="form-group">
-<label for="bookFormTitle">Judul Buku</label>
-<input type="text" id="bookFormTitle" class="form-control" required placeholder="Masukkan judul buku">
-</div>
-<div class="form-group">
-<label for="bookFormAuthor">Pengarang</label>
-<input type="text" id="bookFormAuthor" class="form-control" placeholder="Nama pengarang">
-</div>
-<div class="form-group">
-<label for="bookFormPublisher">Penerbit</label>
-<input type="text" id="bookFormPublisher" class="form-control" placeholder="Nama penerbit">
-</div>
-<div class="form-group">
-<label for="bookFormYear">Tahun Terbit</label>
-<input type="text" id="bookFormYear" class="form-control" placeholder="Contoh: 2024">
-</div>
-<div class="form-group">
-<label for="bookFormStock">Jumlah Stok</label>
-<input type="number" id="bookFormStock" class="form-control" value="1" min="1" required>
-</div>
-<div class="form-group">
-<label for="bookFormCategory">Kategori</label>
-<input type="text" id="bookFormCategory" class="form-control" placeholder="Pelajaran, Novel, Dongeng Anak, dll.">
-</div>
-<div class="form-group">
-<label><input type="checkbox" id="bookFormIsEbook"> Koleksi E-Book (Digital)</label>
-</div>
-<div class="form-group" id="ebookUrlGroup" style="display:none;">
-<label for="bookFormEbookUrl">URL File E-Book (PDF / Link Drive)</label>
-<input type="url" id="bookFormEbookUrl" class="form-control" placeholder="https://...">
-</div>
-<div class="button-group">
-<button type="submit" class="btn-success"><i class="fas fa-save"></i> Simpan Buku</button>
-<button type="button" class="btn-secondary modal-close" data-modal="bookModal">Batal</button>
-</div>
-</form>
-</div>
-</div>
-<div id="memberModal" class="modal">
-<div class="modal-content">
-<div class="modal-header">
-<h2 id="memberModalTitle"><i class="fas fa-user-plus"></i> Tambah Data Anggota</h2>
-<button type="button" class="modal-close" data-modal="memberModal"><i class="fas fa-times"></i></button>
-</div>
-<form id="memberForm">
-<input type="hidden" id="memberFormIsEdit" value="0">
-<div class="form-group">
-<label for="memberFormCode">Kode Anggota</label>
-<input type="text" id="memberFormCode" class="form-control" required placeholder="Contoh: S-001, G-001, O-001">
-</div>
-<div class="form-group">
-<label for="memberFormName">Nama Lengkap</label>
-<input type="text" id="memberFormName" class="form-control" required placeholder="Masukkan nama anggota">
-</div>
-<div class="form-group">
-<label for="memberFormGender">Jenis Kelamin</label>
-<select id="memberFormGender" class="form-control">
-<option value="Laki-Laki">Laki-Laki</option>
-<option value="Perempuan">Perempuan</option>
-</select>
-</div>
-<div class="form-group">
-<label for="memberFormType">Kategori Anggota</label>
-<select id="memberFormType" class="form-control">
-<option value="Siswa">Siswa</option>
-<option value="GTK">GTK (Guru/Karyawan)</option>
-<option value="Umum">Umum / Wali Murid</option>
-</select>
-</div>
-<div class="form-group">
-<label for="memberFormNote">Keterangan / Kelas</label>
-<input type="text" id="memberFormNote" class="form-control" placeholder="Contoh: Kelas 1 A, Wali Kelas, Wali Murid">
-</div>
-<div class="button-group">
-<button type="submit" class="btn-success"><i class="fas fa-save"></i> Simpan Anggota</button>
-<button type="button" class="btn-secondary modal-close" data-modal="memberModal">Batal</button>
-</div>
-</form>
-</div>
-</div>
-<div id="rombelModal" class="modal">
-<div class="modal-content">
-<div class="modal-header">
-<h2><i class="fas fa-graduation-cap"></i> Kenaikan Kelas Serentak (Rombel)</h2>
-<button type="button" class="modal-close" data-modal="rombelModal"><i class="fas fa-times"></i></button>
-</div>
-<p class="text-muted" style="font-size:13px; margin-bottom:12px;">Pilih siswa yang akan dinaikkan kelasnya secara bersamaan.</p>
-<div class="form-group">
-<input type="text" id="searchRombelInput" class="form-control" placeholder="Saring nama siswa atau kelas saat ini...">
-</div>
-<div style="max-height:220px; overflow-y:auto; border:1px solid #E2E8F0; border-radius:8px; margin-bottom:16px;">
-<table class="data-table" style="font-size:12px;">
-<thead>
-<tr>
-<th style="width:40px;"><input type="checkbox" id="selectAllRombel"></th>
-<th>Kode</th>
-<th>Nama</th>
-<th>Kelas Saat Ini</th>
-</tr>
-</thead>
-<tbody id="rombelTableBody"></tbody>
-</table>
-</div>
-<form id="rombelForm">
-<div class="form-group">
-<label for="rombelNewClass">Keterangan / Kelas Baru</label>
-<input type="text" id="rombelNewClass" class="form-control" required placeholder="Contoh: Kelas 2 A">
-</div>
-<div class="button-group">
-<button type="submit" class="btn-success"><i class="fas fa-check"></i> Proses Kenaikan Kelas</button>
-<button type="button" class="btn-secondary modal-close" data-modal="rombelModal">Batal</button>
-</div>
-</form>
-</div>
-</div>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<script src="assets/js/db-library.js"></script>
-<script src="admin.js"></script>
+  <div id="loginScreen" class="login-container">
+    <div class="login-box">
+      <div class="login-left">
+        <div class="login-brand-group">
+          <img src="assets/img/logo.webp" alt="Logo" class="login-logo">
+          <div class="login-brand-text">
+            <h2 class="login-brand">MUSADA Library</h2>
+            <p class="login-subbrand">SD Muhammadiyah 1 Sedati</p>
+          </div>
+        </div>
+        <div class="analog-clock">
+          <div class="clock-face">
+            <div class="number number1"><span>1</span></div>
+            <div class="number number2"><span>2</span></div>
+            <div class="number number3"><span>3</span></div>
+            <div class="number number4"><span>4</span></div>
+            <div class="number number5"><span>5</span></div>
+            <div class="number number6"><span>6</span></div>
+            <div class="number number7"><span>7</span></div>
+            <div class="number number8"><span>8</span></div>
+            <div class="number number9"><span>9</span></div>
+            <div class="number number10"><span>10</span></div>
+            <div class="number number11"><span>11</span></div>
+            <div class="number number12"><span>12</span></div>
+            <div class="hand hour-hand" id="loginHourHand"></div>
+            <div class="hand min-hand" id="loginMinHand"></div>
+            <div class="hand second-hand" id="loginSecHand"></div>
+            <div class="clock-center"></div>
+          </div>
+        </div>
+        <div class="login-date" id="loginDateText">Memuat tanggal...</div>
+      </div>
+      <div class="login-right">
+        <h3 class="login-welcome">Selamat Datang!</h3>
+        <p class="login-instruction">Silakan masuk ke akun Anda</p>
+        <form id="loginForm">
+          <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" placeholder="Masukkan username" required autofocus>
+          </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <div class="password-wrapper">
+              <input type="password" id="password" name="password" placeholder="Masukkan password" required>
+              <button type="button" class="btn-toggle-password" data-action="togglePassword">
+                <i class="fas fa-eye" id="eyeIcon"></i>
+              </button>
+            </div>
+          </div>
+          <div class="login-actions">
+            <button type="submit" class="btn-primary btn-login-submit">
+              <i class="fas fa-sign-in-alt"></i> Login </button>
+          </div>
+        </form>
+        <div id="loginError" class="login-error-msg"></div>
+      </div>
+    </div>
+  </div>
+  <div id="dashboardScreen" class="dashboard-hidden">
+    <div class="app-layout">
+      <aside class="sidebar" id="mainSidebar">
+        <div class="sidebar-brand">
+          <img src="assets/img/logo.webp" alt="Logo" class="sidebar-logo">
+          <div class="sidebar-brand-info">
+            <h2 class="sidebar-title">MUSADA Library</h2>
+            <div class="sidebar-subtitle">SD Muhammadiyah 1 Sedati</div>
+            <div class="status-badge-sidebar"><i class="fas fa-circle"></i> Sistem Aktif (RTDB)</div>
+          </div>
+        </div>
+        <nav class="sidebar-nav tabs">
+          <button class="tab-btn active" data-action="switchTab" data-tab="scanner">
+            <i class="fas fa-qrcode"></i> Scanner </button>
+          <button class="tab-btn" data-action="switchTab" data-tab="statistik">
+            <i class="fas fa-chart-bar"></i> Statistik </button>
+          <button class="tab-btn" data-action="switchTab" data-tab="transaksi">
+            <i class="fas fa-exchange-alt"></i> Transaksi </button>
+          <button class="tab-btn" data-action="switchTab" data-tab="overdued">
+            <i class="fas fa-exclamation-triangle"></i> Overdue </button>
+          <button class="tab-btn" data-action="switchTab" data-tab="anggota">
+            <i class="fas fa-users"></i> Anggota </button>
+          <button class="tab-btn" data-action="switchTab" data-tab="buku">
+            <i class="fas fa-book-open"></i> Buku </button>
+          <button class="tab-btn" data-action="switchTab" data-tab="qrgen">
+            <i class="fas fa-print"></i> Cetak </button>
+          <button class="tab-btn" data-action="switchTab" data-tab="kunjungan">
+            <i class="fas fa-calendar-check"></i> Kunjungan </button>
+          <button class="tab-btn" data-action="switchTab" data-tab="donasi">
+            <i class="fas fa-hand-holding-heart"></i> Donasi </button>
+          <button class="tab-btn" data-action="switchTab" data-tab="admin">
+            <i class="fas fa-user-cog"></i> Admin </button>
+        </nav>
+        <div class="sidebar-bottom">
+          <div class="sidebar-clock" id="liveClock">
+            <div class="analog-clock sidebar-analog-clock">
+              <div class="clock-face">
+                <div class="number number1"><span>1</span></div>
+                <div class="number number2"><span>2</span></div>
+                <div class="number number3"><span>3</span></div>
+                <div class="number number4"><span>4</span></div>
+                <div class="number number5"><span>5</span></div>
+                <div class="number number6"><span>6</span></div>
+                <div class="number number7"><span>7</span></div>
+                <div class="number number8"><span>8</span></div>
+                <div class="number number9"><span>9</span></div>
+                <div class="number number10"><span>10</span></div>
+                <div class="number number11"><span>11</span></div>
+                <div class="number number12"><span>12</span></div>
+                <div class="hand hour-hand" id="headerHourHand"></div>
+                <div class="hand min-hand" id="headerMinHand"></div>
+                <div class="hand second-hand" id="headerSecHand"></div>
+                <div class="clock-center"></div>
+              </div>
+            </div>
+            <div class="sidebar-date-container">
+              <div class="sidebar-day-text" id="headerDayText">Memuat...</div>
+              <div class="sidebar-date-text" id="headerDateText">Memuat waktu...</div>
+            </div>
+          </div>
+        </div>
+      </aside>
+      <div class="main-wrapper">
+        <header class="topbar">
+          <div class="topbar-left">
+            <h1 class="topbar-page-title" id="topbarPageTitle">Dashboard <span class="topbar-separator">&gt;</span>
+              <span id="topbarSubtitle">Scanner &amp; Sirkulasi</span></h1>
+            <a href="https://library.musada.sch.id" class="btn-public-preview" target="_blank" title="Buka Portal Publik"><i class="fas fa-globe"></i> Portal Publik</a>
+          </div>
+          <div class="topbar-right">
+            <div class="admin-profile-card">
+              <img id="headerAdminPhoto" src="assets/img/logo.webp" alt="Avatar">
+              <div class="admin-info-text">
+                <div class="greeting" id="dynamicGreeting">Selamat datang,</div>
+                <div class="admin-name" id="adminNameHeader">-</div>
+              </div>
+            </div>
+            <button class="btn-logout-icon" data-action="handleLogout" title="Logout">
+              <i class="fas fa-power-off"></i>
+            </button>
+          </div>
+        </header>
+        <main class="content-area">
+          <div class="container-fluid">
+            <div id="scanner" class="tab-content active">
+              <div class="scanner-process-row">
+                <div class="card mb-0">
+                  <div class="table-header-luxury mb-15">
+                    <h2><i class="fas fa-qrcode"></i> Scanner & Transaksi</h2>
+                  </div>
+                  <div class="scanner-section no-shadow no-bg mb-20 p-0">
+                    <div class="scanner-frame mt-0">
+                      <div class="corner corner-top-left"></div>
+                      <div class="corner corner-top-right"></div>
+                      <div class="corner corner-bottom-left"></div>
+                      <div class="corner corner-bottom-right"></div>
+                      <div class="scan-area">
+                        <div class="scan-line" id="scanLine"></div>
+                      </div>
+                      <canvas id="qrCanvas" width="240" height="240"></canvas>
+                      <div id="reader" class="scanner-active"></div>
+                      <div class="scanner-status" id="scannerStatus">
+                        <span class="status-light" id="statusLight"></span>
+                        <span class="status-text" id="statusText">Siap Scanning</span>
+                      </div>
+                    </div>
+                    <div class="button-group flex-center mt-15">
+                      <button class="btn-danger btn-sm btn-rounded px-15" data-action="toggleScanner">
+                        <i class="fas fa-stop-circle"></i> Hentikan Scanner </button>
+                    </div>
+                  </div>
+                  <div class="form-container-light">
+                    <div class="form-group form-inline">
+                      <label class="detail-label nowrap"><i class="fas fa-calendar"></i> Lama Pinjam (hari):</label>
+                      <input type="number" id="lamaPinjam" class="form-control input-small" value="7" min="1" max="30">
+                    </div>
+                    <div class="button-group wrap-group mt-15">
+                      <button class="btn-success flex-1 text-sm py-10" data-action="prosesPinjam">
+                        <i class="fas fa-download"></i> PINJAM BUKU </button>
+                      <button class="btn-primary flex-1 text-sm py-10" data-action="prosesKembali">
+                        <i class="fas fa-upload"></i> KEMBALI BUKU </button>
+                      <button class="btn-secondary text-sm py-10 px-15" data-action="resetScanner">
+                        <i class="fas fa-redo"></i> Reset </button>
+                    </div>
+                  </div>
+                </div>
+                <div class="card mb-0">
+                  <div class="table-header-luxury mb-15">
+                    <h2><i class="fas fa-info-circle"></i> Detail Data</h2>
+                  </div>
+                  <div class="form-container-light mb-20">
+                    <h3 class="detail-section-title">
+                      <i class="fas fa-user text-primary"></i> Data Anggota
+                    </h3>
+                    <div id="memberInfo" class="text-sm">
+                      <div class="detail-item">
+                        <span class="detail-label">Kode</span>
+                        <span class="detail-value fw-600 text-right">-</span>
+                      </div>
+                      <div class="detail-item">
+                        <span class="detail-label">Nama</span>
+                        <span class="detail-value fw-600 text-right">-</span>
+                      </div>
+                      <div class="detail-item">
+                        <span class="detail-label">Jenis Kelamin</span>
+                        <span class="detail-value fw-600 text-right">-</span>
+                      </div>
+                      <div class="detail-item">
+                        <span class="detail-label">Tipe</span>
+                        <span class="detail-value fw-600 text-right">-</span>
+                      </div>
+                      <div class="detail-item no-border mb-0">
+                        <span class="detail-label">Keterangan</span>
+                        <span class="detail-value fw-600 text-right">-</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-container-light">
+                    <h3 class="detail-section-title">
+                      <i class="fas fa-book text-primary"></i> Data Buku
+                    </h3>
+                    <div id="bookInfo" class="text-sm">
+                      <div class="detail-item">
+                        <span class="detail-label">Kode Buku</span>
+                        <span class="detail-value fw-600 text-right">-</span>
+                      </div>
+                      <div class="detail-item">
+                        <span class="detail-label">Judul Buku</span>
+                        <span class="detail-value fw-600 text-right">-</span>
+                      </div>
+                      <div class="detail-item">
+                        <span class="detail-label">Pengarang</span>
+                        <span class="detail-value fw-600 text-right">-</span>
+                      </div>
+                      <div class="detail-item no-border mb-0">
+                        <span class="detail-label">Stok Tersedia</span>
+                        <span class="detail-value fw-600 text-right">-</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div id="statistik" class="tab-content">
+              <div class="card">
+                <div class="table-header-luxury">
+                  <h2><i class="fas fa-chart-pie text-purple"></i> Statistik Perpustakaan</h2>
+                  <div class="table-actions">
+                    <button class="btn-primary" data-action="refreshStatistik">
+                      <i class="fas fa-sync-alt"></i> Refresh Data </button>
+                  </div>
+                </div>
+                <div class="stat-widget-grid" id="statsContainer">
+                  <div class="stat-widget widget-primary">
+                    <div class="stat-icon-wrapper"><i class="fas fa-book"></i></div>
+                    <div class="stat-info">
+                      <div class="stat-label">Total Buku</div>
+                      <div class="stat-number" id="statTotalBuku">-</div>
+                    </div>
+                  </div>
+                  <div class="stat-widget widget-success">
+                    <div class="stat-icon-wrapper"><i class="fas fa-check-circle"></i></div>
+                    <div class="stat-info">
+                      <div class="stat-label">Stok Tersedia</div>
+                      <div class="stat-number" id="statTersedia">-</div>
+                    </div>
+                  </div>
+                  <div class="stat-widget widget-warning">
+                    <div class="stat-icon-wrapper"><i class="fas fa-hand-holding"></i></div>
+                    <div class="stat-info">
+                      <div class="stat-label">Sedang Dipinjam</div>
+                      <div class="stat-number" id="statDipinjam">-</div>
+                    </div>
+                  </div>
+                  <div class="stat-widget widget-danger">
+                    <div class="stat-icon-wrapper"><i class="fas fa-exclamation-triangle"></i></div>
+                    <div class="stat-info">
+                      <div class="stat-label">Overdue</div>
+                      <div class="stat-number" id="statOverdue">-</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div id="transaksi" class="tab-content">
+              <div class="card">
+                <div class="table-header-luxury">
+                  <h2><i class="fas fa-exchange-alt"></i> Riwayat Transaksi</h2>
+                </div>
+                <div class="filter-bar-modern">
+                  <div class="filter-item">
+                    <label>Filter Status</label>
+                    <select id="filterStatus" class="form-control min-w-150">
+                      <option value="">Semua</option>
+                      <option value="DIPINJAM">Dipinjam</option>
+                      <option value="KEMBALI">Kembali</option>
+                    </select>
+                  </div>
+                  <div class="filter-item flex-grow-1">
+                    <label>Cari Kode Anggota</label>
+                    <input type="text" id="filterAnggota" class="form-control" placeholder="S-001">
+                  </div>
+                  <div class="filter-actions">
+                    <button class="btn-secondary" data-action="loadTransaksi">
+                      <i class="fas fa-redo"></i> Reset </button>
+                    <button class="btn-primary" data-action="exportTransaksi">
+                      <i class="fas fa-download"></i> Export </button>
+                  </div>
+                </div>
+                <div class="table-container">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>No Transaksi</th>
+                        <th>Tanggal Pinjam</th>
+                        <th>Anggota</th>
+                        <th>Buku</th>
+                        <th>Jatuh Tempo</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody id="transaksiTable">
+                      <tr>
+                        <td colspan="7" class="text-center">Memuat data...</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div id="overdued" class="tab-content">
+              <div class="card">
+                <div class="table-header-luxury">
+                  <h2><i class="fas fa-exclamation-triangle text-danger"></i> Daftar Buku Overdue</h2>
+                </div>
+                <div class="table-container">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>No Transaksi</th>
+                        <th>Anggota</th>
+                        <th>Buku</th>
+                        <th>Jatuh Tempo</th>
+                        <th>Hari Terlambat</th>
+                        <th>Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody id="overdueTable">
+                      <tr>
+                        <td colspan="6" class="text-center">Memuat data...</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div id="anggota" class="tab-content">
+              <div class="card">
+                <div class="table-header-luxury">
+                  <h2><i class="fas fa-users"></i> Data Anggota</h2>
+                  <div class="table-actions">
+                    <button class="btn-primary" data-action="openAddAnggotaModal">
+                      <i class="fas fa-plus-circle"></i> Tambah Anggota </button>
+                    <button class="btn-success" data-action="openRombelModal">
+                      <i class="fas fa-layer-group"></i> Naik Kelas Serentak </button>
+                    <button class="btn-info" data-action="openBulkActions" data-type="anggota">
+                      <i class="fas fa-tasks"></i> Aksi Pilihan </button>
+                  </div>
+                </div>
+                <div class="filter-bar-modern mt-10 mb-15">
+                  <div class="filter-item flex-grow-1">
+                    <input type="text" id="searchAnggotaInput" class="form-control"
+                      placeholder="Cari Kode, Nama, Tipe, Keterangan...">
+                  </div>
+                </div>
+                <div class="table-container mt-20">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th class="col-checkbox"><input type="checkbox" id="selectAllMembers"></th>
+                        <th class="col-kode">Kode</th>
+                        <th class="col-nama">Nama</th>
+                        <th class="col-jk">Jenis Kelamin</th>
+                        <th class="col-tipe">Tipe</th>
+                        <th class="col-keterangan">Keterangan</th>
+                        <th class="col-print">Print Status</th>
+                        <th class="col-aksi">Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody id="anggotaTable">
+                      <tr>
+                        <td colspan="7" class="text-center">Memuat data...</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div id="buku" class="tab-content">
+              <div class="card">
+                <div class="table-header-luxury">
+                  <h2><i class="fas fa-book-open"></i> Data Buku</h2>
+                  <div class="table-actions">
+                    <button class="btn-primary" data-action="openAddBukuModal">
+                      <i class="fas fa-plus-circle"></i> Tambah Buku </button>
+                    <button class="btn-info" data-action="openBulkActions" data-type="buku">
+                      <i class="fas fa-tasks"></i> Aksi Pilihan </button>
+                  </div>
+                </div>
+                <div class="filter-bar-modern mt-10 mb-15">
+                  <div class="filter-item flex-grow-1">
+                    <input type="text" id="searchBukuInput" class="form-control"
+                      placeholder="Cari Kode, Judul, Pengarang, Kategori...">
+                  </div>
+                </div>
+                <div class="table-container mt-20">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th class="col-checkbox"><input type="checkbox" id="selectAllBooks">
+                        </th>
+                        <th class="col-kode-buku">Kode</th>
+                        <th class="col-judul">Judul</th>
+                        <th class="col-pengarang">Pengarang</th>
+                        <th class="col-kategori">Kategori</th>
+                        <th class="col-stok">Stok</th>
+                        <th class="col-rak">Rak</th>
+                        <th class="col-print">Print Status</th>
+                        <th class="col-aksi">Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody id="bukuTable">
+                      <tr>
+                        <td colspan="8" class="text-center">Memuat data...</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div id="qrgen" class="tab-content">
+              <div class="grid-2 gap-20">
+                <div class="card mb-0">
+                  <h3 class="settings-title"><i class="fas fa-id-card"></i> Cetak Kartu Anggota</h3>
+                  <div class="form-group">
+                    <label class="detail-label mb-10">Pilih Metode Cetak</label>
+                    <div class="print-actions-grid">
+                      <button class="print-action-btn primary" data-action="switchPrintMode" data-mode="member-search">
+                        <i class="fas fa-search"></i>
+                        <span>Cari Anggota</span>
+                      </button>
+                      <button class="print-action-btn warning" data-action="switchToSelectiveMode" data-type="member">
+                        <i class="fas fa-check-square"></i>
+                        <span>Cetak Pilihan</span>
+                      </button>
+                      <button class="print-action-btn success" data-action="confirmBulkPrintMembers">
+                        <i class="fas fa-print"></i>
+                        <span>Cetak Semua</span>
+                      </button>
+                    </div>
+                  </div>
+                  <div id="member-search-mode" class="mt-25 d-none">
+                    <div class="filter-bar-modern">
+                      <div class="filter-item flex-grow-1">
+                        <label>Cari Kode atau Nama Anggota</label>
+                        <input type="text" id="memberSearchInput" class="form-control"
+                          placeholder="Contoh: S-1A-001 atau Adam">
+                      </div>
+                      <div class="filter-actions">
+                        <button class="btn-dark" data-action="searchMember">
+                          <i class="fas fa-search"></i> Cari </button>
+                      </div>
+                    </div>
+                    <div id="memberSearchResults"></div>
+                  </div>
+                </div>
+                <div class="card mb-0">
+                  <h3 class="settings-title"><i class="fas fa-tags"></i> Cetak Label Buku</h3>
+                  <div class="form-group">
+                    <label class="detail-label mb-10">Pilih Metode Cetak</label>
+                    <div class="print-actions-grid">
+                      <button class="print-action-btn primary" data-action="switchPrintMode" data-mode="book-search">
+                        <i class="fas fa-search"></i>
+                        <span>Cari Buku</span>
+                      </button>
+                      <button class="print-action-btn warning" data-action="switchToSelectiveMode" data-type="book">
+                        <i class="fas fa-check-square"></i>
+                        <span>Cetak Pilihan</span>
+                      </button>
+                      <button class="print-action-btn success" data-action="confirmBulkPrintBooks">
+                        <i class="fas fa-print"></i>
+                        <span>Cetak Semua</span>
+                      </button>
+                    </div>
+                  </div>
+                  <div id="book-search-mode" class="mt-25 d-none">
+                    <div class="filter-bar-modern">
+                      <div class="filter-item flex-grow-1">
+                        <label>Cari Kode atau Judul Buku</label>
+                        <input type="text" id="bookSearchInput" class="form-control"
+                          placeholder="Contoh: DA-1A-001 atau Pawai">
+                      </div>
+                      <div class="filter-actions">
+                        <button class="btn-dark" data-action="searchBook">
+                          <i class="fas fa-search"></i> Cari </button>
+                      </div>
+                    </div>
+                    <div id="bookSearchResults"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div id="kunjungan" class="tab-content">
+              <div class="card">
+                <div class="table-header-luxury">
+                  <h2><i class="fas fa-calendar-check"></i> Log Kunjungan Perpustakaan</h2>
+                </div>
+                <div class="filter-bar-modern">
+                  <div class="filter-item">
+                    <label>Filter Tgl:</label>
+                    <input type="date" id="filterKunjunganTgl" class="form-control">
+                  </div>
+                  <div class="filter-item flex-grow-1">
+                    <label>Filter Anggota:</label>
+                    <input type="text" id="filterKunjunganAnggota" class="form-control"
+                      placeholder="Kode atau nama anggota">
+                  </div>
+                  <div class="filter-actions">
+                    <button class="btn-dark" data-action="filterKunjungan"><i class="fas fa-filter"></i> Filter</button>
+                    <button class="btn-secondary" data-action="resetKunjunganFilter"><i class="fas fa-redo"></i>
+                      Reset</button>
+                  </div>
+                </div>
+                <div class="stats-pastel-grid">
+                  <div class="stat-pastel green">
+                    <div class="stat-label">Total Kunjungan</div>
+                    <div class="stat-value" id="statTotalKunjungan">0</div>
+                  </div>
+                  <div class="stat-pastel orange">
+                    <div class="stat-label">Kunjungan Hari Ini</div>
+                    <div class="stat-value" id="statKunjunganHariIni">0</div>
+                  </div>
+                  <div class="stat-pastel purple">
+                    <div class="stat-label">Total Anggota Unik</div>
+                    <div class="stat-value" id="statAnggotaUnik">0</div>
+                  </div>
+                </div>
+                <div class="card form-container-light no-shadow mt-20">
+                  <h3 class="mb-15 text-lg fw-600 text-dark">
+                    <i class="fas fa-trophy text-warning-dark"></i> Top 5 Pengunjung Teraktif
+                  </h3>
+                  <div class="table-container">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Peringkat</th>
+                          <th>Kode Anggota</th>
+                          <th>Nama Anggota</th>
+                          <th>Tipe</th>
+                          <th>Jumlah Kunjungan</th>
+                        </tr>
+                      </thead>
+                      <tbody id="topKunjunganTable">
+                        <tr>
+                          <td colspan="5" class="text-center">Memuat data...</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                <div class="table-container mt-20">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>No</th>
+                        <th>Tanggal & Waktu</th>
+                        <th>Kode Anggota</th>
+                        <th>Nama Anggota</th>
+                        <th>Tipe</th>
+                        <th>Keterangan</th>
+                      </tr>
+                    </thead>
+                    <tbody id="kunjunganTable">
+                      <tr>
+                        <td colspan="6" class="text-center">Loading...</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+                        <div id="donasi" class="tab-content">
+              <div class="card mb-0">
+                <div class="table-header-luxury mb-15">
+                  <h2><i class="fas fa-hand-holding-heart"></i> Manajemen &amp; Verifikasi Donasi Publik</h2>
+                </div>
+                <div class="table-responsive">
+                  <table class="data-table">
+                    <thead>
+                      <tr>
+                        <th>Tanggal</th>
+                        <th>Tipe</th>
+                        <th>Nama Donatur</th>
+                        <th>Kontak</th>
+                        <th>Rincian Donasi</th>
+                        <th>Catatan</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody id="donationsTableBody">
+                      <tr><td colspan="8" class="text-center text-muted">Memuat daftar donasi...</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+<div id="admin" class="tab-content">
+              <div class="settings-layout">
+                <div class="settings-sidebar">
+                  <div class="card profile-overview-card">
+                    <div class="profile-photo-wrapper">
+                      <img id="adminPhotoPreview" src="" alt="Foto Admin" class="d-none">
+                      <div id="adminPhotoPlaceholder" class="photo-placeholder">
+                        <i class="fas fa-user-circle"></i>
+                      </div>
+                      <button class="btn-upload-photo" data-action="triggerPhotoUpload" title="Ubah Foto">
+                        <i class="fas fa-camera"></i>
+                      </button>
+                      <input type="file" id="photoUpload" accept="image/*" class="d-none">
+                    </div>
+                    <div class="profile-details-list">
+                      <div class="detail-item">
+                        <span class="detail-label">Username</span>
+                        <span class="detail-value" id="adminUsername">-</span>
+                      </div>
+                      <div class="detail-item">
+                        <span class="detail-label">Nama Lengkap</span>
+                        <span class="detail-value" id="adminNama">-</span>
+                      </div>
+                      <div class="detail-item">
+                        <span class="detail-label">Email</span>
+                        <span class="detail-value" id="adminEmail">-</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="settings-main">
+                  <div class="card settings-card">
+                    <h3 class="settings-title"><i class="fas fa-user-edit"></i> Ubah Informasi Profil</h3>
+                    <form id="updateProfileForm" class="settings-form">
+                      <div class="form-group">
+                        <label>Nama Lengkap</label>
+                        <input type="text" id="updateNamaLengkap" class="form-control" required>
+                      </div>
+                      <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="updateEmail" class="form-control" required>
+                      </div>
+                      <button type="submit" class="btn-primary">
+                        <i class="fas fa-save"></i> Simpan Perubahan </button>
+                    </form>
+                  </div>
+                  <div class="card settings-card">
+                    <h3 class="settings-title"><i class="fas fa-lock"></i> Ubah Password</h3>
+                    <form id="changePasswordForm" class="settings-form">
+                      <div class="form-group">
+                        <label>Password Lama</label>
+                        <input type="password" id="oldPassword" class="form-control" required>
+                      </div>
+                      <div class="form-group">
+                        <label>Password Baru</label>
+                        <input type="password" id="newPassword" class="form-control" required>
+                      </div>
+                      <div class="form-group">
+                        <label>Konfirmasi Password Baru</label>
+                        <input type="password" id="confirmPassword" class="form-control" required>
+                      </div>
+                      <button type="submit" class="btn-primary">
+                        <i class="fas fa-key"></i> Ubah Password </button>
+                    </form>
+                  </div>
+                  <div class="card settings-card">
+                    <h3 class="settings-title"><i class="fas fa-sync-alt text-danger"></i> Reset & Rapikan Data</h3>
+                    <div class="reset-desc text-muted text-sm mb-20 line-height-17">
+                      <p class="mb-10">Fitur ini akan melakukan:</p>
+                      <ul class="pl-20 m-0">
+                        <li>Reset Status semua buku menjadi "Tersedia"</li>
+                        <li>Hapus riwayat Transaksi aktif (buku yang sedang dipinjam dianggap hilang/selesai)</li>
+                        <li>Rapikan sisa kuota anggota agar kembali utuh (2 buku maksimal)</li>
+                        <li>Sangat disarankan dilakukan setiap akhir tahun ajaran baru</li>
+                      </ul>
+                    </div>
+                    <div class="reset-warning">
+                      <div class="flex-center-left gap-10">
+                        <i class="fas fa-exclamation-triangle text-warning-dark text-lg"></i>
+                        <span class="text-warning-dark fw-500 text-sm"> Peringatan: Data yang direset tidak dapat
+                          dikembalikan. Pastikan semua buku fisik sudah berada di perpus! </span>
+                      </div>
+                    </div>
+                    <button type="button" class="btn-danger w-100 p-15 text-md fw-600 btn-rounded flex-center gap-10"
+                      data-action="handleResetData" id="btnResetData">
+                      <i class="fas fa-sync-alt"></i> Reset & Rapikan Data </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div id="anggotaModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Tambah/Edit Anggota</h2>
+        <button class="modal-close" data-action="closeModal" data-modal="anggotaModal"><i
+            class="fas fa-times"></i></button>
+      </div>
+      <form id="anggotaForm">
+        <div class="form-group">
+          <label>Kode</label>
+          <input type="text" id="formKodeAnggota" placeholder="Sebaiknya dikosongkan (dibuat otomatis oleh sistem)">
+        </div>
+        <div class="form-group">
+          <label>Nama</label>
+          <input type="text" id="formNamaAnggota" required>
+        </div>
+        <div class="form-group">
+          <label>Jenis Kelamin</label>
+          <select id="formJenisKelamin" required>
+            <option value="">Pilih Jenis Kelamin</option>
+            <option value="Laki-Laki">Laki-Laki</option>
+            <option value="Perempuan">Perempuan</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Tipe</label>
+          <select id="formTipeAnggota" required>
+            <option value="">Pilih Tipe</option>
+            <option value="Siswa">Siswa</option>
+            <option value="Gukar">Gukar</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Keterangan</label>
+          <textarea id="formKeteranganAnggota" rows="2"></textarea>
+        </div>
+        <div class="button-group">
+          <button type="submit" class="btn-primary">
+            <i class="fas fa-save"></i> Simpan </button>
+          <button type="button" class="btn-secondary" data-action="closeModal" data-modal="anggotaModal">
+            <i class="fas fa-times"></i> Batal </button>
+          <button type="button" id="btnHapusAnggotaModal" class="btn-danger hide ml-auto">
+            <i class="fas fa-trash-alt"></i> Hapus </button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div id="bukuModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Tambah/Edit Buku</h2>
+        <button class="modal-close" data-action="closeModal" data-modal="bukuModal"><i
+            class="fas fa-times"></i></button>
+      </div>
+      <form id="bukuForm">
+        <div class="form-group">
+          <label>Kode Buku</label>
+          <input type="text" id="formKodeBuku" placeholder="Sebaiknya dikosongkan (dibuat otomatis oleh sistem)">
+        </div>
+        <div class="form-group">
+          <label>Kode Rak</label>
+          <input type="text" id="formKodeRak">
+        </div>
+        <div class="form-group">
+          <label>Judul Buku</label>
+          <input type="text" id="formJudulBuku" required>
+        </div>
+        <div class="form-group">
+          <label>Pengarang</label>
+          <input type="text" id="formPengarang">
+        </div>
+        <div class="form-group">
+          <label>Penerbit</label>
+          <input type="text" id="formPenerbit">
+        </div>
+        <div class="form-group">
+          <label>Tahun Terbit</label>
+          <input type="number" id="formTahunTerbit">
+        </div>
+        <div class="form-group">
+          <label>Kategori</label>
+          <input type="text" id="formKategori">
+        </div>
+        <div class="form-group">
+          <label>Stok</label>
+          <input type="number" id="formStok" required>
+        </div>
+        <div class="button-group">
+          <button type="submit" class="btn-primary">
+            <i class="fas fa-save"></i> Simpan </button>
+          <button type="button" class="btn-secondary" data-action="closeModal" data-modal="bukuModal">
+            <i class="fas fa-times"></i> Batal </button>
+          <button type="button" id="btnHapusBukuModal" class="btn-danger hide ml-auto">
+            <i class="fas fa-trash-alt"></i> Hapus </button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div id="rombelModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Naik Kelas Serentak</h2>
+        <button class="modal-close" data-action="closeModal" data-modal="rombelModal"><i
+            class="fas fa-times"></i></button>
+      </div>
+      <div class="text-sm text-muted mb-15"> Gunakan fitur ini untuk menaikkan kelas beberapa siswa secara bersamaan.
+        Cari siswa, pilih, lalu tentukan kelas baru. </div>
+      <div class="filter-bar-modern mb-15">
+        <div class="filter-item flex-grow-1">
+          <input type="text" id="searchRombelInput" class="form-control" placeholder="Cari nama atau kelas lama...">
+        </div>
+      </div>
+      <div class="table-container scroll-y-250 mb-15">
+        <table>
+          <thead>
+            <tr>
+              <th><input type="checkbox" id="selectAllRombel"></th>
+              <th>Kode</th>
+              <th>Nama</th>
+              <th>Kelas Saat Ini</th>
+            </tr>
+          </thead>
+          <tbody id="rombelTable">
+          </tbody>
+        </table>
+      </div>
+      <form id="rombelForm">
+        <div class="form-group">
+          <label>Kelas Baru (Keterangan)</label>
+          <input type="text" id="formKeteranganBaru" required placeholder="Contoh: Kelas 2 A">
+        </div>
+        <div class="button-group">
+          <button type="submit" class="btn-success">
+            <i class="fas fa-save"></i> Proses Kenaikan Kelas </button>
+          <button type="button" class="btn-secondary" data-action="closeModal" data-modal="rombelModal">
+            <i class="fas fa-times"></i> Batal </button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div id="returnModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Kembalikan Buku</h2>
+        <button class="modal-close" data-action="closeModal" data-modal="returnModal"><i
+            class="fas fa-times"></i></button>
+      </div>
+      <div id="returnInfo" class="form-container-light mb-20 bg-gray">
+      </div>
+      <div class="button-group">
+        <button class="btn-success" data-action="confirmReturn">
+          <i class="fas fa-check"></i> Konfirmasi Kembali </button>
+        <button class="btn-secondary" data-action="closeModal" data-modal="returnModal">
+          <i class="fas fa-times"></i> Batal </button>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="assets/js/db-library.js"></script>
+  <script src="admin.js"></script>
 </body>
 </html>

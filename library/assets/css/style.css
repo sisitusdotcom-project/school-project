@@ -2117,6 +2117,26 @@ tr:hover {
   gap: 15px
 }
 
+.btn-public-preview {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgb(255 255 255 / .2);
+  color: #fff;
+  text-decoration: none;
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid rgb(255 255 255 / .35);
+  transition: all 0.2s ease
+}
+
+.btn-public-preview:hover {
+  background: #fff;
+  color: #2563EB
+}
+
 .topbar-page-title {
   font-size: 16px;
   font-weight: 600;
