@@ -1136,6 +1136,10 @@ tr:hover {
   align-items: start
 }
 
+.settings-layout > * {
+  min-width: 0
+}
+
 .profile-overview-card {
   text-align: center;
   padding: 30px 20px
@@ -1150,6 +1154,9 @@ tr:hover {
 
 .profile-photo-wrapper img,
 .photo-placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   border-radius: 50%;
@@ -1171,6 +1178,7 @@ tr:hover {
   position: absolute;
   bottom: 0;
   right: 0;
+  z-index: 2;
   background: #3B82F6;
   color: #fff;
   border: none;

@@ -27,18 +27,50 @@ function startLoginClock() {
   setInterval(updateClock, 1000); updateClock()
 }
 function togglePassword() { const passwordInput = document.getElementById('password'); const eyeIcon = document.getElementById('eyeIcon'); if (passwordInput.type === 'password') { passwordInput.type = 'text'; eyeIcon.classList.remove('fa-eye'); eyeIcon.classList.add('fa-eye-slash') } else { passwordInput.type = 'password'; eyeIcon.classList.remove('fa-eye-slash'); eyeIcon.classList.add('fa-eye') } }
-function showDashboard() { document.getElementById('loginScreen').style.display = 'none'; document.getElementById('dashboardScreen').classList.remove('dashboard-hidden'); updateGreeting(); currentSession = localStorage.getItem('sessionToken'); currentAdminId = localStorage.getItem('adminId'); const namaLengkap = localStorage.getItem('adminNama'); document.getElementById('adminNameHeader').textContent = namaLengkap; initializeScanner(); loadAllData(); loadAdminProfile() }
+function showDashboard() { document.getElementById('loginScreen').style.display = 'none'; document.getElementById('dashboardScreen').classList.remove('dashboard-hidden'); updateGreeting(); currentSession = localStorage.getItem('sessionToken'); currentAdminId = localStorage.getItem('adminId') || 'admin'; const namaLengkap = localStorage.getItem('adminNama'); document.getElementById('adminNameHeader').textContent = namaLengkap || 'Admin'; initializeScanner(); loadAllData(); loadAdminProfile() }
 function handleLogout() { showConfirm('Anda yakin ingin logout?', () => { localStorage.removeItem('sessionToken'); localStorage.removeItem('adminId'); localStorage.removeItem('adminNama'); location.reload() }) }
 function loadAdminProfile() {
-  apiCall('getAdmin', { adminId: currentAdminId }).then(data => {
-    document.getElementById('adminUsername').textContent = data.username; document.getElementById('adminNama').textContent = data.namaLengkap; document.getElementById('adminEmail').textContent = data.email; if (data.fotoUrl && data.fotoUrl.trim() !== '') {
-      const photoPreview = document.getElementById('adminPhotoPreview'); const headerPhoto = document.getElementById('headerAdminPhoto'); const urls = [data.fotoUrl, `https://drive.google.com/thumbnail?id=${extractFileId(data.fotoUrl)}&sz=w200`, `https://drive.google.com/uc?export=view&id=${extractFileId(data.fotoUrl)}`].filter(url => url && url.trim() !== ''); let urlIndex = 0; function tryLoadProfilePhoto() {
-        if (urlIndex >= urls.length) { document.getElementById('adminPhotoPreview').style.display = 'none'; document.getElementById('adminPhotoPlaceholder').style.display = 'flex'; headerPhoto.style.display = 'none'; return }
-        const currentUrl = urls[urlIndex]; photoPreview.src = currentUrl; photoPreview.onerror = function () { urlIndex++; if (urlIndex >= urls.length) { photoPreview.src = 'assets/img/logo.webp'; headerPhoto.src = 'assets/img/logo.webp'; return; } tryLoadProfilePhoto(); }; photoPreview.onload = function () { document.getElementById('adminPhotoPreview').style.display = 'block'; document.getElementById('adminPhotoPlaceholder').style.display = 'none'; headerPhoto.src = currentUrl; headerPhoto.style.display = 'block' }
+  const targetId = currentAdminId || localStorage.getItem('adminId') || 'admin';
+  apiCall('getAdmin', { adminId: targetId }).then(data => {
+    if (!data) return;
+    const uEl = document.getElementById('adminUsername'); if (uEl) uEl.textContent = data.username || targetId;
+    const nEl = document.getElementById('adminNama'); if (nEl) nEl.textContent = data.namaLengkap || 'Admin';
+    const eEl = document.getElementById('adminEmail'); if (eEl) eEl.textContent = data.email || '-';
+    const inpN = document.getElementById('updateNamaLengkap'); if (inpN) inpN.value = data.namaLengkap || '';
+    const inpE = document.getElementById('updateEmail'); if (inpE) inpE.value = data.email || '';
+    const photoPreview = document.getElementById('adminPhotoPreview');
+    const headerPhoto = document.getElementById('headerAdminPhoto');
+    const placeholder = document.getElementById('adminPhotoPlaceholder');
+    const fid = extractFileId(data.fotoUrl);
+    const urls = [data.fotoUrl, fid ? `https://drive.google.com/thumbnail?id=${fid}&sz=w200` : '', fid ? `https://drive.google.com/uc?export=view&id=${fid}` : ''].filter(url => url && url.trim() !== '');
+    let urlIndex = 0;
+    function tryLoadProfilePhoto() {
+      if (urlIndex >= urls.length) {
+        if (photoPreview) { photoPreview.src = 'assets/img/logo.webp'; photoPreview.style.display = 'block'; }
+        if (placeholder) placeholder.style.display = 'none';
+        if (headerPhoto) { headerPhoto.src = 'assets/img/logo.webp'; headerPhoto.style.display = 'block'; }
+        return;
       }
-      tryLoadProfilePhoto()
+      const currentUrl = urls[urlIndex];
+      const img = new Image();
+      img.onload = function () {
+        if (photoPreview) { photoPreview.src = currentUrl; photoPreview.style.display = 'block'; }
+        if (placeholder) placeholder.style.display = 'none';
+        if (headerPhoto) { headerPhoto.src = currentUrl; headerPhoto.style.display = 'block'; }
+      };
+      img.onerror = function () {
+        urlIndex++;
+        tryLoadProfilePhoto();
+      };
+      img.src = currentUrl;
     }
-    document.getElementById('updateNamaLengkap').value = data.namaLengkap; document.getElementById('updateEmail').value = data.email
+    if (urls.length > 0) {
+      tryLoadProfilePhoto();
+    } else {
+      if (photoPreview) { photoPreview.src = 'assets/img/logo.webp'; photoPreview.style.display = 'block'; }
+      if (placeholder) placeholder.style.display = 'none';
+      if (headerPhoto) { headerPhoto.src = 'assets/img/logo.webp'; headerPhoto.style.display = 'block'; }
+    }
   }).catch(err => console.log('Error loading admin profile:', err))
 }
 function extractFileId(url) {
@@ -51,22 +83,28 @@ function handleChangePassword(event) {
   if (newPassword.length < 6) { showAlert('Password minimal 6 karakter', 'warning'); return }
   showLoading('Mengubah password...'); apiCall('updateAdminPassword', { adminId: currentAdminId, oldPassword, newPassword }).then(data => { hideLoading(); showAlert('Password berhasil diubah', 'success'); document.getElementById('changePasswordForm').reset() }).catch(err => { hideLoading(); showAlert(`Gagal: ${err}`, 'error') })
 }
-function handleUpdateProfile(event) { event.preventDefault(); const namaLengkap = document.getElementById('updateNamaLengkap').value; const email = document.getElementById('updateEmail').value; showLoading('Menyimpan perubahan...'); apiCall('updateAdminProfile', { adminId: currentAdminId, namaLengkap, email }).then(data => { hideLoading(); showAlert('Profil berhasil diperbarui', 'success'); localStorage.setItem('adminNama', namaLengkap); document.getElementById('adminNama').textContent = namaLengkap; document.getElementById('adminEmail').textContent = email }).catch(err => { hideLoading(); showAlert(`Gagal: ${err}`, 'error') }) }
+function handleUpdateProfile(event) { event.preventDefault(); const namaLengkap = document.getElementById('updateNamaLengkap').value; const email = document.getElementById('updateEmail').value; const id = currentAdminId || localStorage.getItem('adminId') || 'admin'; showLoading('Menyimpan perubahan...'); apiCall('updateAdminProfile', { adminId: id, namaLengkap, email }).then(data => { hideLoading(); showAlert('Profil berhasil diperbarui', 'success'); localStorage.setItem('adminNama', namaLengkap); const nameHeader = document.getElementById('adminNameHeader'); if (nameHeader) nameHeader.textContent = namaLengkap; const aNama = document.getElementById('adminNama'); if (aNama) aNama.textContent = namaLengkap; const aEmail = document.getElementById('adminEmail'); if (aEmail) aEmail.textContent = email }).catch(err => { hideLoading(); showAlert(`Gagal: ${err}`, 'error') }) }
 function handlePhotoUpload(event) {
   const file = event.target.files[0]; if (!file) return; if (!file.type.startsWith('image/')) { showAlert('File harus berupa gambar', 'error'); return }
   if (file.size > 5 * 1024 * 1024) { showAlert('Ukuran file terlalu besar (max 5MB)', 'error'); return }
-  showLoading('Mengupload foto...'); uploadPhotoToDrive(file)
+  showLoading('Memproses foto...'); uploadAdminPhotoToRTDB(file)
 }
-function uploadPhotoToDrive(file) {
+function uploadAdminPhotoToRTDB(file) {
   const reader = new FileReader(); reader.onload = function (e) {
-    const base64 = e.target.result.split(',')[1]; apiCall('uploadAdminPhoto', { adminId: currentAdminId, fileName: `admin_${currentAdminId}_${Date.now()}.jpg`, base64: base64, mimeType: file.type }).then(data => {
-      hideLoading(); if (!data.fotoUrl && !data.publicUrl) { showAlert('Foto URL tidak valid', 'error'); return }
-      const urls = [data.fotoUrl, data.publicUrl, `https://drive.google.com/uc?export=view&id=${data.fileId}`].filter(url => url); const photoPreview = document.getElementById('adminPhotoPreview'); let urlIndex = 0; function tryLoadPhoto() {
-        if (urlIndex >= urls.length) { showAlert('Foto diupload ke Drive tapi tidak bisa ditampilkan. Cek di folder: My Drive > Perpustakaan > admin', 'warning'); document.getElementById('adminPhotoPreview').style.display = 'none'; return }
-        const currentUrl = urls[urlIndex]; photoPreview.src = currentUrl; photoPreview.onerror = function () { urlIndex++; tryLoadPhoto() }; photoPreview.onload = function () { showAlert('Foto berhasil diupload', 'success'); document.getElementById('adminPhotoPlaceholder').style.display = 'none'; document.getElementById('adminPhotoPreview').style.display = 'block'; const headerPhoto = document.getElementById('headerAdminPhoto'); headerPhoto.src = currentUrl; headerPhoto.style.display = 'block' }
-      }
-      photoPreview.style.display = 'block'; tryLoadPhoto(); document.getElementById('photoUpload').value = ''
-    }).catch(err => { hideLoading(); showAlert(`Gagal upload foto: ${err}`, 'error') })
+    const img = new Image(); img.onload = function () {
+      const canvas = document.createElement('canvas'); const maxDim = 300; let w = img.width; let h = img.height;
+      if (w > h) { if (w > maxDim) { h = Math.round((h * maxDim) / w); w = maxDim } } else { if (h > maxDim) { w = Math.round((w * maxDim) / h); h = maxDim } }
+      canvas.width = w; canvas.height = h; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, w, h);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+      const id = currentAdminId || localStorage.getItem('adminId') || 'admin';
+      apiCall('uploadAdminPhoto', { adminId: id, dataUrl: dataUrl }).then(data => {
+        hideLoading(); showAlert('Foto profil berhasil disimpan di RTDB', 'success');
+        const photoPreview = document.getElementById('adminPhotoPreview'); if (photoPreview) { photoPreview.src = dataUrl; photoPreview.style.display = 'block'; }
+        const placeholder = document.getElementById('adminPhotoPlaceholder'); if (placeholder) placeholder.style.display = 'none';
+        const headerPhoto = document.getElementById('headerAdminPhoto'); if (headerPhoto) { headerPhoto.src = dataUrl; headerPhoto.style.display = 'block'; }
+        document.getElementById('photoUpload').value = ''
+      }).catch(err => { hideLoading(); showAlert(`Gagal menyimpan foto: ${err}`, 'error') })
+    }; img.src = e.target.result
   }; reader.readAsDataURL(file)
 }
 window.addEventListener('DOMContentLoaded', function () { startClock(); startLoginClock(); const session = localStorage.getItem('sessionToken'); if (session) { showDashboard() } }); function showLoading(message = 'Memproses...') { isLoading = !0; Swal.fire({ title: message, didOpen: (modal) => { Swal.showLoading() }, allowOutsideClick: !1, allowEscapeKey: !1 }) }
@@ -94,21 +132,34 @@ async function apiCall(action, params = {}) {
       return await DBLibrary.adminLogin(params.username, params.password);
     }
     case 'getAdmin': {
-      const res = await DBLibrary.getAdmin(params.adminId || currentAdminId);
-      return res ? {
-        username: res.username || params.adminId,
-        namaLengkap: res.namaLengkap || 'Admin',
-        email: res.email || '',
-        fotoUrl: res.fotoUrl || 'assets/img/logo.webp'
-      } : null;
+      let res = await DBLibrary.getAdmin(params.adminId || currentAdminId || 'admin');
+      if (!res && (params.adminId !== 'admin' || currentAdminId !== 'admin')) {
+        res = await DBLibrary.getAdmin('admin');
+      }
+      return {
+        username: (res && res.username) || params.adminId || 'admin',
+        namaLengkap: (res && res.namaLengkap) || 'Admin',
+        email: (res && res.email) || '',
+        fotoUrl: (res && res.fotoUrl) || 'assets/img/logo.webp'
+      };
     }
     case 'updateAdminProfile': {
-      await DBLibrary.updateAdminProfile(params.adminId || currentAdminId, params);
+      const id = params.adminId || currentAdminId || 'admin';
+      await DBLibrary.updateAdminProfile(id, params);
       return { message: 'Profil berhasil diperbarui' };
     }
     case 'updateAdminPassword': {
-      await DBLibrary.updateAdminPassword(params.adminId || currentAdminId, params.oldPassword, params.newPassword);
+      const id = params.adminId || currentAdminId || 'admin';
+      await DBLibrary.updateAdminPassword(id, params.oldPassword, params.newPassword);
       return { message: 'Password berhasil diperbarui' };
+    }
+    case 'uploadAdminPhoto': {
+      const id = params.adminId || currentAdminId || 'admin';
+      await DBLibrary.updateAdminProfile(id, { fotoUrl: params.dataUrl });
+      return { message: 'Foto profil berhasil diperbarui', fotoUrl: params.dataUrl };
+    }
+    case 'resetData': {
+      return await DBLibrary.resetData();
     }
     case 'getStatistik': {
       const s = await DBLibrary.getStatistics();

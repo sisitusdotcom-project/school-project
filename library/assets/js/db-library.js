@@ -396,5 +396,43 @@ const DBLibrary = {
       visitsToday,
       totalVisits: visits.length
     };
+  },
+  async resetData() {
+    this.init();
+    const [booksSnap, trxSnap, membersSnap] = await Promise.all([
+      this.db.ref('library/books').once('value'),
+      this.db.ref('library/transactions').once('value'),
+      this.db.ref('library/members').once('value')
+    ]);
+    const books = booksSnap.val() || {};
+    const trxs = trxSnap.val() || {};
+    const members = membersSnap.val() || {};
+    const updates = {};
+    let booksCount = 0;
+    Object.keys(books).forEach(k => {
+      updates[`library/books/${k}/stockAvailable`] = parseInt(books[k].stockTotal, 10) || 1;
+      updates[`library/books/${k}/printStatus`] = '';
+      booksCount++;
+    });
+    let membersCount = 0;
+    Object.keys(members).forEach(k => {
+      updates[`library/members/${k}/printStatus`] = '';
+      membersCount++;
+    });
+    let trxCount = 0;
+    Object.keys(trxs).forEach(k => {
+      if (trxs[k].status === 'DIPINJAM') {
+        updates[`library/transactions/${k}/status`] = 'KEMBALI';
+        updates[`library/transactions/${k}/returnDate`] = new Date().toISOString().slice(0, 10);
+        trxCount++;
+      }
+    });
+    await this.db.ref().update(updates);
+    return {
+      message: 'Data berhasil direset dan dirapikan',
+      anggotaCount: membersCount,
+      bukuCount: booksCount,
+      transaksiCount: trxCount
+    };
   }
 };
