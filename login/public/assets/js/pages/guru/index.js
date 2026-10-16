@@ -1770,7 +1770,8 @@ const payload = type === 'in'
 if (result.proof_url) payload.proof_url = result.proof_url;
 if (result.record && Object.keys(result.record).length) Object.assign(payload, result.record);
 await DB.saveTeacherAttendance(dateStr, teacherId, payload);
-alert('Presensi berhasil dicatat.');
+const recordedTime = type === 'in' ? (payload.time_in || new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })) : (payload.time_out || new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }));
+AppConfig.showAttendanceSuccessModal({ type, timeStr: recordedTime, user: Auth.userData || Auth.currentUser, isUmmi, date: dateStr });
 capturedProofDataUrl = null;
 proofPreview.src = '';
 proofWrapper.style.display = 'none';

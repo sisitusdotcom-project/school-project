@@ -912,6 +912,102 @@ netSalary: net,
 noticeText: 'Status Periode Ini: Belum Diterbitkan oleh Bagian Keuangan. Angka di bawah merupakan estimasi rincian berjalan berdasarkan rekap presensi dan tugas ajar. Slip gaji resmi diterbitkan setelah Bendahara Keuangan menyelesaikan rekapitulasi penggajian.'
 };
 }
+const ATTENDANCE_MOTIVATIONS = Object.freeze([
+{ text: 'Kasih sayang dan keikhlasan dalam mendidik adalah modal utama kemajuan umat.', author: 'KH. Ahmad Dahlan', category: 'Kutipan Tokoh', target: 'all' },
+{ text: 'Siapa yang menempuh jalan untuk mencari ilmu, maka Allah akan mudahkan jalannya menuju surga.', author: 'HR. Muslim', category: 'Hadits Shahih', target: 'all' },
+{ text: 'Allah akan meninggikan orang-orang yang beriman dan orang-orang yang diberi ilmu beberapa derajat.', author: 'QS. Al-Mujadilah: 11', category: 'Al-Qur\'an Karim', target: 'all' },
+{ text: 'Ing ngarsa sung tuladha, ing madya mangun karsa, tut wuri handayani. Jadilah teladan dan penyemangat hari ini!', author: 'Ki Hajar Dewantara', category: 'Kutipan Tokoh', target: 'all' },
+{ text: 'Mendidik satu insan dengan budi pekerti mulia lebih berharga daripada dunia dan segala isinya.', author: 'Ali bin Abi Thalib r.a.', category: 'Kutipan Sahabat', target: 'all' },
+{ text: 'Pendidikan adalah senjata paling ampuh yang dapat Anda gunakan untuk mengubah dunia.', author: 'Nelson Mandela', category: 'Kutipan Tokoh', target: 'all' },
+{ text: 'Kecantikan sejati seorang pendidik terpancar dari ketinggian adab dan ketulusan dalam mengamalkan ilmu.', author: 'Buya Hamka', category: 'Kutipan Tokoh', target: 'all' },
+{ text: 'Setiap senyuman dan ketulusan yang Anda hadirkan hari ini adalah investasi masa depan generasi bangsa.', author: 'Semangat Pagi', category: 'Energi Positif', target: 'in' },
+{ text: 'Pendidikan yang hebat lahir dari sinergi guru yang tangguh dan tenaga kependidikan yang tulus berdedikasi.', author: 'Apresiasi GTK', category: 'Apresiasi GTK', target: 'all' },
+{ text: 'Awali presensi dengan niat mulia, jadikan ruang kelas dan ruang kerja kita sebagai ladang ibadah yang penuh berkah.', author: 'Niat Keikhlasan', category: 'Energi Positif', target: 'in' },
+{ text: 'Anda mungkin tidak melihat hasilnya hari ini, tapi jejak kebaikan Anda akan membekas selamanya di hati para murid.', author: 'Dampak Nyata', category: 'Inspirasi', target: 'all' },
+{ text: 'Mendidik bukan hanya mentransfer pengetahuan, tetapi menyalakan lentera karakter dan harapan baru setiap hari.', author: 'Fokus Proses', category: 'Inspirasi', target: 'all' },
+{ text: 'Dari balik meja administrasi hingga ke depan ruang kelas, setiap peran Anda adalah kunci keunggulan sekolah.', author: 'Pahlawan Sekolah', category: 'Apresiasi GTK', target: 'all' },
+{ text: 'Satu kalimat penyemangat dan keteladanan dari Anda hari ini dapat menerangi masa depan seorang murid.', author: 'Inspirasi Harian', category: 'Inspirasi', target: 'all' },
+{ text: 'Tetaplah menjadi cahaya yang menuntun anak-anak bangsa menggapai mimpi dan cita-cita mulia mereka.', author: 'Refleksi Diri', category: 'Inspirasi', target: 'all' },
+{ text: 'Sebaik-baik kalian adalah orang yang mempelajari Al-Qur\'an dan mengajarkannya kepada sesama.', author: 'HR. Bukhari', category: 'Hadits Shahih', target: 'all' },
+{ text: 'Setiap huruf Al-Qur\'an yang dilantunkan para santri mengalirkan pahala jariyah tanpa henti bagi guru yang membimbingnya.', author: 'Keutamaan Mengajar Quran', category: 'Guru Ummi', target: 'all' },
+{ text: 'Bimbinglah santri dengan kesabaran dan cinta, karena Anda sedang menuntun para penjaga kalam Ilahi.', author: 'Mutiara Al-Qur\'an', category: 'Guru Ummi', target: 'all' },
+{ text: 'Sekiranya hati kita suci dan ikhlas, niscaya kita tidak akan pernah jenuh mendampingi lantunan ayat suci Al-Qur\'an.', author: 'Utsman bin Affan r.a.', category: 'Kutipan Sahabat', target: 'all' },
+{ text: 'Alhamdulillah atas seluruh dedikasi Anda hari ini. Selamat beristirahat dan berkumpul kembali bersama keluarga tercinta.', author: 'Doa & Syukur', category: 'Refleksi Sore', target: 'out' }
+]);
+function getDailyAttendanceMotivation(options) {
+const opts = options || {};
+const isUmmi = !!opts.isUmmi;
+const type = opts.type || 'in';
+let dateObj = new Date();
+if (opts.date) {
+const parts = String(opts.date).split('-');
+if (parts.length === 3) {
+dateObj = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+} else {
+dateObj = new Date(opts.date);
+}
+}
+const dayNumber = Math.floor(Date.UTC(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate()) / 86400000);
+let pool = ATTENDANCE_MOTIVATIONS.filter(item => {
+if (item.target === 'out' && type !== 'out') return false;
+if (item.target === 'in' && type !== 'in') return false;
+if (item.category === 'Guru Ummi' && !isUmmi) return false;
+return true;
+});
+if (isUmmi) {
+const ummiPool = pool.filter(item => item.category === 'Guru Ummi' || item.author.includes('Bukhari') || item.author.includes('Utsman') || item.author.includes('Dahlan') || item.author.includes('Mujadilah'));
+if (ummiPool.length) {
+const uIdx = Math.abs(dayNumber) % ummiPool.length;
+return ummiPool[uIdx];
+}
+}
+if (!pool.length) pool = ATTENDANCE_MOTIVATIONS;
+const typeOffset = type === 'out' ? 5 : 0;
+const index = Math.abs(dayNumber + typeOffset) % pool.length;
+return pool[index];
+}
+function getRandomAttendanceMotivation(options) {
+return getDailyAttendanceMotivation(options);
+}
+function showAttendanceSuccessModal(options) {
+const opts = options || {};
+const type = opts.type || 'in';
+const timeStr = opts.timeStr || new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+const user = opts.user || null;
+const isUmmi = opts.isUmmi !== undefined ? opts.isUmmi : (user ? isUserUmmi(user) : false);
+const quote = opts.quote || getDailyAttendanceMotivation({ role: user?.role, isUmmi, type, date: opts.date || opts.dateStr });
+const typeLabel = type === 'out' ? 'Presensi Pulang' : 'Presensi Datang';
+const now = new Date();
+const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+const dateFormatted = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+const oldModal = document.getElementById('modal-attendance-success');
+if (oldModal) oldModal.remove();
+const modal = document.createElement('div');
+modal.id = 'modal-attendance-success';
+modal.className = 'modal-overlay modal-attendance-overlay active';
+modal.innerHTML = `<div class="modal modal-attendance-success"><div class="attendance-success-banner"><div class="attendance-success-icon-wrap"><i class="ph-bold ph-check-circle"></i></div><h3 class="attendance-success-title">${typeLabel} Berhasil!</h3><p class="attendance-success-time"><i class="ph ph-clock"></i> ${escapeHtml(timeStr)} WIB &bull; ${escapeHtml(dateFormatted)}</p></div><div class="attendance-quote-card"><div class="attendance-quote-header"><span class="attendance-quote-badge"><i class="ph-fill ph-quotes"></i> Mutiara Hari Ini</span><span class="attendance-quote-tag">${escapeHtml(quote.category || 'Inspirasi')}</span></div><blockquote class="attendance-quote-text">“${escapeHtml(quote.text)}”</blockquote><div class="attendance-quote-author"><i class="ph ph-user-circle"></i><span class="attendance-quote-name">${escapeHtml(quote.author)}</span></div></div><div class="modal-footer attendance-success-footer"><button type="button" class="btn btn-primary btn-block" id="btn-close-attendance-modal"><i class="ph ph-arrow-right"></i> Lanjutkan Beraktivitas</button></div></div>`;
+document.body.appendChild(modal);
+const closeModal = () => {
+modal.classList.remove('active');
+setTimeout(() => {
+if (modal.parentNode) modal.parentNode.removeChild(modal);
+}, 200);
+};
+const closeBtn = modal.querySelector('#btn-close-attendance-modal');
+if (closeBtn) closeBtn.onclick = closeModal;
+modal.onclick = (e) => {
+if (e.target === modal) closeModal();
+};
+const keyHandler = (e) => {
+if (e.key === 'Escape') {
+closeModal();
+document.removeEventListener('keydown', keyHandler);
+}
+};
+document.addEventListener('keydown', keyHandler);
+return modal;
+}
 const APP_DEFAULTS = Object.freeze({
 googleDriveUploadUrl: 'https://script.google.com/macros/s/AKfycbwHNSb34p_FcX_dTQuw87viaZ9joh2rT3KdtMLBVvwpocWzyF3HICPUPRfPuy63LDsNsw/exec',
 attendanceWorkerUrl: 'https://musada-absensi.sisitusdotcom.workers.dev/',
@@ -975,6 +1071,10 @@ calculateGradeSummary,
 PAYROLL_CUTOFF_START,
 PAYROLL_CUTOFF_END,
 getPayrollCutoffRange,
-resolveSalarySlipData
+resolveSalarySlipData,
+ATTENDANCE_MOTIVATIONS,
+getDailyAttendanceMotivation,
+getRandomAttendanceMotivation,
+showAttendanceSuccessModal
 });
 })();
