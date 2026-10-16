@@ -8,5 +8,9 @@ node_modules/
 package-lock.json
 package.json
 
-# Project aplikasi lain
-perpustakaan
+
+# Project contoh
+mysisi
+
+# Multi-domain shared asset junction
+admin-library/assets/

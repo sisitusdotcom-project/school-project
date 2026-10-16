@@ -312,7 +312,6 @@
       ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')",
       ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru')"
     },
-
     "ummi_tasmi_schedules": {
       ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')",
       ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'guru')"
@@ -364,6 +363,45 @@
     "student_promotions": {
       ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')",
       ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('unitFlags').child('WAKA_KURIKULUM').val() === true)"
+    },
+    "library": {
+      ".read": "true",
+      ".write": "true",
+      "books": {
+        ".indexOn": [
+          "category",
+          "shelfCode",
+          "title"
+        ]
+      },
+      "members": {
+        ".indexOn": [
+          "code",
+          "type",
+          "name"
+        ]
+      },
+      "transactions": {
+        ".indexOn": [
+          "memberCode",
+          "bookCode",
+          "status",
+          "dueDate"
+        ]
+      },
+      "visits": {
+        ".indexOn": [
+          "date",
+          "memberCode"
+        ]
+      },
+      "donations": {
+        ".indexOn": [
+          "status",
+          "type",
+          "createdAt"
+        ]
+      }
     }
   }
 }

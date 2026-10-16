@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Perpustakaan Surya Pintar - SD Muhammadiyah 1 Sedati</title>
+<link rel="apple-touch-icon" sizes="180x180" href="assets/img/favicon/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon/favicon-16x16.png">
+<link rel="icon" href="assets/img/favicon/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="assets/css/public.css">
+</head>
+<body>
+<header class="header-public">
+<div class="container header-wrapper">
+<a href="#" class="brand-link">
+<img src="assets/img/logo.webp" alt="Logo SD Muhammadiyah 1 Sedati" class="brand-logo">
+<div>
+<h1 class="brand-title">Perpustakaan Surya Pintar</h1>
+<p class="brand-subtitle">SD Muhammadiyah 1 Sedati</p>
+</div>
+</a>
+<nav>
+<ul class="nav-menu" id="publicNavMenu">
+<li><a href="#section-hero" class="nav-link active">Beranda</a></li>
+<li><a href="#section-katalog" class="nav-link">Katalog Buku</a></li>
+<li><a href="#section-guestbook" class="nav-link">Presensi Kunjungan</a></li>
+<li><a href="#section-donasi" class="nav-link">Donasi Literasi</a></li>
+<li><a href="#section-info" class="nav-link">Info Layanan</a></li>
+<li><a href="https://admin-library.musada.sch.id" class="btn-admin-link" target="_blank"><i class="fas fa-user-shield"></i> Area Petugas</a></li>
+</ul>
+</nav>
+<button type="button" class="mobile-toggle" id="mobileNavToggle" aria-label="Menu Navigasi"><i class="fas fa-bars"></i></button>
+</div>
+</header>
+<main>
+<section class="hero-section" id="section-hero">
+<div class="container hero-grid">
+<div class="hero-content">
+<div class="hero-badge"><i class="fas fa-book-reader"></i> Pusat Literasi Digital SD Muhammadiyah 1 Sedati</div>
+<h2 class="hero-title">Jendela Ilmu, Penggerak Karakter & Peradaban Qur'ani</h2>
+<p class="hero-desc">Temukan ribuan koleksi buku bacaan anak, ensiklopedia sains, novel inspiratif, dan bahan pustaka digital terpadu untuk membentuk generasi cerdas dan berakhlak mulia.</p>
+<div class="hero-actions">
+<a href="#section-katalog" class="btn-hero-primary"><i class="fas fa-search"></i> Jelajahi Katalog</a>
+<a href="#section-guestbook" class="btn-hero-secondary"><i class="fas fa-user-check"></i> Buku Tamu</a>
+<a href="#section-donasi" class="btn-hero-secondary"><i class="fas fa-hand-holding-heart"></i> Donasi Buku</a>
+</div>
+</div>
+<div>
+<div class="hero-stat-card">
+<h3 class="hero-stat-title"><i class="fas fa-chart-pie"></i> Statistik Koleksi Terkini</h3>
+<div class="hero-stat-grid">
+<div class="stat-item">
+<div class="stat-num" id="statTotalBuku">0</div>
+<div class="stat-label">Judul Koleksi</div>
+</div>
+<div class="stat-item">
+<div class="stat-num" id="statStokTersedia">0</div>
+<div class="stat-label">Buku Tersedia</div>
+</div>
+<div class="stat-item">
+<div class="stat-num" id="statEbookCount">0</div>
+<div class="stat-label">Koleksi E-Book</div>
+</div>
+<div class="stat-item">
+<div class="stat-num" id="statVisitsToday">0</div>
+<div class="stat-label">Kunjungan Hari Ini</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="section" id="section-katalog">
+<div class="container">
+<div class="section-header">
+<span class="section-tag">OPAC (Online Public Access Catalog)</span>
+<h2 class="section-title">Katalog & Pencarian Buku</h2>
+<p class="section-desc">Cari dan temukan buku berdasarkan judul, pengarang, penerbit, nomor rak, atau kategori koleksi secara instan.</p>
+</div>
+<div class="search-box-card">
+<div class="search-row">
+<div class="search-input-wrap">
+<i class="fas fa-search"></i>
+<input type="text" id="searchBookInput" class="search-input" placeholder="Ketik judul buku, pengarang, atau nomor rak...">
+</div>
+</div>
+<div class="category-pills" id="categoryPills"></div>
+</div>
+<div class="books-grid" id="booksGrid">
+<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted);"><i class="fas fa-spinner fa-spin" style="font-size: 28px; margin-bottom: 12px; display: block;"></i>Memuat koleksi buku perpustakaan...</div>
+</div>
+</div>
+</section>
+<section class="section" id="section-guestbook" style="background:#FFFFFF; border-top:1px solid var(--border-color); border-bottom:1px solid var(--border-color);">
+<div class="container">
+<div class="section-header">
+<span class="section-tag">Presensi Kunjungan</span>
+<h2 class="section-title">Buku Tamu Perpustakaan</h2>
+<p class="section-desc">Silakan mencatat kehadiran Anda saat berkunjung atau membaca buku di ruang perpustakaan.</p>
+</div>
+<div class="guestbook-card">
+<form id="guestbookForm">
+<div class="form-row">
+<div class="form-group">
+<label for="guestMemberCode" class="form-label">Kode Anggota (Opsional)</label>
+<input type="text" id="guestMemberCode" class="form-control" placeholder="Contoh: S-001, G-001">
+</div>
+<div class="form-group">
+<label for="guestMemberType" class="form-label">Kategori Pengunjung</label>
+<select id="guestMemberType" class="form-control">
+<option value="Siswa">Siswa</option>
+<option value="GTK">Guru / Karyawan</option>
+<option value="Umum">Wali Murid / Tamu Umum</option>
+</select>
+</div>
+</div>
+<div class="form-group">
+<label for="guestMemberName" class="form-label">Nama Lengkap Pengunjung</label>
+<input type="text" id="guestMemberName" class="form-control" placeholder="Masukkan nama Anda" required>
+</div>
+<div class="form-group">
+<label for="guestPurpose" class="form-label">Tujuan Kunjungan</label>
+<select id="guestPurpose" class="form-control">
+<option value="Membaca Buku">Membaca Buku / Literasi</option>
+<option value="Meminjam Buku">Meminjam Buku</option>
+<option value="Mengembalikan Buku">Mengembalikan Buku</option>
+<option value="Tugas Belajar / Diskusi">Tugas Belajar / Diskusi</option>
+<option value="Lainnya">Lainnya</option>
+</select>
+</div>
+<button type="submit" class="btn-submit"><i class="fas fa-check-circle"></i> Catat Kehadiran Saya</button>
+</form>
+</div>
+</div>
+</section>
+<section class="section" id="section-donasi">
+<div class="container">
+<div class="section-header">
+<span class="section-tag">Peduli Literasi</span>
+<h2 class="section-title">Pojok Donasi Perpustakaan</h2>
+<p class="section-desc">Dukung kemajuan literasi dan pengadaan bahan bacaan bermutu bagi santri SD Muhammadiyah 1 Sedati melalui donasi buku atau infaq pengembangan.</p>
+</div>
+<div class="donation-card">
+<div class="donation-tabs">
+<button type="button" class="donation-tab-btn active" data-tab="buku"><i class="fas fa-book"></i> Donasi Buku Fisik</button>
+<button type="button" class="donation-tab-btn" data-tab="dana"><i class="fas fa-hand-holding-usd"></i> Infaq & Donasi Dana</button>
+</div>
+<div id="paneDonasiBuku">
+<form id="formDonasiBuku">
+<div class="form-row">
+<div class="form-group">
+<label for="donaturBukuName" class="form-label">Nama Donatur / Instansi</label>
+<input type="text" id="donaturBukuName" class="form-control" placeholder="Nama Anda atau keluarga" required>
+</div>
+<div class="form-group">
+<label for="donaturBukuPhone" class="form-label">Nomor WhatsApp / Kontak</label>
+<input type="tel" id="donaturBukuPhone" class="form-control" placeholder="08xxxxxxxxxx" required>
+</div>
+</div>
+<div class="form-row">
+<div class="form-group">
+<label for="donaturBukuEmail" class="form-label">Email (Opsional)</label>
+<input type="email" id="donaturBukuEmail" class="form-control" placeholder="alamat@email.com">
+</div>
+<div class="form-group">
+<label for="donaturBukuCount" class="form-label">Jumlah Eksemplar Buku</label>
+<input type="number" id="donaturBukuCount" class="form-control" placeholder="Contoh: 5" min="1" required>
+</div>
+</div>
+<div class="form-group">
+<label for="donaturBukuTitles" class="form-label">Judul Buku / Kategori yang Didonasikan</label>
+<textarea id="donaturBukuTitles" class="form-control" rows="3" placeholder="Sebutkan judul-judul buku atau jenis bacaan yang disumbangkan..." required></textarea>
+</div>
+<div class="form-group">
+<label for="donaturBukuNotes" class="form-label">Catatan Tambahan (Opsional)</label>
+<textarea id="donaturBukuNotes" class="form-control" rows="2" placeholder="Pesan untuk perpustakaan atau informasi pengiriman buku..."></textarea>
+</div>
+<button type="submit" class="btn-submit"><i class="fas fa-paper-plane"></i> Kirim Formulir Donasi Buku</button>
+</form>
+</div>
+<div id="paneDonasiDana" style="display:none;">
+<div class="bank-box">
+<div class="bank-name"><i class="fas fa-university"></i> Bank Syariah Indonesia (BSI)</div>
+<div class="bank-num">7123456789</div>
+<div class="bank-holder">a.n. SD Muhammadiyah 1 Sedati (Perpustakaan)</div>
+</div>
+<div class="bank-box">
+<div class="bank-name"><i class="fas fa-university"></i> Bank Jatim</div>
+<div class="bank-num">0192837465</div>
+<div class="bank-holder">a.n. SD Muhammadiyah 1 Sedati</div>
+</div>
+<form id="formDonasiDana">
+<div class="form-row">
+<div class="form-group">
+<label for="donaturDanaName" class="form-label">Nama Donatur / Hamba Allah</label>
+<input type="text" id="donaturDanaName" class="form-control" placeholder="Nama pengirim infaq" required>
+</div>
+<div class="form-group">
+<label for="donaturDanaPhone" class="form-label">Nomor WhatsApp</label>
+<input type="tel" id="donaturDanaPhone" class="form-control" placeholder="08xxxxxxxxxx" required>
+</div>
+</div>
+<div class="form-group">
+<label for="donaturDanaAmount" class="form-label">Jumlah Donasi / Infaq (Rp)</label>
+<input type="number" id="donaturDanaAmount" class="form-control" placeholder="Contoh: 100000" min="10000" required>
+</div>
+<div class="form-group">
+<label for="donaturDanaNotes" class="form-label">Doa / Pesan / Keterangan Transfer</label>
+<textarea id="donaturDanaNotes" class="form-control" rows="2" placeholder="Tuliskan pesan atau konfirmasi tanggal transfer..."></textarea>
+</div>
+<button type="submit" class="btn-submit"><i class="fas fa-check-double"></i> Konfirmasi Donasi Dana</button>
+</form>
+</div>
+</div>
+</div>
+</section>
+<section class="section" id="section-info" style="background:#FFFFFF; border-top:1px solid var(--border-color);">
+<div class="container">
+<div class="section-header">
+<span class="section-tag">Layanan & Aturan</span>
+<h2 class="section-title">Informasi & Tata Tertib</h2>
+<p class="section-desc">Pedoman pemanfaatan fasilitas dan peminjaman koleksi di Perpustakaan SD Muhammadiyah 1 Sedati.</p>
+</div>
+<div class="guestbook-card" style="box-shadow:none; border-color:var(--border-color);">
+<div style="margin-bottom:20px;">
+<h4 style="font-size:16px; font-weight:700; color:var(--primary); margin-bottom:8px;"><i class="fas fa-clock"></i> Jam Operasional Layanan</h4>
+<p style="font-size:14px; color:var(--text-main);" id="libSettingsHours">Senin - Kamis: 07.00 - 15.00 WIB | Jumat: 07.00 - 11.00 WIB | Sabtu: 07.30 - 12.00 WIB</p>
+</div>
+<div style="margin-bottom:20px;">
+<h4 style="font-size:16px; font-weight:700; color:var(--primary); margin-bottom:8px;"><i class="fas fa-clipboard-check"></i> Ketentuan Peminjaman</h4>
+<ul style="padding-left:20px; font-size:14px; color:var(--text-main); line-height:1.7;">
+<li>Setiap anggota dapat meminjam maksimal 2 (dua) eksemplar buku sekaligus.</li>
+<li>Masa peminjaman standar adalah 7 (tujuh) hari kalender dan dapat diperpanjang 1 kali.</li>
+<li>Koleksi referensi bertanda khusus hanya dapat dibaca di tempat.</li>
+<li>Koleksi digital/e-book dapat diakses bebas secara daring melalui portal ini.</li>
+</ul>
+</div>
+<div>
+<h4 style="font-size:16px; font-weight:700; color:var(--primary); margin-bottom:8px;"><i class="fas fa-phone-alt"></i> Kontak Petugas Perpustakaan</h4>
+<p style="font-size:14px; color:var(--text-main);">Hubungi pustakawan melalui WhatsApp di <a href="https://wa.me/6285704845822" target="_blank" rel="noopener" style="color:var(--primary); font-weight:600;">+62 857-0484-5822</a> untuk bantuan penelusuran pustaka.</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<footer class="footer-public">
+<div class="container">
+<div class="footer-grid">
+<div>
+<h3 class="footer-brand-title">Perpustakaan Surya Pintar</h3>
+<p class="footer-desc">Unit Pelaksana Teknis Perpustakaan SD Muhammadiyah 1 Sedati, Sidoarjo. Mewujudkan insan pembelajar sepanjang hayat berlandaskan nilai-nilai Al-Qur'an dan Sunnah.</p>
+</div>
+<div>
+<h4 class="footer-col-title">Tautan Penting</h4>
+<ul class="footer-links">
+<li><a href="#section-hero">Beranda</a></li>
+<li><a href="#section-katalog">Katalog Buku (OPAC)</a></li>
+<li><a href="#section-guestbook">Buku Tamu Mandiri</a></li>
+<li><a href="#section-donasi">Pojok Donasi Literasi</a></li>
+</ul>
+</div>
+<div>
+<h4 class="footer-col-title">Akses Petugas</h4>
+<ul class="footer-links">
+<li><a href="admin/"><i class="fas fa-lock"></i> Login Admin Perpustakaan</a></li>
+<li><a href="https://musada.sch.id" target="_blank"><i class="fas fa-globe"></i> Portal Utama Sekolah</a></li>
+<li><a href="https://musada.sch.id/login/" target="_blank"><i class="fas fa-user-graduate"></i> Sistem SMS MUSADA</a></li>
+</ul>
+</div>
+</div>
+<div class="footer-bottom">
+<p>&copy; 2026 Perpustakaan Surya Pintar - SD Muhammadiyah 1 Sedati. All rights reserved.</p>
+</div>
+</div>
+</footer>
+<div class="modal-overlay" id="bookDetailModal">
+<div class="modal-card">
+<button type="button" class="modal-close" aria-label="Tutup"><i class="fas fa-times"></i></button>
+<div style="margin-bottom:16px;">
+<span id="modalBookCategory" style="font-size:12px; font-weight:700; color:var(--primary); text-transform:uppercase;">Kategori</span>
+<h3 id="modalBookTitle" style="font-size:20px; font-weight:800; color:var(--text-main); margin-top:4px;">Judul Buku</h3>
+</div>
+<div style="background:var(--bg-page); padding:16px; border-radius:var(--radius-md); border:1px solid var(--border-color); margin-bottom:18px; font-size:13px; display:grid; grid-template-columns:repeat(2,1fr); gap:10px;">
+<div><strong>Kode Buku:</strong> <span id="modalBookCode">-</span></div>
+<div><strong>Nomor Rak:</strong> <span id="modalBookShelf">-</span></div>
+<div><strong>Pengarang:</strong> <span id="modalBookAuthor">-</span></div>
+<div><strong>Penerbit:</strong> <span id="modalBookPublisher">-</span></div>
+<div><strong>Tahun Terbit:</strong> <span id="modalBookYear">-</span></div>
+<div><strong>Ketersediaan:</strong> <span id="modalBookStock">-</span></div>
+</div>
+<div style="margin-bottom:24px;">
+<h4 style="font-size:14px; font-weight:700; color:var(--text-main); margin-bottom:6px;">Deskripsi / Sinopsis</h4>
+<p id="modalBookDesc" style="font-size:13px; color:var(--text-muted); line-height:1.6;">-</p>
+</div>
+<div style="display:flex; gap:12px; justify-content:flex-end;">
+<button type="button" id="btnReadEbook" class="btn-submit" style="width:auto; padding:0 20px; background:var(--accent); display:none;"><i class="fas fa-book-open"></i> Baca E-Book Sekarang</button>
+<button type="button" id="btnReserveBook" class="btn-submit" style="width:auto; padding:0 20px;"><i class="fas fa-bookmark"></i> Ajukan Peminjaman</button>
+</div>
+</div>
+</div>
+<div class="modal-overlay" id="ebookViewerModal">
+<div class="modal-card" style="max-width:900px; height:85vh; display:flex; flex-direction:column; padding:20px;">
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+<h3 id="ebookViewerTitle" style="font-size:16px; font-weight:700; color:var(--text-main); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:80%;">E-Book Reader</h3>
+<button type="button" class="modal-close" style="position:static;" aria-label="Tutup"><i class="fas fa-times"></i></button>
+</div>
+<div style="flex:1; background:#000000; border-radius:var(--radius-md); overflow:hidden;">
+<iframe id="ebookIframe" src="" style="width:100%; height:100%; border:none;" title="Pratinjau E-Book"></iframe>
+</div>
+</div>
+</div>
+<div class="toast" id="publicToast">Notifikasi</div>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="assets/js/db-library.js"></script>
+<script src="assets/js/public.js"></script>
+</body>
+</html>
