@@ -1476,7 +1476,8 @@ const sched = AppConfig.getAttendanceSchedule ? AppConfig.getAttendanceSchedule(
 let lateBadge = '';
 if (att.time_in && sched) {
 const isLate = AppConfig.isAttendanceLate ? AppConfig.isAttendanceLate(att.time_in, sched) : false;
-lateBadge = isLate ? ' <span class="badge badge-warning">Terlambat</span>' : ' <span class="badge badge-success">Tepat Waktu</span>';
+const lateReasonNote = att.late_reason ? `<br><small class="text-danger" style="font-size:11px;" title="Alasan/Banding"><em>"${AppConfig.escapeHtml(att.late_reason)}"</em></small>` : '';
+lateBadge = isLate ? ` <span class="badge badge-warning">Terlambat</span>${lateReasonNote}` : ' <span class="badge badge-success">Tepat Waktu</span>';
 }
 const proofBtn = att.proof_url
 ? `<button class="btn btn-outline btn-sm" data-proof-url="${att.proof_url}"><i class="ph ph-eye"></i> Lihat bukti</button>`

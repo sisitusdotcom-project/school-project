@@ -55,6 +55,8 @@ const DB = {
     if (data.location_out) payload.location_out = data.location_out;
     if (data.proof_url) payload.proof_url = data.proof_url;
     if (data.proofUrl) payload.proof_url = data.proofUrl;
+    if (data.late_reason) payload.late_reason = data.late_reason;
+    if (data.lateReason) payload.late_reason = data.lateReason;
     return payload;
   },
   _serializeStudentAttendance(data = {}) {

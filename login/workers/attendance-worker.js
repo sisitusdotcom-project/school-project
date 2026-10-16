@@ -1,6 +1,11 @@
-const DEFAULT_SCHOOL_LOCATION = {
+const ORIGINAL_SCHOOL_LOCATION = {
   lat: -7.378448579234777,
   lng: 112.75929775962251,
+  radiusMeters: 50
+};
+const DEFAULT_SCHOOL_LOCATION = {
+  lat: -7.39827779479305,
+  lng: 112.74845220581665,
   radiusMeters: 50
 };
 const DEFAULT_ATTENDANCE_RULES = Object.freeze({

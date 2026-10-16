@@ -1008,12 +1008,17 @@ document.removeEventListener('keydown', keyHandler);
 document.addEventListener('keydown', keyHandler);
 return modal;
 }
+const ORIGINAL_SCHOOL_GEOFENCE = Object.freeze({
+lat: -7.378448579234777,
+lng: 112.75929775962251,
+radiusMeters: 50
+});
 const APP_DEFAULTS = Object.freeze({
 googleDriveUploadUrl: 'https://script.google.com/macros/s/AKfycbwHNSb34p_FcX_dTQuw87viaZ9joh2rT3KdtMLBVvwpocWzyF3HICPUPRfPuy63LDsNsw/exec',
 attendanceWorkerUrl: 'https://musada-absensi.sisitusdotcom.workers.dev/',
 attendanceGeofence: Object.freeze({
-lat: -7.378448579234777,
-lng: 112.75929775962251,
+lat: -7.39827779479305,
+lng: 112.74845220581665,
 radiusMeters: 50
 })
 });
@@ -1075,6 +1080,7 @@ resolveSalarySlipData,
 ATTENDANCE_MOTIVATIONS,
 getDailyAttendanceMotivation,
 getRandomAttendanceMotivation,
-showAttendanceSuccessModal
+showAttendanceSuccessModal,
+ORIGINAL_SCHOOL_GEOFENCE
 });
 })();

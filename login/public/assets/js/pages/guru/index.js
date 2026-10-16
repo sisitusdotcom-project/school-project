@@ -1,6 +1,6 @@
 const ATTENDANCE_GEOFENCE = window.APP_ATTENDANCE_GEOFENCE || window.AppConfig?.attendanceGeofence || {
-lat: -7.378448579234777,
-lng: 112.75929775962251,
+lat: -7.39827779479305,
+lng: 112.74845220581665,
 radiusMeters: 50
 };
 const GuruPages = {
@@ -1265,8 +1265,8 @@ btn.disabled = false;
 async renderTeacherAttendance(container) {
 Router.setTitle('Presensi Kehadiran', 'Rekam kehadiran harian Anda di area sekolah.');
 const geofence = window.APP_ATTENDANCE_GEOFENCE || window.AppConfig?.attendanceGeofence || ATTENDANCE_GEOFENCE;
-const schoolLat = Number(geofence?.lat ?? -7.378448579234777);
-const schoolLng = Number(geofence?.lng ?? 112.75929775962251);
+const schoolLat = Number(geofence?.lat ?? -7.39827779479305);
+const schoolLng = Number(geofence?.lng ?? 112.74845220581665);
 const maxRadius = Number(geofence?.radiusMeters ?? 50);
 const maxAccuracy = 200;
 const hasLocalGeofence = Number.isFinite(schoolLat) && Number.isFinite(schoolLng) && Number.isFinite(maxRadius) && maxRadius > 0;
@@ -1313,20 +1313,28 @@ container.innerHTML = `
 </a>
 </div>
 </div>
-<div class="attendance-actions-row">
-<button id="btn-checkin" class="btn btn-primary" disabled><i class="ph ph-sign-in"></i> Presensi Datang</button>
-<button id="btn-checkout" class="btn btn-outline" disabled><i class="ph ph-sign-out"></i> Presensi Pulang</button>
-</div>
 <div id="proof-panel" class="attendance-proof-panel">
 <div class="attendance-proof-header">
-<strong>Bukti Foto Kehadiran dari Kamera</strong>
+<strong>Foto Selfie Kehadiran</strong>
 <span id="proof-status" class="text-muted">Belum ada foto</span>
 </div>
 <video id="attendance-camera-video" class="attendance-camera-video" autoplay playsinline muted></video>
-<button id="attendance-camera-capture" type="button" class="btn btn-primary attendance-camera-capture">Ambil Foto Kamera</button>
+<button id="attendance-camera-capture" type="button" class="btn btn-primary attendance-camera-capture"><i class="ph ph-camera"></i> Ambil Foto Kamera</button>
 <div id="attendance-proof-wrapper" class="attendance-proof-wrapper">
 <img id="attendance-proof-preview" class="attendance-proof-preview" src="" alt="Preview bukti presensi">
 </div>
+</div>
+<div id="attendance-late-notice-box" class="attendance-late-box" style="display:none;">
+<div class="attendance-late-box-header">
+<i class="ph-bold ph-clock-countdown"></i>
+<span>Terlambat (Batas Masuk: <strong id="attendance-late-limit">06:45</strong> WIB)</span>
+</div>
+<p class="attendance-late-box-desc">Sertakan alasan singkat / permohonan banding kehadiran:</p>
+<textarea id="attendance-late-reason-input" class="form-control attendance-late-textarea" rows="2" placeholder="Tulis alasan keterlambatan (opsional)..."></textarea>
+</div>
+<div class="attendance-actions-row">
+<button id="btn-checkin" class="btn btn-primary" disabled><i class="ph ph-sign-in"></i> Presensi Datang</button>
+<button id="btn-checkout" class="btn btn-outline" disabled><i class="ph ph-sign-out"></i> Presensi Pulang</button>
 </div>
 </div>
 <div class="card attendance-history-card">
@@ -1386,7 +1394,7 @@ try {
 if (cameraStream) return true;
 cameraStream = await navigator.mediaDevices.getUserMedia({
 video: {
-facingMode: 'environment',
+facingMode: 'user',
 width: { ideal: 1280 },
 height: { ideal: 720 }
 },
@@ -1427,6 +1435,8 @@ const canvas = document.createElement('canvas');
 canvas.width = cameraVideo.videoWidth;
 canvas.height = cameraVideo.videoHeight;
 const ctx = canvas.getContext('2d');
+ctx.translate(canvas.width, 0);
+ctx.scale(-1, 1);
 ctx.drawImage(cameraVideo, 0, 0, canvas.width, canvas.height);
 const snapshot = canvas.toDataURL('image/jpeg', 0.82);
 const compressed = await compressImageDataUrl(snapshot, 1600, 0.82);
@@ -1479,6 +1489,18 @@ const schedBadge = document.getElementById('att-schedule-badge');
 if (schedBadge) {
 schedBadge.textContent = sched.label;
 }
+const lateNoticeBox = document.getElementById('attendance-late-notice-box');
+const lateLimitTime = document.getElementById('attendance-late-limit');
+if (lateLimitTime) lateLimitTime.textContent = sched.inEnd || '06:45';
+if (lateNoticeBox) {
+const curTime = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+const isCurLate = AppConfig.isAttendanceLate ? AppConfig.isAttendanceLate(curTime, sched) : false;
+if (!myAtt?.time_in && isCurLate && !sched.noLatePenalty && (!sched.isOptional || !isUmmi)) {
+lateNoticeBox.style.display = 'block';
+} else {
+lateNoticeBox.style.display = 'none';
+}
+}
 if (sched.isOff) {
 statusTitle.innerText = "Hari Libur";
 statusText.innerText = `Hari ini (${sched.dayKey}) adalah hari libur untuk ${isUmmi ? 'Guru Ummi' : 'GTK'}. Tidak ada kewajiban presensi.`;
@@ -1495,6 +1517,11 @@ histContainer.innerHTML = '<p class="text-muted" style="font-size: 13px; margin:
 const proofMarkup = myAtt.proof_url
 ? `<div style="margin-top: 12px;"><img src="${DriveBridge.normalizeDriveImageUrl(myAtt.proof_url, 'w300', '')}" alt="Bukti presensi" style="width: 100%; max-height: 180px; object-fit: cover; border-radius: 10px; border: 1px solid #E5E7EB;"></div>`
 : '';
+const isMyAttLate = myAtt.time_in && AppConfig.isAttendanceLate ? AppConfig.isAttendanceLate(myAtt.time_in, sched) : false;
+let lateSectionHtml = '';
+if (isMyAttLate && !sched.noLatePenalty && (!sched.isOptional || !isUmmi)) {
+lateSectionHtml = `<div class="attendance-late-history-item"><div class="attendance-late-tag"><i class="ph ph-clock-countdown"></i> Status: Terlambat (${myAtt.time_in})</div>${myAtt.late_reason ? `<div class="attendance-late-saved-reason"><strong>Alasan / Banding Tercatat:</strong><p class="attendance-late-reason-text">"${AppConfig.escapeHtml(myAtt.late_reason)}"</p></div>` : `<div class="attendance-appeal-form" id="attendance-appeal-form"><p class="attendance-appeal-hint">Belum ada catatan alasan. Anda dapat menambahkan alasan/banding keterlambatan:</p><div style="display:flex; gap:8px;"><input type="text" id="attendance-post-appeal-input" class="form-control form-control-sm" placeholder="Tulis alasan keterlambatan..."><button type="button" id="btn-submit-post-appeal" class="btn btn-sm btn-primary">Simpan</button></div></div>`}</div>`;
+}
 histContainer.innerHTML = `
 <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #E5E7EB; padding-bottom: 8px; margin-bottom: 8px;">
 <span class="text-muted" style="font-size: 13px;">Datang</span>
@@ -1504,8 +1531,31 @@ histContainer.innerHTML = `
 <span class="text-muted" style="font-size: 13px;">Pulang</span>
 <strong style="font-size: 13px;">${myAtt.time_out || '-'}</strong>
 </div>
+${lateSectionHtml}
 ${proofMarkup}
 `;
+const postAppealBtn = document.getElementById('btn-submit-post-appeal');
+if (postAppealBtn) {
+postAppealBtn.onclick = async () => {
+const postInput = document.getElementById('attendance-post-appeal-input');
+const postReason = postInput ? postInput.value.trim() : '';
+if (!postReason) {
+alert('Harap tuliskan alasan keterlambatan.');
+return;
+}
+postAppealBtn.disabled = true;
+postAppealBtn.innerText = 'Menyimpan...';
+try {
+await DB.saveTeacherAttendance(dateStr, teacherId, { late_reason: postReason });
+alert('Catatan alasan keterlambatan berhasil disimpan untuk ditinjau pihak sekolah.');
+await loadHistory();
+} catch (e) {
+alert('Gagal menyimpan catatan alasan.');
+postAppealBtn.disabled = false;
+postAppealBtn.innerText = 'Simpan';
+}
+};
+}
 if (myAtt.time_in && !myAtt.time_out) {
 btnCheckin.style.display = 'none';
 } else if (myAtt.time_in && myAtt.time_out) {
@@ -1521,7 +1571,8 @@ if (fullTbody && fullHist) {
 let onTimeCount = 0;
 let lateCount = 0;
 const rowsHtml = fullHist.map((h) => {
-let statusBadge = '<span class="badge badge-warning">Terlambat</span>';
+const lateReasonNote = h.late_reason ? `<br><small class="text-muted" style="font-size:11px;" title="Catatan/Alasan">Banding: "${AppConfig.escapeHtml(h.late_reason)}"</small>` : '';
+let statusBadge = `<span class="badge badge-warning">Terlambat</span>${lateReasonNote}`;
 const isLate = AppConfig.isAttendanceLate ? AppConfig.isAttendanceLate(h.time_in, sched) : (h.time_in > (sched.inEnd || '06:45'));
 if (sched.noLatePenalty || (sched.isOptional && isUmmi)) {
 statusBadge = '<span class="badge badge-success">Hadir (Pembinaan)</span>';
@@ -1769,6 +1820,11 @@ const payload = type === 'in'
 : { time_out: result.serverTimestamp ? new Date(result.serverTimestamp).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }), location_out: result.location || currentLocation };
 if (result.proof_url) payload.proof_url = result.proof_url;
 if (result.record && Object.keys(result.record).length) Object.assign(payload, result.record);
+if (type === 'in') {
+const lateInput = document.getElementById('attendance-late-reason-input');
+const lateReasonVal = lateInput ? lateInput.value.trim() : '';
+if (lateReasonVal) payload.late_reason = lateReasonVal;
+}
 await DB.saveTeacherAttendance(dateStr, teacherId, payload);
 const recordedTime = type === 'in' ? (payload.time_in || new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })) : (payload.time_out || new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }));
 AppConfig.showAttendanceSuccessModal({ type, timeStr: recordedTime, user: Auth.userData || Auth.currentUser, isUmmi, date: dateStr });
