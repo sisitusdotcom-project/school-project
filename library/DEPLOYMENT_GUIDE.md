@@ -5,7 +5,7 @@ Panduan resmi deployment arsitektur multi-domain untuk **MUSADA Library** berbas
 ## Arsitektur Subdomain
 1. **Portal Publik**: `https://library.musada.sch.id/`
    - Menampilkan OPAC (Katalog Buku & E-Book), Presensi Kunjungan Mandiri, dan Donasi Literasi.
-2. **Portal Administrator**: `https://admin-library.musada.sch.id/`
+2. **Portal Administrator**: `https://admin.musada.sch.id/`
    - Menampilkan Dashboard Petugas, Scanner Barcode/QR kamera, Sirkulasi Pinjam-Kembali, Overdue, Bank Data Buku & Anggota, Cetak Kartu/Barcode, dan Sinkronisasi Master Data Sekolah.
 
 ---
@@ -26,7 +26,7 @@ Panduan resmi deployment arsitektur multi-domain untuk **MUSADA Library** berbas
 4. Klik **Save and Deploy**.
 5. Pada tab **Custom domains**, daftarkan: `library.musada.sch.id`.
 
-### 2. Proyek Portal Administrator (`admin-library.musada.sch.id`)
+### 2. Proyek Portal Administrator (`admin.musada.sch.id`)
 1. Di **Cloudflare Dashboard** > **Workers & Pages**, buat proyek Pages baru dari repositori yang sama (`MUSADA.SCH.ID`).
 2. Pengaturan Build:
    - **Framework Preset**: `None`
@@ -37,7 +37,7 @@ Panduan resmi deployment arsitektur multi-domain untuk **MUSADA Library** berbas
      ```
    - **Build Output Directory**: `dist`
 3. Klik **Save and Deploy**.
-4. Pada tab **Custom domains**, daftarkan: `admin-library.musada.sch.id`.
+4. Pada tab **Custom domains**, daftarkan: `admin.musada.sch.id`.
 
 ---
 
@@ -45,4 +45,4 @@ Panduan resmi deployment arsitektur multi-domain untuk **MUSADA Library** berbas
 - **Zero Asset Duplication**: Seluruh aset gambar, logo, favicon, audio scanner, stylesheet, dan modul database tersimpan di satu lokasi terpusat (`library/assets/`).
 - **Unified Database Client**: Keduanya menggunakan modul SSOT `assets/js/db-library.js` yang terhubung langsung ke Firebase Realtime Database `/library`.
 - **Isolasi Keamanan & Profesionalisme**: Dashboard admin tidak terekspos di domain publik, dan portal publik terpisah dari area internal admin.
-- **Tautan Terintegrasi**: Tombol "Area Petugas" pada publik langsung membuka `https://admin-library.musada.sch.id`, dan tombol "Portal Publik" pada admin membuka `https://library.musada.sch.id`.
+- **Tautan Terintegrasi**: Tombol "Area Petugas" pada publik langsung membuka `https://admin.musada.sch.id`, dan tombol "Portal Publik" pada admin membuka `https://library.musada.sch.id`.
