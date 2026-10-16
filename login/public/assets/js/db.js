@@ -108,18 +108,7 @@ const DB = {
     if (!isDBReady()) return defaultSettings;
     const snap = await db.ref('settings').once('value');
     const current = snap.val() || {};
-    const normalized = AppConfig.normalizeSettings(current);
-    if (!current.attendanceRules?.schedules || (current.attendanceRules?.schedules?.gtk?.senin?.inStart === '06:30' && current.attendanceRules?.schedules?.gtk?.senin?.outStart === '15:30')) {
-      db.ref('settings/attendanceRules').update({
-        scheduleVersion: 2,
-        schedules: normalized.attendanceRules.schedules,
-        checkInStart: normalized.attendanceRules.checkInStart,
-        checkInEnd: normalized.attendanceRules.checkInEnd,
-        checkOutStart: normalized.attendanceRules.checkOutStart,
-        checkOutEnd: normalized.attendanceRules.checkOutEnd
-      }).catch(() => {});
-    }
-    return normalized;
+    return AppConfig.normalizeSettings(current);
   },
   async updateSettings(data) {
     if (!isDBReady()) return;
@@ -209,16 +198,16 @@ const DB = {
   async submitTeacherAttendanceToWorker({ dateStr, teacherId, type, photoDataUrl, location, accuracy, isUmmi, roleGroup, lateReason }) {
     const workerUrl = (window.CLOUDFLARE_ATTENDANCE_WORKER_URL || '').trim();
     if (!workerUrl || workerUrl.includes('your-subdomain')) {
-      const fallbackProof = await this.saveTeacherAttendanceProof(dateStr, teacherId, photoDataUrl, 'image/jpeg');
+      const proofUrl = await this.saveTeacherAttendanceProof(dateStr, teacherId, photoDataUrl, 'image/jpeg');
       const payload = {
         ...(type === 'in' ? { time_in: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) } : {}),
         ...(type === 'out' ? { time_out: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) } : {}),
         ...(location ? (type === 'in' ? { location_in: location } : { location_out: location }) : {}),
-        ...(fallbackProof ? { proof_url: fallbackProof } : {}),
+        ...(proofUrl ? { proof_url: proofUrl } : {}),
         ...(lateReason ? { late_reason: lateReason } : {})
       };
       await this.saveTeacherAttendance(dateStr, teacherId, payload);
-      return { status: 'success', proof_url: fallbackProof, record: payload };
+      return { status: 'success', proof_url: proofUrl, record: payload };
     }
     const user = typeof firebase !== 'undefined' && firebase.auth ? firebase.auth().currentUser : null;
     const idToken = user ? await user.getIdToken() : '';

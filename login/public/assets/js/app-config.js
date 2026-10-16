@@ -505,11 +505,12 @@ const unitList = Array.isArray(units) ? units : [units];
 return unitList.some(u => assignments.includes(u));
 }
 function getAttendanceSchedule(rules = {}, isUmmi = false, date = new Date()) {
+const r = rules || {};
 const d = date instanceof Date ? date : new Date(date);
 const dayNames = ['minggu', 'senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu'];
 const dayKey = dayNames[d.getDay()] || 'senin';
 const groupKey = isUmmi ? 'ummi' : 'gtk';
-const schedules = rules.schedules || DEFAULT_SETTINGS.attendanceRules.schedules;
+const schedules = r.schedules || DEFAULT_SETTINGS.attendanceRules.schedules;
 const groupSched = schedules[groupKey] || DEFAULT_SETTINGS.attendanceRules.schedules[groupKey] || {};
 const defGroup = DEFAULT_SETTINGS.attendanceRules.schedules[groupKey] || {};
 const daySched = groupSched[dayKey] || defGroup[dayKey] || {};

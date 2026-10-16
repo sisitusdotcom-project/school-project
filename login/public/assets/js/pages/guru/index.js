@@ -1271,13 +1271,23 @@ const maxRadius = Number(geofence?.radiusMeters ?? ATTENDANCE_GEOFENCE.radiusMet
 const maxAccuracy = 200;
 const hasLocalGeofence = Number.isFinite(schoolLat) && Number.isFinite(schoolLng) && Number.isFinite(maxRadius) && maxRadius > 0;
 const hostName = window.location.host;
+const isUmmi = AppConfig.isUserUmmi(Auth.userData || Auth.currentUser);
+const initSched = AppConfig.getAttendanceSchedule ? AppConfig.getAttendanceSchedule(null, isUmmi, new Date()) : null;
+let currentSchedule = initSched;
+const isInitOff = !!(initSched && initSched.isOff);
+const initIconHtml = isInitOff ? '<i class="ph ph-calendar-x" style="font-size: 32px;"></i>' : '<i class="ph ph-spinner ph-spin"></i>';
+const initIconBg = isInitOff ? '#F3F4F6' : '#F3F4F6';
+const initIconColor = isInitOff ? '#6B7280' : '#9CA3AF';
+const initTitle = isInitOff ? 'Hari Libur' : 'Mencari Lokasi...';
+const initText = isInitOff ? `Hari ini (${initSched.dayKey}) adalah hari libur untuk ${isUmmi ? 'Guru Ummi' : 'GTK'}. Tidak ada kewajiban presensi.` : 'Mohon tunggu, sedang memverifikasi posisi koordinat Anda.';
+const actionsDisplay = isInitOff ? 'none' : 'flex';
 container.innerHTML = `
 <div class="card attendance-status-card">
-<div id="geo-status-icon" class="attendance-status-icon">
-<i class="ph ph-spinner ph-spin"></i>
+<div id="geo-status-icon" class="attendance-status-icon" style="background:${initIconBg}; color:${initIconColor};">
+${initIconHtml}
 </div>
-<h3 id="geo-status-title" class="attendance-status-title">Mencari Lokasi...</h3>
-<p id="geo-status-text" class="attendance-status-text">Mohon tunggu, sedang memverifikasi posisi koordinat Anda.</p>
+<h3 id="geo-status-title" class="attendance-status-title">${initTitle}</h3>
+<p id="geo-status-text" class="attendance-status-text">${initText}</p>
 <div id="geo-permission-box" class="attendance-permission-box">
 <div class="attendance-guide-title">
 <i class="ph ph-shield-warning"></i>
@@ -1332,7 +1342,7 @@ container.innerHTML = `
 <p class="attendance-late-box-desc">Sertakan alasan singkat / permohonan banding kehadiran:</p>
 <textarea id="attendance-late-reason-input" class="form-control attendance-late-textarea" rows="2" placeholder="Tulis alasan keterlambatan (opsional)..."></textarea>
 </div>
-<div class="attendance-actions-row">
+<div class="attendance-actions-row" style="display:${actionsDisplay};">
 <button id="btn-checkin" class="btn btn-primary" disabled><i class="ph ph-sign-in"></i> Presensi Datang</button>
 <button id="btn-checkout" class="btn btn-outline" disabled><i class="ph ph-sign-out"></i> Presensi Pulang</button>
 </div>
@@ -1376,6 +1386,9 @@ const proofStatus = document.getElementById('proof-status');
 const proofWrapper = document.getElementById('attendance-proof-wrapper');
 let cameraStream = null;
 let capturedProofDataUrl = null;
+let currentLocation = null;
+let currentAccuracy = null;
+let watchId = null;
 const stopCamera = () => {
 if (cameraStream) {
 cameraStream.getTracks().forEach((track) => track.stop());
@@ -1383,6 +1396,12 @@ cameraStream = null;
 }
 if (cameraVideo) {
 cameraVideo.srcObject = null;
+}
+};
+const stopGeolocationWatch = () => {
+if (watchId !== null && navigator.geolocation) {
+navigator.geolocation.clearWatch(watchId);
+watchId = null;
 }
 };
 const startCamera = async () => {
@@ -1481,10 +1500,10 @@ DB.getTeacherAttendance(dateStr, teacherId),
 DB.getTeacherAttendanceHistory(teacherId, 60),
 DB.getSettings()
 ]);
-const isUmmi = AppConfig.isUserUmmi(Auth.userData || Auth.currentUser);
-const sched = AppConfig.getAttendanceSchedule ? AppConfig.getAttendanceSchedule(settings?.attendanceRules, isUmmi, new Date()) : {
-inStart: '06:00', inEnd: isUmmi ? '07:15' : '06:45', outStart: isUmmi ? '12:30' : '14:30', outEnd: '17:30', label: `${isUmmi ? 'Guru Ummi' : 'GTK'}: Masuk 06:00`
-};
+const sched = AppConfig.getAttendanceSchedule ? AppConfig.getAttendanceSchedule(settings?.attendanceRules, isUmmi, new Date()) : (initSched || {
+inStart: '06:00', inEnd: isUmmi ? '07:15' : '06:45', outStart: isUmmi ? '12:30' : '14:30', outEnd: '17:30', isOff: false, label: `${isUmmi ? 'Guru Ummi' : 'GTK'}: Masuk 06:00`
+});
+currentSchedule = sched;
 const schedBadge = document.getElementById('att-schedule-badge');
 if (schedBadge) {
 schedBadge.textContent = sched.label;
@@ -1492,6 +1511,23 @@ schedBadge.textContent = sched.label;
 const lateNoticeBox = document.getElementById('attendance-late-notice-box');
 const lateLimitTime = document.getElementById('attendance-late-limit');
 if (lateLimitTime) lateLimitTime.textContent = sched.inEnd || '06:45';
+const actionsRow = container.querySelector('.attendance-actions-row');
+if (sched.isOff) {
+statusTitle.innerText = "Hari Libur";
+statusText.innerText = `Hari ini (${sched.dayKey}) adalah hari libur untuk ${isUmmi ? 'Guru Ummi' : 'GTK'}. Tidak ada kewajiban presensi.`;
+statusIcon.style.background = '#F3F4F6';
+statusIcon.style.color = '#6B7280';
+statusIcon.innerHTML = '<i class="ph ph-calendar-x" style="font-size: 32px;"></i>';
+if (actionsRow) actionsRow.style.display = 'none';
+btnCheckin.style.display = 'none';
+btnCheckout.style.display = 'none';
+if (proofPanel) proofPanel.style.display = 'none';
+if (permissionBox) permissionBox.classList.remove('active');
+if (lateNoticeBox) lateNoticeBox.style.display = 'none';
+stopCamera();
+stopGeolocationWatch();
+} else {
+if (actionsRow && (!myAtt || !myAtt.time_in || !myAtt.time_out)) actionsRow.style.display = 'flex';
 if (lateNoticeBox) {
 const curTime = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
 const isCurLate = AppConfig.isAttendanceLate ? AppConfig.isAttendanceLate(curTime, sched) : false;
@@ -1501,15 +1537,10 @@ lateNoticeBox.style.display = 'block';
 lateNoticeBox.style.display = 'none';
 }
 }
-if (sched.isOff) {
-statusTitle.innerText = "Hari Libur";
-statusText.innerText = `Hari ini (${sched.dayKey}) adalah hari libur untuk ${isUmmi ? 'Guru Ummi' : 'GTK'}. Tidak ada kewajiban presensi.`;
-statusIcon.style.background = '#F3F4F6';
-statusIcon.style.color = '#6B7280';
-statusIcon.innerHTML = '<i class="ph ph-calendar-x" style="font-size: 32px;"></i>';
-} else if (sched.isOptional) {
+if (sched.isOptional) {
 statusTitle.innerText = "Sabtu Opsional";
 statusText.innerText = `Hari ini (${sched.dayKey}) jadwal presensi opsional untuk pembinaan.${isUmmi ? ' Tidak ada hitungan keterlambatan.' : ' Presensi masuk dibuka 07.00-08.00 WIB, pulang bebas.'}`;
+}
 }
 if (!myAtt) {
 histContainer.innerHTML = '<p class="text-muted" style="font-size: 13px; margin: 0;">Belum ada rekam presensi hari ini.</p>';
@@ -1623,10 +1654,8 @@ const a = Math.sin(dp / 2) * Math.sin(dp / 2) + Math.cos(p1) * Math.cos(p2) * Ma
 const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 return R * c;
 };
-let currentLocation = null;
-let currentAccuracy = null;
-let watchId = null;
 const acceptPosition = (latitude, longitude, accuracy, distance) => {
+if (currentSchedule && currentSchedule.isOff) return false;
 currentAccuracy = Number(accuracy || 0);
 currentLocation = { lat: latitude, lng: longitude };
 permissionBox.classList.remove('active');
@@ -1645,10 +1674,7 @@ cameraCaptureBtn.innerText = 'Ambil Foto Kamera';
 btnCheckin.disabled = false;
 btnCheckout.disabled = false;
 void startCamera();
-if (watchId !== null && navigator.geolocation) {
-navigator.geolocation.clearWatch(watchId);
-watchId = null;
-}
+stopGeolocationWatch();
 return true;
 }
 statusIcon.style.background = '#FEF3C7'; statusIcon.style.color = '#F59E0B';
@@ -1675,10 +1701,7 @@ cameraCaptureBtn.innerText = 'Ambil Foto Kamera';
 btnCheckin.disabled = false;
 btnCheckout.disabled = false;
 void startCamera();
-if (watchId !== null && navigator.geolocation) {
-navigator.geolocation.clearWatch(watchId);
-watchId = null;
-}
+stopGeolocationWatch();
 return true;
 }
 statusIcon.style.background = '#FEF3C7'; statusIcon.style.color = '#F59E0B';
@@ -1690,6 +1713,7 @@ btnCheckout.disabled = true;
 return false;
 };
 const onGeoSuccess = (position) => {
+if (currentSchedule && currentSchedule.isOff) return;
 const { latitude, longitude, accuracy } = position.coords;
 const distance = hasLocalGeofence ? getDistance(schoolLat, schoolLng, latitude, longitude) : 0;
 const ok = acceptPosition(latitude, longitude, accuracy, distance);
@@ -1699,6 +1723,7 @@ statusText.innerText = `Jarak Anda sekitar ${Math.round(distance)} m dari titik 
 }
 };
 const onGeoError = (error) => {
+if (currentSchedule && currentSchedule.isOff) return;
 statusIcon.style.background = '#FEE2E2'; statusIcon.style.color = '#EF4444';
 statusIcon.innerHTML = '<i class="ph ph-warning-circle" style="font-size: 32px;"></i>';
 if (error && error.code === 1) {
@@ -1754,6 +1779,7 @@ tryStandard();
 );
 };
 const startGeolocationWatch = () => {
+if (currentSchedule && currentSchedule.isOff) return;
 if (!navigator.geolocation) {
 statusIcon.style.background = '#FEE2E2'; statusIcon.style.color = '#EF4444';
 statusIcon.innerHTML = '<i class="ph ph-warning-circle" style="font-size: 32px;"></i>';
@@ -1762,10 +1788,7 @@ statusText.innerText = "Perangkat Anda tidak mendukung fitur lokasi GPS.";
 permissionBox.classList.remove('active');
 return;
 }
-if (watchId !== null) {
-navigator.geolocation.clearWatch(watchId);
-watchId = null;
-}
+stopGeolocationWatch();
 watchId = navigator.geolocation.watchPosition(onGeoSuccess, onGeoError, {
 enableHighAccuracy: true,
 timeout: 15000,
@@ -1785,14 +1808,24 @@ navigator.permissions.query({ name: 'geolocation' }).then(perm => {
 perm.onchange = () => {
 if (perm.state === 'granted') {
 permissionBox.classList.remove('active');
+if (!currentSchedule || !currentSchedule.isOff) {
 startGeolocationWatch();
+}
 } else if (perm.state === 'denied') {
 onGeoError({ code: 1, message: 'User denied Geolocation' });
 }
 };
 }).catch(() => {});
 }
+if (!currentSchedule || !currentSchedule.isOff) {
 startGeolocationWatch();
+}
+const cleanupAttendance = () => {
+stopCamera();
+stopGeolocationWatch();
+window.removeEventListener('hashchange', cleanupAttendance);
+};
+window.addEventListener('hashchange', cleanupAttendance);
 const handlePresensi = async (type) => {
 if (!currentLocation) return;
 const btn = type === 'in' ? btnCheckin : btnCheckout;
