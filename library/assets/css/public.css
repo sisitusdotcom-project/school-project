@@ -171,6 +171,25 @@ textarea.form-control{height:auto;padding:10px 14px}
 .btn-action-auto{width:auto;padding:0 20px}
 .btn-accent-color{background:var(--accent)}
 .pane-hidden{display:none}
+.book-action-group{display:flex;gap:6px}
+.flipbook-fallback-frame{width:100%;height:100%;border:none}
+#dfBookContainer{width:100%;height:100%;position:relative}
+.flipbook-sidemenu{background:#ffffff!important;box-shadow:2px 0 16px rgba(0,0,0,0.25)!important}
+.flipbook-sidemenu-title{color:#1e293b!important;font-weight:700!important}
+.flipbook-menu-btn.fa,.flipbook-icon-fa{font-family:"Font Awesome 6 Free","Font Awesome 5 Free",sans-serif!important;font-weight:900!important}
+.flipbook-menuBottom{position:absolute;bottom:0;left:0;right:0;width:100%;box-sizing:border-box;display:flex!important;justify-content:center!important;align-items:center!important;padding:8px 16px;background:rgba(15,23,42,0.92)!important;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid rgba(255,255,255,0.1);z-index:100;pointer-events:none;overflow:hidden}
+.flipbook-menuBottom > *{pointer-events:auto}
+.flipbook-menu-left,.flipbook-menu-right{display:none!important}
+.flipbook-menu-center{display:flex!important;align-items:center!important;justify-content:center!important;gap:6px;width:auto!important;margin:0 auto!important}
+.flipbook-menu-btn{color:#F8FAFC!important;background:rgba(255,255,255,0.08)!important;border:1px solid rgba(255,255,255,0.1)!important;border-radius:8px!important;margin:0!important;width:38px!important;height:38px!important;line-height:38px!important;text-align:center!important;font-size:14px!important;transition:all .2s ease!important;cursor:pointer}
+.flipbook-menu-btn:hover{color:#FFFFFF!important;background:#2563EB!important;border-color:#3B82F6!important;transform:translateY(-2px);box-shadow:0 4px 12px rgba(37,99,235,0.4)}
+.flipbook-menu-btn[style*="display: none"],.flipbook-menu-btn[style*="display:none"],.flipbook-menu-btn.hidden{display:none!important}
+.flipbook-currentPageHolder{display:inline-flex!important;align-items:center!important;justify-content:center!important;background:rgba(255,255,255,0.1)!important;border:1px solid rgba(255,255,255,0.15)!important;color:#F8FAFC!important;border-radius:8px!important;padding:0 12px!important;height:38px!important;font-size:13px!important;font-weight:600!important;margin:0!important;pointer-events:auto!important}
+.flipbook-currentPageHolder span{color:#F8FAFC!important;font-weight:600!important}
+.flipbook-currentPageHolder input{background:#1E293B!important;color:#FFFFFF!important;border:1px solid #3B82F6!important;border-radius:4px!important;padding:2px 6px!important;text-align:center}
+.flipbook-nav{z-index:90}
+.flipbook-left-arrow,.flipbook-right-arrow{background:rgba(15,23,42,0.65)!important;color:#FFFFFF!important;border-radius:8px!important;backdrop-filter:blur(4px);transition:all .2s ease!important}
+.flipbook-left-arrow:hover,.flipbook-right-arrow:hover{background:#2563EB!important;transform:scale(1.08)}
 @media (max-width:768px){
 .header-wrapper{height:60px}
 .nav-menu{position:fixed;top:60px;left:0;right:0;background:#ffffff;flex-direction:column;align-items:flex-start;padding:20px;border-bottom:1px solid var(--border-color);box-shadow:var(--shadow-md);display:none}
@@ -182,15 +201,13 @@ textarea.form-control{height:auto;padding:10px 14px}
 .handover-group{grid-template-columns:1fr}
 .footer-grid{grid-template-columns:1fr;gap:24px}
 .modal-card{padding:20px}
-}
-.mt-10{margin-top:10px}
-.w-full{width:100%}
-#dfBookContainer{width:100%;height:100%;position:relative}
-.flipbook-menu-btn.fa,.flipbook-icon-fa{font-weight:900!important}
-.flipbook-sidemenu{background:#ffffff!important;box-shadow:2px 0 16px rgba(0,0,0,0.25)!important}
-.flipbook-sidemenu-title{color:#1e293b!important;font-weight:700!important}
-@media (max-width:768px){
-.flipbook-topbar{height:42px;padding:0 10px}
-.flipbook-stage{height:calc(100vh - 42px)}
+.flipbook-topbar{height:40px;padding:0 8px}
+.flipbook-stage{height:calc(100vh - 40px)}
 .flipbook-title{font-size:12px}
+.flipbook-nav{display:none!important}
+.flipbook-menuBottom{padding:6px 8px!important}
+.flipbook-menu-center{gap:4px!important}
+.flipbook-menu-btn{width:34px!important;height:34px!important;line-height:34px!important;font-size:13px!important;border-radius:6px!important}
+.flipbook-currentPageHolder{height:34px!important;padding:0 8px!important;font-size:12px!important;border-radius:6px!important}
 }
+.iScrollHorizontalScrollbar,.iScrollVerticalScrollbar{display:none!important;opacity:0!important;pointer-events:none!important}

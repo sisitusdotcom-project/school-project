@@ -168,7 +168,7 @@
             <p class="book-author"><i class="fas fa-feather-alt"></i> ${b.author || 'Anonim'} (${b.year || '-'})</p>
             <div class="book-footer">
               <span class="stock-indicator"><span class="stock-dot ${dotClass}"></span>${stockText}</span>
-              <div style="display:flex; gap:6px;">
+              <div class="book-action-group">
                 <button type="button" class="btn-loan-book" data-code="${b.code}" ${isAvail ? '' : 'disabled'}><i class="fas fa-bookmark"></i> Pinjam</button>
                 <button type="button" class="btn-view-book" data-code="${b.code}"><i class="fas fa-info-circle"></i> Info</button>
               </div>
@@ -294,6 +294,39 @@
       }
     }
   }
+  function onFlipbookKeyDown(e) {
+    if (!activeFlipbookInstance) return;
+    if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+    if (e.key === 'ArrowRight' || e.key === 'PageDown') {
+      e.preventDefault();
+      if (typeof activeFlipbookInstance.nextPage === 'function') activeFlipbookInstance.nextPage();
+    } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+      e.preventDefault();
+      if (typeof activeFlipbookInstance.prevPage === 'function') activeFlipbookInstance.prevPage();
+    } else if (e.key === ' ' || e.code === 'Space') {
+      e.preventDefault();
+      if (e.shiftKey) {
+        if (typeof activeFlipbookInstance.prevPage === 'function') activeFlipbookInstance.prevPage();
+      } else {
+        if (typeof activeFlipbookInstance.nextPage === 'function') activeFlipbookInstance.nextPage();
+      }
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      if (typeof activeFlipbookInstance.firstPage === 'function') activeFlipbookInstance.firstPage();
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      if (typeof activeFlipbookInstance.lastPage === 'function') activeFlipbookInstance.lastPage();
+    } else if (e.key === '+' || e.key === '=') {
+      e.preventDefault();
+      if (typeof activeFlipbookInstance.zoomIn === 'function') activeFlipbookInstance.zoomIn();
+    } else if (e.key === '-' || e.key === '_') {
+      e.preventDefault();
+      if (typeof activeFlipbookInstance.zoomOut === 'function') activeFlipbookInstance.zoomOut();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      closeFlipbookViewer();
+    }
+  }
   function openFlipbookViewer(book) {
     const modal = document.getElementById('flipbookModal');
     const stage = document.getElementById('flipbookStage');
@@ -303,37 +336,139 @@
     stage.innerHTML = '<div id="dfBookContainer"></div>';
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
+        const isMobileScreen = window.innerWidth <= 768;
     const pdfUrl = book.ebookUrl || 'buku-perpus/pedoman-hidup-islami-warga-muhammadiyah.pdf';
     const fbOptions = {
       pdfUrl: pdfUrl,
-      backgroundColor: '#3E444C',
-      skin: 'light',
+      backgroundColor: '#1E242B',
+      skin: 'dark',
+      skinColor: '#F8FAFC',
+      skinBackground: '#0F172A',
+      btnColor: '#F8FAFC',
+      btnColorHover: '#38BDF8',
       viewMode: '3d',
+      singlePageMode: isMobileScreen,
+      singlePageModeIfMobile: true,
       responsiveView: true,
+      responsiveViewTreshold: 768,
+      touchSwipeEnabled: true,
+      sideNavigationButtons: true,
+      pageFlipDuration: 0.7,
       pdfBrowserViewerIfMobile: false,
       pdfPageScale: 1.5,
-      sound: true,
+      sound: false,
       assets: {
         preloader: 'assets/vendor/flipbook/images/preloader.jpg',
-        overlay: 'assets/vendor/flipbook/images/overlay.png',
-        flipMp3: 'assets/vendor/flipbook/mp3/turnPage.mp3'
+        overlay: 'assets/vendor/flipbook/images/overlay.png'
+      },
+      btnOrder: [
+        'btnPrev',
+        'currentPage',
+        'btnNext',
+        'btnZoomIn',
+        'btnZoomOut',
+        'btnThumbs',
+        'btnExpand'
+      ],
+      currentPage: {
+        enabled: true,
+        title: 'Nomor Halaman',
+        vAlign: 'bottom',
+        hAlign: 'center'
+      },
+      btnPrev: {
+        enabled: true,
+        title: 'Halaman Sebelumnya',
+        vAlign: 'bottom',
+        hAlign: 'center'
+      },
+      btnNext: {
+        enabled: true,
+        title: 'Halaman Selanjutnya',
+        vAlign: 'bottom',
+        hAlign: 'center'
+      },
+      btnZoomIn: {
+        enabled: true,
+        title: 'Perbesar',
+        vAlign: 'bottom',
+        hAlign: 'center'
+      },
+      btnZoomOut: {
+        enabled: true,
+        title: 'Perkecil',
+        vAlign: 'bottom',
+        hAlign: 'center'
+      },
+      btnThumbs: {
+        enabled: true,
+        title: 'Semua Halaman',
+        vAlign: 'bottom',
+        hAlign: 'center'
+      },
+      btnExpand: {
+        enabled: true,
+        title: 'Layar Penuh',
+        vAlign: 'bottom',
+        hAlign: 'center'
+      },
+      btnFirst: {
+        enabled: false
+      },
+      btnLast: {
+        enabled: false
+      },
+      btnAutoplay: {
+        enabled: false
+      },
+      btnBookmark: {
+        enabled: false
+      },
+      btnToc: {
+        enabled: false
+      },
+      btnSound: {
+        enabled: false
+      },
+      btnDownloadPdf: {
+        enabled: false
+      },
+      btnDownloadPages: {
+        enabled: false
+      },
+      btnPrint: {
+        enabled: false
+      },
+      btnShare: {
+        enabled: false
+      },
+      btnSelect: {
+        enabled: false
       }
     };
     try {
       if (window.jQuery && window.jQuery.fn && window.jQuery.fn.flipBook) {
         activeFlipbookInstance = window.jQuery('#dfBookContainer').flipBook(fbOptions);
       } else {
-        stage.innerHTML = `<iframe src="${pdfUrl}" style="width:100%;height:100%;border:none;"></iframe>`;
+        stage.innerHTML = `<iframe src="${pdfUrl}" class="flipbook-fallback-frame"></iframe>`;
       }
     } catch (e) {
-      stage.innerHTML = `<iframe src="${pdfUrl}" style="width:100%;height:100%;border:none;"></iframe>`;
+      stage.innerHTML = `<iframe src="${pdfUrl}" class="flipbook-fallback-frame"></iframe>`;
     }
+    window.removeEventListener('keydown', onFlipbookKeyDown);
+    window.addEventListener('keydown', onFlipbookKeyDown);
   }
   function closeFlipbookViewer() {
+    window.removeEventListener('keydown', onFlipbookKeyDown);
     const modal = document.getElementById('flipbookModal');
     const stage = document.getElementById('flipbookStage');
     if (modal) modal.classList.remove('active');
     document.body.style.overflow = '';
+    if (activeFlipbookInstance && activeFlipbookInstance.autoplay && typeof activeFlipbookInstance.toggleAutoplay === 'function') {
+      try {
+        activeFlipbookInstance.toggleAutoplay();
+      } catch (e) {}
+    }
     if (stage) stage.innerHTML = '';
     activeFlipbookInstance = null;
   }
