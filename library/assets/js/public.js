@@ -327,6 +327,71 @@
       closeFlipbookViewer();
     }
   }
+  function getBookBookmark(code) {
+    if (!code) return null;
+    try {
+      const raw = localStorage.getItem('musada_bm_' + code);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+  function setBookBookmark(code, page, title) {
+    if (!code) return;
+    try {
+      localStorage.setItem('musada_bm_' + code, JSON.stringify({ page: parseInt(page, 10), title: title || '', time: Date.now() }));
+    } catch (e) {}
+  }
+  function removeBookBookmark(code) {
+    if (!code) return;
+    try {
+      localStorage.removeItem('musada_bm_' + code);
+    } catch (e) {}
+  }
+  function isCurrentPageBookmarked(bm, cur, isDouble, total) {
+    if (!bm || !bm.page) return false;
+    const bmPage = parseInt(bm.page, 10);
+    if (!isDouble || cur <= 1 || cur > total) {
+      return bmPage === cur;
+    }
+    const pLeft = Math.floor(cur / 2) * 2;
+    const pRight = pLeft + 1;
+    return bmPage === pLeft || bmPage === pRight;
+  }
+  function updateBookmarkUI(book, cur, isDouble, total) {
+    if (!book) return;
+    const btnBm = document.getElementById('btnFbBookmark');
+    const ribbon = document.getElementById('flipbookBookmarkRibbon');
+    const bm = getBookBookmark(book.code);
+    const hasBm = !!(bm && bm.page);
+    const onBmPage = hasBm && isCurrentPageBookmarked(bm, cur, isDouble, total);
+    if (btnBm) {
+      const icon = btnBm.querySelector('i');
+      if (onBmPage) {
+        btnBm.classList.add('is-bookmarked');
+        btnBm.title = `Halaman ${bm.page} ditandai (Klik untuk hapus penanda)`;
+        if (icon) icon.className = 'fas fa-bookmark';
+      } else {
+        btnBm.classList.remove('is-bookmarked');
+        btnBm.title = hasBm ? `Ada penanda di Hal ${bm.page} (Klik untuk tandai halaman ini)` : 'Tandai Halaman Ini';
+        if (icon) icon.className = hasBm ? 'fas fa-bookmark' : 'far fa-bookmark';
+      }
+    }
+    if (ribbon) {
+      if (hasBm) {
+        ribbon.classList.add('active');
+        ribbon.title = `Penanda Buku: Halaman ${bm.page} (Klik untuk lompat)`;
+      } else {
+        ribbon.classList.remove('active');
+      }
+    }
+  }
+  function checkBookmarkOnOpen(book) {
+    const bm = getBookBookmark(book.code);
+    if (bm && bm.page && bm.page > 1) {
+      showToast(`Ada penanda di Halaman ${bm.page}. Klik tali penanda untuk melanjutkan.`, 'info');
+    }
+  }
   function updatePageDisplay(fb) {
     const pageIndicator = document.getElementById('flipbookPageIndicator');
     if (!pageIndicator || !fb || !fb.target) return;
@@ -335,23 +400,29 @@
     const isDouble = fb.target.pageMode === (window.DFLIP ? window.DFLIP.PAGE_MODE.DOUBLE : 2);
     if (!isDouble || cur <= 1 || cur > total) {
       pageIndicator.textContent = `${Math.min(cur, total)} / ${total}`;
-      return;
-    }
-    const pLeft = Math.floor(cur / 2) * 2;
-    const pRight = pLeft + 1;
-    if (pRight > total) {
-      pageIndicator.textContent = `${pLeft} / ${total}`;
     } else {
-      pageIndicator.textContent = `${pLeft}-${pRight} / ${total}`;
+      const pLeft = Math.floor(cur / 2) * 2;
+      const pRight = pLeft + 1;
+      if (pRight > total) {
+        pageIndicator.textContent = `${pLeft} / ${total}`;
+      } else {
+        pageIndicator.textContent = `${pLeft}-${pRight} / ${total}`;
+      }
+    }
+    if (activeBook) {
+      updateBookmarkUI(activeBook, cur, isDouble, total);
     }
   }
   function openFlipbookViewer(book) {
+    activeBook = book;
     const modal = document.getElementById('flipbookModal');
     const stage = document.getElementById('flipbookStage');
     const titleEl = document.getElementById('flipbookBookTitle');
+    const subTitleEl = document.getElementById('flipbookSubbarTitle');
     const pageIndicator = document.getElementById('flipbookPageIndicator');
     if (!modal || !stage) return;
     if (titleEl) titleEl.innerText = book.title;
+    if (subTitleEl) subTitleEl.innerText = book.title;
     if (pageIndicator) pageIndicator.innerText = 'Memuat...';
     stage.innerHTML = '<div id="dfBookContainer"></div>';
     modal.classList.add('active');
@@ -367,10 +438,10 @@
       webglShadow: true,
       soundEnable: false,
       height: '100%',
-      duration: 600,
+      duration: 550,
       stiffness: 1.5,
-      pdfRenderQuality: 0.9,
-      maxTextureSize: 1600,
+      pdfRenderQuality: isMobileScreen ? 0.8 : 0.9,
+      maxTextureSize: isMobileScreen ? 1200 : 1600,
       minTextureSize: 512,
       rangeChunkSize: 524288,
       backgroundColor: '#1E242B',
@@ -381,6 +452,7 @@
       singlePageMode: window.DFLIP ? window.DFLIP.SINGLE_PAGE_MODE.BOOKLET : 2,
       onReady: function(fb) {
         updatePageDisplay(fb);
+        checkBookmarkOnOpen(book);
       },
       onFlip: function(fb) {
         updatePageDisplay(fb);
@@ -394,6 +466,41 @@
       }
     } catch (e) {
       stage.innerHTML = `<iframe src="${pdfUrl}" class="flipbook-fallback-frame"></iframe>`;
+    }
+    const btnBm = document.getElementById('btnFbBookmark');
+    const ribbon = document.getElementById('flipbookBookmarkRibbon');
+    if (btnBm) {
+      btnBm.onclick = () => {
+        if (!activeBook || !activeFlipbookInstance || !activeFlipbookInstance.target) return;
+        const cur = activeFlipbookInstance.target._activePage || 1;
+        const total = activeFlipbookInstance.target.pageCount || 1;
+        const isDouble = activeFlipbookInstance.target.pageMode === (window.DFLIP ? window.DFLIP.PAGE_MODE.DOUBLE : 2);
+        const bm = getBookBookmark(activeBook.code);
+        if (bm && isCurrentPageBookmarked(bm, cur, isDouble, total)) {
+          removeBookBookmark(activeBook.code);
+          showToast(`Penanda baca di Halaman ${bm.page} dihapus.`, 'info');
+        } else {
+          setBookBookmark(activeBook.code, cur, activeBook.title);
+          showToast(`Halaman ${cur} disimpan sebagai penanda baca!`, 'success');
+        }
+        updateBookmarkUI(activeBook, cur, isDouble, total);
+      };
+    }
+    if (ribbon) {
+      ribbon.onclick = () => {
+        if (!activeBook || !activeFlipbookInstance) return;
+        const bm = getBookBookmark(activeBook.code);
+        if (!bm || !bm.page) return;
+        const cur = activeFlipbookInstance.target ? (activeFlipbookInstance.target._activePage || 1) : 1;
+        const total = activeFlipbookInstance.target ? (activeFlipbookInstance.target.pageCount || 1) : 1;
+        const isDouble = activeFlipbookInstance.target ? (activeFlipbookInstance.target.pageMode === (window.DFLIP ? window.DFLIP.PAGE_MODE.DOUBLE : 2)) : false;
+        if (isCurrentPageBookmarked(bm, cur, isDouble, total)) {
+          showToast(`Sedang berada di halaman penanda (${bm.page}).`, 'info');
+        } else if (typeof activeFlipbookInstance.gotoPage === 'function') {
+          activeFlipbookInstance.gotoPage(bm.page);
+          showToast(`Melompat ke Halaman ${bm.page}.`, 'info');
+        }
+      };
     }
     const btnZoomIn = document.getElementById('btnFbZoomIn');
     const btnZoomOut = document.getElementById('btnFbZoomOut');
@@ -424,7 +531,9 @@
     window.removeEventListener('keydown', onFlipbookKeyDown);
     const modal = document.getElementById('flipbookModal');
     const stage = document.getElementById('flipbookStage');
+    const ribbon = document.getElementById('flipbookBookmarkRibbon');
     if (modal) modal.classList.remove('active');
+    if (ribbon) ribbon.classList.remove('active');
     document.body.style.overflow = '';
     if (activeFlipbookInstance && typeof activeFlipbookInstance.dispose === 'function') {
       try {

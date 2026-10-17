@@ -117,7 +117,7 @@ textarea.form-control{height:auto;padding:10px 14px}
 .modal-card{background:#ffffff;border-radius:var(--radius-lg);width:100%;max-width:620px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg);position:relative;padding:28px}
 .modal-close{position:absolute;top:16px;right:16px;background:var(--bg-page);width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--text-muted)}
 .modal-close:hover{background:var(--danger-light);color:var(--danger)}
-.toast{position:fixed;bottom:24px;right:24px;background:#ffffff;padding:14px 20px;border-radius:var(--radius-md);box-shadow:var(--shadow-lg);border-left:4px solid var(--primary);font-size:14px;font-weight:600;display:flex;align-items:center;gap:10px;z-index:10000;transform:translateY(100px);opacity:0;transition:all .3s ease}
+.toast{position:fixed;bottom:24px;right:24px;background:#ffffff;padding:14px 20px;border-radius:var(--radius-md);box-shadow:var(--shadow-lg);border-left:4px solid var(--primary);font-size:14px;font-weight:600;display:flex;align-items:center;gap:10px;z-index:100000;transform:translateY(100px);opacity:0;transition:all .3s ease}
 .toast.active{transform:translateY(0);opacity:1}
 .loan-card-preview{display:flex;gap:14px;align-items:center;padding:14px;background:var(--bg-page);border-radius:var(--radius-md);border:1px solid var(--border-color);margin-bottom:18px}
 .loan-card-cover{width:56px;height:76px;object-fit:cover;border-radius:var(--radius-sm);background:#E2E8F0;display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--primary)}
@@ -147,11 +147,15 @@ textarea.form-control{height:auto;padding:10px 14px}
 .flipbook-title{font-size:14px;font-weight:600;color:#F8FAFC;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .flipbook-actions{display:flex;align-items:center;gap:8px}
 .flipbook-page-badge{display:inline-flex;align-items:center;justify-content:center;padding:5px 14px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.22);border-radius:var(--radius-full);color:#F8FAFC;font-size:13px;font-weight:700;letter-spacing:0.5px;white-space:nowrap;font-variant-numeric:tabular-nums}
-.flipbook-page-badge i{color:var(--accent)}
 .btn-flipbook-tool{background:rgba(255,255,255,0.08);color:#F8FAFC;width:34px;height:34px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .2s ease;border:1px solid rgba(255,255,255,0.12);cursor:pointer}
 .btn-flipbook-tool:hover{background:#2563EB;color:#ffffff;border-color:#3B82F6;transform:scale(1.05)}
+.btn-flipbook-tool.is-bookmarked{background:#DC2626!important;color:#ffffff!important;border-color:#EF4444!important}
 .btn-flipbook-close{background:rgba(239,68,68,0.2);color:#F87171;width:34px;height:34px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .2s ease;border:1px solid rgba(239,68,68,0.3);cursor:pointer}
 .btn-flipbook-close:hover{background:var(--danger);color:#ffffff;border-color:var(--danger);transform:scale(1.05)}
+.flipbook-subbar-mobile{display:none}
+.flipbook-bookmark-ribbon{position:absolute;top:52px;left:50%;transform:translateX(-50%);width:26px;height:48px;background:linear-gradient(180deg,#DC2626 0%,#B91C1C 75%,#991B1B 100%);color:#ffffff;display:none;align-items:flex-end;justify-content:center;padding-bottom:11px;font-size:11px;clip-path:polygon(0 0,100% 0,100% calc(100% - 9px),50% 100%,0 calc(100% - 9px));box-shadow:0 4px 12px rgba(0,0,0,0.45);cursor:pointer;z-index:150;transition:all .3s cubic-bezier(0.34,1.56,0.64,1)}
+.flipbook-bookmark-ribbon.active{display:flex}
+.flipbook-bookmark-ribbon:hover{height:54px;background:linear-gradient(180deg,#EF4444 0%,#DC2626 75%,#B91C1C 100%)}
 .flipbook-stage{flex:1;width:100%;height:calc(100vh - 52px);overflow:hidden;position:relative;background:#1E242B}
 .grid-full-col{grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted)}
 .grid-full-col i{font-size:32px;margin-bottom:12px;display:block}
@@ -195,15 +199,21 @@ textarea.form-control{height:auto;padding:10px 14px}
 .handover-group{grid-template-columns:1fr}
 .footer-grid{grid-template-columns:1fr;gap:24px}
 .modal-card{padding:20px}
-.flipbook-topbar{height:46px;padding:0 10px}
-.flipbook-stage{height:calc(100vh - 46px)}
-.flipbook-title{font-size:12px}
-.flipbook-badge{display:none}
-.btn-flipbook-tool{width:30px;height:30px;font-size:12px}
-.btn-flipbook-close{width:30px;height:30px;font-size:12px}
-.flipbook-page-badge{padding:4px 8px;font-size:11px}
-.df-container>.df-ui-prev,.df-container>.df-ui-next{width:36px!important;height:42px!important;font-size:16px!important;left:6px!important}
-.df-container>.df-ui-next{right:6px!important;left:auto!important}
-.df-book-stage{padding:10px 10px!important}
+.flipbook-topbar{height:44px;padding:0 8px}
+.flipbook-actions{gap:4px}
+.flipbook-topbar .flipbook-title-wrap{display:none}
+.flipbook-subbar-mobile{display:flex;align-items:center;justify-content:center;height:30px;background:#0F172A;border-bottom:1px solid rgba(255,255,255,0.08);padding:0 12px;color:#CBD5E1;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;z-index:90}
+.flipbook-subbar-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+.flipbook-bookmark-ribbon{top:74px;left:auto;right:16px;transform:none;width:24px;height:42px;padding-bottom:10px;font-size:10px}
+.flipbook-bookmark-ribbon:hover{height:46px}
+.flipbook-stage{height:calc(100vh - 74px)}
+.btn-flipbook-tool{width:28px;height:28px;font-size:11px}
+.btn-flipbook-close{width:28px;height:28px;font-size:12px}
+.flipbook-page-badge{padding:3px 8px;font-size:11px}
+.df-container>.df-ui-prev,.df-container>.df-ui-next{width:32px!important;height:32px!important;font-size:12px!important;border-radius:50%!important;top:auto!important;bottom:14px!important;transform:none!important;background:rgba(15,23,42,0.6)!important;opacity:0.65!important}
+.df-container>.df-ui-prev{left:12px!important}
+.df-container>.df-ui-next{right:12px!important;left:auto!important}
+.df-container>.df-ui-prev:hover,.df-container>.df-ui-next:hover{opacity:1!important;background:#2563EB!important;transform:scale(1.1)!important}
+.df-book-stage{padding:6px 6px!important}
 }
 .iScrollHorizontalScrollbar,.iScrollVerticalScrollbar{display:none!important;opacity:0!important;pointer-events:none!important}
