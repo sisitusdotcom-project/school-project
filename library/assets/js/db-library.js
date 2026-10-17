@@ -102,8 +102,19 @@ const DBLibrary = {
   },
   async getMember(code) {
     this.init();
+    if (!code) return null;
     const snap = await this.db.ref(`library/members/${code}`).once('value');
-    return snap.val();
+    let m = snap.val();
+    if (m) return m;
+    const snapLegacy = await this.db.ref(`library/legacyMapping/${code}`).once('value');
+    const mapped = snapLegacy.val();
+    if (mapped) {
+      const snapMapped = await this.db.ref(`library/members/${mapped}`).once('value');
+      m = snapMapped.val();
+      if (m) return m;
+    }
+    const all = await this.getMembers();
+    return all.find(item => item.code === code || item.nis === code || item.nbm === code || item.legacyCode === code || item.studentId === code) || null;
   },
   async saveMember(code, data) {
     this.init();
@@ -267,6 +278,39 @@ const DBLibrary = {
     this.init();
     await this.db.ref(`library/donations/${id}/status`).set(status);
   },
+  async submitLoanRequest(payload) {
+    this.init();
+    const id = `REQ-${Date.now()}`;
+    const reqData = {
+      id,
+      bookCode: payload.bookCode || '',
+      bookTitle: payload.bookTitle || '',
+      shelfCode: payload.shelfCode || '',
+      borrowerType: payload.borrowerType || 'Siswa',
+      borrowerName: payload.borrowerName || '',
+      memberCode: payload.memberCode || '',
+      phone: payload.phone || '',
+      handoverMethod: payload.handoverMethod || 'direct',
+      studentName: payload.studentName || '',
+      studentClass: payload.studentClass || '',
+      pickupDate: payload.pickupDate || new Date().toISOString().slice(0, 10),
+      notes: payload.notes || '',
+      status: 'pending',
+      createdAt: new Date().toISOString()
+    };
+    await this.db.ref(`library/loan_requests/${id}`).set(reqData);
+    return reqData;
+  },
+  async getLoanRequests() {
+    this.init();
+    const snap = await this.db.ref('library/loan_requests').once('value');
+    const val = snap.val() || {};
+    return Object.keys(val).map(k => ({ ...val[k], id: k })).reverse();
+  },
+  async updateLoanRequestStatus(id, status) {
+    this.init();
+    await this.db.ref(`library/loan_requests/${id}/status`).set(status);
+  },
   async adminLogin(username, password) {
     this.init();
     const snap = await this.db.ref(`library/admins/${username}`).once('value');
@@ -311,57 +355,63 @@ const DBLibrary = {
   },
   async syncMembersFromMaster() {
     this.init();
-    const [studentsSnap, usersSnap, currentMembers] = await Promise.all([
+    const [studentsSnap, usersSnap, personnelSnap, currentMembers] = await Promise.all([
       this.db.ref('students').once('value'),
       this.db.ref('users').once('value'),
+      this.db.ref('personnel').once('value'),
       this.getMembers()
     ]);
     const students = studentsSnap.val() || {};
     const users = usersSnap.val() || {};
-    const existingCodes = new Set(currentMembers.map(m => m.code));
-    const updates = {};
-    let sIndex = 1;
-    currentMembers.filter(m => m.code && m.code.startsWith('S-')).forEach(m => {
-      const num = parseInt(m.code.replace('S-', ''), 10);
-      if (num >= sIndex) sIndex = num + 1;
+    const personnel = personnelSnap.val() || {};
+    const existingMap = new Map();
+    currentMembers.forEach(m => {
+      if (m.code) existingMap.set(m.code, m);
+      if (m.nis) existingMap.set(m.nis, m);
+      if (m.nbm) existingMap.set(m.nbm, m);
+      if (m.studentId) existingMap.set(m.studentId, m);
+      if (m.name) existingMap.set(m.name.toLowerCase().trim(), m);
     });
+    const updates = {};
     for (const [id, s] of Object.entries(students)) {
-      const found = currentMembers.find(m => m.studentId === id || (m.name && m.name.toLowerCase() === (s.name || '').toLowerCase()));
+      const nis = (s.nis || '').trim();
+      const code = nis || id;
+      const found = existingMap.get(code) || existingMap.get(nis) || existingMap.get(id) || existingMap.get((s.name || '').toLowerCase().trim());
       if (!found) {
-        const code = `S-${String(sIndex).padStart(3, '0')}`;
-        sIndex++;
+        const cName = (s.classId || '').replace('CLASS_', 'Kelas ').replace(/_/g, ' ');
         updates[`library/members/${code}`] = {
           code,
+          nis,
           studentId: id,
           name: s.name || 'Siswa',
           gender: s.gender === 'L' ? 'Laki-Laki' : 'Perempuan',
           type: 'Siswa',
-          note: s.classId ? `Kelas ${s.classId.toUpperCase()}` : 'Siswa Aktif',
+          note: cName || 'Siswa Aktif',
           printStatus: '',
-          createdAt: new Date().toISOString()
+          legacyCode: '',
+          updatedAt: new Date().toISOString()
         };
       }
     }
-    let gIndex = 1;
-    currentMembers.filter(m => m.code && m.code.startsWith('G-')).forEach(m => {
-      const num = parseInt(m.code.replace('G-', ''), 10);
-      if (num >= gIndex) gIndex = num + 1;
-    });
-    for (const [id, u] of Object.entries(users)) {
-      if (u.role === 'guru' || u.role === 'tendik' || u.role === 'admin') {
-        const found = currentMembers.find(m => m.teacherId === id || (m.name && m.name.toLowerCase() === (u.name || '').toLowerCase()));
+    const allPersonnel = { ...users, ...personnel };
+    for (const [id, u] of Object.entries(allPersonnel)) {
+      if (['guru', 'tendik', 'admin', 'kepsek', 'staff'].includes(u.role) || u.position) {
+        let nbm = (u.nbm || '').trim();
+        if (nbm === '-') nbm = '';
+        const code = nbm || id;
+        const found = existingMap.get(code) || (nbm && existingMap.get(nbm)) || existingMap.get(id) || existingMap.get((u.name || '').toLowerCase().trim());
         if (!found) {
-          const code = `G-${String(gIndex).padStart(3, '0')}`;
-          gIndex++;
           updates[`library/members/${code}`] = {
             code,
-            teacherId: id,
-            name: u.name || 'Guru/Karyawan',
+            nbm,
+            userId: id,
+            name: u.name || 'GTK',
             gender: u.gender === 'L' ? 'Laki-Laki' : 'Perempuan',
-            type: 'GTK',
+            type: u.role === 'guru' || (u.position && u.position.toLowerCase().includes('guru')) ? 'Guru' : 'Tenaga Kependidikan',
             note: u.position || u.role || 'GTK MUSADA',
             printStatus: '',
-            createdAt: new Date().toISOString()
+            legacyCode: '',
+            updatedAt: new Date().toISOString()
           };
         }
       }

@@ -20,7 +20,7 @@ Panduan resmi deployment arsitektur multi-domain untuk **MUSADA Library** berbas
    - **Root directory**: `/` (biarkan root)
    - **Build Command**:
      ```bash
-     mkdir -p dist && cp -r library/* dist/
+     mkdir -p dist && cp -r library/* dist/ && cp -r buku-perpus dist/buku-perpus
      ```
    - **Build Output Directory**: `dist`
 4. Klik **Save and Deploy**.

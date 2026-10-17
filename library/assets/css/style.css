@@ -2405,3 +2405,14 @@ tr:hover {
 .btn-outline{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:6px;background:#ffffff;border:1px solid #CBD5E1;color:#334155;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s ease}
 .btn-outline:hover{background:#F1F5F9;border-color:#94A3B8}
 .modal.active{display:flex}
+.card-mb-24{margin-bottom:24px}
+.badge-handover{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:700}
+.badge-handover.entrusted{background:#FEF3C7;color:#92400E}
+.badge-handover.direct{background:#DBEAFE;color:#1E40AF}
+.badge-req-status{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:700}
+.badge-req-status.pending{background:#FEE2E2;color:#991B1B}
+.badge-req-status.ready{background:#D1FAE5;color:#065F46}
+.badge-req-status.completed{background:#E2E8F0;color:#334155}
+.btn-action-group{display:flex;gap:6px;flex-wrap:wrap}
+.btn-wa-sm{background:#25D366;color:#ffffff;border:none;padding:4px 8px;border-radius:4px;font-size:11px;font-weight:600;display:inline-flex;align-items:center;gap:4px;text-decoration:none}
+.btn-wa-sm:hover{background:#1EBE5D;color:#ffffff}
