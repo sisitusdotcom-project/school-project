@@ -12,8 +12,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link rel="stylesheet" href="assets/vendor/flipbook/css/font-awesome.css">
-<link rel="stylesheet" href="assets/vendor/flipbook/css/flipbook.style.css">
+<link rel="stylesheet" href="assets/vendor/dflip/css/themify-icons.min.css">
+<link rel="stylesheet" href="assets/vendor/dflip/css/dflip.min.css">
 <link rel="stylesheet" href="assets/css/public.css">
 </head>
 <body>
@@ -434,6 +434,12 @@
 <h3 class="flipbook-title" id="flipbookBookTitle">Membaca E-Book</h3>
 </div>
 <div class="flipbook-actions">
+<div class="flipbook-page-badge" id="flipbookPageBadge">
+<span id="flipbookPageIndicator">1 / --</span>
+</div>
+<button type="button" class="btn-flipbook-tool" id="btnFbZoomOut" title="Perkecil"><i class="fas fa-search-minus"></i></button>
+<button type="button" class="btn-flipbook-tool" id="btnFbZoomIn" title="Perbesar"><i class="fas fa-search-plus"></i></button>
+<button type="button" class="btn-flipbook-tool" id="btnFbFullscreen" title="Layar Penuh"><i class="fas fa-expand"></i></button>
 <button type="button" class="btn-flipbook-close" id="btnCloseFlipbook" aria-label="Tutup Pembaca"><i class="fas fa-times"></i></button>
 </div>
 </div>
@@ -442,8 +448,11 @@
 <div class="toast" id="publicToast">Notifikasi</div>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<script src="assets/vendor/flipbook/js/jquery.min.js"></script>
-<script src="assets/vendor/flipbook/js/flipbook.min.js"></script>
+<script src="assets/vendor/dflip/js/libs/jquery.min.js"></script>
+<script src="assets/vendor/dflip/js/libs/three.min.js"></script>
+<script src="assets/vendor/dflip/js/libs/mockup.min.js"></script>
+<script src="assets/vendor/dflip/js/libs/pdf.min.js"></script>
+<script src="assets/vendor/dflip/js/dflip.min.js"></script>
 <script src="assets/js/db-library.js"></script>
 <script src="assets/js/public.js"></script>
 </body>

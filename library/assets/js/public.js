@@ -327,133 +327,95 @@
       closeFlipbookViewer();
     }
   }
+  function updatePageDisplay(fb) {
+    const pageIndicator = document.getElementById('flipbookPageIndicator');
+    if (!pageIndicator || !fb || !fb.target) return;
+    const cur = fb.target._activePage || 1;
+    const total = fb.target.pageCount || (fb.target.contentProvider && fb.target.contentProvider.pageCount) || 1;
+    const isDouble = fb.target.pageMode === (window.DFLIP ? window.DFLIP.PAGE_MODE.DOUBLE : 2);
+    if (!isDouble || cur <= 1 || cur > total) {
+      pageIndicator.textContent = `${Math.min(cur, total)} / ${total}`;
+      return;
+    }
+    const pLeft = Math.floor(cur / 2) * 2;
+    const pRight = pLeft + 1;
+    if (pRight > total) {
+      pageIndicator.textContent = `${pLeft} / ${total}`;
+    } else {
+      pageIndicator.textContent = `${pLeft}-${pRight} / ${total}`;
+    }
+  }
   function openFlipbookViewer(book) {
     const modal = document.getElementById('flipbookModal');
     const stage = document.getElementById('flipbookStage');
     const titleEl = document.getElementById('flipbookBookTitle');
+    const pageIndicator = document.getElementById('flipbookPageIndicator');
     if (!modal || !stage) return;
     if (titleEl) titleEl.innerText = book.title;
+    if (pageIndicator) pageIndicator.innerText = 'Memuat...';
     stage.innerHTML = '<div id="dfBookContainer"></div>';
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
-        const isMobileScreen = window.innerWidth <= 768;
+    const isMobileScreen = window.innerWidth <= 768;
     const pdfUrl = book.ebookUrl || 'buku-perpus/pedoman-hidup-islami-warga-muhammadiyah.pdf';
-    const fbOptions = {
-      pdfUrl: pdfUrl,
+    window.dFlipLocation = 'assets/vendor/dflip/';
+    if (window.DFLIP && window.DFLIP.defaults) {
+      window.DFLIP.defaults.pdfjsWorkerSrc = 'assets/vendor/dflip/js/libs/pdf.worker.min.js';
+    }
+    const dFlipOptions = {
+      webgl: true,
+      webglShadow: true,
+      soundEnable: false,
+      height: '100%',
+      duration: 600,
+      stiffness: 1.5,
+      pdfRenderQuality: 0.9,
+      maxTextureSize: 1600,
+      minTextureSize: 512,
+      rangeChunkSize: 524288,
       backgroundColor: '#1E242B',
-      skin: 'dark',
-      skinColor: '#F8FAFC',
-      skinBackground: '#0F172A',
-      btnColor: '#F8FAFC',
-      btnColorHover: '#38BDF8',
-      viewMode: '3d',
-      singlePageMode: isMobileScreen,
-      singlePageModeIfMobile: true,
-      responsiveView: true,
-      responsiveViewTreshold: 768,
-      touchSwipeEnabled: true,
-      sideNavigationButtons: true,
-      pageFlipDuration: 0.7,
-      pdfBrowserViewerIfMobile: false,
-      pdfPageScale: 1.5,
-      sound: false,
-      assets: {
-        preloader: 'assets/vendor/flipbook/images/preloader.jpg',
-        overlay: 'assets/vendor/flipbook/images/overlay.png'
+      controlsPosition: (window.DFLIP && window.DFLIP.CONTROLSPOSITION && window.DFLIP.CONTROLSPOSITION.HIDDEN) || 'hide',
+      allControls: 'altPrev,pageNumber,altNext,play,outline,thumbnail,zoomIn,zoomOut,fullScreen,share,download,search,more,pageMode,startPage,endPage,sound',
+      hideControls: 'altPrev,altNext,pageNumber,play,outline,thumbnail,zoomIn,zoomOut,fullScreen,share,download,search,more,pageMode,startPage,endPage,sound',
+      pageMode: isMobileScreen ? (window.DFLIP ? window.DFLIP.PAGE_MODE.SINGLE : 1) : (window.DFLIP ? window.DFLIP.PAGE_MODE.DOUBLE : 2),
+      singlePageMode: window.DFLIP ? window.DFLIP.SINGLE_PAGE_MODE.BOOKLET : 2,
+      onReady: function(fb) {
+        updatePageDisplay(fb);
       },
-      btnOrder: [
-        'btnPrev',
-        'currentPage',
-        'btnNext',
-        'btnZoomIn',
-        'btnZoomOut',
-        'btnThumbs',
-        'btnExpand'
-      ],
-      currentPage: {
-        enabled: true,
-        title: 'Nomor Halaman',
-        vAlign: 'bottom',
-        hAlign: 'center'
-      },
-      btnPrev: {
-        enabled: true,
-        title: 'Halaman Sebelumnya',
-        vAlign: 'bottom',
-        hAlign: 'center'
-      },
-      btnNext: {
-        enabled: true,
-        title: 'Halaman Selanjutnya',
-        vAlign: 'bottom',
-        hAlign: 'center'
-      },
-      btnZoomIn: {
-        enabled: true,
-        title: 'Perbesar',
-        vAlign: 'bottom',
-        hAlign: 'center'
-      },
-      btnZoomOut: {
-        enabled: true,
-        title: 'Perkecil',
-        vAlign: 'bottom',
-        hAlign: 'center'
-      },
-      btnThumbs: {
-        enabled: true,
-        title: 'Semua Halaman',
-        vAlign: 'bottom',
-        hAlign: 'center'
-      },
-      btnExpand: {
-        enabled: true,
-        title: 'Layar Penuh',
-        vAlign: 'bottom',
-        hAlign: 'center'
-      },
-      btnFirst: {
-        enabled: false
-      },
-      btnLast: {
-        enabled: false
-      },
-      btnAutoplay: {
-        enabled: false
-      },
-      btnBookmark: {
-        enabled: false
-      },
-      btnToc: {
-        enabled: false
-      },
-      btnSound: {
-        enabled: false
-      },
-      btnDownloadPdf: {
-        enabled: false
-      },
-      btnDownloadPages: {
-        enabled: false
-      },
-      btnPrint: {
-        enabled: false
-      },
-      btnShare: {
-        enabled: false
-      },
-      btnSelect: {
-        enabled: false
+      onFlip: function(fb) {
+        updatePageDisplay(fb);
       }
     };
     try {
       if (window.jQuery && window.jQuery.fn && window.jQuery.fn.flipBook) {
-        activeFlipbookInstance = window.jQuery('#dfBookContainer').flipBook(fbOptions);
+        activeFlipbookInstance = window.jQuery('#dfBookContainer').flipBook(pdfUrl, dFlipOptions);
       } else {
         stage.innerHTML = `<iframe src="${pdfUrl}" class="flipbook-fallback-frame"></iframe>`;
       }
     } catch (e) {
       stage.innerHTML = `<iframe src="${pdfUrl}" class="flipbook-fallback-frame"></iframe>`;
+    }
+    const btnZoomIn = document.getElementById('btnFbZoomIn');
+    const btnZoomOut = document.getElementById('btnFbZoomOut');
+    const btnFullscreen = document.getElementById('btnFbFullscreen');
+    if (btnZoomIn) {
+      btnZoomIn.onclick = () => {
+        if (activeFlipbookInstance && typeof activeFlipbookInstance.zoom === 'function') activeFlipbookInstance.zoom(1);
+      };
+    }
+    if (btnZoomOut) {
+      btnZoomOut.onclick = () => {
+        if (activeFlipbookInstance && typeof activeFlipbookInstance.zoom === 'function') activeFlipbookInstance.zoom(-1);
+      };
+    }
+    if (btnFullscreen) {
+      btnFullscreen.onclick = () => {
+        if (activeFlipbookInstance && activeFlipbookInstance.ui && typeof activeFlipbookInstance.ui.switchFullscreen === 'function') {
+          activeFlipbookInstance.ui.switchFullscreen();
+        } else if (modal.requestFullscreen) {
+          if (!document.fullscreenElement) modal.requestFullscreen(); else document.exitFullscreen();
+        }
+      };
     }
     window.removeEventListener('keydown', onFlipbookKeyDown);
     window.addEventListener('keydown', onFlipbookKeyDown);
@@ -464,9 +426,9 @@
     const stage = document.getElementById('flipbookStage');
     if (modal) modal.classList.remove('active');
     document.body.style.overflow = '';
-    if (activeFlipbookInstance && activeFlipbookInstance.autoplay && typeof activeFlipbookInstance.toggleAutoplay === 'function') {
+    if (activeFlipbookInstance && typeof activeFlipbookInstance.dispose === 'function') {
       try {
-        activeFlipbookInstance.toggleAutoplay();
+        activeFlipbookInstance.dispose();
       } catch (e) {}
     }
     if (stage) stage.innerHTML = '';
