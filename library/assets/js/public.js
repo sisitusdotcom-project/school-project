@@ -303,20 +303,25 @@
     stage.innerHTML = '<div id="dfBookContainer"></div>';
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
-    const pdfUrl = book.ebookUrl || 'buku-perpus/asbabun-nuzul-al-wahidi-an-nisaburi.pdf';
-    const dFlipOptions = {
-      webgl: true,
-      height: '100%',
-      dFlipLocation: 'assets/vendor/dflip/',
-      soundEnable: true,
-      backgroundColor: '#0B1120',
-      scrollWheel: false,
-      autoPlayDuration: 4000,
-      direction: 1
+    const pdfUrl = book.ebookUrl || 'buku-perpus/pedoman-hidup-islami-warga-muhammadiyah.pdf';
+    const fbOptions = {
+      pdfUrl: pdfUrl,
+      backgroundColor: '#3E444C',
+      skin: 'light',
+      viewMode: '3d',
+      responsiveView: true,
+      pdfBrowserViewerIfMobile: false,
+      pdfPageScale: 1.5,
+      sound: true,
+      assets: {
+        preloader: 'assets/vendor/flipbook/images/preloader.jpg',
+        overlay: 'assets/vendor/flipbook/images/overlay.png',
+        flipMp3: 'assets/vendor/flipbook/mp3/turnPage.mp3'
+      }
     };
     try {
       if (window.jQuery && window.jQuery.fn && window.jQuery.fn.flipBook) {
-        activeFlipbookInstance = window.jQuery('#dfBookContainer').flipBook(pdfUrl, dFlipOptions);
+        activeFlipbookInstance = window.jQuery('#dfBookContainer').flipBook(fbOptions);
       } else {
         stage.innerHTML = `<iframe src="${pdfUrl}" style="width:100%;height:100%;border:none;"></iframe>`;
       }
