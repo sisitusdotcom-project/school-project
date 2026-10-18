@@ -1,15 +1,12 @@
 (function(){
-  const hostname = window.location.hostname.toLowerCase();
-  if (hostname.startsWith('admin-perpus') || hostname.startsWith('adm.perpus')) {
-    window.location.replace('admin/');
-    return;
-  }
   let allBooks = [];
   let currentCollectionType = 'all';
   let currentCategory = 'all';
   let searchQuery = '';
   let activeBook = null;
   let activeFlipbookInstance = null;
+  let displayedLimit = 24;
+  const BATCH_SIZE = 24;
   function showToast(message, type = 'info') {
     const toast = document.getElementById('publicToast');
     if (!toast) return;
@@ -33,6 +30,29 @@
       window.speechSynthesis.speak(u);
     } catch (e) {}
   }
+  function normalizeCategory(raw) {
+    if (!raw) return 'Koleksi Umum';
+    const s = raw.trim();
+    const lower = s.toLowerCase();
+    if (lower.includes('dongeng')) return 'Dongeng Anak';
+    if (lower.includes('komik')) return 'Komik Anak';
+    if (lower.includes('cerita islami') || lower.includes('e-book islami') || lower.includes('fikih') || lower.includes('ensiklopedia anak islami')) return 'Cerita & Buku Islami';
+    if (lower.includes('cerita anak')) return 'Cerita Anak';
+    if (lower.includes('nonfiksi') || lower.includes('non-fiksi')) return 'Nonfiksi Edukatif';
+    if (lower.includes('majalah')) return 'Majalah Anak';
+    if (lower.includes('novel')) return 'Novel Anak';
+    if (lower.includes('muhammadiyah')) return 'Kemuhammadiyahan';
+    if (lower.includes('guru') || lower.includes('pendidikan') || lower.includes('modul')) return 'Pendidikan & Guru';
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  }
+  function getThemeClassByCategory(cat) {
+    const c = (cat || '').toLowerCase();
+    if (c.includes('islam') || c.includes('muhammadiyah')) return 'cover-theme-islam';
+    if (c.includes('dongeng') || c.includes('cerita')) return 'cover-theme-story';
+    if (c.includes('komik')) return 'cover-theme-comic';
+    if (c.includes('nonfiksi') || c.includes('pendidikan') || c.includes('modul')) return 'cover-theme-edu';
+    return 'cover-theme-default';
+  }
   async function loadLibraryData() {
     try {
       const [books, stats, settings] = await Promise.all([
@@ -43,10 +63,14 @@
       allBooks = books;
       renderStats(stats);
       renderSettings(settings);
-      renderCategoryPills();
+      renderCategoryFilters();
       filterAndRenderBooks();
     } catch (err) {
       console.error('Load library error:', err);
+      const container = document.getElementById('booksGrid');
+      if (container) {
+        container.innerHTML = `<div class="grid-full-col"><i class="fas fa-exclamation-triangle"></i>Gagal memuat katalog buku dari database. Silakan muat ulang halaman.</div>`;
+      }
     }
   }
   function renderStats(stats) {
@@ -73,47 +97,101 @@
   function renderSettings(settings) {
     const hoursEl = document.getElementById('libSettingsHours');
     if (hoursEl && settings.openHours) hoursEl.innerText = settings.openHours;
+    const waText = document.getElementById('footerWaText');
+    const waLink = document.getElementById('libContactWaLink');
+    if (settings.contactWa) {
+      const cleanWa = settings.contactWa.replace(/[^0-9]/g, '');
+      if (waText) waText.innerText = '+' + cleanWa;
+      if (waLink) waLink.href = `https://wa.me/${cleanWa}?text=${encodeURIComponent('Halo Pustakawan MUSADA Library, saya ingin konsultasi mengenai layanan perpustakaan...')}`;
+    }
+    renderDonationAccounts(settings.donationAccounts, settings.contactWa);
   }
-  function renderCategoryPills() {
-    const container = document.getElementById('categoryPills');
+  function renderDonationAccounts(accounts, contactWa) {
+    const container = document.getElementById('donationAccountsContainer');
     if (!container) return;
+    const cleanWa = (contactWa || '6285704845822').replace(/[^0-9]/g, '');
+    const validAccounts = Array.isArray(accounts) && accounts.filter(a => a && a.number && a.number.length >= 6);
+    if (validAccounts && validAccounts.length > 0) {
+      container.innerHTML = `
+        <div class="bank-grid">
+          ${validAccounts.map(b => `
+            <div class="bank-box">
+              <div class="bank-name"><i class="fas fa-university"></i> ${b.bank || 'Bank Transfer'}</div>
+              <div class="bank-num">${b.number}</div>
+              <div class="bank-holder">a.n. ${b.holder || 'SD Muhammadiyah 1 Sedati'}</div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    } else {
+      container.innerHTML = `
+        <div class="donation-notice-card">
+          <div class="donation-notice-icon"><i class="fas fa-hand-holding-heart"></i></div>
+          <div class="donation-notice-content">
+            <h4>Penyaluran Infaq & Donasi Literasi</h4>
+            <p>Rekening resmi infaq literasi dalam pembaruan administrasi sekolah. Donasi dapat dikoordinasikan langsung via formulir di bawah atau konfirmasi WhatsApp petugas.</p>
+            <a href="https://wa.me/${cleanWa}?text=${encodeURIComponent('Halo Petugas Perpustakaan MUSADA, saya berniat menyalurkan infaq/donasi buku untuk perpustakaan...')}" target="_blank" rel="noopener" class="btn-wa-donation"><i class="fab fa-whatsapp"></i> Hubungi WhatsApp Petugas</a>
+          </div>
+        </div>
+      `;
+    }
+  }
+  function getFilteredPool() {
     let pool = allBooks;
     if (currentCollectionType === 'physical') {
       pool = allBooks.filter(b => !b.isEbook);
     } else if (currentCollectionType === 'ebook') {
       pool = allBooks.filter(b => b.isEbook);
     }
-    const categories = ['Semua', ...new Set(pool.map(b => b.category).filter(Boolean))];
-    container.innerHTML = categories.map(cat => {
-      const isAll = cat === 'Semua';
-      const key = isAll ? 'all' : cat;
-      const activeClass = currentCategory === key ? 'active' : '';
-      return `<button type="button" class="pill-btn ${activeClass}" data-category="${key}">${cat}</button>`;
-    }).join('');
-    container.querySelectorAll('.pill-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        container.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        currentCategory = btn.dataset.category;
-        filterAndRenderBooks();
-      });
+    return pool;
+  }
+  function renderCategoryFilters() {
+    const pool = getFilteredPool();
+    const select = document.getElementById('categorySelectFilter');
+    const pillsContainer = document.getElementById('categoryPills');
+    const catCounts = {};
+    pool.forEach(b => {
+      const norm = normalizeCategory(b.category);
+      catCounts[norm] = (catCounts[norm] || 0) + 1;
     });
+    const sortedCats = Object.keys(catCounts).sort((a, b) => catCounts[b] - catCounts[a]);
+    if (select) {
+      select.innerHTML = `<option value="all">Semua Kategori (${pool.length})</option>` +
+        sortedCats.map(cat => `<option value="${cat}" ${currentCategory === cat ? 'selected' : ''}>${cat} (${catCounts[cat]})</option>`).join('');
+    }
+    if (pillsContainer) {
+      const topPills = ['all', ...sortedCats.slice(0, 6)];
+      pillsContainer.innerHTML = topPills.map(cat => {
+        const isAll = cat === 'all';
+        const label = isAll ? 'Semua Koleksi' : cat;
+        const count = isAll ? pool.length : catCounts[cat];
+        const activeClass = currentCategory === cat ? 'active' : '';
+        return `<button type="button" class="pill-btn ${activeClass}" data-category="${cat}">${label} (${count})</button>`;
+      }).join('');
+      pillsContainer.querySelectorAll('.pill-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          currentCategory = btn.dataset.category;
+          if (select) select.value = currentCategory;
+          pillsContainer.querySelectorAll('.pill-btn').forEach(b => b.classList.toggle('active', b.dataset.category === currentCategory));
+          displayedLimit = BATCH_SIZE;
+          filterAndRenderBooks();
+        });
+      });
+    }
   }
   function filterAndRenderBooks() {
     const container = document.getElementById('booksGrid');
+    const statusText = document.getElementById('catalogCountText');
+    const loadMoreWrap = document.getElementById('loadMoreWrap');
+    const btnLoadMore = document.getElementById('btnLoadMoreBooks');
     if (!container) return;
-    let filtered = allBooks;
-    if (currentCollectionType === 'physical') {
-      filtered = filtered.filter(b => !b.isEbook);
-    } else if (currentCollectionType === 'ebook') {
-      filtered = filtered.filter(b => b.isEbook);
-    }
+    let pool = getFilteredPool();
     if (currentCategory && currentCategory !== 'all') {
-      filtered = filtered.filter(b => b.category === currentCategory);
+      pool = pool.filter(b => normalizeCategory(b.category) === currentCategory);
     }
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
-      filtered = filtered.filter(b => {
+      pool = pool.filter(b => {
         return (b.title && b.title.toLowerCase().includes(q)) ||
           (b.author && b.author.toLowerCase().includes(q)) ||
           (b.code && b.code.toLowerCase().includes(q)) ||
@@ -122,24 +200,36 @@
           (b.publisher && b.publisher.toLowerCase().includes(q));
       });
     }
-    if (!filtered.length) {
-      container.innerHTML = `<div class="grid-full-col"><i class="fas fa-search"></i>Tidak ada koleksi buku yang cocok dengan pencarian Anda.</div>`;
+    if (statusText) {
+      statusText.innerText = `Menampilkan ${Math.min(displayedLimit, pool.length)} dari ${pool.length} koleksi buku`;
+    }
+    if (!pool.length) {
+      container.innerHTML = `<div class="grid-full-col"><i class="fas fa-search"></i>Tidak ada koleksi buku yang cocok dengan kata kunci atau filter pencarian Anda.</div>`;
+      if (loadMoreWrap) loadMoreWrap.classList.add('pane-hidden');
       return;
     }
-    container.innerHTML = filtered.map(b => {
+    const currentBatch = pool.slice(0, displayedLimit);
+    container.innerHTML = currentBatch.map(b => {
+      const normCat = normalizeCategory(b.category);
       if (b.isEbook) {
         const coverHtml = b.coverUrl
           ? `<img src="${b.coverUrl}" alt="${b.title}" class="book-cover-img" loading="lazy">`
-          : `<i class="fas fa-tablet-alt book-cover-placeholder"></i>`;
+          : `
+            <div class="cover-mockup cover-theme-islam">
+              <i class="fas fa-tablet-alt cover-mockup-icon"></i>
+              <div class="cover-mockup-title">${b.title}</div>
+              <div class="cover-mockup-meta">3D E-Book · ${b.author || 'Pustaka'}</div>
+            </div>
+          `;
         return `
           <article class="book-card is-ebook">
             <div class="book-cover-wrap">
-              <span class="badge-ebook-tag"><i class="fas fa-bolt"></i> E-Book</span>
-              <span class="badge-pages-tag"><i class="fas fa-layer-group"></i> 3D Flipbook</span>
+              <span class="badge-ebook-tag"><i class="fas fa-bolt"></i> 3D E-Book</span>
+              <span class="badge-pages-tag"><i class="fas fa-layer-group"></i> Flipbook</span>
               ${coverHtml}
             </div>
             <div class="book-body">
-              <span class="book-category">${b.category || 'E-Book Digital'}</span>
+              <span class="book-category">${normCat}</span>
               <h4 class="book-title" title="${b.title}">${b.title}</h4>
               <p class="book-author"><i class="fas fa-feather-alt"></i> ${b.author || 'Anonim'} (${b.year || '-'})</p>
               <div class="book-footer">
@@ -151,11 +241,18 @@
         `;
       }
       const isAvail = (parseInt(b.stockAvailable, 10) > 0);
-      const stockText = isAvail ? `Tersedia: ${b.stockAvailable} eks` : 'Sedang Dipinjam';
+      const stockText = isAvail ? `${b.stockAvailable} eks` : 'Kosong';
       const dotClass = isAvail ? 'avail' : 'empty';
+      const themeClass = getThemeClassByCategory(b.category);
       const coverHtml = b.coverUrl
         ? `<img src="${b.coverUrl}" alt="${b.title}" class="book-cover-img" loading="lazy">`
-        : `<i class="fas fa-book book-cover-placeholder"></i>`;
+        : `
+          <div class="cover-mockup ${themeClass}">
+            <i class="fas fa-book-open cover-mockup-icon"></i>
+            <div class="cover-mockup-title">${b.title}</div>
+            <div class="cover-mockup-meta">Rak ${b.shelfCode || '-'} · ${b.author || 'Anonim'}</div>
+          </div>
+        `;
       return `
         <article class="book-card is-physical">
           <div class="book-cover-wrap">
@@ -163,11 +260,11 @@
             ${coverHtml}
           </div>
           <div class="book-body">
-            <span class="book-category">${b.category || 'Koleksi Rak'}</span>
+            <span class="book-category">${normCat}</span>
             <h4 class="book-title" title="${b.title}">${b.title}</h4>
             <p class="book-author"><i class="fas fa-feather-alt"></i> ${b.author || 'Anonim'} (${b.year || '-'})</p>
             <div class="book-footer">
-              <span class="stock-indicator"><span class="stock-dot ${dotClass}"></span>${stockText}</span>
+              <span class="stock-indicator" title="Ketersediaan buku di rak"><span class="stock-dot ${dotClass}"></span>${stockText}</span>
               <div class="book-action-group">
                 <button type="button" class="btn-loan-book" data-code="${b.code}" ${isAvail ? '' : 'disabled'}><i class="fas fa-bookmark"></i> Pinjam</button>
                 <button type="button" class="btn-view-book" data-code="${b.code}"><i class="fas fa-info-circle"></i> Info</button>
@@ -177,6 +274,15 @@
         </article>
       `;
     }).join('');
+    if (loadMoreWrap && btnLoadMore) {
+      if (pool.length > displayedLimit) {
+        loadMoreWrap.classList.remove('pane-hidden');
+        const remaining = pool.length - displayedLimit;
+        btnLoadMore.innerHTML = `<i class="fas fa-chevron-down"></i> Tampilkan Lebih Banyak (${remaining} buku lagi)`;
+      } else {
+        loadMoreWrap.classList.add('pane-hidden');
+      }
+    }
     container.querySelectorAll('.btn-view-book').forEach(btn => {
       btn.addEventListener('click', () => {
         const code = btn.dataset.code;
@@ -204,14 +310,14 @@
     const modal = document.getElementById('bookDetailModal');
     if (!modal) return;
     document.getElementById('modalBookTitle').innerText = book.title;
-    document.getElementById('modalBookCategory').innerText = book.category || 'Koleksi Umum';
+    document.getElementById('modalBookCategory').innerText = normalizeCategory(book.category);
     document.getElementById('modalBookAuthor').innerText = book.author || '-';
     document.getElementById('modalBookPublisher').innerText = book.publisher || '-';
     document.getElementById('modalBookYear').innerText = book.year || '-';
-    document.getElementById('modalBookShelf').innerText = book.isEbook ? 'Digital (Akses Online)' : (book.shelfCode || '-');
+    document.getElementById('modalBookShelf').innerText = book.isEbook ? 'Digital (Akses Online)' : (book.shelfCode ? 'Rak ' + book.shelfCode : '-');
     document.getElementById('modalBookCode').innerText = book.code || '-';
     document.getElementById('modalBookStock').innerText = book.isEbook ? 'Tersedia Digital (Akses Online)' : `${book.stockAvailable} dari ${book.stockTotal} eksemplar`;
-    document.getElementById('modalBookDesc').innerText = book.description || 'Buku ini tersedia di MUSADA Library SD Muhammadiyah 1 Sedati.';
+    document.getElementById('modalBookDesc').innerText = book.description || 'Buku ini tersedia di koleksi MUSADA Library SD Muhammadiyah 1 Sedati.';
     const btnRead = document.getElementById('btnReadEbook');
     const btnReserve = document.getElementById('btnReserveBook');
     if (btnRead) {
@@ -248,43 +354,41 @@
     document.getElementById('loanPreviewCode').innerText = book.code;
     document.getElementById('loanPreviewShelf').innerText = 'Rak ' + (book.shelfCode || '-');
     document.getElementById('loanPreviewAuthor').innerText = book.author || 'Anonim';
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const dateInput = document.getElementById('loanPickupDate');
-    if (dateInput) {
-      dateInput.value = tomorrow.toISOString().slice(0, 10);
-      dateInput.min = new Date().toISOString().slice(0, 10);
+    const pickupInput = document.getElementById('loanPickupDate');
+    if (pickupInput) {
+      const today = new Date().toISOString().slice(0, 10);
+      pickupInput.min = today;
+      if (!pickupInput.value) pickupInput.value = today;
     }
     updateHandoverUI();
     modal.classList.add('active');
   }
   function updateHandoverUI() {
-    const bTypeSelect = document.getElementById('loanBorrowerType');
-    const bType = bTypeSelect ? bTypeSelect.value : 'Wali';
+    const bType = document.getElementById('loanBorrowerType')?.value || 'Wali';
     const grpHandover = document.getElementById('groupHandoverMethod');
     const grpStudent = document.getElementById('groupStudentDetails');
     const noticeText = document.getElementById('loanNoticeText');
-    const radioEntrusted = document.querySelector('input[name="handoverMethodRadio"][value="entrusted"]');
-    const isEntrusted = radioEntrusted ? radioEntrusted.checked : true;
     if (bType === 'Wali') {
       if (grpHandover) grpHandover.classList.remove('pane-hidden');
       if (grpStudent) grpStudent.classList.remove('pane-hidden');
+      const rad = document.querySelector('input[name="handoverMethodRadio"]:checked');
+      const isEntrusted = rad ? rad.value === 'entrusted' : true;
       if (noticeText) {
         noticeText.innerText = isEntrusted
-          ? 'Buku fisik yang dipinjam akan disiapkan oleh petugas perpustakaan dan dititipkan kepada Ananda melalui wali kelas pada hari belajar berikutnya.'
-          : 'Bapak/Ibu dapat datang langsung mengambil buku ke meja sirkulasi perpustakaan sekolah pada jam kerja dengan menyebutkan kode pengajuan.';
+          ? 'Buku akan disiapkan pustakawan dan dititipkan kepada Ananda saat jam pulang sekolah melalui wali kelas.'
+          : 'Orang tua/wali murid dipersilakan mengambil buku langsung di ruang perpustakaan sekolah pada jam kerja layanan.';
       }
     } else if (bType === 'Siswa') {
       if (grpHandover) grpHandover.classList.add('pane-hidden');
       if (grpStudent) grpStudent.classList.remove('pane-hidden');
       if (noticeText) {
-        noticeText.innerText = 'Siswa dapat mengambil buku langsung di perpustakaan pada jam istirahat atau saat pulang sekolah.';
+        noticeText.innerText = 'Siswa dapat mengambil buku langsung di meja sirkulasi perpustakaan pada jam istirahat atau saat pulang sekolah.';
       }
     } else if (bType === 'GTK') {
       if (grpHandover) grpHandover.classList.add('pane-hidden');
       if (grpStudent) grpStudent.classList.add('pane-hidden');
       if (noticeText) {
-        noticeText.innerText = 'Buku dapat diambil di perpustakaan atau diantarkan ke ruang guru oleh pustakawan.';
+        noticeText.innerText = 'Buku dapat diambil di perpustakaan atau diantarkan ke ruang guru oleh petugas perpustakaan.';
       }
     } else {
       if (grpHandover) grpHandover.classList.add('pane-hidden');
@@ -292,39 +396,6 @@
       if (noticeText) {
         noticeText.innerText = 'Masyarakat umum / tamu dipersilakan mengambil buku langsung ke meja sirkulasi perpustakaan dengan menunjukkan kartu identitas diri.';
       }
-    }
-  }
-  function onFlipbookKeyDown(e) {
-    if (!activeFlipbookInstance) return;
-    if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
-    if (e.key === 'ArrowRight' || e.key === 'PageDown') {
-      e.preventDefault();
-      if (typeof activeFlipbookInstance.nextPage === 'function') activeFlipbookInstance.nextPage();
-    } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
-      e.preventDefault();
-      if (typeof activeFlipbookInstance.prevPage === 'function') activeFlipbookInstance.prevPage();
-    } else if (e.key === ' ' || e.code === 'Space') {
-      e.preventDefault();
-      if (e.shiftKey) {
-        if (typeof activeFlipbookInstance.prevPage === 'function') activeFlipbookInstance.prevPage();
-      } else {
-        if (typeof activeFlipbookInstance.nextPage === 'function') activeFlipbookInstance.nextPage();
-      }
-    } else if (e.key === 'Home') {
-      e.preventDefault();
-      if (typeof activeFlipbookInstance.firstPage === 'function') activeFlipbookInstance.firstPage();
-    } else if (e.key === 'End') {
-      e.preventDefault();
-      if (typeof activeFlipbookInstance.lastPage === 'function') activeFlipbookInstance.lastPage();
-    } else if (e.key === '+' || e.key === '=') {
-      e.preventDefault();
-      if (typeof activeFlipbookInstance.zoomIn === 'function') activeFlipbookInstance.zoomIn();
-    } else if (e.key === '-' || e.key === '_') {
-      e.preventDefault();
-      if (typeof activeFlipbookInstance.zoomOut === 'function') activeFlipbookInstance.zoomOut();
-    } else if (e.key === 'Escape') {
-      e.preventDefault();
-      closeFlipbookViewer();
     }
   }
   function getBookBookmark(code) {
@@ -390,6 +461,39 @@
     const bm = getBookBookmark(book.code);
     if (bm && bm.page && bm.page > 1) {
       showToast(`Ada penanda di Halaman ${bm.page}. Klik tali penanda untuk melanjutkan.`, 'info');
+    }
+  }
+  function onFlipbookKeyDown(e) {
+    if (!activeFlipbookInstance) return;
+    if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+    if (e.key === 'ArrowRight' || e.key === 'PageDown') {
+      e.preventDefault();
+      if (typeof activeFlipbookInstance.nextPage === 'function') activeFlipbookInstance.nextPage();
+    } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+      e.preventDefault();
+      if (typeof activeFlipbookInstance.prevPage === 'function') activeFlipbookInstance.prevPage();
+    } else if (e.key === ' ' || e.code === 'Space') {
+      e.preventDefault();
+      if (e.shiftKey) {
+        if (typeof activeFlipbookInstance.prevPage === 'function') activeFlipbookInstance.prevPage();
+      } else {
+        if (typeof activeFlipbookInstance.nextPage === 'function') activeFlipbookInstance.nextPage();
+      }
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      if (typeof activeFlipbookInstance.firstPage === 'function') activeFlipbookInstance.firstPage();
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      if (typeof activeFlipbookInstance.lastPage === 'function') activeFlipbookInstance.lastPage();
+    } else if (e.key === '+' || e.key === '=') {
+      e.preventDefault();
+      if (typeof activeFlipbookInstance.zoomIn === 'function') activeFlipbookInstance.zoomIn();
+    } else if (e.key === '-' || e.key === '_') {
+      e.preventDefault();
+      if (typeof activeFlipbookInstance.zoomOut === 'function') activeFlipbookInstance.zoomOut();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      closeFlipbookViewer();
     }
   }
   function updatePageDisplay(fb) {
@@ -555,14 +659,47 @@
         btn.classList.add('active');
         currentCollectionType = btn.dataset.type;
         currentCategory = 'all';
-        renderCategoryPills();
+        displayedLimit = BATCH_SIZE;
+        renderCategoryFilters();
         filterAndRenderBooks();
       });
     });
     const searchInput = document.getElementById('searchBookInput');
+    const btnClear = document.getElementById('btnClearSearch');
     if (searchInput) {
       searchInput.addEventListener('input', (e) => {
         searchQuery = e.target.value.trim();
+        if (btnClear) btnClear.classList.toggle('pane-hidden', !searchQuery);
+        displayedLimit = BATCH_SIZE;
+        filterAndRenderBooks();
+      });
+    }
+    if (btnClear && searchInput) {
+      btnClear.addEventListener('click', () => {
+        searchInput.value = '';
+        searchQuery = '';
+        btnClear.classList.add('pane-hidden');
+        displayedLimit = BATCH_SIZE;
+        filterAndRenderBooks();
+        searchInput.focus();
+      });
+    }
+    const catSelect = document.getElementById('categorySelectFilter');
+    if (catSelect) {
+      catSelect.addEventListener('change', (e) => {
+        currentCategory = e.target.value;
+        const pillsContainer = document.getElementById('categoryPills');
+        if (pillsContainer) {
+          pillsContainer.querySelectorAll('.pill-btn').forEach(b => b.classList.toggle('active', b.dataset.category === currentCategory));
+        }
+        displayedLimit = BATCH_SIZE;
+        filterAndRenderBooks();
+      });
+    }
+    const btnLoadMore = document.getElementById('btnLoadMoreBooks');
+    if (btnLoadMore) {
+      btnLoadMore.addEventListener('click', () => {
+        displayedLimit += BATCH_SIZE;
         filterAndRenderBooks();
       });
     }
@@ -571,6 +708,11 @@
     if (mobileToggle && navMenu) {
       mobileToggle.addEventListener('click', () => {
         navMenu.classList.toggle('active');
+      });
+      navMenu.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', () => {
+          navMenu.classList.remove('active');
+        });
       });
     }
     document.querySelectorAll('.modal-close').forEach(btn => {
@@ -715,37 +857,44 @@
       });
     }
     const guestForm = document.getElementById('guestbookForm');
+    const memberCodeInput = document.getElementById('guestMemberCode');
+    const memberNameInput = document.getElementById('guestMemberName');
+    const memberTypeSelect = document.getElementById('guestMemberType');
+    const btnLookup = document.getElementById('btnLookupMember');
+    async function doMemberLookup() {
+      if (!memberCodeInput) return;
+      const code = memberCodeInput.value.trim().toUpperCase();
+      if (!code) return;
+      try {
+        const m = await DBLibrary.getMember(code);
+        if (m) {
+          if (memberNameInput) memberNameInput.value = m.name;
+          if (memberTypeSelect) {
+            if (m.type === 'Siswa') memberTypeSelect.value = 'Siswa';
+            else if (m.type === 'Guru' || m.type === 'Tenaga Kependidikan') memberTypeSelect.value = 'GTK';
+          }
+          showToast(`Data anggota ditemukan: ${m.name}`, 'success');
+        } else {
+          showToast('Data kode anggota tidak ditemukan, silakan isi nama Anda.', 'info');
+        }
+      } catch (e) {}
+    }
+    if (memberCodeInput) memberCodeInput.addEventListener('change', doMemberLookup);
+    if (btnLookup) btnLookup.addEventListener('click', doMemberLookup);
     if (guestForm) {
-      const memberCodeInput = document.getElementById('guestMemberCode');
-      const memberNameInput = document.getElementById('guestMemberName');
-      const memberTypeSelect = document.getElementById('guestMemberType');
-      if (memberCodeInput) {
-        memberCodeInput.addEventListener('change', async () => {
-          const code = memberCodeInput.value.trim().toUpperCase();
-          if (!code) return;
-          try {
-            const m = await DBLibrary.getMember(code);
-            if (m) {
-              if (memberNameInput) memberNameInput.value = m.name;
-              if (memberTypeSelect) memberTypeSelect.value = m.type;
-              showToast(`Data anggota ditemukan: ${m.name}`, 'success');
-            }
-          } catch (e) {}
-        });
-      }
       guestForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const submitBtn = guestForm.querySelector('button[type="submit"]');
+        const submitBtn = document.getElementById('btnSubmitGuest') || guestForm.querySelector('button[type="submit"]');
         const origText = submitBtn.innerHTML;
         submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mencatat Kunjungan...';
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mencatat Kehadiran...';
         try {
           const memberCode = (memberCodeInput ? memberCodeInput.value : '').trim().toUpperCase();
           const memberName = (memberNameInput ? memberNameInput.value : '').trim();
           const memberType = memberTypeSelect ? memberTypeSelect.value : 'Umum';
           const purpose = (document.getElementById('guestPurpose')?.value || 'Membaca Buku').trim();
           await DBLibrary.logVisit({ memberCode, memberName, memberType, purpose });
-          showToast('Kunjungan Anda berhasil dicatat. Selamat membaca!', 'success');
+          showToast('Kehadiran Anda berhasil dicatat. Selamat membaca!', 'success');
           bunyikanSalam(memberName || 'Pengunjung');
           guestForm.reset();
           const stats = await DBLibrary.getStatistics();
@@ -779,7 +928,7 @@
     if (formBuku) {
       formBuku.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const btn = formBuku.querySelector('button[type="submit"]');
+        const btn = document.getElementById('btnSubmitDonasiBuku') || formBuku.querySelector('button[type="submit"]');
         const orig = btn.innerHTML;
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengirim Formulir...';
@@ -813,7 +962,7 @@
     if (formDana) {
       formDana.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const btn = formDana.querySelector('button[type="submit"]');
+        const btn = document.getElementById('btnSubmitDonasiDana') || formDana.querySelector('button[type="submit"]');
         const orig = btn.innerHTML;
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengirim Konfirmasi...';
