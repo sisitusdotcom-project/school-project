@@ -2562,3 +2562,15 @@ body{background:#fff !important;color:#000 !important;}
 .fin-indent-1{padding-left:7px !important;}
 .fin-indent-2{padding-left:13px !important;}
 }
+.ortu-rapor-card{margin-bottom:16px;padding:16px}
+.ortu-rapor-header{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px}
+.ortu-rapor-title{margin:0 0 6px 0;font-size:16px}
+.ortu-rapor-meta{margin:0;font-size:13px}
+.ortu-rapor-badge{font-size:12px;padding:6px 12px}
+.ortu-rapor-footer{margin-top:16px;padding-top:14px;border-top:1px solid var(--border-color,#e2e8f0);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.ortu-rapor-note{margin:0;font-size:12.5px}
+.ortu-rapor-actions{display:inline-flex;gap:8px}
+.ortu-rapor-btn{display:inline-flex;align-items:center;gap:6px}
+.ortu-rapor-head-wrap{margin-bottom:20px}
+.ortu-rapor-main-title{font-size:18px;margin:0 0 6px 0}
+.table-th-select{width:40px}

@@ -21,8 +21,8 @@ const OrtuPages = {
     const subjArr = DB.toArray(subjectsData).filter(s => s.active !== false).sort((a, b) => (a.order || 0) - (b.order || 0));
     const exArr = DB.toArray(extrasData);
     const ummiClsArr = DB.toArray(allUmmiClasses || {});
-    const year = (settings && settings.currentAcademicYear) || '2024/2025';
-    const sem = (settings && settings.currentSemester) || 1;
+    const year = (settings && settings.currentAcademicYear) || AppConfig.DEFAULT_SETTINGS.currentAcademicYear;
+    const sem = (settings && settings.currentSemester) || AppConfig.DEFAULT_SETTINGS.currentSemester;
     const scoreLabel = {
       4: 'Sangat Baik',
       3: 'Baik',
@@ -263,32 +263,32 @@ const OrtuPages = {
       DB.getSettings(),
       DB.getClasses()
     ]);
-    const year = settings?.currentAcademicYear || '2024/2025';
-    const sem = settings?.currentSemester || 1;
+    const year = settings?.currentAcademicYear || AppConfig.DEFAULT_SETTINGS.currentAcademicYear;
+    const sem = settings?.currentSemester || AppConfig.DEFAULT_SETTINGS.currentSemester;
     let cardsHtml = '';
     for (const student of studentArr) {
       const cls = classes[student.classId] || {};
       const finalization = await DB.getRaporFinalization(year, sem, student.classId);
       const isFin = finalization && finalization.finalized;
       cardsHtml += `
-        <div class="card section-block" style="margin-bottom:16px; padding:16px;">
-          <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
+        <div class="card section-block ortu-rapor-card">
+          <div class="ortu-rapor-header">
             <div>
-              <h3 style="margin:0 0 6px 0; font-size:16px;">${AppConfig.escapeHtml(student.name)}</h3>
-              <p class="text-muted" style="margin:0; font-size:13px;">
+              <h3 class="ortu-rapor-title">${AppConfig.escapeHtml(student.name)}</h3>
+              <p class="text-muted ortu-rapor-meta">
                 Kelas: <strong>${AppConfig.escapeHtml(cls.name || '-')}</strong> · NISN: <strong>${AppConfig.escapeHtml(student.nisn || '-')}</strong> · Tahun Ajaran: <strong>${AppConfig.escapeHtml(year)}</strong> (Semester ${sem})
               </p>
             </div>
             <div>
-              ${isFin ? '<span class="badge badge-success" style="font-size:12px; padding:6px 12px;"><i class="ph ph-check-circle"></i> Siap Diunduh & Dicetak</span>' : '<span class="badge badge-warning" style="font-size:12px; padding:6px 12px;"><i class="ph ph-clock"></i> Proses Rekapitulasi Rapor</span>'}
+              ${isFin ? '<span class="badge badge-success ortu-rapor-badge"><i class="ph ph-check-circle"></i> Siap Diunduh & Dicetak</span>' : '<span class="badge badge-warning ortu-rapor-badge"><i class="ph ph-clock"></i> Proses Rekapitulasi Rapor</span>'}
             </div>
           </div>
-          <div style="margin-top:16px; padding-top:14px; border-top:1px solid var(--border-color,#e2e8f0); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
-            <p class="text-muted" style="margin:0; font-size:12.5px;">
+          <div class="ortu-rapor-footer">
+            <p class="text-muted ortu-rapor-note">
               ${isFin ? 'Rapor semester ini telah difinalisasi oleh wali kelas. Anda dapat langsung mencetak lembar rapor format F4 resmi.' : 'Wali kelas sedang melakukan rekapitulasi nilai akhir. Lembar cetak rapor akan dapat diunduh setelah difinalisasi oleh sekolah.'}
             </p>
-            <div style="display:inline-flex; gap:8px;">
-              <a href="print.html?id=${student.id}" target="_blank" class="btn ${isFin ? 'btn-primary' : 'btn-outline'}" style="display:inline-flex; align-items:center; gap:6px;">
+            <div class="ortu-rapor-actions">
+              <a href="print.html?id=${student.id}" target="_blank" class="btn ${isFin ? 'btn-primary' : 'btn-outline'} ortu-rapor-btn">
                 <i class="ph ph-printer"></i> ${isFin ? 'Cetak Lembar Rapor F4' : 'Pratinjau Lembar Rapor'}
               </a>
             </div>
@@ -297,9 +297,9 @@ const OrtuPages = {
       `;
     }
     container.innerHTML = `
-      <div style="margin-bottom:20px;">
-        <h2 style="font-size:18px; margin:0 0 6px 0;"><i class="ph ph-file-pdf"></i> Lembar Rapor Resmi Siswa</h2>
-        <p class="text-muted" style="margin:0; font-size:13px;">Akses dan cetak lembar e-rapor resmi Kurikulum Merdeka untuk putra-putri Anda.</p>
+      <div class="ortu-rapor-head-wrap">
+        <h2 class="ortu-rapor-main-title"><i class="ph ph-file-pdf"></i> Lembar Rapor Resmi Siswa</h2>
+        <p class="text-muted ortu-rapor-meta">Akses dan cetak lembar e-rapor resmi Kurikulum Merdeka untuk putra-putri Anda.</p>
       </div>
       ${cardsHtml}
     `;

@@ -12,11 +12,11 @@ const CurriculumPages = {
       <section class="card-grid section-spacer">
         <div class="card stat-card">
           <div class="stat-icon stat-icon--primary"><i class="ph ph-books"></i></div>
-          <div><p class="stat-value">${settings.currentAcademicYear || '2026/2027'}</p><p class="stat-label text-muted">Tahun Ajaran</p></div>
+          <div><p class="stat-value">${settings.currentAcademicYear || AppConfig.DEFAULT_SETTINGS.currentAcademicYear}</p><p class="stat-label text-muted">Tahun Ajaran</p></div>
         </div>
         <div class="card stat-card">
           <div class="stat-icon stat-icon--warning"><i class="ph ph-calendar"></i></div>
-          <div><p class="stat-value">Semester ${settings.currentSemester || '1'}</p><p class="stat-label text-muted">Semester Berjalan</p></div>
+          <div><p class="stat-value">Semester ${settings.currentSemester || AppConfig.DEFAULT_SETTINGS.currentSemester}</p><p class="stat-label text-muted">Semester Berjalan</p></div>
         </div>
         <div class="card stat-card">
           <div class="stat-icon stat-icon--success"><i class="ph ph-list-checks"></i></div>
@@ -38,6 +38,13 @@ const CurriculumPages = {
               <div class="quick-nav-info">
                 <div class="quick-nav-title">Pembagian Rombel</div>
                 <div class="quick-nav-desc">Daftar kelas & penugasan wali</div>
+              </div>
+            </a>
+            <a href="#/admin/classes?action=promo" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-arrow-fat-lines-up"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Kenaikan & Promosi Rombel</div>
+                <div class="quick-nav-desc">Proses kenaikan kelas & kelulusan alumni</div>
               </div>
             </a>
             <a href="#/admin/subjects" class="quick-nav-card">
@@ -108,13 +115,13 @@ const CurriculumPages = {
       </section>
       <section class="card section-spacer">
         <div class="card-header">
-          <h3 class="card-title"><i class="ph ph-gear"></i> Konfigurasi Kalender Akademik Aktif</h3>
+          <h3 class="card-title"><i class="ph ph-gear"></i> Konfigurasi Kalender Akademik Aktif (Pusat Mandat SSOT)</h3>
         </div>
         <div class="card-body">
           <form id="form-academic-settings" class="inline-form">
             <div class="form-group compact-field">
               <label>Tahun Ajaran</label>
-              <input id="set-year" value="${settings.currentAcademicYear || '2026/2027'}" placeholder="Contoh: 2026/2027">
+              <input id="set-year" value="${settings.currentAcademicYear || AppConfig.DEFAULT_SETTINGS.currentAcademicYear}" placeholder="Contoh: 2026/2027">
             </div>
             <div class="form-group compact-field">
               <label>Semester</label>

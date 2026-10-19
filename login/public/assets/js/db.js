@@ -461,8 +461,8 @@ const DB = {
     let sem = explicitSem;
     if (!year || !sem) {
       const settings = await this.getSettings();
-      year = settings.currentAcademicYear || '2026/2027';
-      sem = settings.currentSemester || '1';
+      year = settings.currentAcademicYear || AppConfig.DEFAULT_SETTINGS.currentAcademicYear;
+      sem = settings.currentSemester || AppConfig.DEFAULT_SETTINGS.currentSemester;
     }
     const snap = await db.ref(`ummi_journals/${studentId}`).once('value');
     const journals = this.toArray(snap.val() || {});

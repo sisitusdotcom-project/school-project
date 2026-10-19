@@ -409,12 +409,16 @@ const ModuleKit = {
         let value = row ? row[f.key] : (f.default !== undefined ? f.default : (f.type === 'date' ? this.today() : ''));
         if (f.key === 'semester' && refs.__settings) {
           const s = refs.__settings;
-          const y = s.currentAcademicYear || s.academicYear || '2026/2027';
+          const y = s.currentAcademicYear || s.academicYear || AppConfig.DEFAULT_SETTINGS.currentAcademicYear;
           const sem = (s.currentSemester === '2' || s.semester === 'Genap') ? 'Semester 2 (Genap)' : 'Semester 1 (Ganjil)';
           const otherSem = sem === 'Semester 1 (Ganjil)' ? 'Semester 2 (Genap)' : 'Semester 1 (Ganjil)';
           const opts = [`${sem} - T.A. ${y}`, `${otherSem} - T.A. ${y}`, `1 Tahun Penuh - T.A. ${y}`];
           el.innerHTML = opts.map((o) => `<option value="${this.esc(o)}">${this.esc(o)}</option>`).join('');
           if (!row) value = `${sem} - T.A. ${y}`;
+        }
+        if (f.key === 'academicYear' && refs.__settings && !row && !value) {
+          const s = refs.__settings;
+          value = s.currentAcademicYear || s.academicYear || AppConfig.DEFAULT_SETTINGS.currentAcademicYear;
         }
         if (f.type === 'multi') {
           const chosen = value && typeof value === 'object' ? value : {};
@@ -701,7 +705,7 @@ const ModuleKit = {
       let options = this.optionList(field);
       if (field.key === 'semester' && (!options || !options.length) && refs.__settings) {
         const s = refs.__settings;
-        const y = s.currentAcademicYear || s.academicYear || '2026/2027';
+        const y = s.currentAcademicYear || s.academicYear || AppConfig.DEFAULT_SETTINGS.currentAcademicYear;
         const sem = (s.currentSemester === '2' || s.semester === 'Genap') ? 'Semester 2 (Genap)' : 'Semester 1 (Ganjil)';
         const otherSem = sem === 'Semester 1 (Ganjil)' ? 'Semester 2 (Genap)' : 'Semester 1 (Ganjil)';
         options = [

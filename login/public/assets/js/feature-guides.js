@@ -661,7 +661,7 @@ const FeatureGuides = {
       'Menghapus Mapel dari Rombel: Klik ikon tempat sampah merah pada baris mata pelajaran untuk menghapusnya khusus dari rombel ini (tidak memengaruhi rombel lain atau bank mapel sekolah).',
       'Menyimpan Perubahan: Klik tombol \'Simpan Penugasan Rombel\'. Struktur mapel ini menjadi acuan tunggal resmi untuk input nilai akademik guru dan lembar cetak rapor murid.',
       'Menetapkan Wali Kelas: Klik ikon pensil pada baris kelas untuk memperbarui nama wali kelas pendamping.',
-      'Kenaikan Kelas: Gunakan tombol \'Kenaikan Kelas\' di kanan atas untuk memproses kenaikan rombel secara massal pada akhir tahun ajaran.'
+      'Kenaikan Kelas & Kelulusan (SSOT): Gunakan tombol \'Kenaikan Kelas\' (atau akses langsung dari menu Kurikulum) untuk memproses promosi rombel atau kelulusan alumni secara terpusat pada akhir tahun ajaran. Data kelulusan otomatis terintegrasi ke buku penelusuran alumni sekolah.'
     ],
     '#/admin/subjects': [
       'Bank Data Mata Pelajaran: Menu ini dikelola oleh Waka Kurikulum untuk mendefinisikan seluruh mata pelajaran resmi sekolah beserta kategorinya (Agama, Umum, Muatan Lokal, Kekhasan).',

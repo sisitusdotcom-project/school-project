@@ -19,7 +19,7 @@
     },
     "settings": {
       ".read": "auth != null",
-      ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'"
+      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('unitFlags').child('TIM_IT').val() === true || root.child('users').child(auth.uid).child('unitFlags').child('WAKA_KURIKULUM').val() === true || root.child('users').child(auth.uid).child('unitFlags').child('WAKA_HUMAS_PERSONALIA').val() === true)"
     },
     "characters": {
       ".read": "auth != null",

@@ -97,11 +97,12 @@ ${summaryCards.map((item) => `
 </section>
 <section class="card section-spacer">
 <div class="card-header">
-<h3 class="card-title">Konfigurasi sekolah</h3>
+<h3 class="card-title">Konfigurasi sekolah (SSOT)</h3>
+<a href="#/curriculum" class="btn btn-outline btn-sm"><i class="ph ph-calendar"></i> Pengaturan di Kurikulum</a>
 </div>
 <ul class="list-plain">
-<li>Tahun ajaran: <strong>${settings.currentAcademicYear}</strong></li>
-<li>Semester aktif: <strong>${settings.currentSemester}</strong></li>
+<li>Tahun ajaran: <strong>${settings.currentAcademicYear || AppConfig.DEFAULT_SETTINGS.currentAcademicYear}</strong></li>
+<li>Semester aktif: <strong>${settings.currentSemester || AppConfig.DEFAULT_SETTINGS.currentSemester}</strong></li>
 <li>Indikator karakter aktif: <strong>${charArr.filter(c => c.active !== false).length}</strong></li>
 <li>Orang tua terdaftar: <strong>${ortuCount}</strong></li>
 </ul>
@@ -492,7 +493,7 @@ ${isKurikulum ? `
 ` : ''}
 </div>
 <div class="table-responsive">
-<table class="table"><thead><tr><th>Nama Kelas</th><th>Wali Kelas</th><th>Jumlah Siswa</th><th style="width:220px">Aksi</th></tr></thead>
+<table class="table"><thead><tr><th>Nama Kelas</th><th>Wali Kelas</th><th>Jumlah Siswa</th><th class="table-col-lg">Aksi</th></tr></thead>
 <tbody>${rows}</tbody></table>
 </div>
 </div>
@@ -592,7 +593,7 @@ ${classArr.map(c => `<option value="${c.id}">${AppConfig.escapeHtml(c.name)}</op
 </div>
 <div class="table-responsive">
 <table class="table table-sm">
-<thead><tr><th style="width:40px">Pilih</th><th>NIS</th><th>Nama Siswa</th><th>Status</th></tr></thead>
+<thead><tr><th class="table-th-select">Pilih</th><th>NIS</th><th>Nama Siswa</th><th>Status</th></tr></thead>
 <tbody id="promo-students-tbody">
 <tr><td colspan="4" class="text-center text-muted">Pilih kelas asal terlebih dahulu.</td></tr>
 </tbody>
@@ -782,6 +783,9 @@ document.getElementById('promo-to-cls').value = '';
 document.getElementById('promo-students-tbody').innerHTML = '<tr><td colspan="4" class="text-center text-muted">Pilih kelas asal terlebih dahulu.</td></tr>';
 document.getElementById('modal-promo').classList.add('active');
 };
+if (window.location.hash.includes('action=promo')) {
+setTimeout(() => { btnPromoCls.click(); }, 150);
+}
 }
 const promoFromSelect = document.getElementById('promo-from-cls');
 if (promoFromSelect) {
@@ -792,15 +796,15 @@ if (!fromId) {
 tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Pilih kelas asal terlebih dahulu.</td></tr>';
 return;
 }
-const filteredStudents = studentArr.filter(s => s.classId === fromId).sort((a,b) => a.name.localeCompare(b.name));
+const filteredStudents = studentArr.filter(s => s.classId === fromId && s.status !== 'Lulus' && s.status !== 'Keluar').sort((a,b) => (a.name || '').localeCompare(b.name || ''));
 if (!filteredStudents.length) {
-tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Tidak ada siswa terdaftar di kelas ini.</td></tr>';
+tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Tidak ada siswa aktif terdaftar di kelas ini.</td></tr>';
 return;
 }
 tbody.innerHTML = filteredStudents.map(s => `
 <tr>
 <td><input type="checkbox" class="chk-promo-stu" data-stu-id="${s.id}" checked></td>
-<td>${s.nis || '-'}</td>
+<td>${s.nis || s.nisn || '-'}</td>
 <td><strong>${AppConfig.escapeHtml(s.name)}</strong></td>
 <td><span class="badge badge-success">Siap Promosi</span></td>
 </tr>
@@ -835,17 +839,22 @@ const submitBtn = document.getElementById('btn-submit-promo');
 submitBtn.disabled = true;
 submitBtn.innerHTML = '<i class="ph ph-spinner"></i> Memproses...';
 try {
+const settings = await DB.getSettings();
+const currentYear = settings.currentAcademicYear || AppConfig.DEFAULT_SETTINGS.currentAcademicYear;
+const timestamp = new Date().toISOString();
 const updates = {};
-selectedIds.forEach(id => {
+let existingAlumni = {};
 if (toId === 'LULUS_ALUMNI') {
-updates[`students/${id}/classId`] = 'ALUMNI';
-updates[`students/${id}/status`] = 'Lulus';
-} else {
-updates[`students/${id}/classId`] = toId;
+try {
+const snap = await firebase.database().ref('student_affairs/alumni').once('value');
+existingAlumni = snap.val() || {};
+} catch (alumniErr) {}
 }
-});
+const promoKey = firebase.database().ref(`classes/${fromId}/promotion`).push().key;
 const promoLog = {
-date: new Date().toISOString(),
+id: promoKey,
+date: timestamp,
+academicYear: currentYear,
 fromClassId: fromId,
 fromClassName: fromClsName,
 toClassId: toId,
@@ -854,9 +863,56 @@ totalStudents: selectedIds.length,
 studentIds: selectedIds,
 executedBy: Auth.currentUser.uid
 };
-const promoKey = firebase.database().ref(`classes/${fromId}/promotion`).push().key;
 updates[`classes/${fromId}/promotion/${promoKey}`] = promoLog;
 updates[`student_promotions/${promoKey}`] = promoLog;
+selectedIds.forEach(id => {
+const stu = studentArr.find(s => s.id === id) || {};
+if (toId === 'LULUS_ALUMNI') {
+updates[`students/${id}/classId`] = 'ALUMNI';
+updates[`students/${id}/status`] = 'Lulus';
+updates[`students/${id}/graduationYear`] = currentYear;
+const prev = existingAlumni[id] || {};
+updates[`student_affairs/alumni/${id}`] = {
+...prev,
+id: id,
+studentId: id,
+name: stu.name || prev.name || '',
+gender: stu.gender || prev.gender || 'Laki-laki',
+nisn: stu.nisn || prev.nisn || '',
+graduationYear: currentYear,
+destinationSchool: prev.destinationSchool || 'Belum terdata',
+schoolType: prev.schoolType || 'SMP',
+updatedAt: timestamp
+};
+} else {
+updates[`students/${id}/classId`] = toId;
+updates[`students/${id}/status`] = 'Aktif';
+}
+updates[`students/${id}/promotionHistory/${promoKey}`] = {
+promoId: promoKey,
+date: timestamp,
+academicYear: currentYear,
+fromClassId: fromId,
+fromClassName: fromClsName,
+toClassId: toId,
+toClassName: toClsName,
+executedBy: Auth.currentUser.uid
+};
+updates[`students/${id}/lastPromotion`] = {
+date: timestamp,
+academicYear: currentYear,
+fromClassId: fromId,
+toClassId: toId
+};
+});
+const auditKey = firebase.database().ref('audit_logs').push().key;
+updates[`audit_logs/${auditKey}`] = {
+action: 'PROMOSI_KELAS',
+actor: Auth.currentUser.uid,
+actorName: Auth.currentUser.displayName || Auth.currentUser.email || 'Admin/Kurikulum',
+timestamp: timestamp,
+detail: `Kenaikan rombel dari ${fromClsName} ke ${toClsName} (${selectedIds.length} siswa). Tahun Ajaran: ${currentYear}`
+};
 await firebase.database().ref().update(updates);
 alert(`Sukses mempromosikan ${selectedIds.length} siswa ke ${toClsName}!`);
 App.closeModal('modal-promo');

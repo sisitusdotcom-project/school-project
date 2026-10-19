@@ -2863,8 +2863,8 @@ if (!myEks.length) {
 container.innerHTML = `<div class="card"><p class="text-muted">Anda belum memiliki ekstrakurikuler binaan untuk dinilai.</p></div>`;
 return;
 }
-const year = settings.currentAcademicYear || '2026/2027';
-const sem = settings.currentSemester || '1';
+const year = settings.currentAcademicYear || AppConfig.DEFAULT_SETTINGS.currentAcademicYear;
+const sem = settings.currentSemester || AppConfig.DEFAULT_SETTINGS.currentSemester;
 let activeEks = myEks[0];
 const studentMap = DB.toArray(allStudents).reduce((acc, s) => { acc[s.id] = s; return acc; }, {});
 let viewContainer = container.querySelector('#ekskul-grades-view');
