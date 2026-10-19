@@ -377,8 +377,8 @@ const DBLibrary = {
       const nis = (s.nis || '').trim();
       const code = nis || id;
       const found = existingMap.get(code) || existingMap.get(nis) || existingMap.get(id) || existingMap.get((s.name || '').toLowerCase().trim());
+      const cName = s.status === 'Lulus' || s.classId === 'ALUMNI' ? 'Alumni' : (s.classId || '').replace('CLASS_', 'Kelas ').replace(/_/g, ' ');
       if (!found) {
-        const cName = (s.classId || '').replace('CLASS_', 'Kelas ').replace(/_/g, ' ');
         updates[`library/members/${code}`] = {
           code,
           nis,
@@ -391,6 +391,11 @@ const DBLibrary = {
           legacyCode: '',
           updatedAt: new Date().toISOString()
         };
+      } else if (found.studentId === id || found.nis === nis || found.code === code) {
+        if (cName && found.note !== cName) {
+          updates[`library/members/${found.code}/note`] = cName;
+          updates[`library/members/${found.code}/updatedAt`] = new Date().toISOString();
+        }
       }
     }
     const allPersonnel = { ...users, ...personnel };

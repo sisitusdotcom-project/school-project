@@ -854,7 +854,7 @@ const DB = {
     if (s === 'paid' || s === 'lunas') normStatus = 'Lunas';
     else if (s.includes('beasiswa')) normStatus = 'Bebas Beasiswa';
     const normalized = {
-      academicYear: data.academicYear || '',
+      academicYear: data.academicYear || AppConfig.DEFAULT_SETTINGS.currentAcademicYear,
       month: data.month || '',
       studentId: data.studentId || '',
       amount: Number(data.amount || 0),
