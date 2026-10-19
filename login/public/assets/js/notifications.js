@@ -132,7 +132,7 @@ const NotificationService = {
             unit: ['WAKA_KEUANGAN', 'STAF_KEUANGAN'],
             title: 'Vakasi Tugas Dinas Siap Dicairkan',
             message: `Vakasi tugas dinas an. ${payload.gtkIdName || 'GTK'} sebesar ${moneyStr(payload.vakasi)} siap dicairkan.`,
-            link: '#/finance/ledger',
+            link: '#/finance/transactions',
             type: 'info',
             action: 'Pencairan Kas',
             excludeUid: uid
@@ -228,7 +228,7 @@ const NotificationService = {
             unit: ['WAKA_KEUANGAN', 'STAF_KEUANGAN'],
             title: 'Pencairan Santunan GTK',
             message: `Santunan an. ${payload.recipientName || 'GTK'} sebesar ${moneyStr(payload.amount || 0)} disetujui untuk pencairan kas.`,
-            link: '#/finance/ledger',
+            link: '#/finance/transactions',
             type: 'info',
             action: 'Pencairan Kas',
             excludeUid: uid

@@ -2455,3 +2455,56 @@ html,body{background:#fff !important;color:#000 !important;margin:0 !important;p
 .attendance-actions-row .btn{font-size:11.5px;padding:8px 4px;}
 .attendance-actions-row .btn i{font-size:13px;}
 }
+.fin-dash-toolbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;background:var(--surface,#fff);padding:12px 16px;border-radius:var(--radius-md,8px);border:1px solid var(--border,#e5e7eb);}
+.fin-dash-filters{display:flex;flex-wrap:wrap;align-items:center;gap:10px;}
+.fin-dash-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px;}
+.fin-tabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:18px;border-bottom:1px solid var(--border,#e5e7eb);-webkit-overflow-scrolling:touch;}
+.fin-tab-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:transparent;border:none;border-bottom:3px solid transparent;color:var(--text-muted,#64748b);font-weight:600;font-size:13.5px;cursor:pointer;white-space:nowrap;transition:all 0.15s ease;}
+.fin-tab-btn:hover{color:var(--primary,#0284c7);}
+.fin-tab-btn.active{color:var(--primary,#0284c7);border-bottom-color:var(--primary,#0284c7);}
+.fin-summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-bottom:20px;}
+.fin-summary-grid > *{min-width:0;}
+.fin-formula-box{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 16px;margin-bottom:16px;background:linear-gradient(135deg,#f0fdf4 0%,#ecfdf5 100%);border:1px solid #a7f3d0;border-radius:8px;}
+.fin-formula-text{font-size:13px;color:#065f46;line-height:1.4;}
+.fin-formula-text strong{color:#047857;}
+.fin-badge-balanced{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:#059669;color:#fff;border-radius:999px;font-size:11.5px;font-weight:700;letter-spacing:0.3px;}
+.fin-badge-unbalanced{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:#dc2626;color:#fff;border-radius:999px;font-size:11.5px;font-weight:700;letter-spacing:0.3px;}
+.fin-table{width:100%;border-collapse:collapse;font-size:13px;}
+.fin-table th{background:var(--surface-muted,#f8fafc);color:var(--text-main,#1e293b);font-weight:700;padding:10px 12px;border:1px solid var(--border,#e5e7eb);text-align:left;}
+.fin-table td{padding:9px 12px;border:1px solid var(--border,#e5e7eb);color:var(--text-main,#1e293b);vertical-align:middle;overflow-wrap:break-word;word-break:break-word;}
+.fin-table .text-right{text-align:right;}
+.fin-table .text-center{text-align:center;}
+.fin-row-header td{background:var(--surface-muted,#f1f5f9);font-weight:700;color:var(--text-main,#0f172a);}
+.fin-row-subtotal td{background:#f8fafc;font-weight:600;border-top:1px dashed var(--border,#cbd5e1);}
+.fin-row-total td{background:#f1f5f9;font-weight:800;border-top:2px solid var(--border-dark,#94a3b8);border-bottom:2px solid var(--border-dark,#94a3b8);}
+.fin-indent-1{padding-left:24px;}
+.fin-indent-2{padding-left:40px;}
+.fin-credit-row{background:rgba(0,0,0,0.015);}
+.fin-w-40{width:40px;}
+.fin-w-90{width:90px;}
+.fin-w-110{width:110px;}
+.fin-w-130{width:130px;}
+.fin-w-140{width:140px;}
+.fin-w-160{width:160px;}
+.fin-w-180{width:180px;}
+.fin-d-none{display:none;}
+.fin-print-header{display:none;margin-bottom:16px;}
+.fin-print-signatures{display:none;margin-top:28px;}
+@media print{
+.fin-dash-toolbar,.fin-tabs,.quick-nav-grid,.action-cell,#app-header,#app-sidebar,.btn,.btn-group,.modal-overlay,.fin-screen-only,#fin-shortcuts-section,.fin-formula-box{display:none !important;}
+.fin-print-header{display:block !important;margin-bottom:16px;}
+.fin-print-signatures{display:grid !important;grid-template-columns:1fr 1fr;gap:40px;margin-top:24px;page-break-inside:avoid;}
+.fin-print-sig-box{text-align:center;font-size:11pt;}
+.fin-print-sig-space{height:55px;}
+.fin-table th{background:#e2e8f0 !important;color:#000 !important;border:1px solid #000 !important;}
+.fin-table td{border:1px solid #000 !important;color:#000 !important;}
+.card{border:none !important;box-shadow:none !important;padding:0 !important;}
+body{background:#fff !important;color:#000 !important;}
+}
+@media(max-width:768px){
+.fin-dash-toolbar{flex-direction:column;align-items:stretch;}
+.fin-dash-filters,.fin-dash-actions{width:100%;}
+.fin-dash-actions .btn{flex:1;justify-content:center;}
+.fin-table{font-size:12px;}
+.fin-table th,.fin-table td{padding:7px 8px;}
+}

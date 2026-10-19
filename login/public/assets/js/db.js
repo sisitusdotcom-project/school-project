@@ -825,9 +825,15 @@ const DB = {
       id: id || data.id || null,
       type: data.type || 'income',
       category: data.category || 'Umum',
+      accountCode: data.accountCode || (data.type === 'expense' ? '5-9999' : '4-9999'),
+      accountName: data.accountName || (data.type === 'expense' ? 'Beban Operasional Lainnya' : 'Pendapatan Lainnya'),
+      rkasId: data.rkasId || null,
+      refNo: data.refNo || '',
+      method: data.method || 'Tunai',
       description: data.description || 'Transaksi baru',
       amount: Number(data.amount || 0),
       date: data.date || new Date().toISOString().slice(0, 10),
+      sourceBillId: data.sourceBillId || null,
       createdAt: data.createdAt || firebase.database.ServerValue.TIMESTAMP
     };
     const ref = id ? db.ref(`finance/ledger/${id}`) : db.ref('finance/ledger').push();
@@ -843,24 +849,87 @@ const DB = {
   },
   async saveStudentBill(data, id = null) {
     if (!isDBReady()) return null;
+    let normStatus = 'Belum Lunas';
+    const s = String(data.status || '').toLowerCase();
+    if (s === 'paid' || s === 'lunas') normStatus = 'Lunas';
+    else if (s.includes('beasiswa')) normStatus = 'Bebas Beasiswa';
     const normalized = {
+      academicYear: data.academicYear || '',
+      month: data.month || '',
       studentId: data.studentId || '',
       amount: Number(data.amount || 0),
-      dueDate: data.dueDate || new Date().toISOString().slice(0, 10),
-      status: data.status || 'pending',
+      dueDate: data.dueDate || data.paymentDate || new Date().toISOString().slice(0, 10),
+      paymentDate: data.paymentDate || (normStatus === 'Lunas' ? new Date().toISOString().slice(0, 10) : ''),
+      status: normStatus,
+      receipt: data.receipt || '',
       note: data.note || '',
+      ledgerEntryId: data.ledgerEntryId || null,
       createdAt: data.createdAt || firebase.database.ServerValue.TIMESTAMP
     };
     const ref = id ? db.ref(`finance/student_bills/${id}`) : db.ref('finance/student_bills').push();
     await ref.set(normalized);
     return ref.key;
   },
-  async markStudentBillPaid(id) {
-    if (!isDBReady() || !id) return;
+  async markStudentBillPaid(id, opts = {}) {
+    if (!isDBReady() || !id) return null;
     const bills = await this.getStudentBills();
     const bill = bills[id];
-    if (!bill) return;
-    await db.ref(`finance/student_bills/${id}/status`).set('paid');
+    if (!bill) return null;
+    const payDate = opts.paymentDate || new Date().toISOString().slice(0, 10);
+    const method = opts.method || 'Transfer';
+    const updates = {
+      [`finance/student_bills/${id}/status`]: 'Lunas',
+      [`finance/student_bills/${id}/paymentDate`]: payDate
+    };
+    let ledgerKey = bill.ledgerEntryId || null;
+    if (!ledgerKey) {
+      let studentName = opts.studentName || '';
+      if (!studentName && bill.studentId) {
+        const student = await this.getStudent(bill.studentId);
+        studentName = student?.name || bill.studentId;
+      }
+      const periodLabel = [bill.month, bill.academicYear].filter(Boolean).join(' ');
+      const desc = `Pembayaran SPP ${periodLabel ? periodLabel + ' ' : ''}- ${studentName || 'Siswa'}`.trim();
+      const ledgerEntry = {
+        type: 'income',
+        category: 'SPP',
+        accountCode: '4-1010',
+        accountName: 'Pendapatan SPP Siswa',
+        description: desc,
+        amount: Number(bill.amount || 0),
+        date: payDate,
+        method: method,
+        refNo: opts.refNo || `SPP-${String(Date.now()).slice(-6)}`,
+        sourceBillId: id,
+        createdAt: firebase.database.ServerValue.TIMESTAMP
+      };
+      const lRef = db.ref('finance/ledger').push();
+      ledgerKey = lRef.key;
+      ledgerEntry.id = ledgerKey;
+      updates[`finance/ledger/${ledgerKey}`] = ledgerEntry;
+      updates[`finance/student_bills/${id}/ledgerEntryId`] = ledgerKey;
+    }
+    await db.ref().update(updates);
+    return ledgerKey;
+  },
+  async getRKAS() {
+    return this._readCollection('finance/rkas', {});
+  },
+  async saveRKAS(data, id = null) {
+    if (!isDBReady()) return null;
+    const item = {
+      fiscalYear: data.fiscalYear || '',
+      code: data.code || '',
+      component: data.component || 'Komponen Anggaran',
+      category: data.category || 'Lainnya',
+      pagu: Number(data.pagu || 0),
+      realized: Number(data.realized || 0),
+      status: data.status || 'Draft',
+      updatedAt: firebase.database.ServerValue.TIMESTAMP
+    };
+    const ref = id ? db.ref(`finance/rkas/${id}`) : db.ref('finance/rkas').push();
+    await ref.set(item);
+    return ref.key;
   }
 ,
   async getStudentReferenceIndex() {

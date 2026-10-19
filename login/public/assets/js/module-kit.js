@@ -93,6 +93,14 @@ const ModuleKit = {
       return out;
     },
     asset: () => DB.getFacilityAssets(),
+    rkasComponent: async () => {
+      const rkas = await DB.getRKAS();
+      const out = {};
+      Object.entries(rkas || {}).forEach(([id, item]) => {
+        if (item) out[id] = { name: `${item.code ? '[' + item.code + '] ' : ''}${item.component || 'Komponen'} (Pagu: Rp ${Number(item.pagu || 0).toLocaleString('id-ID')})` };
+      });
+      return out;
+    },
     ekskul: () => DB.getExtracurriculars(),
     ummiClass: (ctx) => ModuleKit.scopedClasses('ummi_classes', 'teacherId', ctx, 'KOORD_UMMI'),
     ummiStudent: (ctx) => ModuleKit.scopedStudents('ummi_classes', 'teacherId', ctx, 'KOORD_UMMI'),

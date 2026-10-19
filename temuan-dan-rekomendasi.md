@@ -155,6 +155,8 @@ Semua temuan arsitektural telah diselesaikan 100%:
    * *Status:* **Tuntas.** Pemisahan `REF_LOADERS.employee`, `teacher`, dan `student` menjamin seluruh dropdown kepegawaian 100% steril dari akun orang tua/siswa.
 8. **Pengaktifan Modul Layanan Baru:**
    * *Status:* **Tuntas.** Tiga modul baru telah aktif: Penelusuran Alumni (`#/student-affairs/alumni`), Perizinan Siswa Sakit/Izin (`#/student-affairs/leaves`), dan Tagihan SPP Siswa (`#/finance/student-bills`) lengkap dengan penyesuaian aturan keamanan Firebase Realtime Database.
+9. **Dashboard Keuangan Terintegrasi & 4 Laporan Pokok (ISAK 35 & SAK EP):**
+   * *Status:* **Tuntas.** Dashboard Keuangan (#/finance) dilengkapi 5 tab terpadu: Ringkasan Eksekutif Likuiditas, Jurnal Umum Double-Entry (Debit-Kredit Seimbang), Arus Kas ISAK 35 (Operasional, Investasi, Pendanaan), Realisasi Anggaran (LRA RKAS agregasi real-time), dan Laporan Posisi Keuangan (Neraca Nirlaba terhubung aset Sarpras). Dilengkapi otomatisasi kas masuk saat pelunasan tagihan SPP (SSOT & DRY), sinkronisasi alokasi RKAS pengeluaran, koreksi tautan notifikasi, serta fitur ekspor Excel (.xlsx) dan Cetak PDF resmi Dikdasmen.
 
 ---
 

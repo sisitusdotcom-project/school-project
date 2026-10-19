@@ -762,7 +762,8 @@
         sel('category', 'Kategori', ['BOS', 'SPP', 'Donasi', 'Honor', 'ATK', 'Listrik & Air', 'Pemeliharaan', 'Kegiatan', 'Lainnya'], { required: true }),
         t('description', 'Uraian', { required: true }),
         money('amount', 'Nominal', { required: true }),
-        sel('method', 'Metode', ['Tunai', 'Transfer'])
+        sel('method', 'Metode Kas / Bank', ['Kas Tunai (Brankas)', 'Bank Jatim Operasional', 'Bank BOS', 'Transfer Lainnya']),
+        ref('rkasId', 'Pos Komponen RKAS (Khusus Pengeluaran)', 'rkasComponent')
       ]
     },
     '#/finance/cashbook': {
