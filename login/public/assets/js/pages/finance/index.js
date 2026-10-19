@@ -186,9 +186,11 @@ const FinancePages = {
     const renderToolbar = () => `
       <div class="fin-dash-toolbar">
         <div class="fin-dash-filters">
-          <label class="form-label" for="fin-period-select"><strong>Periode:</strong></label>
-          <input type="month" id="fin-period-select" class="form-input" value="${selectedMonth}">
-          <span class="badge badge-primary">Tahun Ajaran ${esc(currentYear)}</span>
+          <div class="fin-filter-group">
+            <label class="form-label fin-filter-label" for="fin-period-select">Periode:</label>
+            <input type="month" id="fin-period-select" class="form-input fin-period-input" value="${selectedMonth}">
+          </div>
+          <span class="badge badge-primary fin-period-badge">T.A. ${esc(currentYear)}</span>
         </div>
         <div class="fin-dash-actions">
           ${!isReadOnly ? `
