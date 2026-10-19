@@ -402,6 +402,20 @@
           "createdAt"
         ]
       }
+    },
+    "subject_chapters": {
+      ".read": "auth != null",
+      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')"
+    },
+    "rapor_finalization": {
+      ".read": "auth != null",
+      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')"
+    },
+    "notifications": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null"
+      }
     }
   }
 }

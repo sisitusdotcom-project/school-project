@@ -434,7 +434,7 @@ container.innerHTML = `<div class="card"><div class="obs-list">${items}</div></d
 async renderAcademicGrades(container) {
 Router.setTitle('Input Nilai Mapel', 'Input nilai akhir dan capaian kompetensi siswa per rombel.');
 const uid = Auth.currentUser.uid;
-const [classArr, subjects, settings] = await Promise.all([DB.getClassesForTeacher(uid), DB.getSubjects(), DB.getSettings()]);
+const [classArr, subjects, settings, allUsers] = await Promise.all([DB.getClassesForTeacher(uid), DB.getSubjects(), DB.getSettings(), DB.getAllUsers()]);
 const subArr = DB.toArray(subjects).sort((a, b) => (a.order || 0) - (b.order || 0));
 if (!classArr.length || !subArr.length) {
 container.innerHTML = `<div class="card"><p class="text-muted">Data kelas atau mata pelajaran belum tersedia untuk Anda.</p></div>`;
@@ -466,7 +466,8 @@ ${classOpts}
 </form>
 </div>
 <div id="academic-container"></div>
-`;    const populateSubjectsForClass = (classId) => {
+`;
+const populateSubjectsForClass = (classId) => {
 const subSelect = document.getElementById('ac-subject');
 if (!subSelect) return [];
 subSelect.innerHTML = '<option value="">Pilih Mata Pelajaran</option>';
@@ -481,30 +482,64 @@ const classSubjects = classSubKeys.length > 0 ? subArr.filter(s => classSubKeys.
 let availableSubjects = [];
 if (isWali) {
 availableSubjects = classSubjects;
+const mine = [];
+const others = [];
+classSubjects.forEach(s => {
+const tUid = cls.subjectTeachers?.[s.id];
+if (tUid === uid || (!tUid && isWali)) {
+mine.push(s);
+} else {
+others.push(s);
+}
+});
+let optHtml = '<option value="">— Pilih Mata Pelajaran —</option>';
+if (mine.length) {
+optHtml += '<optgroup label="Mata Pelajaran Anda (Input & Edit Nilai)">';
+mine.forEach(s => {
+optHtml += `<option value="${s.id}">${AppConfig.escapeHtml(s.name)} (Dapat Diedit)</option>`;
+});
+optHtml += '</optgroup>';
+}
+if (others.length) {
+optHtml += '<optgroup label="Mata Pelajaran Guru Lain (Peninjauan / Read-Only)">';
+others.forEach(s => {
+const tUid = cls.subjectTeachers[s.id];
+const tName = allUsers[tUid]?.name || 'Guru Pengampu';
+optHtml += `<option value="${s.id}">${AppConfig.escapeHtml(s.name)} — Pengampu: ${AppConfig.escapeHtml(tName)} (Read-Only)</option>`;
+});
+optHtml += '</optgroup>';
+}
+subSelect.innerHTML = optHtml;
 } else {
 const mySubjectIds = Object.keys(cls.subjectTeachers || {}).filter(subId => cls.subjectTeachers[subId] === uid);
 availableSubjects = classSubjects.filter(s => mySubjectIds.includes(s.id));
-}
+let optHtml = '<option value="">— Pilih Mata Pelajaran —</option>';
 availableSubjects.forEach(s => {
-subSelect.innerHTML += `<option value="${s.id}">${AppConfig.escapeHtml(s.name)}</option>`;
+optHtml += `<option value="${s.id}">${AppConfig.escapeHtml(s.name)}</option>`;
 });
+subSelect.innerHTML = optHtml;
+}
 subSelect.disabled = availableSubjects.length === 0;
 return availableSubjects;
 };
 document.getElementById('ac-class').addEventListener('change', (e) => {
 populateSubjectsForClass(e.target.value);
-});document.getElementById('filter-academic').onsubmit = async (e) => {
+});
+document.getElementById('filter-academic').onsubmit = async (e) => {
 e.preventDefault();
 const classId = document.getElementById('ac-class').value;
 const subjectId = document.getElementById('ac-subject').value;
 if (!classId || !subjectId) return;
 const acContainer = document.getElementById('academic-container');
 acContainer.innerHTML = '<div class="loader" style="margin: 20px auto"></div>';
+try {
 const cls = classArr.find(c => c.id === classId);
 const isWali = cls && cls.teacherId === uid;
 const subjectTeacherUid = cls?.subjectTeachers?.[subjectId];
 const isSubjectTeacher = subjectTeacherUid === uid || (!subjectTeacherUid && isWali);
 const isReadOnly = isWali && !isSubjectTeacher && Boolean(subjectTeacherUid);
+const subjectTeacherName = subjectTeacherUid && allUsers[subjectTeacherUid] ? allUsers[subjectTeacherUid].name : 'Guru Pengampu';
+const subObj = subArr.find(s => s.id === subjectId);
 const year = settings.currentAcademicYear;
 const sem = settings.currentSemester;
 const [students, rawChapters, finalization] = await Promise.all([
@@ -531,12 +566,15 @@ let chManageHtml = '';
 if (isReadOnly) {
 chManageHtml = `
 <div class="card section-block" style="margin-bottom:14px; border-left:4px solid var(--warning,#f59e0b);">
-<div class="card-header mk-header" style="padding:10px 14px;">
-<h4 style="margin:0;font-size:13.5px;"><i class="ph ph-lock"></i> Mode Peninjauan Wali Kelas (Read-Only Nilai Mapel)</h4>
-<span class="badge badge-warning">Guru Mapel Pengampu</span>
+<div class="card-header mk-header" style="padding:10px 14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+<h4 style="margin:0;font-size:13.5px;"><i class="ph ph-lock"></i> Mode Peninjauan Wali Kelas (Read-Only)</h4>
+<div style="display:inline-flex; align-items:center; gap:8px;">
+<span class="badge badge-warning">Pengampu: ${AppConfig.escapeHtml(subjectTeacherName)}</span>
+<button type="button" class="btn btn-xs btn-outline-warning" id="btn-request-revision"><i class="ph ph-chat-circle-dots"></i> Minta Revisi Nilai</button>
+</div>
 </div>
 <div class="card-body" style="padding:10px 14px; font-size:12.5px;">
-<p class="text-muted" style="margin:0 0 8px 0;">Nilai PH per Bab, STS, dan SAS/SAT diinput langsung oleh guru pengampu mapel. Nilai ini otomatis direkap untuk rapor. Sebagai wali kelas, Anda dapat memeriksa dan menyesuaikan deskripsi Capaian Kompetensi (CP) rapor sebelum difinalisasi.</p>
+<p class="text-muted" style="margin:0 0 8px 0;">Mata pelajaran ini diampu oleh <strong>${AppConfig.escapeHtml(subjectTeacherName)}</strong>. Sesuai prinsip Single Source of Truth (SSOT), nilai formatif (PH), sumatif (STS/SAS), nilai akhir, dan capaian kompetensi dikelola langsung oleh guru pengampu. Wali kelas meninjau nilai ini sebelum difinalisasi ke rapor resmi.</p>
 <div style="display:flex; flex-wrap:wrap; gap:8px;">
 ${currentChapters.map(c => `<span class="badge badge-outline" style="font-size:11px;"><strong>${AppConfig.escapeHtml(c.title || 'Bab ' + c.chapterNo)}:</strong> ${AppConfig.escapeHtml(c.cp || '-')}</span>`).join('')}
 </div>
@@ -660,30 +698,67 @@ ${chInputs}
 </div>
 <div class="form-group" style="margin-bottom:0;">
 <label style="font-size:11px; font-weight:700; color:var(--primary);">Nilai Akhir Rapor</label>
-<input type="number" class="ac-score" data-stu="${s.id}" value="${g.score || ''}" placeholder="75-100" min="75" max="100">
+<input type="number" class="ac-score" data-stu="${s.id}" value="${g.score || ''}" placeholder="75-100" min="75" max="100" ${isReadOnly ? 'disabled' : ''}>
 </div>
 </div>
 <div class="form-group" style="margin-bottom:0;">
 <label style="font-size:11.5px; display:flex; justify-content:space-between; align-items:center;">
 <span><strong>Capaian Kompetensi (CP Rapor Siswa)</strong></span>
-<span class="text-muted" style="font-size:11px;">Otomatis dari Bab Tertinggi (Bisa Diedit Wali Kelas)</span>
+<span class="text-muted" style="font-size:11px;">${isReadOnly ? 'Dikelola oleh Guru Pengampu (Read-Only)' : 'Otomatis dari Bab Tertinggi (Bisa Diedit)'}</span>
 </label>
-<textarea class="ac-comp-text" data-stu="${s.id}" rows="2" style="width:100%; font-size:12.5px; border-radius:6px; border:1px solid var(--border-color); padding:6px 8px;">${AppConfig.escapeHtml(defaultCpText)}</textarea>
+<textarea class="ac-comp-text" data-stu="${s.id}" rows="2" style="width:100%; font-size:12.5px; border-radius:6px; border:1px solid var(--border-color); padding:6px 8px;" ${isReadOnly ? 'disabled' : ''}>${AppConfig.escapeHtml(defaultCpText)}</textarea>
 </div>
 </div>
 `;
 }).join('');
+let bottomActionHtml = '';
+if (isReadOnly) {
+bottomActionHtml = `
+<div style="background:var(--bg-subtle,#f8fafc); border:1px solid var(--border-color,#e2e8f0); border-radius:8px; padding:14px; text-align:center; margin-bottom:20px;">
+<p style="margin:0 0 8px 0; font-size:13px; color:var(--text-muted);"><i class="ph ph-lock"></i> Nilai mata pelajaran ini bersifat Read-Only untuk Wali Kelas guna menjaga integritas data (SSOT).</p>
+<button type="button" class="btn btn-outline-warning btn-sm" id="btn-request-revision-bottom"><i class="ph ph-chat-circle-dots"></i> Minta Revisi Nilai ke ${AppConfig.escapeHtml(subjectTeacherName)}</button>
+</div>
+`;
+} else {
+bottomActionHtml = `
+<button id="btn-save-academic" class="btn btn-primary" style="width:100%; padding:12px; font-size:14px;"><i class="ph ph-floppy-disk"></i> Simpan Semua Nilai & Capaian Rapor</button>
+`;
+}
 acContainer.innerHTML = `
 ${finalizationCard}
 ${chManageHtml}
 <div style="margin-bottom:16px;">
 ${studentCardsHtml}
 </div>
-<button id="btn-save-academic" class="btn btn-primary" style="width:100%; padding:12px; font-size:14px;"><i class="ph ph-floppy-disk"></i> Simpan Semua Nilai & Capaian Rapor</button>
+${bottomActionHtml}
 `;
 bindEvents();
 };
 const bindEvents = () => {
+const handleRequestRevision = async () => {
+const note = prompt(`Tuliskan catatan revisi nilai yang ingin diajukan kepada ${subjectTeacherName}:`);
+if (!note || !note.trim()) return;
+try {
+if (typeof NotificationService !== 'undefined' && subjectTeacherUid) {
+await NotificationService.send({
+recipientUid: subjectTeacherUid,
+title: `Permintaan Revisi Nilai: ${subObj?.name || 'Mata Pelajaran'}`,
+message: `Wali kelas ${cls.name} (${Auth.currentUser.displayName || 'Wali Kelas'}) mengajukan peninjauan/revisi nilai: "${note.trim()}"`,
+link: `#/guru/academic?classId=${classId}&subjectId=${subjectId}`,
+type: 'warning'
+});
+alert(`Permintaan revisi telah dikirim ke ${subjectTeacherName}.`);
+} else {
+alert('Layanan notifikasi tidak tersedia.');
+}
+} catch (err) {
+alert('Gagal mengirimkan notifikasi revisi.');
+}
+};
+const btnRevTop = document.getElementById('btn-request-revision');
+if (btnRevTop) btnRevTop.onclick = handleRequestRevision;
+const btnRevBottom = document.getElementById('btn-request-revision-bottom');
+if (btnRevBottom) btnRevBottom.onclick = handleRequestRevision;
 const btnAddCh = document.getElementById('btn-add-chapter');
 if (btnAddCh) {
 btnAddCh.onclick = () => {
@@ -795,10 +870,10 @@ const sasVal = Number(sasInp?.value);
 const sts2Val = Number(sts2Inp?.value);
 const satVal = Number(satInp?.value);
 const validExams = [phAvg, sts1Val, sasVal, sts2Val, satVal].filter(v => Number.isFinite(v) && v >= 75);
-if (validExams.length && scoreInp) {
+if (validExams.length && scoreInp && !scoreInp.disabled) {
 scoreInp.value = Math.round(validExams.reduce((a, b) => a + b, 0) / validExams.length);
 }
-if (bestCh && compText && (!compText.value.trim() || compText.value.startsWith('Menunjukkan penguasaan'))) {
+if (bestCh && compText && !compText.disabled && (!compText.value.trim() || compText.value.startsWith('Menunjukkan penguasaan'))) {
 compText.value = bestCh.cp ? `Menunjukkan penguasaan materi yang sangat baik dalam ${bestCh.cp}.` : `Menunjukkan penguasaan materi yang sangat baik pada ${bestCh.title}.`;
 }
 };
@@ -807,7 +882,9 @@ chScoreInputs.forEach(inp => inp.oninput = recalculateStudent);
 if (inp) inp.oninput = recalculateStudent;
 });
 });
-document.getElementById('btn-save-academic').onclick = async (e) => {
+const btnSave = document.getElementById('btn-save-academic');
+if (btnSave) {
+btnSave.onclick = async (e) => {
 const btn = e.target;
 for (const card of acContainer.querySelectorAll('.stu-grade-card')) {
 const inputs = card.querySelectorAll('input[type="number"]');
@@ -891,14 +968,23 @@ btn.disabled = false;
 btn.innerHTML = '<i class="ph ph-floppy-disk"></i> Simpan Semua Nilai & Capaian Rapor';
 }, 2000);
 } catch (err) {
-console.error('Error saving grades:', err);
 alert('Gagal menyimpan nilai.');
 btn.disabled = false;
 btn.innerHTML = '<i class="ph ph-floppy-disk"></i> Simpan Semua Nilai & Capaian Rapor';
 }
 };
+}
 };
 renderFullUi();
+} catch (err) {
+acContainer.innerHTML = `
+<div class="card" style="border-left:4px solid var(--danger,#ef4444); padding:16px;">
+<h4 style="margin:0 0 8px 0; color:var(--danger,#ef4444);"><i class="ph ph-warning-circle"></i> Terjadi Kesalahan Memuat Nilai</h4>
+<p class="text-muted" style="margin:0 0 12px 0; font-size:13px;">${AppConfig.escapeHtml(err.message || 'Gagal memuat data dari database.')}</p>
+<button type="button" class="btn btn-sm btn-outline" onclick="document.getElementById('filter-academic').dispatchEvent(new Event('submit', { cancelable: true }))"><i class="ph ph-arrows-clockwise"></i> Coba Lagi</button>
+</div>
+`;
+}
 };
 if (preClassId && classArr.some(c => c.id === preClassId)) {
 document.getElementById('ac-class').value = preClassId;
@@ -914,15 +1000,18 @@ if (form) form.dispatchEvent(new Event('submit', { cancelable: true }));
 },
 async renderAdditionalData(container) {
 Router.setTitle('Data Tambahan', 'Input Kokurikuler, Ekstrakurikuler, Kehadiran, dan Catatan Wali Kelas.');
+const uid = Auth.currentUser.uid;
+const isAdmin = DB._currentUserIsAdmin();
 const [classes, ekskuls, settings] = await Promise.all([
 DB.getClasses(),
 DB.getExtracurriculars(),
 DB.getSettings()
 ]);
-const classArr = DB.toArray(classes);
+const allClassArr = DB.toArray(classes);
+const classArr = isAdmin ? allClassArr : allClassArr.filter(c => c.teacherId === uid);
 const eksArr = DB.toArray(ekskuls).sort((a, b) => (a.order || 0) - (b.order || 0));
 if (!classArr.length) {
-container.innerHTML = `<div class="card"><p class="text-muted">Data kelas belum tersedia.</p></div>`;
+container.innerHTML = `<div class="card"><p class="text-muted">Fitur ini khusus untuk Wali Kelas. Anda belum ditugaskan sebagai wali kelas di rombel manapun.</p></div>`;
 return;
 }
 const classOpts = classArr.map(c => `<option value="${c.id}">${AppConfig.escapeHtml(c.name)}</option>`).join('');
@@ -939,7 +1028,8 @@ ${classOpts}
 <div id="add-student-container"></div>
 <div id="add-form-container"></div>
 `;
-document.getElementById('add-class').onchange = async (e) => {
+const addClsEl = document.getElementById('add-class');
+addClsEl.onchange = async (e) => {
 const classId = e.target.value;
 const stuContainer = document.getElementById('add-student-container');
 const formContainer = document.getElementById('add-form-container');
@@ -1048,34 +1138,42 @@ ${achList.map(a => `<li><strong>${AppConfig.escapeHtml(a.title || a.competition 
 document.querySelectorAll('.chk-eks').forEach(chk => {
 chk.onchange = (e) => {
 const txt = document.getElementById(`desc-eks-${e.target.dataset.id}`);
-txt.style.display = e.target.checked ? 'block' : 'none';
+if (txt) txt.style.display = e.target.checked ? 'block' : 'none';
 };
 });
-const copyAchBtn = document.getElementById('btn-copy-ach');
-if (copyAchBtn) {
-copyAchBtn.onclick = () => {
-const achText = achList.map(a => `${a.title || a.competition || 'Prestasi'} (Juara ${a.rank || '-'}, Tingkat ${a.level || '-'})`).join('; ');
-const noteArea = document.getElementById('add-note');
-const prefix = noteArea.value.trim() ? noteArea.value.trim() + '\n\nPrestasi yang diraih: ' : 'Prestasi yang diraih: ';
-noteArea.value = prefix + achText;
+const btnCopy = document.getElementById('btn-copy-ach');
+if (btnCopy) {
+btnCopy.onclick = () => {
+const noteField = document.getElementById('add-note');
+if (!noteField) return;
+const achSummary = achList.map(a => `${a.title || a.competition || 'Prestasi'} (Juara ${a.rank || '-'})`).join(', ');
+const addition = `Meraih prestasi membanggakan: ${achSummary}. `;
+if (!noteField.value.includes(achSummary)) {
+noteField.value = (noteField.value ? noteField.value.trim() + ' ' : '') + addition;
+}
 };
 }
 document.getElementById('btn-save-additional').onclick = async (e) => {
 const btn = e.target;
 btn.disabled = true;
-btn.innerHTML = '<i class="ph ph-spinner"></i> Menyimpan...';
+btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Menyimpan...';
+const cocuDesc = document.getElementById('add-cocu').value.trim();
+const noteDesc = document.getElementById('add-note').value.trim();
+const sakit = document.getElementById('add-sakit').value;
+const izin = document.getElementById('add-izin').value;
+const alpa = document.getElementById('add-alpa').value;
 const pCocu = DB.saveCocurricular(year, sem, studentId, {
-description: document.getElementById('add-cocu').value.trim(),
+description: cocuDesc,
 updatedBy: Auth.currentUser.uid
 });
 const pNote = DB.saveTeacherNote(year, sem, studentId, {
-note: document.getElementById('add-note').value.trim(),
+note: noteDesc,
 updatedBy: Auth.currentUser.uid
 });
 const pAtt = DB.saveAttendance(year, sem, studentId, {
-sakit: parseInt(document.getElementById('add-sakit').value) || 0,
-izin: parseInt(document.getElementById('add-izin').value) || 0,
-alpa: parseInt(document.getElementById('add-alpa').value) || 0,
+sakit: parseInt(sakit) || 0,
+izin: parseInt(izin) || 0,
+alpa: parseInt(alpa) || 0,
 updatedBy: Auth.currentUser.uid
 });
 const pEks = [];
@@ -1106,6 +1204,10 @@ btn.innerHTML = '<i class="ph ph-floppy-disk"></i> Simpan Data Tambahan';
 };
 };
 };
+if (classArr.length === 1) {
+addClsEl.value = classArr[0].id;
+addClsEl.dispatchEvent(new Event('change'));
+}
 },
 _obsModal(charArr) {
 const charOpts = charArr.map(c => `<option value="${c.id}">${AppConfig.escapeHtml(c.name)}</option>`).join('');

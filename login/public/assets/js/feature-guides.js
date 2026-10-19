@@ -670,12 +670,10 @@ const FeatureGuides = {
       'Monitoring Distribusi Mapel: Kolom \'Guru Pengampu Terpetakan\' otomatis menampilkan jumlah rombel yang mengambil mapel tersebut beserta nama-nama guru pengajarnya.'
     ],
     '#/guru/academic': [
-      'Siapa yang Berhak Menginput: Guru Pengampu yang ditugaskan mengajar mata pelajaran tersebut di rombel bersangkutan, atau Wali Kelas untuk mata pelajaran kelas binaannya.',
-      'Cara Cepat dari Menu Kelas: Buka menu Kelas & E-Rapor, lalu klik tombol \'Input Nilai Mapel\' pada kartu kelas yang Anda ajar. Form akan otomatis memilih kelas dan mapel yang bersangkutan.',
-      'Cara Manual: Pilih kelas pada menu pilihan kelas, lalu pilih mata pelajaran yang Anda ampu (hanya mapel yang Anda ajar di kelas tersebut yang akan muncul).',
-      'Memuat Daftar Murid: Klik tombol \'Tampilkan\'. Daftar seluruh murid di kelas tersebut akan otomatis muncul.',
-      'Menginput Skor & Capaian: Masukkan nilai akhir angka (rentang 0-100) dan deskripsi capaian kompetensi siswa.',
-      'Menyimpan Nilai: Klik tombol \'Simpan Nilai\'. Nilai ini otomatis menjadi acuan resmi yang mengalir ke lembar e-rapor wali kelas dan cetak rapor F4.'
+      'Hak Akses & Prinsip SSOT: Guru Pengampu menginput dan mengubah nilai mata pelajaran yang diampunya. Wali Kelas dapat meninjau (Mode Read-Only) seluruh mata pelajaran di kelasnya sebelum difinalisasi.',
+      'Daftar Pilihan Mapel: Pilihan mapel dikelompokkan secara tegas menjadi \'Mata Pelajaran Anda (Input & Edit Nilai)\' dan \'Mata Pelajaran Guru Lain (Peninjauan / Read-Only)\' lengkap dengan nama pengampu.',
+      'Minta Revisi Nilai: Pada mode peninjauan, jika terdapat koreksi nilai atau CP, wali kelas dapat mengklik tombol \'Minta Revisi Nilai\' untuk mengirim notifikasi langsung ke guru pengampu.',
+      'Simpan Nilai & Notifikasi Otomatis: Saat guru pengampu menyimpan nilai, sistem otomatis mengirim notifikasi ke wali kelas bahwa nilai telah diperbarui untuk persiapan e-rapor.'
     ],
     '#/curriculum/syllabus': [
       'Klik tombol \'Unggah Modul Ajar\' di pojok kanan atas.',
