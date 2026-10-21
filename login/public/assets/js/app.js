@@ -101,6 +101,10 @@ const App = {
     const backdrop = document.getElementById('sidebar-backdrop');
     const toggleMenu = () => {
       if (!sidebar || !backdrop) return;
+      const notifDropdown = document.getElementById('notif-dropdown');
+      if (notifDropdown && notifDropdown.classList.contains('active')) {
+        notifDropdown.classList.remove('active');
+      }
       sidebar.classList.toggle('active');
       backdrop.classList.toggle('active');
     };

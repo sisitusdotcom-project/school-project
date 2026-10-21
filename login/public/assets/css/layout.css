@@ -566,6 +566,30 @@
   .desktop-only {
     display: none !important
   }
+  .mobile-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .mobile-header .btn-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text-main);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    transition: all 0.2s ease;
+  }
+  .mobile-header .btn-icon:hover,
+  .mobile-header .btn-icon:active {
+    background: var(--bg-hover, #f8fafc);
+    border-color: var(--border-strong, #cbd5e1);
+  }
   .mobile-header .brand-logo-small {
     gap: 7px;
   }
@@ -586,20 +610,87 @@
     font-size: 9px;
   }
   .sidebar {
-    transform: translateX(-100%)
+    transform: translateX(-100%);
+    width: min(280px, 86vw);
+    box-shadow: 0 0 35px rgba(0, 0, 0, 0.4);
   }
   .sidebar.active {
     transform: translateX(0)
   }
   .sidebar-header {
-    height: auto;
-    padding: 10px 12px;
+    height: 60px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   }
+  .sidebar-header .brand-logo-small {
+    flex: 1;
+    min-width: 0;
+    gap: 8px;
+    overflow: hidden;
+  }
+  .sidebar-header .brand-logo-small img {
+    width: 36px;
+    height: 36px;
+    flex: 0 0 36px;
+  }
+  .sidebar-header .brand-logo-text {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+  }
+  .sidebar-header .brand-logo-text strong {
+    font-size: 13px;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+  }
+  .sidebar-header .brand-logo-text > span {
+    font-size: 9.5px;
+    color: rgba(255, 255, 255, 0.85);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+  }
+  .sidebar-header .brand-logo-text small {
+    font-size: 9px;
+    color: rgba(255, 255, 255, 0.65);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    margin-top: 1px;
+  }
+  .sidebar-header #btn-menu-close,
   .sidebar-header .btn-icon {
-    width: 32px;
-    height: 32px;
-    flex: 0 0 32px;
+    width: 34px;
+    height: 34px;
+    flex: 0 0 34px;
+    margin-left: auto;
     font-size: 18px;
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .sidebar-header #btn-menu-close:hover,
+  .sidebar-header #btn-menu-close:active,
+  .sidebar-header .btn-icon:hover {
+    background: rgba(239, 68, 68, 0.3);
+    border-color: rgba(239, 68, 68, 0.5);
+    color: #ffffff;
+    transform: scale(1.05);
   }
   .sidebar-nav {
     gap: 2px;

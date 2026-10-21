@@ -600,6 +600,12 @@ const NotificationService = {
       btn.onclick = (e) => {
         e.preventDefault();
         e.stopPropagation();
+        const sidebar = document.getElementById('sidebar');
+        const backdrop = document.getElementById('sidebar-backdrop');
+        if (sidebar && sidebar.classList.contains('active')) {
+          sidebar.classList.remove('active');
+          if (backdrop) backdrop.classList.remove('active');
+        }
         if (dropdown) dropdown.classList.toggle('active');
         this.updateActionBadges();
       };
