@@ -1971,7 +1971,7 @@ stopCamera();
 await loadHistory();
 } catch (err) {
 console.error(err);
-alert(err && err.message ? err.message : 'Gagal mencatat presensi. Pastikan foto dan lokasi benar, serta endpoint Drive aktif.');
+alert(err && err.message ? err.message : 'Gagal mencatat presensi. Pastikan foto dan lokasi benar, serta endpoint server aktif.');
 btn.disabled = false;
 btn.innerHTML = type === 'in' ? '<i class="ph ph-sign-in"></i> Presensi Datang' : '<i class="ph ph-sign-out"></i> Presensi Pulang';
 }

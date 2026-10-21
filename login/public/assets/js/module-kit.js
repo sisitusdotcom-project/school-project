@@ -436,7 +436,7 @@ const ModuleKit = {
           const curEl = form.querySelector(`#mk-f-${f.key}_current`);
           if (curEl) {
             if (row && row[f.key]) {
-              curEl.innerHTML = `<div class="mk-file-badge"><span class="text-success"><i class="ph ph-check-circle"></i> Berkas tersimpan</span><button type="button" class="btn btn-xs btn-outline" data-preview-url="${this.esc(row[f.key])}" data-preview-title="${this.esc(row.title || row.docType || f.label || 'Berkas')}"><i class="ph ph-eye"></i> Lihat Berkas</button></div>`;
+              curEl.innerHTML = `<div class="mk-file-badge"><span class="text-success"><i class="ph ph-check-circle"></i> Berkas tersimpan di server</span><button type="button" class="btn btn-xs btn-outline" data-preview-url="${this.esc(row[f.key])}" data-preview-title="${this.esc(row.title || row.docType || f.label || 'Berkas')}"><i class="ph ph-eye"></i> Lihat Berkas</button></div>`;
             } else {
               curEl.innerHTML = '';
             }
@@ -947,20 +947,20 @@ const ModuleKit = {
     if (!rawUrl) return;
     document.querySelectorAll('.mk-preview-overlay').forEach((m) => m.remove());
     const url = rawUrl.trim();
-    const driveMatch = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/) || url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-    const driveId = driveMatch ? driveMatch[1] : null;
+    const driveId = typeof DriveBridge !== 'undefined' && DriveBridge.extractFileId ? DriveBridge.extractFileId(url) : (url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/) || url.match(/[?&]id=([a-zA-Z0-9_-]+)/))?.[1];
     const isImage = /\.(jpg|jpeg|png|webp|gif|bmp)(\?.*)?$/i.test(url) || url.startsWith('data:image/');
     let contentHtml = '';
     if (isImage) {
       const imgSrc = typeof DriveBridge !== 'undefined' ? DriveBridge.normalizeDriveImageUrl(url, 'w1200', url) : url;
       contentHtml = `<div class="mk-preview-img-wrap"><img src="${this.esc(imgSrc)}" alt="${this.esc(title)}" class="mk-preview-img"></div>`;
     } else if (driveId) {
-      contentHtml = `<div class="mk-preview-frame-wrap"><iframe src="https://drive.google.com/file/d/${this.esc(driveId)}/preview" class="mk-preview-frame" allow="autoplay"></iframe></div>`;
+      contentHtml = `<div class="mk-preview-frame-wrap"><div class="mk-preview-corner-guard"></div><iframe src="https://drive.google.com/file/d/${this.esc(driveId)}/preview" class="mk-preview-frame" allow="autoplay"></iframe></div>`;
     } else if (/\.pdf(\?.*)?$/i.test(url)) {
-      contentHtml = `<div class="mk-preview-frame-wrap"><iframe src="${this.esc(url)}" class="mk-preview-frame"></iframe></div>`;
+      contentHtml = `<div class="mk-preview-frame-wrap"><div class="mk-preview-corner-guard"></div><iframe src="${this.esc(url)}" class="mk-preview-frame"></iframe></div>`;
     } else {
       contentHtml = `<div class="mk-preview-fallback"><i class="ph ph-file-arrow-down mk-preview-fallback-icon"></i><p class="text-muted">Pratinjau langsung tidak tersedia untuk format berkas ini.</p><a href="${this.esc(url)}" target="_blank" rel="noopener noreferrer" class="btn btn-primary"><i class="ph ph-arrow-square-out"></i> Buka / Unduh Berkas</a></div>`;
     }
+    const viewerUrl = typeof DriveBridge !== 'undefined' && DriveBridge.getViewerUrl ? DriveBridge.getViewerUrl(url, title) : url;
     const modal = document.createElement('div');
     modal.className = 'modal-overlay mk-preview-overlay active';
     modal.innerHTML = `
@@ -973,7 +973,7 @@ const ModuleKit = {
           ${contentHtml}
         </div>
         <div class="modal-footer">
-          <a href="${this.esc(url)}" target="_blank" rel="noopener noreferrer" class="btn btn-outline"><i class="ph ph-arrow-square-out"></i> Buka di Tab Baru</a>
+          <a href="${this.esc(viewerUrl)}" target="_blank" rel="noopener noreferrer" class="btn btn-outline"><i class="ph ph-arrow-square-out"></i> Buka di Tab Baru</a>
           <button type="button" class="btn btn-primary" data-close-preview="1">Tutup</button>
         </div>
       </div>

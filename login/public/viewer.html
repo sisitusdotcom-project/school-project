@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Server Dokumen | SD Muhammadiyah 1 Sedati</title>
+<link rel="icon" type="image/webp" href="../../assets/img/logo/logo.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/base.css">
+<link rel="stylesheet" href="assets/css/components.css">
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+<body class="server-viewer-layout">
+<header class="server-viewer-header">
+<div class="server-viewer-brand">
+<img src="../../assets/img/logo/logo.webp" alt="Logo Musada" class="server-viewer-logo">
+<div class="server-viewer-title-group">
+<span class="server-viewer-app-name">Server Dokumen Resmi Musada</span>
+<h1 class="server-viewer-doc-title" id="viewer-doc-title">Memuat Dokumen...</h1>
+</div>
+</div>
+<div class="server-viewer-actions">
+<button type="button" class="btn btn-outline btn-sm" id="btn-viewer-print"><i class="ph ph-printer"></i> Cetak</button>
+<button type="button" class="btn btn-primary btn-sm" id="btn-viewer-close"><i class="ph ph-x"></i> Tutup</button>
+</div>
+</header>
+<main class="server-viewer-main" id="viewer-container">
+<div class="mk-preview-frame-wrap" id="viewer-frame-wrap">
+<div class="mk-preview-corner-guard"></div>
+<iframe id="viewer-frame" class="mk-preview-frame" allow="autoplay"></iframe>
+</div>
+<div class="server-viewer-img-wrap hidden" id="viewer-img-wrap">
+<img id="viewer-img" class="server-viewer-img" alt="">
+</div>
+</main>
+<script src="assets/js/drive-utils.js"></script>
+<script src="assets/js/viewer.js"></script>
+</body>
+</html>

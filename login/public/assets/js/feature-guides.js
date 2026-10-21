@@ -76,7 +76,7 @@ const FeatureGuides = {
       func: 'Repositori digital arsip surat resmi, SK pengangkatan, piagam kerja sama, dan dokumen kelembagaan.',
       from: 'Staf Administrasi Humas',
       to: 'Arsiparis & Pimpinan Sekolah',
-      usage: 'Pilih kategori surat/SK, cantumkan nomor dokumen, dan tempel tautan file Google Drive/PDF.'
+      usage: 'Pilih kategori surat/SK, cantumkan nomor dokumen, dan cantumkan tautan dokumen server/PDF.'
     },
     '#/personnel/events': {
       func: 'Koordinasi manajemen kepanitiaan dan timeline acara besar sekolah (Milad, Wisuda, Baitul Arqom, Pawai).',
@@ -523,7 +523,7 @@ const FeatureGuides = {
       usage: 'Periksa kelengkapan NISN/NUPTK warga sekolah, lalu jalankan sinkronisasi atau ekspor berkas data master Dapodik/EMIS.'
     },
     '#/it-admin/backup': {
-      func: 'Pencadangan data berkala ke penyimpanan komputer atau Google Drive untuk mengamankan data sekolah.',
+      func: 'Pencadangan data berkala ke penyimpanan komputer atau server cadangan untuk mengamankan data sekolah.',
       from: 'Tim Administrator IT',
       to: 'Keamanan & Keberlanjutan Data Sekolah',
       usage: 'Klik Buat Cadangan Baru untuk mengunduh snapshot data JSON terkini, atau pilih berkas cadangan untuk pemulihan darurat.'
@@ -547,10 +547,10 @@ const FeatureGuides = {
       usage: 'Atur koneksi API WhatsApp gateway untuk kirim bukti presensi murid otomatis ke orang tua, atau sambungkan server ujian CBT.'
     },
     '#/it-admin/dashboard': {
-      func: 'Pusat telemetri operasional teknologi: monitoring lalu lintas API, kuota Google Drive, dan status geofence sekolah.',
+      func: 'Pusat telemetri operasional teknologi: monitoring lalu lintas API, kuota penyimpanan server, dan status geofence sekolah.',
       from: 'Telemetri Sistem Realtime',
       to: 'Tim IT & Administrator',
-      usage: 'Pantau grafik kesehatan server, status latensi Firebase, dan kuota penyimpanan berkas Google Drive.'
+      usage: 'Pantau grafik kesehatan server, status latensi Firebase, dan kuota penyimpanan berkas server.'
     },
     '#/gtk/official-travel': {
       func: 'Pengajuan dan pencatatan riwayat perjalanan dinas / tugas luar mandiri oleh GTK (lembaga pengundang, tujuan, surat tugas bertanda tangan, dan foto kegiatan).',
@@ -678,7 +678,7 @@ const FeatureGuides = {
     '#/curriculum/syllabus': [
       'Klik tombol \'Unggah Modul Ajar\' di pojok kanan atas.',
       'Tentukan judul perangkat, pilih kelas yang diampu, nama mata pelajaran, serta semester berjalan.',
-      'Masukkan tautan link dokumen (Google Drive atau penyimpanan awan) yang sudah diatur hak akses lihatnya.',
+      'Masukkan tautan dokumen (penyimpanan server sekolah) yang sudah diatur hak akses lihatnya.',
       'Klik \'Simpan\'. Dokumen akan masuk ke antrean telaah Waka Kurikulum dengan alur status Draft, Diajukan, hingga Disetujui.'
     ],
     '#/guru/student-attendance': [

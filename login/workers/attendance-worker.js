@@ -217,10 +217,10 @@ async function forwardToDriveUploadUrl({ gasUploadUrl, fileName, mimeType, photo
     result = await response.json();
   } catch (error) {
     const text = await response.text();
-    throw new Error(text || 'Upload ke Drive gagal.');
+    throw new Error(text || 'Upload ke server gagal.');
   }
   if (!response.ok || result.status !== 'success') {
-    throw new Error(result && result.message ? result.message : 'Upload ke Drive gagal.');
+    throw new Error(result && result.message ? result.message : 'Upload ke server gagal.');
   }
   return result.fileUrl || '';
 }
