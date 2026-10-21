@@ -930,14 +930,13 @@ const ATTENDANCE_MOTIVATIONS = Object.freeze([
 { text: 'Satu kalimat penyemangat dan keteladanan dari Anda hari ini dapat menerangi masa depan seorang murid.', author: 'Inspirasi Harian', category: 'Inspirasi', target: 'all' },
 { text: 'Tetaplah menjadi cahaya yang menuntun anak-anak bangsa menggapai mimpi dan cita-cita mulia mereka.', author: 'Refleksi Diri', category: 'Inspirasi', target: 'all' },
 { text: 'Sebaik-baik kalian adalah orang yang mempelajari Al-Qur\'an dan mengajarkannya kepada sesama.', author: 'HR. Bukhari', category: 'Hadits Shahih', target: 'all' },
-{ text: 'Setiap huruf Al-Qur\'an yang dilantunkan para santri mengalirkan pahala jariyah tanpa henti bagi guru yang membimbingnya.', author: 'Keutamaan Mengajar Quran', category: 'Guru Ummi', target: 'all' },
-{ text: 'Bimbinglah santri dengan kesabaran dan cinta, karena Anda sedang menuntun para penjaga kalam Ilahi.', author: 'Mutiara Al-Qur\'an', category: 'Guru Ummi', target: 'all' },
-{ text: 'Sekiranya hati kita suci dan ikhlas, niscaya kita tidak akan pernah jenuh mendampingi lantunan ayat suci Al-Qur\'an.', author: 'Utsman bin Affan r.a.', category: 'Kutipan Sahabat', target: 'all' },
-{ text: 'Alhamdulillah atas seluruh dedikasi Anda hari ini. Selamat beristirahat dan berkumpul kembali bersama keluarga tercinta.', author: 'Doa & Syukur', category: 'Refleksi Sore', target: 'out' }
+{ text: 'Sekiranya hati kita suci dan ikhlas, niscaya kita tidak akan pernah jenuh mendampingi lentera kebaikan dan ilmu.', author: 'Utsman bin Affan r.a.', category: 'Kutipan Sahabat', target: 'all' },
+{ text: 'Alhamdulillah atas seluruh dedikasi Anda hari ini. Semoga segala amal ibadah kita hari ini senantiasa di Ridhoi Allah SWT.', author: 'Doa & Syukur', category: 'Refleksi Sore', target: 'out' },
+{ text: 'Terima kasih atas ilmu, keteladanan, dan ketulusan yang Anda curahkan hari ini. Selamat beristirahat dan berkumpul kembali bersama keluarga tercinta.', author: 'Apresiasi & Refleksi', category: 'Refleksi Sore', target: 'out' },
+{ text: 'Lelahmu dalam mendidik dan melayani anak bangsa insyaAllah bernilai pahala jariyah. Semoga Allah SWT memberkahi setiap langkah pulang Anda.', author: 'Doa & Harapan', category: 'Refleksi Sore', target: 'out' }
 ]);
 function getDailyAttendanceMotivation(options) {
 const opts = options || {};
-const isUmmi = !!opts.isUmmi;
 const type = opts.type || 'in';
 let dateObj = new Date();
 if (opts.date) {
@@ -949,23 +948,13 @@ dateObj = new Date(opts.date);
 }
 }
 const dayNumber = Math.floor(Date.UTC(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate()) / 86400000);
-let pool = ATTENDANCE_MOTIVATIONS.filter(item => {
-if (item.target === 'out' && type !== 'out') return false;
-if (item.target === 'in' && type !== 'in') return false;
-if (item.category === 'Guru Ummi' && !isUmmi) return false;
-return true;
+const pool = ATTENDANCE_MOTIVATIONS.filter(item => {
+if (type === 'out') return item.target === 'out';
+return item.target === 'in' || item.target === 'all';
 });
-if (isUmmi) {
-const ummiPool = pool.filter(item => item.category === 'Guru Ummi' || item.author.includes('Bukhari') || item.author.includes('Utsman') || item.author.includes('Dahlan') || item.author.includes('Mujadilah'));
-if (ummiPool.length) {
-const uIdx = Math.abs(dayNumber) % ummiPool.length;
-return ummiPool[uIdx];
-}
-}
-if (!pool.length) pool = ATTENDANCE_MOTIVATIONS;
-const typeOffset = type === 'out' ? 5 : 0;
-const index = Math.abs(dayNumber + typeOffset) % pool.length;
-return pool[index];
+const safePool = pool.length ? pool : ATTENDANCE_MOTIVATIONS;
+const index = Math.abs(dayNumber) % safePool.length;
+return safePool[index];
 }
 function getRandomAttendanceMotivation(options) {
 return getDailyAttendanceMotivation(options);
@@ -975,8 +964,7 @@ const opts = options || {};
 const type = opts.type || 'in';
 const timeStr = opts.timeStr || new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
 const user = opts.user || null;
-const isUmmi = opts.isUmmi !== undefined ? opts.isUmmi : (user ? isUserUmmi(user) : false);
-const quote = opts.quote || getDailyAttendanceMotivation({ role: user?.role, isUmmi, type, date: opts.date || opts.dateStr });
+const quote = opts.quote || getDailyAttendanceMotivation({ type, date: opts.date || opts.dateStr });
 const typeLabel = type === 'out' ? 'Presensi Pulang' : 'Presensi Datang';
 const now = new Date();
 const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
