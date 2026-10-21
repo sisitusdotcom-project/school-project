@@ -73,7 +73,8 @@ const Auth = {
     const email = emailInput.value.trim();
     const password = passwordInput.value;
     btn.disabled = true;
-    btn.querySelector('.btn-text').innerText = 'Loading...';
+    btn.classList.add('btn-loading');
+    btn.innerHTML = '<span class="btn-spinner"></span><span class="btn-text">Memproses Masuk...</span>';
     err.classList.add('hidden');
     try {
       await auth.signInWithEmailAndPassword(email, password);
@@ -87,7 +88,8 @@ const Auth = {
       }
       err.classList.remove('hidden');
       btn.disabled = false;
-      btn.querySelector('.btn-text').innerText = 'Masuk';
+      btn.classList.remove('btn-loading');
+      btn.innerHTML = '<span class="btn-text">Masuk</span><i class="ph ph-arrow-right"></i>';
     }
   },
   togglePasswordVisibility() {

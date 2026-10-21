@@ -837,7 +837,7 @@ const toClsName = toId === 'LULUS_ALUMNI' ? 'Lulus / Alumni' : (classArr.find(c 
 if (!confirm(`Yakin ingin mempromosikan ${selectedIds.length} siswa dari ${fromClsName} ke ${toClsName}?`)) return;
 const submitBtn = document.getElementById('btn-submit-promo');
 submitBtn.disabled = true;
-submitBtn.innerHTML = '<i class="ph ph-spinner"></i> Memproses...';
+submitBtn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Memproses...';
 try {
 const settings = await DB.getSettings();
 const currentYear = settings.currentAcademicYear || AppConfig.DEFAULT_SETTINGS.currentAcademicYear;

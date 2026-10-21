@@ -277,7 +277,7 @@ const PersonnelPages = {
         const btn = form.querySelector('button[type="submit"]') || form.querySelector('button');
         const originalHtml = btn.innerHTML;
         btn.disabled = true;
-        btn.innerHTML = '<i class="ph ph-spinner"></i> Menyimpan...';
+        btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Menyimpan...';
         try {
           const payload = buildPayload();
           const current = await DB.getSettings();

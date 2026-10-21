@@ -385,7 +385,7 @@ document.getElementById('form-obs-quick').onsubmit = async (e) => {
 e.preventDefault();
 const btn = e.target.querySelector('button[type="submit"]');
 btn.disabled = true;
-btn.innerHTML = '<i class="ph ph-spinner"></i> Menyimpan...';
+btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Menyimpan...';
 const today = new Date().toISOString().slice(0, 10);
 await DB.saveObservation({
 studentId: document.getElementById('oq-stu').value,

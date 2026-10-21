@@ -238,7 +238,7 @@ window.AdminAssignmentsModule = {
         if (!targetUser) return;
         const submitBtn = container.querySelector('#btn-save-assign');
         submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="ph ph-spinner"></i> Menyimpan...';
+        submitBtn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Menyimpan...';
         try {
           const unitFlags = {};
           selected.forEach(code => {

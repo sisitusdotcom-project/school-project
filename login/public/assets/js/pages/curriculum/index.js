@@ -144,7 +144,7 @@ const CurriculumPages = {
         const btn = formAcademic.querySelector('button');
         const originalHtml = btn.innerHTML;
         btn.disabled = true;
-        btn.innerHTML = '<i class="ph ph-spinner"></i> Menyimpan...';
+        btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Menyimpan...';
         try {
           const yearVal = document.getElementById('set-year').value.trim();
           const semVal = document.getElementById('set-sem').value;
