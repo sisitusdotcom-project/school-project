@@ -1009,22 +1009,23 @@ document.removeEventListener('keydown', keyHandler);
 document.addEventListener('keydown', keyHandler);
 return modal;
 }
-const ORIGINAL_SCHOOL_GEOFENCE = Object.freeze({
+const SCHOOL_GEOFENCE = Object.freeze({
 lat: -7.378448579234777,
 lng: 112.75929775962251,
 radiusMeters: 50
 });
+const ORIGINAL_SCHOOL_GEOFENCE = SCHOOL_GEOFENCE;
 const APP_DEFAULTS = Object.freeze({
 googleDriveUploadUrl: 'https://script.google.com/macros/s/AKfycbwHNSb34p_FcX_dTQuw87viaZ9joh2rT3KdtMLBVvwpocWzyF3HICPUPRfPuy63LDsNsw/exec',
 attendanceWorkerUrl: 'https://musada-absensi.sisitusdotcom.workers.dev/',
-attendanceGeofence: ORIGINAL_SCHOOL_GEOFENCE
+attendanceGeofence: SCHOOL_GEOFENCE
 });
 const runtimeConfig = {
 googleDriveUploadUrl: window.GOOGLE_DRIVE_UPLOAD_URL || APP_DEFAULTS.googleDriveUploadUrl,
 attendanceWorkerUrl: window.CLOUDFLARE_ATTENDANCE_WORKER_URL || APP_DEFAULTS.attendanceWorkerUrl,
-attendanceGeofence: window.APP_ATTENDANCE_GEOFENCE || APP_DEFAULTS.attendanceGeofence
+attendanceGeofence: SCHOOL_GEOFENCE
 };
-window.APP_ATTENDANCE_GEOFENCE = Object.freeze(runtimeConfig.attendanceGeofence);
+window.APP_ATTENDANCE_GEOFENCE = SCHOOL_GEOFENCE;
 window.GOOGLE_DRIVE_UPLOAD_URL = runtimeConfig.googleDriveUploadUrl;
 window.CLOUDFLARE_ATTENDANCE_WORKER_URL = runtimeConfig.attendanceWorkerUrl;
 window.GOOGLE_DRIVE_CONFIG = Object.freeze({
@@ -1078,6 +1079,8 @@ ATTENDANCE_MOTIVATIONS,
 getDailyAttendanceMotivation,
 getRandomAttendanceMotivation,
 showAttendanceSuccessModal,
+attendanceGeofence: SCHOOL_GEOFENCE,
+SCHOOL_GEOFENCE,
 ORIGINAL_SCHOOL_GEOFENCE
 });
 })();

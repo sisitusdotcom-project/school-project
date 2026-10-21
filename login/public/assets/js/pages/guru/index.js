@@ -1,8 +1,4 @@
-const ATTENDANCE_GEOFENCE = window.APP_ATTENDANCE_GEOFENCE || window.AppConfig?.attendanceGeofence || {
-lat: -7.378448579234777,
-lng: 112.75929775962251,
-radiusMeters: 50
-};
+const ATTENDANCE_GEOFENCE = AppConfig.attendanceGeofence;
 const GuruPages = {
 async renderDashboard(container) {
 const role = Auth.currentRole || Auth.userData?.role;
@@ -1366,10 +1362,10 @@ btn.disabled = false;
 },
 async renderTeacherAttendance(container) {
 Router.setTitle('Presensi Kehadiran', 'Rekam kehadiran harian Anda di area sekolah.');
-const geofence = window.APP_ATTENDANCE_GEOFENCE || window.AppConfig?.attendanceGeofence || ATTENDANCE_GEOFENCE;
-const schoolLat = Number(geofence?.lat ?? ATTENDANCE_GEOFENCE.lat);
-const schoolLng = Number(geofence?.lng ?? ATTENDANCE_GEOFENCE.lng);
-const maxRadius = Number(geofence?.radiusMeters ?? ATTENDANCE_GEOFENCE.radiusMeters);
+const geofence = ATTENDANCE_GEOFENCE;
+const schoolLat = geofence.lat;
+const schoolLng = geofence.lng;
+const maxRadius = geofence.radiusMeters;
 const maxAccuracy = 200;
 const hasLocalGeofence = Number.isFinite(schoolLat) && Number.isFinite(schoolLng) && Number.isFinite(maxRadius) && maxRadius > 0;
 const hostName = window.location.host;

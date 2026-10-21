@@ -1,4 +1,4 @@
-const DEFAULT_SCHOOL_LOCATION = Object.freeze({
+const SCHOOL_LOCATION = Object.freeze({
   lat: -7.378448579234777,
   lng: 112.75929775962251,
   radiusMeters: 50
@@ -12,16 +12,6 @@ const DEFAULT_ATTENDANCE_RULES = Object.freeze({
   attendanceEndDate: ''
 });
 const MAX_ACCURACY_METERS = 200;
-function getSchoolLocation(env) {
-  const lat = Number(env?.SCHOOL_LAT ?? DEFAULT_SCHOOL_LOCATION.lat);
-  const lng = Number(env?.SCHOOL_LNG ?? DEFAULT_SCHOOL_LOCATION.lng);
-  const radiusMeters = Number(env?.SCHOOL_RADIUS_METERS ?? DEFAULT_SCHOOL_LOCATION.radiusMeters);
-  return {
-    lat: Number.isFinite(lat) ? lat : DEFAULT_SCHOOL_LOCATION.lat,
-    lng: Number.isFinite(lng) ? lng : DEFAULT_SCHOOL_LOCATION.lng,
-    radiusMeters: Number.isFinite(radiusMeters) ? radiusMeters : DEFAULT_SCHOOL_LOCATION.radiusMeters
-  };
-}
 function getCorsHeaders(origin) {
   const allowOrigin = origin && /^https?:\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0)(:\d+)?$/.test(origin)
     ? origin
@@ -266,7 +256,6 @@ export default {
       const { dateStr, teacherId, type, photoDataUrl, location, accuracy, clientTimestamp } = body || {};
       const authHeader = request.headers.get('Authorization') || '';
       const idToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
-      const schoolLocation = getSchoolLocation(env);
       const attendanceRules = await getAttendanceRules(env);
       if (!teacherId || !dateStr || !photoDataUrl || !location || !location.lat || !location.lng) {
         return jsonResponse(400, { status: 'error', message: 'Payload absensi tidak lengkap.' }, request);
@@ -312,8 +301,8 @@ export default {
           }, request);
         }
       }
-      const distance = getDistanceMeters(location.lat, location.lng, schoolLocation.lat, schoolLocation.lng);
-      const radius = Number(schoolLocation.radiusMeters);
+      const distance = getDistanceMeters(location.lat, location.lng, SCHOOL_LOCATION.lat, SCHOOL_LOCATION.lng);
+      const radius = SCHOOL_LOCATION.radiusMeters;
       const accuracyValue = Number(accuracy || 0);
       if (distance > radius) {
         return jsonResponse(403, { status: 'error', message: `Lokasi di luar area sekolah. Jarak: ${Math.round(distance)}m.` }, request);
