@@ -255,6 +255,9 @@ const ModuleKit = {
     }
     return scoped.length.toLocaleString('id-ID');
   },
+  renderLoading(text = 'Memuat data...') {
+    return `<div class="card section-block"><div class="card-body"><div class="loading-state"><div class="loader loading-state__loader"></div><span>${this.esc(text)}</span></div></div></div>`;
+  },
   async render(container, path, title, icon) {
     const def = this.defs[path];
     if (def.view === 'cashbook') {
@@ -270,7 +273,7 @@ const ModuleKit = {
       return;
     }
     Router.setTitle(title, def.subtitle || '');
-    container.innerHTML = '<div class="card section-block"><div class="card-body text-muted">Memuat data...</div></div>';
+    container.innerHTML = this.renderLoading('Memuat data...');
     const writable = !def.readOnly && this.canWrite(def);
     const canAdd = writable && !def.noAdd;
     const canDel = writable && !def.noDelete;
@@ -728,7 +731,7 @@ const ModuleKit = {
   },
   async renderMyClasses(container, def, title) {
     Router.setTitle(title, def.subtitle || '');
-    container.innerHTML = '<div class="card section-block"><div class="card-body text-muted">Memuat data...</div></div>';
+    container.innerHTML = this.renderLoading('Memuat data...');
     const uid = Auth.currentUser ? Auth.currentUser.uid : '';
     const [classes, students, progress] = await Promise.all([
       this.fetchObject(def.classNode),

@@ -1451,7 +1451,7 @@ ${initIconHtml}
 <span id="att-schedule-badge" class="badge badge-primary" style="font-size:11px;">Jadwal Aktif</span>
 </div>
 <div id="att-history-container">
-<p class="text-muted attendance-history-empty">Memuat data...</p>
+<div class="loading-state loading-state-compact"><div class="loader loader-sm loading-state__loader"></div><span>Memuat data presensi...</span></div>
 </div>
 </div>
 <section class="card section-block" style="margin-top:16px;">
@@ -1463,7 +1463,7 @@ ${initIconHtml}
 <div class="table-wrap">
 <table class="table">
 <thead><tr><th>Tanggal</th><th>Jam Datang</th><th>Jam Pulang</th><th>Status</th><th>Bukti</th></tr></thead>
-<tbody id="att-full-history-tbody"><tr><td colspan="5" class="text-muted">Memuat data rekap...</td></tr></tbody>
+<tbody id="att-full-history-tbody"><tr><td colspan="5"><div class="loading-state loading-state-compact"><div class="loader loader-sm loading-state__loader"></div><span>Memuat data rekap...</span></div></td></tr></tbody>
 </table>
 </div>
 </div>
