@@ -214,9 +214,9 @@
 
           <div class="spmb-info-block status-check-box">
             <h3>Cek Status Pendaftaran</h3>
-            <p>Masukkan email pendaftaran atau nomor NISN calon siswa untuk memantau perkembangan proses verifikasi dan seleksi.</p>
+            <p>Masukkan email pendaftaran atau nomor NIS calon siswa untuk memantau perkembangan proses verifikasi dan seleksi.</p>
             <div class="status-check-form">
-              <input type="text" id="statusCheckInput" placeholder="Contoh: budi@gmail.com atau NISN">
+              <input type="text" id="statusCheckInput" placeholder="Contoh: budi@gmail.com atau NIS">
               <button type="button" class="btn-view-more-inline spmb-button spmb-button--secondary" id="cekStatusBtn">Cek Status</button>
             </div>
           </div>
@@ -356,52 +356,75 @@
         if (!spmbForm.reportValidity()) {
           return;
         }
-
         const btnSubmit = spmbForm.querySelector('button[type="submit"]');
         if (btnSubmit) {
           btnSubmit.disabled = true;
           btnSubmit.textContent = 'Memproses...';
         }
-
         const formData = new FormData(spmbForm);
         const payload = Object.fromEntries(formData.entries());
+        payload.nama_lengkap = payload.nama_siswa || '';
         payload.status = 'Mendaftar';
         payload.timestamp = Date.now();
-
-        // Push data to Firebase via REST API
-        fetch('https://musada-sd-default-rtdb.firebaseio.com/spmb_registrations.json', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(payload)
-        }).then(res => {
-          if(!res.ok) throw new Error('Gagal menyimpan data');
-          alert('Data pendaftaran berhasil dikirim. Silakan tunggu konfirmasi dari pihak sekolah.');
-          spmbForm.reset();
-          if (penyakitLainnya) penyakitLainnya.style.display = 'none';
-        }).catch(err => {
-          console.error(err);
-          alert('Terjadi kesalahan saat mengirim pendaftaran. Silakan coba lagi.');
-        }).finally(() => {
-          if (btnSubmit) {
-            btnSubmit.disabled = false;
-            btnSubmit.textContent = 'Kirim Pendaftaran';
-          }
-        });
+        fetch('https://musada-sd-default-rtdb.firebaseio.com/settings/lastNis.json')
+          .then(res => res.json())
+          .then(lastNis => {
+            const currentNum = (typeof lastNis === 'number' && lastNis >= 996) ? lastNis : 996;
+            const nextNum = currentNum + 1;
+            const nextNisStr = String(nextNum).padStart(4, '0');
+            payload.nis = nextNisStr;
+            return fetch('https://musada-sd-default-rtdb.firebaseio.com/settings/lastNis.json', {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(nextNum)
+            }).then(() => fetch('https://musada-sd-default-rtdb.firebaseio.com/spmb_registrations.json', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            })).then(res => {
+              if (!res.ok) throw new Error('Gagal menyimpan data');
+              alert('Data pendaftaran berhasil dikirim! Nomor Induk Siswa (NIS) pendaftaran Ananda adalah: ' + nextNisStr + '. Harap simpan nomor NIS ini.');
+              spmbForm.reset();
+              if (penyakitLainnya) penyakitLainnya.style.display = 'none';
+            });
+          }).catch(err => {
+            console.error(err);
+            alert('Terjadi kesalahan saat mengirim pendaftaran. Silakan coba lagi.');
+          }).finally(() => {
+            if (btnSubmit) {
+              btnSubmit.disabled = false;
+              btnSubmit.textContent = 'Kirim Pendaftaran';
+            }
+          });
       });
     }
-
     if (statusCheckBtn && statusCheckInput) {
       statusCheckBtn.addEventListener('click', function () {
         const value = statusCheckInput.value.trim();
         if (!value) {
-          alert('Masukkan email pendaftaran atau NISN untuk mengecek status.');
+          alert('Masukkan email pendaftaran, NIS, atau NIK untuk mengecek status.');
           statusCheckInput.focus();
           return;
         }
-
-        alert('Status pendaftaran sedang diproses. Silakan cek kembali secara berkala untuk update terbaru.');
+        statusCheckBtn.disabled = true;
+        statusCheckBtn.textContent = 'Memeriksa...';
+        fetch('https://musada-sd-default-rtdb.firebaseio.com/spmb_registrations.json')
+          .then(res => res.json())
+          .then(data => {
+            const list = data ? Object.values(data) : [];
+            const match = list.find(r => r && (r.nis === value || r.email_orangtua === value || r.nik === value || r.nisn === value));
+            if (match) {
+              alert('Status Pendaftaran Ditemukan!\nNama: ' + (match.nama_siswa || match.nama_lengkap || '-') + '\nNIS: ' + (match.nis || '-') + '\nStatus: ' + (match.status || 'Mendaftar'));
+            } else {
+              alert('Data pendaftaran tidak ditemukan untuk: ' + value + '. Pastikan email, NIS, atau NIK sesuai berkas pendaftaran.');
+            }
+          }).catch(err => {
+            console.error(err);
+            alert('Gagal memeriksa status. Silakan coba sesaat lagi.');
+          }).finally(() => {
+            statusCheckBtn.disabled = false;
+            statusCheckBtn.textContent = 'Cek Status';
+          });
       });
     }
   </script>

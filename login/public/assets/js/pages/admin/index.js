@@ -1039,10 +1039,11 @@ container.innerHTML = `
 renderTable();
 document.getElementById('search-student').addEventListener('input', renderTable);
 document.getElementById('filter-gender').addEventListener('change', renderTable);
-document.getElementById('btn-add-stu').onclick = () => {
+document.getElementById('btn-add-stu').onclick = async () => {
 document.getElementById('stu-modal-title').innerText = 'Tambah siswa';
 document.getElementById('stu-id').value = '';
-document.getElementById('stu-nis').value = '';
+const nextNis = await DB.getNextNis();
+document.getElementById('stu-nis').value = nextNis;
 document.getElementById('stu-nisn').value = '';
 document.getElementById('stu-name').value = '';
 document.getElementById('stu-gender').value = 'L';
@@ -1051,14 +1052,15 @@ App.openModal('modal-stu');
 };
 document.getElementById('form-stu').onsubmit = async (e) => {
 e.preventDefault();
-const id = document.getElementById('stu-id').value || null;
+const nis = document.getElementById('stu-nis').value.trim();
+const id = document.getElementById('stu-id').value || ('SISWA_' + nis);
 await DB.saveStudent(id, {
 classId: classId,
-nis: document.getElementById('stu-nis').value.trim(),
+nis: nis,
 nisn: document.getElementById('stu-nisn').value.trim(),
 name: document.getElementById('stu-name').value.trim(),
 gender: document.getElementById('stu-gender').value,
-parentId: document.getElementById('stu-parent').value || null
+parentId: document.getElementById('stu-parent').value || id
 });
 App.closeModal('modal-stu');
 AdminPages.renderStudents(container, classId);

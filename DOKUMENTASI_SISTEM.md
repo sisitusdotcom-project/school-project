@@ -32,6 +32,10 @@ Sistem mengadopsi arsitektur dua tingkat untuk memisahkan secara tegas antara **
 ### 1. Prinsip Utama: 1 Orang = 1 Akun Tunggal (SSOT)
 * Setiap pegawai (GTK) hanya memiliki **satu akun login** dengan email format `gtk[namabersih]@musada.sch.id`.
 * Pendidik yang merangkap jabatan (misalnya: Guru Kelas yang menjabat Waka Keuangan, atau Guru Mapel yang merangkap Koordinator Ummi dan Staf Kurikulum) **tidak dibuatkan multi-akun**, melainkan diberikan atribut penugasan ganda pada array `assignments`.
+* Setiap murid/wali murid memiliki **satu akun login tunggal** berbasis NIS: `siswa[NIS]@musada.sch.id` (UID: `SISWA_[NIS]`).
+* **NIS sebagai SSOT Siswa:** Seluruh relasi data murid (kelas, presensi, rapor, ekskul, perpustakaan) mengacu secara tunggal ke NIS. NISN tetap dicatat sebagai data atribut biasa (seperti halnya jenis kelamin/tanggal lahir).
+* **Auto-generate NIS pada SPMB:** Saat pendaftaran siswa baru (SPMB), sistem langsung menerbitkan NIS urutan terakhir secara otomatis (`settings/lastNis + 1`) sehingga tidak ada duplikasi NIS.
+* **Aturan Mutasi / Keluar:** Jika siswa mutasi atau keluar, nomor NIS tetap melekat pada siswa tersebut (tidak didaur ulang), dan nomor pendaftaran berikutnya berlanjut ke urutan berikutnya.
 * Navigasi sidebar dirakit secara dinamis oleh sistem (`AppConfig.getRoleNav`) berdasarkan kombinasi role dan penugasan yang dimiliki.
 
 ### 2. Distribusi Akun Sistem Aktif (Database Realtime)
@@ -44,7 +48,7 @@ Sistem mengadopsi arsitektur dua tingkat untuk memisahkan secara tegas antara **
    * Termasuk 14 Pembina Ekstrakurikuler.
    * Termasuk 16 Wali Kelas rombel.
 4. **Tenaga Kependidikan (`role: 'tendik'`)**: 10 akun staf kependidikan (TU, Bendahara TU, Perpustakaan, Koperasi, Driver, Kebersihan).
-5. **Orang Tua / Wali Murid (`role: 'ortu'`)**: 372 akun orang tua/wali siswa aktif.
+5. **Orang Tua / Wali Murid (`role: 'ortu'`)**: 378 akun orang tua/wali siswa aktif (login format: `siswa[NIS]@musada.sch.id` / `0623`).
 
 ---
 

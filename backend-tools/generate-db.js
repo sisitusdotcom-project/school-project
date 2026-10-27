@@ -54,11 +54,8 @@ for (let i = 0; i < linesSiswa.length; i++) {
       const gender = cols[5]?.trim() || '';
       if (kelas) currentClass = kelas;
       if (!nama || nama.toLowerCase() === 'nama' || !no.match(/^\d+$/)) continue;
-      const cleanNisn = nisn ? nisn.replace(/\s+/g, '') : (noInduk || (Date.now() + '_' + no));
-      let uid = `SISWA_${cleanNisn}`;
-      if (rtdb.students[uid]) {
-        uid = `SISWA_${noInduk || cleanNisn}`;
-      }
+      const cleanNis = String(noInduk || '').trim().padStart(4, '0');
+      let uid = `SISWA_${cleanNis}`;
       let classId = 'CLASS_' + currentClass.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase();
       classId = classId.replace(/_+/g, '_');
       rtdb.users[uid] = {

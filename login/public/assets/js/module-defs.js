@@ -311,6 +311,7 @@
         { label: 'Dalam Seleksi', icon: 'ph-hourglass', tone: 'warning', where: { status: ['Mendaftar', 'Seleksi'] } }
       ],
       fields: [
+        t('nis', 'NIS (Nomor Induk Siswa)'),
         t('nama_lengkap', 'Nama Calon Siswa', { required: true }),
         sel('jenis_kelamin', 'Jenis Kelamin', ['Laki-laki', 'Perempuan']),
         t('nik', 'NIK (16 Digit)'),

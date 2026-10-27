@@ -519,13 +519,55 @@ const DB = {
   },
   async saveStudent(id, data) {
     if (!isDBReady()) return null;
-    const ref = id ? db.ref(`students/${id}`) : db.ref('students').push();
+    let studentId = id;
+    if (!studentId && data && data.nis) {
+      const cleanNis = String(data.nis).trim().padStart(4, '0');
+      studentId = 'SISWA_' + cleanNis;
+      data.nis = cleanNis;
+      data.parentId = studentId;
+    }
+    const ref = studentId ? db.ref(`students/${studentId}`) : db.ref('students').push();
     await ref.set(data);
-    return ref.key;
+    if (studentId && data && data.name) {
+      await db.ref(`users/${studentId}`).update({
+        name: data.name,
+        role: 'ortu',
+        isActive: true
+      });
+    }
+    return studentId || ref.key;
+  },
+  async getNextNis() {
+    if (!isDBReady()) return '0997';
+    const [settingsSnap, studentsSnap, spmbSnap] = await Promise.all([
+      db.ref('settings/lastNis').once('value'),
+      db.ref('students').once('value'),
+      db.ref('spmb_registrations').once('value')
+    ]);
+    let max = settingsSnap.val() ? parseInt(settingsSnap.val(), 10) : 0;
+    const students = studentsSnap.val() || {};
+    for (const s of Object.values(students)) {
+      if (s && s.nis) {
+        const n = parseInt(s.nis, 10);
+        if (!isNaN(n) && n > max) max = n;
+      }
+    }
+    const spmb = spmbSnap.val() || {};
+    for (const r of Object.values(spmb)) {
+      if (r && r.nis) {
+        const n = parseInt(r.nis, 10);
+        if (!isNaN(n) && n > max) max = n;
+      }
+    }
+    const nextNum = Math.max(max, 996) + 1;
+    const nextNis = String(nextNum).padStart(4, '0');
+    await db.ref('settings/lastNis').set(nextNum);
+    return nextNis;
   },
   async deleteStudent(id) {
     if (!isDBReady()) return;
     await db.ref(`students/${id}`).remove();
+    await db.ref(`users/${id}`).remove();
   },
   _assessPath(year, sem) {
     return `assessments/${year.replace('/', '-')}_${sem}`;

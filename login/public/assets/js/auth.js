@@ -70,7 +70,11 @@ const Auth = {
     const btn = document.getElementById('btn-login');
     const err = document.getElementById('login-error');
     if (!emailInput || !passwordInput || !btn || !err) return;
-    const email = emailInput.value.trim();
+    let email = emailInput.value.trim();
+    if (email && !email.includes('@')) {
+      const clean = email.toLowerCase().replace(/[^a-z0-9]/g, '');
+      email = clean.startsWith('siswa') ? `${clean}@musada.sch.id` : `siswa${clean.padStart(4, '0')}@musada.sch.id`;
+    }
     const password = passwordInput.value;
     btn.disabled = true;
     btn.classList.add('btn-loading');
