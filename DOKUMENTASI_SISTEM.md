@@ -346,6 +346,10 @@ Untuk menjamin sistem bebas dari duplikasi data (*DRY*) dan memiliki satu sumber
      - `employee`: Khusus GTK aktif (`role !== 'ortu'`). Menjamin form *Kesejahteraan Staf*, *Pelatihan*, dan *Gaji* tidak lagi memuat nama siswa.
      - `teacher`: Khusus Pendidik (`role === 'guru'`, `admin`, `kepsek`). Menjamin form *Jadwal*, *Supervisi*, *Jurnal*, dan *Plotting Ummi* hanya memuat guru pengajar.
      - `student`: Khusus Siswa dari basis data pokok murid.
+6. **Kategori Penerimaan & Pengeluaran Kas Keuangan (`AppConfig.FINANCE_CATEGORIES`):**
+   * **Pemasukan (Income)**: SPP, Uang Kegiatan, Daftar Ulang, DPP, Buku, Seragam, Extrakurikuler, Catering, Antar Jemput, Lainnya.
+   * **Pengeluaran (Expense)**: Kepala Sekolah, Bidang Kurikulum, Bidang Kesiswaan, Bidang Sarana Prasarana, Bidang Humas Personalia Perkaderan, Bidang Keuangan, Honorarium, Donasi.
+   * **Implementasi SSOT & DRY**: Seluruh daftar kategori dikonsolidasikan terpusat di `AppConfig.FINANCE_CATEGORIES`. Dropdown kategori pada modal transaksi `ModuleKit` (`#/finance/transactions`) dan modal kasir dashboard keuangan (`#modal-fin-ledger`) beroperasi dinamis mengikuti pilihan Tipe Transaksi (`income` vs `expense`), serta memetakan kode akun jurnal umum secara otomatis melalui `AppConfig.resolveFinanceAccounts()`.
 
 ---
 

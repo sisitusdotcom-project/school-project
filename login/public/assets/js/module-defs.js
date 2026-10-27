@@ -484,7 +484,7 @@
           await ledgerRef.set({
             date: p.date || new Date().toISOString().slice(0, 10),
             type: 'expense',
-            category: 'Honor',
+            category: 'Honorarium',
             refNo: `WLF-${id ? id.slice(-6) : Date.now()}`,
             description: `Realisasi Kesejahteraan Pegawai: ${p.type || 'Tunjangan'} (${empName})`,
             amount: Number(p.amount) || 0,
@@ -751,6 +751,14 @@
     '#/finance/transactions': {
       node: 'finance/ledger', noun: 'Penerimaan & Pengeluaran', writeRoles: FI, dateField: 'date', statusField: 'type', badges: { income: 'success', expense: 'danger' },
       subtitle: 'Jurnal transaksi kas. Menjadi sumber Buku Kas Umum dan ringkasan dashboard.',
+      derive: (p) => {
+        const acc = window.AppConfig?.resolveFinanceAccounts ? window.AppConfig.resolveFinanceAccounts(p) : null;
+        const contra = p.type === 'expense' ? acc?.debit : acc?.credit;
+        return {
+          accountCode: contra?.code || (p.type === 'expense' ? '5-9999' : '4-9999'),
+          accountName: contra?.name || (p.type === 'expense' ? 'Beban Operasional Lainnya' : 'Pendapatan Lainnya')
+        };
+      },
       summary: [
         { label: 'Total Transaksi', icon: 'ph-arrows-left-right', tone: 'primary' },
         { label: 'Penerimaan', icon: 'ph-arrow-down-left', tone: 'success', where: { type: 'income' }, sum: 'amount', money: true },
@@ -760,7 +768,7 @@
         date('date', 'Tanggal', { required: true }),
         sel('type', 'Tipe', [{ value: 'income', label: 'Penerimaan' }, { value: 'expense', label: 'Pengeluaran' }], { required: true }),
         t('refNo', 'No. Bukti'),
-        sel('category', 'Kategori', ['BOS', 'SPP', 'Donasi', 'Honor', 'ATK', 'Listrik & Air', 'Pemeliharaan', 'Kegiatan', 'Lainnya'], { required: true }),
+        sel('category', 'Kategori', (window.AppConfig?.getAllFinanceCategories ? window.AppConfig.getAllFinanceCategories() : ['SPP', 'Uang Kegiatan', 'Daftar Ulang', 'DPP', 'Buku', 'Seragam', 'Extrakurikuler', 'Catering', 'Antar Jemput', 'Kepala Sekolah', 'Bidang Kurikulum', 'Bidang Kesiswaan', 'Bidang Sarana Prasarana', 'Bidang Humas Personalia Perkaderan', 'Bidang Keuangan', 'Honorarium', 'Donasi', 'Lainnya']), { required: true }),
         t('description', 'Uraian', { required: true }),
         money('amount', 'Nominal', { required: true }),
         sel('method', 'Metode Kas / Bank', ['Kas Tunai (Brankas)', 'Bank Jatim Operasional', 'Bank BOS', 'Transfer Lainnya']),

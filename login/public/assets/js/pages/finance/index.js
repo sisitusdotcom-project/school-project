@@ -26,6 +26,7 @@ const FinancePages = {
     const money = (val) => 'Rp ' + Number(val || 0).toLocaleString('id-ID');
     const esc = (txt) => AppConfig.escapeHtml(txt || '');
     const resolveAccounts = (entry) => {
+      if (AppConfig.resolveFinanceAccounts) return AppConfig.resolveFinanceAccounts(entry);
       const isExp = entry.type === 'expense';
       const method = entry.method || 'Tunai';
       let cashAcc = { code: '1-1001', name: 'Kas Tunai (Brankas)' };
@@ -460,11 +461,11 @@ const FinancePages = {
           else inOther += amt;
         } else {
           if (cat.includes('honor') || cat.includes('gaji')) outGaji += amt;
-          else if (cat.includes('atk')) outATK += amt;
+          else if (cat.includes('kurikulum') || cat.includes('atk')) outATK += amt;
+          else if (cat.includes('sarana') || cat.includes('sarpras') || cat.includes('aset') || cat.includes('gedung')) outInvest += amt;
+          else if (cat.includes('kesiswaan') || cat.includes('kegiatan') || cat.includes('lomba')) outKeg += amt;
+          else if (cat.includes('humas') || cat.includes('personalia') || cat.includes('santunan') || cat.includes('sosial') || cat.includes('kesejahteraan') || cat.includes('donasi')) outSocial += amt;
           else if (cat.includes('listrik') || cat.includes('air') || cat.includes('internet')) outDaya += amt;
-          else if (cat.includes('kegiatan') || cat.includes('lomba')) outKeg += amt;
-          else if (cat.includes('santunan') || cat.includes('sosial') || cat.includes('kesejahteraan')) outSocial += amt;
-          else if (cat.includes('aset') || cat.includes('gedung') || cat.includes('pengadaan')) outInvest += amt;
           else if (cat.includes('pinjaman') || cat.includes('finansial')) outFinance += amt;
           else outOtherOp += amt;
         }
@@ -695,16 +696,7 @@ const FinancePages = {
                 <div class="form-group">
                   <label for="fin-ledger-cat">Kategori Transaksi</label>
                   <select id="fin-ledger-cat" class="form-select" required>
-                    <option value="SPP">SPP Siswa</option>
-                    <option value="BOS">Dana BOS Reguler</option>
-                    <option value="Donasi">Donasi & Infaq</option>
-                    <option value="Honor">Gaji & Honor GTK</option>
-                    <option value="ATK">ATK & Bahan Pembelajaran</option>
-                    <option value="Listrik & Air">Listrik, Air & Internet</option>
-                    <option value="Pemeliharaan">Pemeliharaan Gedung & Sarpras</option>
-                    <option value="Kegiatan">Kegiatan Siswa & Lomba</option>
-                    <option value="Santunan">Santunan Sosial Pegawai</option>
-                    <option value="Lainnya">Lainnya</option>
+                    ${(AppConfig.getFinanceCategories ? AppConfig.getFinanceCategories('income') : []).map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('')}
                   </select>
                 </div>
                 <div class="form-group">
@@ -908,10 +900,20 @@ const FinancePages = {
         });
       }
       const typeSelect = container.querySelector('#fin-ledger-type');
+      const catSelect = container.querySelector('#fin-ledger-cat');
       const rkasGroup = container.querySelector('#group-fin-rkas');
-      if (typeSelect && rkasGroup) {
+      const syncFinCategories = (selectedType) => {
+        if (!catSelect) return;
+        const list = AppConfig.getFinanceCategories ? AppConfig.getFinanceCategories(selectedType) : [];
+        const cur = catSelect.value;
+        catSelect.innerHTML = '<option value="">-- Pilih Kategori --</option>' + list.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
+        if (cur && list.includes(cur)) catSelect.value = cur;
+      };
+      if (typeSelect) {
+        syncFinCategories(typeSelect.value);
         typeSelect.addEventListener('change', () => {
-          rkasGroup.classList.toggle('fin-d-none', typeSelect.value !== 'expense');
+          syncFinCategories(typeSelect.value);
+          if (rkasGroup) rkasGroup.classList.toggle('fin-d-none', typeSelect.value !== 'expense');
         });
       }
       const formLedger = container.querySelector('#form-fin-ledger');

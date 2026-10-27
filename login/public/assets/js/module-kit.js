@@ -519,6 +519,24 @@ const ModuleKit = {
         humasFeedback.readOnly = !isApprover;
         humasFeedback.placeholder = isApprover ? 'Catatan telaah atau instruksi verifikasi Humas...' : '(Hanya dapat diisi oleh peninjau Humas)';
       }
+      const finTypeField = form.querySelector('#mk-f-type');
+      const finCatField = form.querySelector('#mk-f-category');
+      const finRkasGroup = form.querySelector('#mk-f-rkasId')?.closest('.mk-fgroup');
+      if (finTypeField && finCatField && window.AppConfig?.getFinanceCategories) {
+        const updateFinCategories = (selectedType) => {
+          const list = window.AppConfig.getFinanceCategories(selectedType);
+          const curVal = row ? (row.category || '') : finCatField.value;
+          finCatField.innerHTML = '<option value="">-- Pilih Kategori --</option>' + list.map((c) => `<option value="${this.esc(c)}">${this.esc(c)}</option>`).join('');
+          if (curVal && list.includes(curVal)) finCatField.value = curVal;
+          if (finRkasGroup) {
+            finRkasGroup.style.display = String(selectedType).toLowerCase() === 'expense' ? '' : 'none';
+          }
+        };
+        const initType = row ? (row.type || 'income') : (finTypeField.value || 'income');
+        finTypeField.value = initType;
+        updateFinCategories(initType);
+        finTypeField.onchange = () => updateFinCategories(finTypeField.value);
+      }
       App.openModal(modalId);
     };
     const closeForm = () => App.closeModal(modalId);

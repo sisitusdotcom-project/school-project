@@ -1020,7 +1020,85 @@ window.GOOGLE_DRIVE_CONFIG = Object.freeze({
 uploadUrl: runtimeConfig.googleDriveUploadUrl,
 attendanceWorkerUrl: runtimeConfig.attendanceWorkerUrl
 });
+const FINANCE_CATEGORIES = Object.freeze({
+income: Object.freeze([
+'SPP',
+'Uang Kegiatan',
+'Daftar Ulang',
+'DPP',
+'Buku',
+'Seragam',
+'Extrakurikuler',
+'Catering',
+'Antar Jemput',
+'Lainnya'
+]),
+expense: Object.freeze([
+'Kepala Sekolah',
+'Bidang Kurikulum',
+'Bidang Kesiswaan',
+'Bidang Sarana Prasarana',
+'Bidang Humas Personalia Perkaderan',
+'Bidang Keuangan',
+'Honorarium',
+'Donasi'
+])
+});
+function getFinanceCategories(type = 'income') {
+const normalized = String(type || '').toLowerCase().trim();
+if (normalized === 'expense' || normalized === 'pengeluaran') {
+return [...FINANCE_CATEGORIES.expense];
+}
+return [...FINANCE_CATEGORIES.income];
+}
+function getAllFinanceCategories() {
+return [...new Set([...FINANCE_CATEGORIES.income, ...FINANCE_CATEGORIES.expense])];
+}
+function resolveFinanceAccounts(entry = {}) {
+const isExp = String(entry?.type || '').toLowerCase() === 'expense';
+const method = String(entry?.method || 'Tunai');
+let cashAcc = { code: '1-1001', name: 'Kas Tunai (Brankas)' };
+if (method.includes('BOS')) cashAcc = { code: '1-1003', name: 'Bank Jatim (Kas BOS)' };
+else if (method.includes('Bank') || method.includes('Transfer')) cashAcc = { code: '1-1002', name: 'Bank Jatim (Operasional)' };
+let contraAcc = { code: isExp ? '5-9999' : '4-9999', name: isExp ? 'Beban Operasional Lainnya' : 'Pendapatan Lainnya' };
+const cat = String(entry?.category || '').toLowerCase().trim();
+if (!isExp) {
+if (cat === 'spp') contraAcc = { code: '4-1010', name: 'Pendapatan SPP Siswa' };
+else if (cat === 'uang kegiatan' || cat === 'kegiatan') contraAcc = { code: '4-1011', name: 'Pendapatan Uang Kegiatan' };
+else if (cat === 'daftar ulang') contraAcc = { code: '4-1012', name: 'Pendapatan Daftar Ulang' };
+else if (cat === 'dpp') contraAcc = { code: '4-1013', name: 'Pendapatan DPP Siswa' };
+else if (cat === 'buku') contraAcc = { code: '4-1014', name: 'Pendapatan Buku Pembelajaran' };
+else if (cat === 'seragam') contraAcc = { code: '4-1015', name: 'Pendapatan Seragam Sekolah' };
+else if (cat === 'extrakurikuler' || cat === 'ekstrakurikuler') contraAcc = { code: '4-1016', name: 'Pendapatan Ekstrakurikuler' };
+else if (cat === 'catering') contraAcc = { code: '4-1017', name: 'Pendapatan Layanan Catering' };
+else if (cat === 'antar jemput') contraAcc = { code: '4-1018', name: 'Pendapatan Layanan Antar Jemput' };
+else if (cat.includes('bos')) contraAcc = { code: '4-1020', name: 'Pendapatan Dana BOS' };
+else if (cat.includes('donasi') || cat.includes('infaq')) contraAcc = { code: '4-1030', name: 'Pendapatan Infaq & Donasi' };
+else contraAcc = { code: '4-1090', name: `Pendapatan ${entry?.category || 'Lainnya'}` };
+} else {
+if (cat === 'kepala sekolah') contraAcc = { code: '5-2001', name: 'Beban Program Kepala Sekolah' };
+else if (cat === 'bidang kurikulum' || cat.includes('kurikulum')) contraAcc = { code: '5-2002', name: 'Beban Bidang Kurikulum' };
+else if (cat === 'bidang kesiswaan' || cat.includes('kesiswaan')) contraAcc = { code: '5-2003', name: 'Beban Bidang Kesiswaan' };
+else if (cat === 'bidang sarana prasarana' || cat.includes('sarpras') || cat.includes('sarana')) contraAcc = { code: '5-2004', name: 'Beban Sarana Prasarana' };
+else if (cat === 'bidang humas personalia perkaderan' || cat.includes('humas') || cat.includes('personalia')) contraAcc = { code: '5-2005', name: 'Beban Humas Personalia & Perkaderan' };
+else if (cat === 'bidang keuangan' || cat.includes('keuangan')) contraAcc = { code: '5-2006', name: 'Beban Operasional Bidang Keuangan' };
+else if (cat === 'honorarium' || cat.includes('honor') || cat.includes('gaji')) contraAcc = { code: '5-1010', name: 'Beban Gaji & Honorarium GTK' };
+else if (cat === 'donasi') contraAcc = { code: '5-3010', name: 'Beban Donasi & Sosial' };
+else if (cat.includes('atk')) contraAcc = { code: '5-2010', name: 'Beban ATK & Pembelajaran' };
+else if (cat.includes('listrik') || cat.includes('air') || cat.includes('internet')) contraAcc = { code: '5-2020', name: 'Beban Daya & Jasa' };
+else if (cat.includes('santunan') || cat.includes('kesejahteraan')) contraAcc = { code: '5-2050', name: 'Beban Kesejahteraan GTK' };
+else contraAcc = { code: '5-2090', name: `Beban ${entry?.category || 'Operasional'}` };
+}
+return {
+debit: isExp ? contraAcc : cashAcc,
+credit: isExp ? cashAcc : contraAcc
+};
+}
 window.AppConfig = Object.freeze({
+FINANCE_CATEGORIES,
+getFinanceCategories,
+getAllFinanceCategories,
+resolveFinanceAccounts,
 ROLES,
 PRIMARY_ROLES,
 ROLE_LABELS,

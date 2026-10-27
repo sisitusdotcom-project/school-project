@@ -863,12 +863,14 @@ const DB = {
   },
   async saveFinanceEntry(data, id = null) {
     if (!isDBReady()) return null;
+    const resolvedAcc = window.AppConfig?.resolveFinanceAccounts ? window.AppConfig.resolveFinanceAccounts(data) : null;
+    const defaultContra = resolvedAcc ? (data.type === 'expense' ? resolvedAcc.debit : resolvedAcc.credit) : null;
     const entry = {
       id: id || data.id || null,
       type: data.type || 'income',
-      category: data.category || 'Umum',
-      accountCode: data.accountCode || (data.type === 'expense' ? '5-9999' : '4-9999'),
-      accountName: data.accountName || (data.type === 'expense' ? 'Beban Operasional Lainnya' : 'Pendapatan Lainnya'),
+      category: data.category || 'Lainnya',
+      accountCode: data.accountCode || defaultContra?.code || (data.type === 'expense' ? '5-9999' : '4-9999'),
+      accountName: data.accountName || defaultContra?.name || (data.type === 'expense' ? 'Beban Operasional Lainnya' : 'Pendapatan Lainnya'),
       rkasId: data.rkasId || null,
       refNo: data.refNo || '',
       method: data.method || 'Tunai',
