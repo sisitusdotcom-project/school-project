@@ -716,8 +716,11 @@ const FinancePages = {
                   </select>
                 </div>
                 <div class="form-group">
-                  <label for="fin-ledger-amount">Nominal (Rp)</label>
-                  <input type="number" id="fin-ledger-amount" class="form-input" required min="1" placeholder="Contoh: 350000">
+                  <label for="fin-ledger-amount">Nominal</label>
+                  <div class="input-money-wrap">
+                    <span class="input-money-prefix">Rp</span>
+                    <input type="text" inputmode="numeric" id="fin-ledger-amount" class="form-input input-money" required placeholder="0" data-type="money">
+                  </div>
                 </div>
                 <div class="form-group">
                   <label for="fin-ledger-desc">Keterangan / Uraian</label>
@@ -776,8 +779,11 @@ const FinancePages = {
                   <input type="text" id="fin-bill-year" class="form-input" required value="${esc(currentYear)}">
                 </div>
                 <div class="form-group">
-                  <label for="fin-bill-amount">Nominal SPP (Rp)</label>
-                  <input type="number" id="fin-bill-amount" class="form-input" required min="1" placeholder="Masukkan nominal SPP">
+                  <label for="fin-bill-amount">Nominal SPP</label>
+                  <div class="input-money-wrap">
+                    <span class="input-money-prefix">Rp</span>
+                    <input type="text" inputmode="numeric" id="fin-bill-amount" class="form-input input-money" required placeholder="0" data-type="money">
+                  </div>
                 </div>
                 <div class="form-group">
                   <label for="fin-bill-date">Jatuh Tempo</label>
@@ -899,6 +905,7 @@ const FinancePages = {
           App.openModal('modal-fin-bill');
         });
       }
+      if (AppConfig.initRupiahInputs) AppConfig.initRupiahInputs(container);
       const typeSelect = container.querySelector('#fin-ledger-type');
       const catSelect = container.querySelector('#fin-ledger-cat');
       const rkasGroup = container.querySelector('#group-fin-rkas');
@@ -928,7 +935,7 @@ const FinancePages = {
             category: document.getElementById('fin-ledger-cat').value,
             method: document.getElementById('fin-ledger-method').value,
             rkasId: document.getElementById('fin-ledger-rkas').value || null,
-            amount: Number(document.getElementById('fin-ledger-amount').value),
+            amount: AppConfig.parseRupiah ? AppConfig.parseRupiah(document.getElementById('fin-ledger-amount').value) : Number(document.getElementById('fin-ledger-amount').value),
             description: document.getElementById('fin-ledger-desc').value,
             date: document.getElementById('fin-ledger-date').value,
             refNo: document.getElementById('fin-ledger-ref').value
@@ -947,7 +954,7 @@ const FinancePages = {
           submitBtn.innerHTML = 'Menyimpan...';
           const stuId = document.getElementById('fin-bill-student').value;
           const status = document.getElementById('fin-bill-status').value;
-          const amt = Number(document.getElementById('fin-bill-amount').value);
+          const amt = AppConfig.parseRupiah ? AppConfig.parseRupiah(document.getElementById('fin-bill-amount').value) : Number(document.getElementById('fin-bill-amount').value);
           const month = document.getElementById('fin-bill-month').value;
           const year = document.getElementById('fin-bill-year').value;
           const dueDate = document.getElementById('fin-bill-date').value;

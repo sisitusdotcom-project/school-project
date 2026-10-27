@@ -350,6 +350,10 @@ Untuk menjamin sistem bebas dari duplikasi data (*DRY*) dan memiliki satu sumber
    * **Pemasukan (Income)**: SPP, Uang Kegiatan, Daftar Ulang, DPP, Buku, Seragam, Extrakurikuler, Catering, Antar Jemput, Lainnya.
    * **Pengeluaran (Expense)**: Kepala Sekolah, Bidang Kurikulum, Bidang Kesiswaan, Bidang Sarana Prasarana, Bidang Humas Personalia Perkaderan, Bidang Keuangan, Honorarium, Donasi.
    * **Implementasi SSOT & DRY**: Seluruh daftar kategori dikonsolidasikan terpusat di `AppConfig.FINANCE_CATEGORIES`. Dropdown kategori pada modal transaksi `ModuleKit` (`#/finance/transactions`) dan modal kasir dashboard keuangan (`#modal-fin-ledger`) beroperasi dinamis mengikuti pilihan Tipe Transaksi (`income` vs `expense`), serta memetakan kode akun jurnal umum secara otomatis melalui `AppConfig.resolveFinanceAccounts()`.
+7. **Automasi Input Angka Keuangan / Format Rupiah (`AppConfig.attachRupiahMask`):**
+   * **Visual Masking Dinamis**: Setiap input bertipe nominal keuangan otomatis diformat dengan tanda titik ribuan standar Indonesia (`id-ID`, contoh: `1.234.567.890`) saat pengguna mengetik, dengan prefix visual `Rp`.
+   * **Bebas Spinner Browser**: Menggunakan `type="text" inputmode="numeric"` untuk mencegah munculnya tombol panah stepper browser (`^v`) dan memastikan keyboard numerik aktif pada perangkat mobile.
+   * **Konsistensi Data (SSOT & DRY)**: Disimpan ke basis data sebagai angka murni (`Number`, integer) melalui fungsi parser terpusat `AppConfig.parseRupiah()`, sehingga seluruh formula kalkulasi, total saldo, dan laporan tidak terganggu format teks.
 
 ---
 

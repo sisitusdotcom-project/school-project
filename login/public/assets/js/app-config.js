@@ -1094,7 +1094,61 @@ debit: isExp ? contraAcc : cashAcc,
 credit: isExp ? cashAcc : contraAcc
 };
 }
+function formatRupiah(val, withPrefix = false) {
+if (val === undefined || val === null || val === '') return '';
+const cleanDigits = String(val).replace(/[^0-9]/g, '');
+if (!cleanDigits) return '';
+const num = parseInt(cleanDigits, 10);
+const formatted = isNaN(num) ? '' : num.toLocaleString('id-ID');
+return withPrefix ? (formatted ? `Rp ${formatted}` : '') : formatted;
+}
+function parseRupiah(val) {
+if (typeof val === 'number') return isNaN(val) ? 0 : Math.round(val);
+if (!val) return 0;
+const cleanDigits = String(val).replace(/[^0-9]/g, '');
+return cleanDigits ? parseInt(cleanDigits, 10) : 0;
+}
+function attachRupiahMask(input) {
+if (!input || input.__rupiahMaskAttached) return;
+input.__rupiahMaskAttached = true;
+input.type = 'text';
+input.inputMode = 'numeric';
+input.autocomplete = 'off';
+const formatInput = () => {
+const rawVal = input.value;
+const cleanDigits = rawVal.replace(/[^0-9]/g, '');
+if (!cleanDigits) {
+input.value = '';
+return;
+}
+const num = parseInt(cleanDigits, 10);
+const formatted = isNaN(num) ? '' : num.toLocaleString('id-ID');
+const oldCursor = input.selectionStart;
+const oldLen = rawVal.length;
+input.value = formatted;
+if (oldCursor !== null && document.activeElement === input) {
+const newLen = formatted.length;
+const diff = newLen - oldLen;
+const newCursor = Math.max(0, oldCursor + diff);
+input.setSelectionRange(newCursor, newCursor);
+}
+};
+input.addEventListener('input', formatInput);
+input.addEventListener('blur', () => {
+if (input.value) formatInput();
+});
+if (input.value) formatInput();
+}
+function initRupiahInputs(container = document) {
+if (!container) return;
+const selector = 'input[data-type="money"], input.input-money, input.input-rupiah, input[data-currency="rupiah"]';
+container.querySelectorAll(selector).forEach(attachRupiahMask);
+}
 window.AppConfig = Object.freeze({
+formatRupiah,
+parseRupiah,
+attachRupiahMask,
+initRupiahInputs,
 FINANCE_CATEGORIES,
 getFinanceCategories,
 getAllFinanceCategories,

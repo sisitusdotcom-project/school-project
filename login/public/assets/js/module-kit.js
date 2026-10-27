@@ -442,8 +442,12 @@ const ModuleKit = {
             }
           }
         }
+        if (f.type === 'money') {
+          value = value === undefined || value === null || value === '' ? '' : (window.AppConfig?.formatRupiah ? window.AppConfig.formatRupiah(value) : value);
+        }
         el.value = value === undefined || value === null ? '' : value;
       });
+      if (window.AppConfig?.initRupiahInputs) window.AppConfig.initRupiahInputs(form);
       const isApprover = this.isApprover(def);
       if (isOrtu || (!isApprover && def.approverRoles)) {
         const sf = form.querySelector(`#mk-f-${def.statusField || 'status'}`);
@@ -627,7 +631,11 @@ const ModuleKit = {
             el.focus();
             throw new Error('Validation failed');
           }
-          if (f.type === 'number' || f.type === 'money') value = value === '' ? 0 : Number(value);
+          if (f.type === 'money') {
+            value = window.AppConfig?.parseRupiah ? window.AppConfig.parseRupiah(value) : (value === '' ? 0 : Number(String(value).replace(/[^0-9]/g, '')));
+          } else if (f.type === 'number') {
+            value = value === '' ? 0 : Number(value);
+          }
           payload[f.key] = value;
           if (f.ref) payload[`${f.key}Name`] = value ? ((refs[f.ref] || {})[value] || '') : '';
         }
@@ -740,8 +748,10 @@ const ModuleKit = {
       control = `<textarea id="${id}" rows="3"${req}${dis}></textarea>`;
     } else if (field.type === 'file') {
       control = `<div class="mk-file-box"><input type="hidden" id="${id}"><input type="file" id="${id}_file" class="mk-file-input" accept="${field.accept || '*/*'}"><div class="mk-file-hint text-muted"><i class="ph ph-upload-simple"></i> Unggah berkas dari perangkat (PDF, Dokumen, atau Gambar)</div><div id="${id}_current" class="mk-file-current"></div></div>`;
+    } else if (field.type === 'money') {
+      control = `<div class="input-money-wrap"><span class="input-money-prefix">Rp</span><input type="text" inputmode="numeric" id="${id}" class="input-money" placeholder="0" data-type="money"${req}${dis}></div>`;
     } else {
-      const type = ['number', 'money'].includes(field.type) ? 'number' : (['date', 'time'].includes(field.type) ? field.type : 'text');
+      const type = field.type === 'number' ? 'number' : (['date', 'time'].includes(field.type) ? field.type : 'text');
       const min = type === 'number' ? ' min="0" step="any"' : '';
       control = `<input type="${type}" id="${id}"${min}${req}${dis}>`;
     }

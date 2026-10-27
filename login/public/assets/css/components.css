@@ -173,6 +173,37 @@ color: var(--danger);
 font-size: 13px;
 margin-top: 8px
 }
+.input-money-wrap {
+position: relative;
+display: flex;
+align-items: stretch;
+width: 100%
+}
+.input-money-prefix {
+display: inline-flex;
+align-items: center;
+justify-content: center;
+padding: 0 14px;
+font-size: 13px;
+font-weight: 700;
+color: var(--primary);
+background: var(--bg-subtle, #f8fafc);
+border: 1px solid var(--border-strong);
+border-right: none;
+border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+user-select: none
+}
+.input-money-wrap input.input-money,
+.input-money-wrap input {
+border-top-left-radius: 0 !important;
+border-bottom-left-radius: 0 !important;
+font-weight: 600;
+letter-spacing: 0.5px
+}
+.input-money-wrap:focus-within .input-money-prefix {
+border-color: var(--primary);
+background: var(--primary-light, #eff6ff)
+}
 .card {
 background: #fff;
 border-radius: 12px;
