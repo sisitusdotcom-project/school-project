@@ -759,37 +759,56 @@ const DB = {
     return ref.key;
   },
   _raporPath(type, year, sem) {
-    return `${type}/${year.replace('/', '-')}_${sem}`;
+    return `${type}/${String(year || '').replace(/\//g, '-')}_${sem}`;
   },
   async getAcademicGrades(year, sem, studentId) {
-    let res = await this._readCollection(`${this._raporPath('academic_grades', year, sem)}/${studentId}`, {});
-    if (!Object.keys(res).length && year && String(year).includes('/')) {
-      const parts = String(year).split('/');
-      res = await this._readCollection(`academic_grades/${parts[0]}/${parts[1]}_${sem}/${studentId}`, {});
+    if (!year || !sem || !studentId) return {};
+    try {
+      return await this._readCollection(`${this._raporPath('academic_grades', year, sem)}/${studentId}`, {});
+    } catch (_) {
+      return {};
     }
-    return res;
   },
   async getAllAcademicGrades(year, sem) {
-    let res = await this._readCollection(this._raporPath('academic_grades', year, sem), {});
-    if (year && String(year).includes('/')) {
-      const parts = String(year).split('/');
-      const alt = await this._readCollection(`academic_grades/${parts[0]}/${parts[1]}_${sem}`, {});
-      if (Object.keys(alt).length) {
-        res = Object.keys(res).length ? { ...alt, ...res } : alt;
-      }
+    if (!year || !sem) return {};
+    try {
+      return await this._readCollection(this._raporPath('academic_grades', year, sem), {});
+    } catch (_) {
+      return {};
     }
-    return res;
   },
   async getClassRankings(year, sem, classId) {
-    const [students, allGrades] = await Promise.all([
-      this.getStudentsByClass(classId),
-      this.getAllAcademicGrades(year, sem)
-    ]);
-    return window.AppConfig?.calculateClassRankings ? window.AppConfig.calculateClassRankings(students, allGrades) : {};
+    if (!year || !sem || !classId) return {};
+    const pathKey = `${String(year).replace('/', '-')}_${sem}/${classId}`;
+    try {
+      const cached = await this._readCollection(`class_rankings/${pathKey}`, {});
+      if (cached && Object.keys(cached).length) return cached;
+    } catch (_) {}
+    try {
+      const [students, allGrades] = await Promise.all([
+        this.getStudentsByClass(classId),
+        this.getAllAcademicGrades(year, sem)
+      ]);
+      const rankings = window.AppConfig?.calculateClassRankings ? window.AppConfig.calculateClassRankings(students, allGrades) : {};
+      if (rankings && Object.keys(rankings).length && isDBReady()) {
+        const isOrtu = typeof Auth !== 'undefined' && Auth.currentUser && Auth.currentUser.role === 'ortu';
+        if (!isOrtu) {
+          db.ref(`class_rankings/${pathKey}`).update(rankings).catch(() => {});
+        }
+      }
+      return rankings;
+    } catch (_) {
+      return {};
+    }
   },
   async getStudentClassRank(year, sem, studentId, classId) {
-    const rankings = await this.getClassRankings(year, sem, classId);
-    return rankings[studentId] || null;
+    if (!year || !sem || !studentId || !classId) return null;
+    try {
+      const rankings = await this.getClassRankings(year, sem, classId);
+      return rankings[studentId] || null;
+    } catch (_) {
+      return null;
+    }
   },
   async getSubjectChapters(year, sem, classId, subjectId) {
     return this._read(`subject_chapters/${year}/${sem}/${classId}/${subjectId}`, []);

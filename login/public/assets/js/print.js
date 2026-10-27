@@ -45,7 +45,7 @@ async function generateReport(studentId, container) {
       DB.getTeacherNote(year, sem, studentId),
       DB.getParentResponse(year, sem, studentId),
       DB.getAssessments(year, sem, studentId),
-      DB.getStudentClassRank(year, sem, studentId, student.classId)
+      DB.getStudentClassRank(year, sem, studentId, student.classId).catch(() => null)
     ]);
     const rankText = (rankResult && rankResult.isTop10 && rankResult.text) ? rankResult.text : '';
     const normCategory = (cat) => {
@@ -232,7 +232,6 @@ async function generateReport(studentId, container) {
                   <td>Tahun Ajaran</td>
                   <td>: <span>${year}</span></td>
               </tr>
-              ${rankText ? `<tr><td>Peringkat Kelas</td><td colspan="3">: <strong>${rankText}</strong></td></tr>` : ''}
           </table>
           <table class="data-table">
               <thead>
@@ -245,6 +244,7 @@ async function generateReport(studentId, container) {
               </thead>
               <tbody>
                   ${tableHtml || '<tr><td colspan="4" class="text-center text-muted">Belum ada nilai akademik</td></tr>'}
+                  ${rankText ? `<tr class="rank-row"><td colspan="2" class="text-center"><strong>Peringkat Kelas</strong></td><td colspan="2"><strong>${rankText}</strong></td></tr>` : ''}
               </tbody>
           </table>
           <div class="section-header">Kokurikuler</div>

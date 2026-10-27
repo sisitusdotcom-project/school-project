@@ -71,7 +71,7 @@
       ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')",
       "$year_sem": {
         "$studentId": {
-          ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu' || root.child('students').child($studentId).child('parentId').val() === auth.uid)",
+          ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu' || root.child('students').child($studentId).child('parentId').val() === auth.uid || auth.uid === $studentId)",
           ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')"
         }
       }
@@ -80,7 +80,7 @@
       ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')",
       "$year_sem": {
         "$studentId": {
-          ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu' || root.child('students').child($studentId).child('parentId').val() === auth.uid)",
+          ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu' || root.child('students').child($studentId).child('parentId').val() === auth.uid || auth.uid === $studentId)",
           ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')"
         }
       }
@@ -89,7 +89,7 @@
       ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')",
       "$year_sem": {
         "$studentId": {
-          ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu' || root.child('students').child($studentId).child('parentId').val() === auth.uid)",
+          ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu' || root.child('students').child($studentId).child('parentId').val() === auth.uid || auth.uid === $studentId)",
           ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')"
         }
       }
@@ -98,7 +98,7 @@
       ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')",
       "$year_sem": {
         "$studentId": {
-          ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu' || root.child('students').child($studentId).child('parentId').val() === auth.uid)",
+          ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu' || root.child('students').child($studentId).child('parentId').val() === auth.uid || auth.uid === $studentId)",
           ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')"
         }
       }
@@ -107,7 +107,7 @@
       ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')",
       "$year_sem": {
         "$studentId": {
-          ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu' || root.child('students').child($studentId).child('parentId').val() === auth.uid)",
+          ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu' || root.child('students').child($studentId).child('parentId').val() === auth.uid || auth.uid === $studentId)",
           ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')"
         }
       }
@@ -116,7 +116,7 @@
       ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')",
       "$year_sem": {
         "$studentId": {
-          ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu' || root.child('students').child($studentId).child('parentId').val() === auth.uid)",
+          ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu' || root.child('students').child($studentId).child('parentId').val() === auth.uid || auth.uid === $studentId)",
           ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')"
         }
       }
@@ -125,8 +125,8 @@
       ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')",
       "$year_sem": {
         "$studentId": {
-          ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu' || root.child('students').child($studentId).child('parentId').val() === auth.uid)",
-          ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu' || root.child('students').child($studentId).child('parentId').val() === auth.uid)"
+          ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu' || root.child('students').child($studentId).child('parentId').val() === auth.uid || auth.uid === $studentId)",
+          ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu' || root.child('students').child($studentId).child('parentId').val() === auth.uid || auth.uid === $studentId)"
         }
       }
     },
@@ -408,6 +408,10 @@
       ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')"
     },
     "rapor_finalization": {
+      ".read": "auth != null",
+      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')"
+    },
+    "class_rankings": {
       ".read": "auth != null",
       ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')"
     },

@@ -57,6 +57,11 @@
             text-align: center;
             font-size: 9.5pt;
         }
+        .rank-row td {
+            background-color: #f2f2f2 !important;
+            font-size: 9.5pt;
+            padding: 5px 8px;
+        }
         .sub-subject td:nth-child(1) {
             padding-left: 12px;
             color: #333333;
