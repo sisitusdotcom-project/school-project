@@ -129,10 +129,11 @@ container.innerHTML = `
 async renderClasses(container) {
 Router.setTitle('Kelas & E-Rapor', 'Pusat pengelolaan penilaian akademik, karakter, dan pencetakan rapor rombel.');
 const uid = Auth.currentUser.uid;
-const [classArr, students, subjects] = await Promise.all([
+const [classArr, students, subjects, settings] = await Promise.all([
 DB.getClassesForTeacher(uid),
 DB.getAllStudents(),
-DB.getSubjects()
+DB.getSubjects(),
+DB.getSettings()
 ]);
 const studentArr = DB.toArray(students);
 if (!classArr.length) {
@@ -205,7 +206,7 @@ container.innerHTML = `
 </div>
 `;
 container.querySelectorAll('.btn-print-modal-cls').forEach(btn => {
-btn.onclick = () => {
+btn.onclick = async () => {
 const classId = btn.dataset.printCls;
 const targetClass = classArr.find(c => c.id === classId);
 if (!targetClass) return;
@@ -215,18 +216,28 @@ const listContainer = document.getElementById('rapor-students-list');
 if (!classStudents.length) {
 listContainer.innerHTML = '<div class="card text-center text-muted p-3">Belum ada data murid terdaftar di kelas ini.</div>';
 } else {
-listContainer.innerHTML = classStudents.map((s, idx) => `
+listContainer.innerHTML = '<div class="card text-center text-muted p-3"><i class="ph ph-spinner"></i> Memuat data murid & peringkat...</div>';
+document.getElementById('modal-rapor-print').classList.add('active');
+const year = settings?.currentAcademicYear || AppConfig.DEFAULT_SETTINGS.currentAcademicYear;
+const sem = settings?.currentSemester || AppConfig.DEFAULT_SETTINGS.currentSemester;
+const rankMap = await DB.getClassRankings(year, sem, classId);
+listContainer.innerHTML = classStudents.map((s, idx) => {
+const rankInfo = rankMap[s.id];
+const rankBadge = (rankInfo && rankInfo.isTop10 && rankInfo.text) ? `<span class="badge badge-primary"><i class="ph ph-medal"></i> ${AppConfig.escapeHtml(rankInfo.text)}</span>` : '';
+return `
 <div class="rapor-student-row">
 <div class="rapor-student-info">
 <span class="badge badge-primary">${idx + 1}</span>
 <div>
 <strong>${AppConfig.escapeHtml(s.name)}</strong>
-<div class="text-muted small">${AppConfig.formatStudentIdentity(s)} · <span class="badge badge-success"><i class="ph ph-book-open"></i> Ummi: ${AppConfig.escapeHtml(s.ummiLevel || 'Pra-Jilid')}</span></div>
+<div class="text-muted small">${AppConfig.formatStudentIdentity(s)} · <span class="badge badge-success"><i class="ph ph-book-open"></i> Ummi: ${AppConfig.escapeHtml(s.ummiLevel || 'Pra-Jilid')}</span>${rankBadge ? ' · ' + rankBadge : ''}</div>
 </div>
 </div>
 <a href="print.html?id=${s.id}" target="_blank" class="btn btn-primary btn-sm"><i class="ph ph-printer"></i> Cetak Rapor F4</a>
 </div>
-`).join('');
+`;
+}).join('');
+return;
 }
 document.getElementById('modal-rapor-print').classList.add('active');
 };

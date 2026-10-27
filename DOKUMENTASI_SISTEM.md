@@ -354,6 +354,13 @@ Untuk menjamin sistem bebas dari duplikasi data (*DRY*) dan memiliki satu sumber
    * **Visual Masking Dinamis**: Setiap input bertipe nominal keuangan otomatis diformat dengan tanda titik ribuan standar Indonesia (`id-ID`, contoh: `1.234.567.890`) saat pengguna mengetik, dengan prefix visual `Rp`.
    * **Bebas Spinner Browser**: Menggunakan `type="text" inputmode="numeric"` untuk mencegah munculnya tombol panah stepper browser (`^v`) dan memastikan keyboard numerik aktif pada perangkat mobile.
    * **Konsistensi Data (SSOT & DRY)**: Disimpan ke basis data sebagai angka murni (`Number`, integer) melalui fungsi parser terpusat `AppConfig.parseRupiah()`, sehingga seluruh formula kalkulasi, total saldo, dan laporan tidak terganggu format teks.
+8. **Sistem Perangkingan Rapor (Top 10 Only, Kondisional Rapi):**
+   * **Aturan Tampilan Rapor**: Peringkat siswa di rapor hanya dimunculkan untuk siswa yang memperoleh peringkat 1 sampai 10 di kelasnya (`isTop10: true`), dengan format teks otomatis: `Peringkat X dari Y siswa` (di mana Y adalah total siswa aktif di kelas terkait).
+   * **Kondisional Peringkat > 10 (Tanpa Kolom / Baris Kosong)**: Untuk siswa dengan peringkat 11 ke atas atau yang belum memiliki rekapitulasi nilai, baris atau informasi peringkat dihilangkan sepenuhnya (tidak disisakan baris kosong, sel kosong, maupun kolom kosong). Tampilan tabel identitas rapor tetap padat dan rapi.
+   * **Implementasi SSOT & DRY**:
+     - Fungsi kalkulasi peringkat terpusat di `AppConfig.calculateClassRankings(students, allGrades)` dan `AppConfig.getStudentClassRank(studentId, classStudents, allGrades)`.
+     - Akses query data terpusat di `DB.getClassRankings(year, sem, classId)` dan `DB.getStudentClassRank(year, sem, studentId, classId)`.
+     - Terintegrasi secara seragam pada lembar cetak rapor F4 (`print.html` / `print.js`), modal cetak rapor guru (`guru/index.js`), kartu e-rapor wali murid (`ortu/index.js`), serta profil perkembangan siswa.
 
 ---
 

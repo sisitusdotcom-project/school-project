@@ -762,10 +762,34 @@ const DB = {
     return `${type}/${year.replace('/', '-')}_${sem}`;
   },
   async getAcademicGrades(year, sem, studentId) {
-    return this._readCollection(`${this._raporPath('academic_grades', year, sem)}/${studentId}`, {});
+    let res = await this._readCollection(`${this._raporPath('academic_grades', year, sem)}/${studentId}`, {});
+    if (!Object.keys(res).length && year && String(year).includes('/')) {
+      const parts = String(year).split('/');
+      res = await this._readCollection(`academic_grades/${parts[0]}/${parts[1]}_${sem}/${studentId}`, {});
+    }
+    return res;
   },
   async getAllAcademicGrades(year, sem) {
-    return this._readCollection(this._raporPath('academic_grades', year, sem), {});
+    let res = await this._readCollection(this._raporPath('academic_grades', year, sem), {});
+    if (year && String(year).includes('/')) {
+      const parts = String(year).split('/');
+      const alt = await this._readCollection(`academic_grades/${parts[0]}/${parts[1]}_${sem}`, {});
+      if (Object.keys(alt).length) {
+        res = Object.keys(res).length ? { ...alt, ...res } : alt;
+      }
+    }
+    return res;
+  },
+  async getClassRankings(year, sem, classId) {
+    const [students, allGrades] = await Promise.all([
+      this.getStudentsByClass(classId),
+      this.getAllAcademicGrades(year, sem)
+    ]);
+    return window.AppConfig?.calculateClassRankings ? window.AppConfig.calculateClassRankings(students, allGrades) : {};
+  },
+  async getStudentClassRank(year, sem, studentId, classId) {
+    const rankings = await this.getClassRankings(year, sem, classId);
+    return rankings[studentId] || null;
   },
   async getSubjectChapters(year, sem, classId, subjectId) {
     return this._read(`subject_chapters/${year}/${sem}/${classId}/${subjectId}`, []);

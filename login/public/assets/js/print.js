@@ -37,15 +37,17 @@ async function generateReport(studentId, container) {
     };
     const year = settings.currentAcademicYear;
     const sem = settings.currentSemester;
-    const [academic, cocu, stuEks, att, note, parentResp, chars] = await Promise.all([
+    const [academic, cocu, stuEks, att, note, parentResp, chars, rankResult] = await Promise.all([
       DB.getAcademicGrades(year, sem, studentId),
       DB.getCocurricular(year, sem, studentId),
       DB.getStudentExtracurriculars(year, sem, studentId),
       DB.getAttendance(year, sem, studentId),
       DB.getTeacherNote(year, sem, studentId),
       DB.getParentResponse(year, sem, studentId),
-      DB.getAssessments(year, sem, studentId)
+      DB.getAssessments(year, sem, studentId),
+      DB.getStudentClassRank(year, sem, studentId, student.classId)
     ]);
+    const rankText = (rankResult && rankResult.isTop10 && rankResult.text) ? rankResult.text : '';
     const normCategory = (cat) => {
       const c = (cat || '').toLowerCase();
       if (c === 'agama') return 'Agama';
@@ -230,6 +232,7 @@ async function generateReport(studentId, container) {
                   <td>Tahun Ajaran</td>
                   <td>: <span>${year}</span></td>
               </tr>
+              ${rankText ? `<tr><td>Peringkat Kelas</td><td colspan="3">: <strong>${rankText}</strong></td></tr>` : ''}
           </table>
           <table class="data-table">
               <thead>

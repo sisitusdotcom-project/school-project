@@ -1144,7 +1144,77 @@ if (!container) return;
 const selector = 'input[data-type="money"], input.input-money, input.input-rupiah, input[data-currency="rupiah"]';
 container.querySelectorAll(selector).forEach(attachRupiahMask);
 }
+function calculateClassRankings(students = {}, allGrades = {}) {
+const studentList = (Array.isArray(students) ? students : Object.entries(students || {}).map(([k, v]) => ({ id: v?.id || k, ...v }))).filter((s) => s && s.isActive !== false);
+if (!studentList.length) return {};
+const scored = studentList.map((st) => {
+const sId = st.id || st.nis || st.studentId;
+const grades = allGrades[sId] || (st.nis ? allGrades[st.nis] : null) || (st.nis ? allGrades['SISWA_' + st.nis] : null) || (st.id ? allGrades['SISWA_' + st.id] : null) || {};
+let totalScore = 0;
+let count = 0;
+Object.values(grades).forEach((g) => {
+const score = Number(g?.score);
+if (!isNaN(score) && score > 0) {
+totalScore += score;
+count++;
+}
+});
+const avgScore = count > 0 ? (totalScore / count) : 0;
+return {
+id: sId,
+nis: st.nis,
+name: st.name || sId,
+student: st,
+totalScore,
+avgScore,
+count
+};
+});
+scored.sort((a, b) => (b.totalScore - a.totalScore) || (b.avgScore - a.avgScore) || String(a.name).localeCompare(String(b.name)));
+const totalStudents = studentList.length;
+const rankings = {};
+scored.forEach((item, idx) => {
+let rankInfo;
+if (item.totalScore <= 0) {
+rankInfo = {
+rank: null,
+totalStudents,
+totalScore: 0,
+avgScore: '0',
+isTop10: false,
+text: null
+};
+} else {
+let rank = idx + 1;
+if (idx > 0) {
+const prev = scored[idx - 1];
+if (item.totalScore === prev.totalScore && Math.abs(item.avgScore - prev.avgScore) < 0.001) {
+rank = rankings[prev.id]?.rank || rank;
+}
+}
+const isTop10 = rank >= 1 && rank <= 10;
+rankInfo = {
+rank,
+totalStudents,
+totalScore: item.totalScore,
+avgScore: item.avgScore.toFixed(1),
+isTop10,
+text: isTop10 ? `Peringkat ${rank} dari ${totalStudents} siswa` : null
+};
+}
+rankings[item.id] = rankInfo;
+if (item.nis && item.nis !== item.id) rankings[item.nis] = rankInfo;
+if (item.student?.id && item.student.id !== item.id) rankings[item.student.id] = rankInfo;
+});
+return rankings;
+}
+function getStudentClassRank(studentId, classStudents = {}, allGrades = {}) {
+const rankings = calculateClassRankings(classStudents, allGrades);
+return rankings[studentId] || null;
+}
 window.AppConfig = Object.freeze({
+calculateClassRankings,
+getStudentClassRank,
 formatRupiah,
 parseRupiah,
 attachRupiahMask,

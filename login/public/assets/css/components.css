@@ -2743,6 +2743,7 @@ body{background:#fff !important;color:#000 !important;}
 .ortu-rapor-title{margin:0 0 6px 0;font-size:16px}
 .ortu-rapor-meta{margin:0;font-size:13px}
 .ortu-rapor-badge{font-size:12px;padding:6px 12px}
+.ortu-rapor-badges{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .ortu-rapor-footer{margin-top:16px;padding-top:14px;border-top:1px solid var(--border-color,#e2e8f0);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
 .ortu-rapor-note{margin:0;font-size:12.5px}
 .ortu-rapor-actions{display:inline-flex;gap:8px}
