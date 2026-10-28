@@ -1674,7 +1674,7 @@ border-radius: 0 0 var(--radius-sm) var(--radius-sm);
 }
 .mk-preview-frame {
 width: 100%;
-height: calc(100% + 56px);
+height: calc(100% + 130px);
 margin-top: -56px;
 border: none;
 flex: 1;
@@ -1689,6 +1689,10 @@ height: 60px;
 z-index: 10;
 pointer-events: auto;
 background: transparent;
+}
+.mk-preview-frame-raw {
+height: 100%;
+margin-top: 0;
 }
 .server-viewer-layout {
 display: flex;
@@ -1712,15 +1716,18 @@ z-index: 20;
 display: flex;
 align-items: center;
 gap: 12px;
+min-width: 0;
 }
 .server-viewer-logo {
 width: 32px;
 height: 32px;
 object-fit: contain;
+flex-shrink: 0;
 }
 .server-viewer-title-group {
 display: flex;
 flex-direction: column;
+min-width: 0;
 }
 .server-viewer-app-name {
 font-size: 11px;
@@ -1743,6 +1750,7 @@ text-overflow: ellipsis;
 display: flex;
 align-items: center;
 gap: 8px;
+flex-shrink: 0;
 }
 .server-viewer-main {
 flex: 1;
@@ -1767,6 +1775,30 @@ max-height: 90vh;
 object-fit: contain;
 border-radius: var(--radius-sm);
 box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+}
+.server-viewer-empty {
+flex: 1;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+gap: 12px;
+color: #94a3b8;
+padding: 24px;
+text-align: center;
+}
+.server-viewer-empty-icon {
+font-size: 48px;
+color: #64748b;
+}
+@media (max-width: 640px) {
+.server-viewer-header {
+padding: 8px 12px;
+}
+.server-viewer-doc-title {
+max-width: 160px;
+font-size: 13px;
+}
 }
 .mk-preview-img-wrap {
 width: 100%;

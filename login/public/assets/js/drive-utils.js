@@ -2,6 +2,7 @@ const DriveBridge = {
   extractFileId(url) {
     if (!url || typeof url !== 'string') return '';
     const cleanUrl = url.trim();
+    if (!cleanUrl) return '';
     const matchDrive = cleanUrl.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
     if (matchDrive && matchDrive[1]) return matchDrive[1];
     const matchUc = cleanUrl.match(/drive\.google\.com\/uc\?(?:[^&]+&)*id=([a-zA-Z0-9_-]+)/);
@@ -10,26 +11,47 @@ const DriveBridge = {
     if (matchOpen && matchOpen[1]) return matchOpen[1];
     const matchThumb = cleanUrl.match(/drive\.google\.com\/thumbnail\?(?:[^&]+&)*id=([a-zA-Z0-9_-]+)/);
     if (matchThumb && matchThumb[1]) return matchThumb[1];
+    const matchUserContent = cleanUrl.match(/drive\.usercontent\.google\.com\/[^\/]+\/([a-zA-Z0-9_-]+)/);
+    if (matchUserContent && matchUserContent[1]) return matchUserContent[1];
+    const matchLh3 = cleanUrl.match(/lh3\.googleusercontent\.com\/d\/([a-zA-Z0-9_-]+)/);
+    if (matchLh3 && matchLh3[1]) return matchLh3[1];
     const matchDocs = cleanUrl.match(/docs\.google\.com\/[a-z]+\/d\/([a-zA-Z0-9_-]+)/);
     if (matchDocs && matchDocs[1]) return matchDocs[1];
+    const matchId = cleanUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+    if (matchId && matchId[1]) return matchId[1];
+    if (/^[a-zA-Z0-9_-]{25,}$/.test(cleanUrl)) return cleanUrl;
     return '';
+  },
+  getServerDisplayUrl(rawUrl) {
+    const id = this.extractFileId(rawUrl);
+    if (id) return `https://server.musada.sch.id/docs/${id}`;
+    return rawUrl || '';
+  },
+  getPreviewEmbedUrl(rawUrl) {
+    const id = this.extractFileId(rawUrl);
+    if (id) return `https://drive.google.com/file/d/${id}/preview`;
+    return rawUrl || '';
   },
   getDownloadUrl(fileId) {
     if (!fileId) return '';
     return `https://drive.google.com/uc?export=download&id=${fileId}`;
   },
   getViewerUrl(rawUrl, title = 'Dokumen') {
-    if (!rawUrl || typeof rawUrl !== 'string') return '';
+    if (!rawUrl || typeof rawUrl !== 'string') return '#';
     const cleanUrl = rawUrl.trim();
     const fileId = this.extractFileId(cleanUrl);
     const isImage = /\.(jpg|jpeg|png|webp|gif|bmp)(\?.*)?$/i.test(cleanUrl) || cleanUrl.startsWith('data:image/');
-    if (isImage) {
-      return this.normalizeDriveImageUrl(cleanUrl, 'w1200', cleanUrl);
+    const cleanTitle = encodeURIComponent(title || 'Dokumen');
+    let viewerPath = 'viewer.html';
+    if (typeof window !== 'undefined' && window.location && window.location.pathname) {
+      if (!window.location.pathname.includes('/login/public/')) {
+        viewerPath = '/login/public/viewer.html';
+      }
     }
     if (fileId) {
-      return `https://drive.google.com/file/d/${fileId}/view?usp=sharing`;
+      return `${viewerPath}?id=${encodeURIComponent(fileId)}&title=${cleanTitle}${isImage ? '&type=image' : ''}`;
     }
-    return cleanUrl;
+    return `${viewerPath}?file=${encodeURIComponent(cleanUrl)}&title=${cleanTitle}${isImage ? '&type=image' : ''}`;
   },
   normalizeDriveImageUrl(rawUrl, size = 'w200', fallback = '') {
     if (!rawUrl) return fallback;
