@@ -94,6 +94,43 @@ const DBLibrary = {
     this.init();
     await this.db.ref(`library/books/${code}`).remove();
   },
+  async generateBookCode(category, shelfCode) {
+    this.init();
+    const books = await this.getBooks();
+    const catMap = {
+      'Board Book': 'BB', 'Buku Dongeng': 'BD', 'Cerita Anak': 'CA',
+      'Cerita Islami': 'CI', 'Dongeng Anak': 'DA', 'Dongeng anak': 'DA',
+      'Dongeng Islami': 'DI', 'Ensiklopedia Anak Islami': 'EA',
+      'E-Book Islami': 'EB', 'Cerita Anak & Fiksi': 'EB',
+      'Kemuhammadiyahan': 'EB', 'Pendidikan & Guru': 'EB',
+      'Fikih Anak': 'FA', 'Filsafat Dewasa': 'FD', 'Kamus': 'KA',
+      'Komik Anak': 'KA', 'Komik Aqidah': 'KA', 'Komik Islami': 'KI',
+      'Komik': 'KO', 'Majalah Anak': 'MA', 'Majalah Islam': 'MI',
+      'Majalah Islami': 'MI', 'Modul Pembelajaran': 'MP', 'Novel Anak': 'NA',
+      'Nonfiksi Edukatif': 'NE', 'Non-fiksi Edukatif': 'NE',
+      'Novel Fiksi Sastra Klasik': 'NF', 'Nonfiksi Ilmiah': 'NI',
+      'Novel': 'NO', 'Nonfiksi': 'NO'
+    };
+    const catTrimmed = (category || '').trim();
+    let cat = catMap[catTrimmed];
+    if (!cat) {
+      const words = catTrimmed.split(/\s+/).filter(Boolean);
+      if (words.length >= 2) cat = (words[0][0] + words[1][0]).toUpperCase();
+      else cat = (catTrimmed.substring(0, 2) || 'BK').toUpperCase();
+    }
+    const rak = (shelfCode || '1A').replace(/[^a-zA-Z0-9]/g, '').toUpperCase() || '1A';
+    const prefix = `${cat}-${rak}-`;
+    let maxNum = 0;
+    books.forEach(b => {
+      const c = b.code || '';
+      if (c.startsWith(prefix)) {
+        const parts = c.split('-');
+        const num = parseInt(parts[parts.length - 1], 10);
+        if (!isNaN(num) && num > maxNum) maxNum = num;
+      }
+    });
+    return `${prefix}${String(maxNum + 1).padStart(3, '0')}`;
+  },
   async getMembers() {
     this.init();
     const snap = await this.db.ref('library/members').once('value');
