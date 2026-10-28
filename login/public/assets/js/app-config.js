@@ -1004,7 +1004,7 @@ radiusMeters: 50
 });
 const ORIGINAL_SCHOOL_GEOFENCE = SCHOOL_GEOFENCE;
 const APP_DEFAULTS = Object.freeze({
-googleDriveUploadUrl: 'https://script.google.com/macros/s/AKfycbwHNSb34p_FcX_dTQuw87viaZ9joh2rT3KdtMLBVvwpocWzyF3HICPUPRfPuy63LDsNsw/exec',
+googleDriveUploadUrl: 'https://script.google.com/macros/s/AKfycbxk4PM_VNZt__dwfXuk5v3pI366vHDFG31HZNx2t_4jpmomd-2aUXgKkEHimB8DfJQcrg/exec',
 attendanceWorkerUrl: 'https://musada-absensi.sisitusdotcom.workers.dev/',
 attendanceGeofence: SCHOOL_GEOFENCE
 });

@@ -1,41 +1,41 @@
 const DriveBridge = {
-  extractFileId(rawUrl) {
-    if (!rawUrl || typeof rawUrl !== 'string') return null;
-    const url = rawUrl.trim();
-    if (!url) return null;
-    const m1 = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
-    if (m1 && m1[1]) return m1[1];
-    const m2 = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-    if (m2 && m2[1]) return m2[1];
-    const m3 = url.match(/drive\.usercontent\.google\.com\/[^\/]+\/([a-zA-Z0-9_-]+)/);
-    if (m3 && m3[1]) return m3[1];
-    const m4 = url.match(/lh3\.googleusercontent\.com\/d\/([a-zA-Z0-9_-]+)/);
-    if (m4 && m4[1]) return m4[1];
-    const m5 = url.match(/docs\.google\.com\/[^\/]+\/d\/([a-zA-Z0-9_-]+)/);
-    if (m5 && m5[1]) return m5[1];
-    return null;
+  extractFileId(url) {
+    if (!url || typeof url !== 'string') return '';
+    const cleanUrl = url.trim();
+    const matchDrive = cleanUrl.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
+    if (matchDrive && matchDrive[1]) return matchDrive[1];
+    const matchUc = cleanUrl.match(/drive\.google\.com\/uc\?(?:[^&]+&)*id=([a-zA-Z0-9_-]+)/);
+    if (matchUc && matchUc[1]) return matchUc[1];
+    const matchOpen = cleanUrl.match(/drive\.google\.com\/open\?(?:[^&]+&)*id=([a-zA-Z0-9_-]+)/);
+    if (matchOpen && matchOpen[1]) return matchOpen[1];
+    const matchThumb = cleanUrl.match(/drive\.google\.com\/thumbnail\?(?:[^&]+&)*id=([a-zA-Z0-9_-]+)/);
+    if (matchThumb && matchThumb[1]) return matchThumb[1];
+    const matchDocs = cleanUrl.match(/docs\.google\.com\/[a-z]+\/d\/([a-zA-Z0-9_-]+)/);
+    if (matchDocs && matchDocs[1]) return matchDocs[1];
+    return '';
   },
-  getServerDisplayUrl(rawUrl) {
-    const id = this.extractFileId(rawUrl);
-    if (id) return `https://server.musada.sch.id/docs/${id}`;
-    return rawUrl || '';
-  },
-  getPreviewEmbedUrl(rawUrl) {
-    const id = this.extractFileId(rawUrl);
-    if (id) return `https://drive.google.com/file/d/${id}/preview`;
-    return rawUrl || '';
+  getDownloadUrl(fileId) {
+    if (!fileId) return '';
+    return `https://drive.google.com/uc?export=download&id=${fileId}`;
   },
   getViewerUrl(rawUrl, title = 'Dokumen') {
-    if (!rawUrl || typeof rawUrl !== 'string') return '#';
-    const id = this.extractFileId(rawUrl);
-    const cleanTitle = encodeURIComponent(title || 'Dokumen');
-    if (id) return `viewer.html?id=${encodeURIComponent(id)}&title=${cleanTitle}`;
-    return `viewer.html?file=${encodeURIComponent(rawUrl.trim())}&title=${cleanTitle}`;
+    if (!rawUrl || typeof rawUrl !== 'string') return '';
+    const cleanUrl = rawUrl.trim();
+    const fileId = this.extractFileId(cleanUrl);
+    const isImage = /\.(jpg|jpeg|png|webp|gif|bmp)(\?.*)?$/i.test(cleanUrl) || cleanUrl.startsWith('data:image/');
+    if (isImage) {
+      return this.normalizeDriveImageUrl(cleanUrl, 'w1200', cleanUrl);
+    }
+    if (fileId) {
+      return `https://drive.google.com/file/d/${fileId}/view?usp=sharing`;
+    }
+    return cleanUrl;
   },
   normalizeDriveImageUrl(rawUrl, size = 'w200', fallback = '') {
-    if (!rawUrl || typeof rawUrl !== 'string') return fallback;
+    if (!rawUrl) return fallback;
     const url = rawUrl.trim();
     if (!url) return fallback;
+    if (url.startsWith('data:') || url.startsWith('blob:')) return url;
     const fileId = this.extractFileId(url);
     if (fileId) return `https://drive.google.com/thumbnail?id=${fileId}&sz=${size}`;
     return url;
@@ -50,21 +50,13 @@ const DriveBridge = {
     }
     return { uploadUrl };
   },
-  async uploadBase64({ fileName, mimeType, base64Data, folderId = null, folderKey = null }) {
-    const normalizedBase64 = typeof base64Data === 'string' && base64Data.includes('base64,')
-      ? base64Data.split('base64,')[1]
-      : base64Data;
-    if (!fileName || !mimeType || !normalizedBase64) {
-      throw new Error('File, tipe file, dan data base64 wajib diisi.');
-    }
+  async sendPost(action, params = {}) {
     const config = this.ensureUploadConfig();
     const payload = new URLSearchParams();
-    payload.append('action', 'upload');
-    payload.append('fileName', fileName);
-    payload.append('mimeType', mimeType);
-    payload.append('fileData', normalizedBase64);
-    if (folderKey) payload.append('folderKey', folderKey);
-    if (folderId) payload.append('folderId', folderId);
+    payload.append('action', action);
+    for (const [k, v] of Object.entries(params)) {
+      if (v !== null && v !== undefined) payload.append(k, v);
+    }
     const response = await fetch(config.uploadUrl, {
       method: 'POST',
       headers: {
@@ -77,12 +69,44 @@ const DriveBridge = {
       result = await response.json();
     } catch (error) {
       const text = await response.text();
-      throw new Error(text || 'Upload ke server berkas gagal.');
+      throw new Error(text || 'Koneksi ke server berkas gagal.');
     }
     if (!result || result.status !== 'success') {
-      throw new Error(result && result.message ? result.message : 'Upload ke server berkas gagal.');
+      throw new Error(result && result.message ? result.message : 'Operasi berkas di server gagal.');
     }
     return result;
+  },
+  async uploadBase64({ fileName, mimeType, base64Data, folderId = null, folderKey = null }) {
+    const normalizedBase64 = typeof base64Data === 'string' && base64Data.includes('base64,')
+      ? base64Data.split('base64,')[1]
+      : base64Data;
+    if (!fileName || !mimeType || !normalizedBase64) {
+      throw new Error('File, tipe file, dan data base64 wajib diisi.');
+    }
+    return this.sendPost('upload', { fileName, mimeType, fileData: normalizedBase64, folderId, folderKey });
+  },
+  async convertDocxToPdf(file, onProgress) {
+    if (onProgress) onProgress('Mengonversi Word ke PDF di server...');
+    const b64 = await new Promise((res, rej) => {
+      const r = new FileReader();
+      r.onload = () => res(r.result);
+      r.onerror = rej;
+      r.readAsDataURL(file);
+    });
+    const normalizedB64 = b64.includes('base64,') ? b64.split('base64,')[1] : b64;
+    const res = await this.sendPost('convertDocx', {
+      fileName: file.name,
+      mimeType: file.type || 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      fileData: normalizedB64
+    });
+    if (!res.pdfBase64) throw new Error('Hasil konversi PDF kosong.');
+    const binaryStr = atob(res.pdfBase64);
+    const bytes = new Uint8Array(binaryStr.length);
+    for (let i = 0; i < binaryStr.length; i++) {
+      bytes[i] = binaryStr.charCodeAt(i);
+    }
+    const pdfName = res.fileName || file.name.replace(/\.(docx|doc)$/i, '') + '.pdf';
+    return new File([bytes.buffer], pdfName, { type: 'application/pdf' });
   },
   async uploadProfilePhoto(uid, base64Data, mimeType = 'image/jpeg') {
     const ext = mimeType.includes('png') ? 'png' : 'jpg';
@@ -166,6 +190,21 @@ const SmartFileCompressor = {
       document.head.appendChild(script);
     });
   },
+  async ensureJsPdf() {
+    const existing = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
+    if (existing) return existing;
+    return new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+      script.onload = () => {
+        const found = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
+        if (found) resolve(found);
+        else reject(new Error('jsPDF gagal dimuat'));
+      };
+      script.onerror = () => reject(new Error('Gagal memuat pustaka jsPDF'));
+      document.head.appendChild(script);
+    });
+  },
   async compressPdf(file, onProgress) {
     try {
       if (onProgress) onProgress('Menyiapkan peramping PDF...');
@@ -177,8 +216,8 @@ const SmartFileCompressor = {
       if (!numPages || numPages > 60) {
         return file;
       }
-      const jsPDF = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF || null;
-      if (!jsPDF) return file;
+      const jsPdfClass = await this.ensureJsPdf();
+      if (!jsPdfClass) return file;
       let newPdf = null;
       for (let i = 1; i <= numPages; i++) {
         if (onProgress) onProgress(`Mengoptimalkan halaman ${i} dari ${numPages}...`);
@@ -199,7 +238,7 @@ const SmartFileCompressor = {
         const ptWidth = unscaledViewport.width;
         const ptHeight = unscaledViewport.height;
         if (i === 1) {
-          newPdf = new jsPDF({ orientation: orientation, unit: 'pt', format: [ptWidth, ptHeight] });
+          newPdf = new jsPdfClass({ orientation: orientation, unit: 'pt', format: [ptWidth, ptHeight] });
           newPdf.addImage(imgData, 'JPEG', 0, 0, ptWidth, ptHeight);
         } else {
           newPdf.addPage([ptWidth, ptHeight], orientation);
@@ -219,20 +258,31 @@ const SmartFileCompressor = {
   },
   async processFile(file, onProgress) {
     if (!file) return file;
+    const isWord = /\.(docx|doc)$/i.test(file.name) || (file.type && (file.type.includes('wordprocessingml') || file.type.includes('msword')));
+    if (isWord) {
+      const rawPdf = await DriveBridge.convertDocxToPdf(file, onProgress);
+      if (rawPdf) {
+        try {
+          const compPdf = await this.compressPdf(rawPdf, onProgress);
+          return compPdf;
+        } catch (compErr) {
+          console.warn('Kompresi PDF lanjutan dilewati:', compErr);
+          return rawPdf;
+        }
+      }
+    }
     const sizeMb = file.size / (1024 * 1024);
     if (file.type.startsWith('image/')) {
       if (file.size > 500 * 1024) {
         if (onProgress) onProgress(`Mengoptimalkan foto (${sizeMb.toFixed(1)} MB)...`);
-        const res = await this.compressImage(file, onProgress);
-        return res;
+        return this.compressImage(file, onProgress);
       }
       return file;
     }
     if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
-      if (file.size > 3 * 1024 * 1024) {
+      if (file.size > 2 * 1024 * 1024) {
         if (onProgress) onProgress(`Berkas besar (${sizeMb.toFixed(1)} MB). Merampingkan dokumen...`);
-        const res = await this.compressPdf(file, onProgress);
-        return res;
+        return this.compressPdf(file, onProgress);
       }
       return file;
     }
