@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,6 +20,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 </head>
+
 <body>
   <div id="app-loading" class="fullscreen-overlay">
     <div class="loader"></div>
@@ -71,9 +73,9 @@
           </div>
           <form id="login-form">
             <div class="form-group"><label for="email">Email atau NIS</label><input type="text" id="email"
-                placeholder="Email GTK atau NIS Siswa (contoh: 0623)" required></div>
+                placeholder="Enter your email..." required></div>
             <div class="form-group"><label for="password">Password</label>
-              <div class="password-wrapper"><input type="password" id="password" placeholder="Masukkan password"
+              <div class="password-wrapper"><input type="password" id="password" placeholder="Enter your password..."
                   required><button type="button" class="btn-toggle-password" id="toggle-password"
                   title="Lihat/Sembunyikan password"><i class="ph ph-eye" id="toggle-password-icon"></i></button></div>
             </div>
@@ -91,20 +93,23 @@
     <header class="mobile-header">
       <div class="brand-logo-small">
         <img src="../../assets/img/logo/logo.webp" alt="Logo Musada">
-        <span class="brand-logo-text"><strong>SMS MUSADA</strong><span>(Sistem Manajemen Sekolah)</span><small>SD Muhammadiyah 1 Sedati</small></span>
+        <span class="brand-logo-text"><strong>SMS MUSADA</strong><span>(Sistem Manajemen Sekolah)</span><small>SD
+            Muhammadiyah 1 Sedati</small></span>
       </div>
       <div class="mobile-header-actions">
-        <button class="btn-icon page-notif-btn" id="btn-notif-toggle-mobile" aria-label="Notifikasi"><i class="ph ph-bell"></i><span class="notif-badge" id="notif-badge-mobile">0</span></button>
-        <button class="btn-icon" id="btn-menu-toggle" aria-label="Buka menu navigasi"><i class="ph ph-list"></i></button>
+        <button class="btn-icon page-notif-btn" id="btn-notif-toggle-mobile" aria-label="Notifikasi"><i
+            class="ph ph-bell"></i><span class="notif-badge" id="notif-badge-mobile">0</span></button>
+        <button class="btn-icon" id="btn-menu-toggle" aria-label="Buka menu navigasi"><i
+            class="ph ph-list"></i></button>
       </div>
     </header>
     <aside id="sidebar" class="sidebar">
       <div class="sidebar-header">
         <div class="brand-logo-small">
           <img src="../../assets/img/logo/logo.webp" alt="Logo Musada">
-          <span class="brand-logo-text"><strong>SMS MUSADA</strong><span>(Sistem Manajemen Sekolah)</span><small>SD Muhammadiyah 1 Sedati</small></span>
-        </div><button
-          class="btn-icon mobile-only" id="btn-menu-close" aria-label="Tutup menu navigasi"><i
+          <span class="brand-logo-text"><strong>SMS MUSADA</strong><span>(Sistem Manajemen Sekolah)</span><small>SD
+              Muhammadiyah 1 Sedati</small></span>
+        </div><button class="btn-icon mobile-only" id="btn-menu-close" aria-label="Tutup menu navigasi"><i
             class="ph ph-x"></i></button>
       </div>
       <nav class="sidebar-nav" id="sidebar-nav"></nav>
@@ -174,8 +179,10 @@
               <div class="profile-role-badge" id="profile-role"></div>
               <input type="file" id="profile-photo-input" accept="image/*" class="hidden">
               <div class="profile-avatar-actions">
-                <button type="button" class="btn btn-outline btn-xs" id="btn-change-photo"><i class="ph ph-camera"></i> Ganti Foto</button>
-                <button type="button" class="btn btn-outline btn-xs text-danger hidden" id="btn-remove-photo"><i class="ph ph-trash"></i> Hapus</button>
+                <button type="button" class="btn btn-outline btn-xs" id="btn-change-photo"><i class="ph ph-camera"></i>
+                  Ganti Foto</button>
+                <button type="button" class="btn btn-outline btn-xs text-danger hidden" id="btn-remove-photo"><i
+                    class="ph ph-trash"></i> Hapus</button>
               </div>
             </div>
           </div>
@@ -185,7 +192,8 @@
           </div>
           <div class="form-group">
             <label for="profile-password">Ganti Password</label>
-            <input type="password" id="profile-password" minlength="6" placeholder="(Kosongkan jika tidak diubah, min. 6 karakter)">
+            <input type="password" id="profile-password" minlength="6"
+              placeholder="(Kosongkan jika tidak diubah, min. 6 karakter)">
           </div>
         </div>
         <div class="modal-footer">
@@ -220,9 +228,10 @@
   <script src="assets/js/pages/komite/index.js"></script>
   <script src="assets/js/notifications.js"></script>
   <script src="assets/js/app.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 </body>
+
 </html>
