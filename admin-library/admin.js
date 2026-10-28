@@ -41,42 +41,11 @@ const inpE = document.getElementById('updateEmail'); if (inpE) inpE.value = data
 const photoPreview = document.getElementById('adminPhotoPreview');
 const headerPhoto = document.getElementById('headerAdminPhoto');
 const placeholder = document.getElementById('adminPhotoPlaceholder');
-const fid = extractFileId(data.fotoUrl);
-const urls = [data.fotoUrl, fid ? `https://drive.google.com/thumbnail?id=${fid}&sz=w200` : '', fid ? `https://drive.google.com/uc?export=view&id=${fid}` : ''].filter(url => url && url.trim() !== '');
-let urlIndex = 0;
-function tryLoadProfilePhoto() {
-if (urlIndex >= urls.length) {
-if (photoPreview) { photoPreview.src = 'assets/img/logo.webp'; photoPreview.style.display = 'block'; }
+const photoUrl = (data.fotoUrl && data.fotoUrl.trim() !== '') ? data.fotoUrl : 'assets/img/logo.webp';
+if (photoPreview) { photoPreview.src = photoUrl; photoPreview.style.display = 'block'; }
 if (placeholder) placeholder.style.display = 'none';
-if (headerPhoto) { headerPhoto.src = 'assets/img/logo.webp'; headerPhoto.style.display = 'block'; }
-return;
-}
-const currentUrl = urls[urlIndex];
-const img = new Image();
-img.onload = function () {
-if (photoPreview) { photoPreview.src = currentUrl; photoPreview.style.display = 'block'; }
-if (placeholder) placeholder.style.display = 'none';
-if (headerPhoto) { headerPhoto.src = currentUrl; headerPhoto.style.display = 'block'; }
-};
-img.onerror = function () {
-urlIndex++;
-tryLoadProfilePhoto();
-};
-img.src = currentUrl;
-}
-if (urls.length > 0) {
-tryLoadProfilePhoto();
-} else {
-if (photoPreview) { photoPreview.src = 'assets/img/logo.webp'; photoPreview.style.display = 'block'; }
-if (placeholder) placeholder.style.display = 'none';
-if (headerPhoto) { headerPhoto.src = 'assets/img/logo.webp'; headerPhoto.style.display = 'block'; }
-}
+if (headerPhoto) { headerPhoto.src = photoUrl; headerPhoto.style.display = 'block'; }
 }).catch(err => console.log('Error loading admin profile:', err))
-}
-function extractFileId(url) {
-if (!url) return ''; if (url.includes('id=')) { return url.split('id=')[1] }
-if (url.includes('/d/')) { return url.split('/d/')[1].split('/')[0] }
-return ''
 }
 function handleChangePassword(event) {
 event.preventDefault(); const oldPassword = document.getElementById('oldPassword').value; const newPassword = document.getElementById('newPassword').value; const confirmPassword = document.getElementById('confirmPassword').value; if (newPassword !== confirmPassword) { showAlert('Password baru tidak cocok', 'error'); return }

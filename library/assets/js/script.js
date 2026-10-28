@@ -31,20 +31,14 @@ function showDashboard() { document.getElementById('loginScreen').style.display 
 function handleLogout() { showConfirm('Anda yakin ingin logout?', () => { localStorage.removeItem('sessionToken'); localStorage.removeItem('adminId'); localStorage.removeItem('adminNama'); location.reload() }) }
 function loadAdminProfile() {
   apiCall('getAdmin', { adminId: currentAdminId }).then(data => {
-    document.getElementById('adminUsername').textContent = data.username; document.getElementById('adminNama').textContent = data.namaLengkap; document.getElementById('adminEmail').textContent = data.email; if (data.fotoUrl && data.fotoUrl.trim() !== '') {
-      const photoPreview = document.getElementById('adminPhotoPreview'); const headerPhoto = document.getElementById('headerAdminPhoto'); const urls = [data.fotoUrl, `https://drive.google.com/thumbnail?id=${extractFileId(data.fotoUrl)}&sz=w200`, `https://drive.google.com/uc?export=view&id=${extractFileId(data.fotoUrl)}`].filter(url => url && url.trim() !== ''); let urlIndex = 0; function tryLoadProfilePhoto() {
-        if (urlIndex >= urls.length) { document.getElementById('adminPhotoPreview').style.display = 'none'; document.getElementById('adminPhotoPlaceholder').style.display = 'flex'; headerPhoto.style.display = 'none'; return }
-        const currentUrl = urls[urlIndex]; photoPreview.src = currentUrl; photoPreview.onerror = function () { urlIndex++; tryLoadProfilePhoto() }; photoPreview.onload = function () { document.getElementById('adminPhotoPreview').style.display = 'block'; document.getElementById('adminPhotoPlaceholder').style.display = 'none'; headerPhoto.src = currentUrl; headerPhoto.style.display = 'block' }
-      }
-      tryLoadProfilePhoto()
-    }
+    document.getElementById('adminUsername').textContent = data.username; document.getElementById('adminNama').textContent = data.namaLengkap; document.getElementById('adminEmail').textContent = data.email;
+    const photoUrl = (data.fotoUrl && data.fotoUrl.trim() !== '') ? data.fotoUrl : 'assets/img/logo.webp';
+    const photoPreview = document.getElementById('adminPhotoPreview'); const headerPhoto = document.getElementById('headerAdminPhoto'); const placeholder = document.getElementById('adminPhotoPlaceholder');
+    if (photoPreview) { photoPreview.src = photoUrl; photoPreview.style.display = 'block'; }
+    if (placeholder) placeholder.style.display = 'none';
+    if (headerPhoto) { headerPhoto.src = photoUrl; headerPhoto.style.display = 'block'; }
     document.getElementById('updateNamaLengkap').value = data.namaLengkap; document.getElementById('updateEmail').value = data.email
   }).catch(err => console.log('Error loading admin profile:', err))
-}
-function extractFileId(url) {
-  if (!url) return ''; if (url.includes('id=')) { return url.split('id=')[1] }
-  if (url.includes('/d/')) { return url.split('/d/')[1].split('/')[0] }
-  return ''
 }
 function handleChangePassword(event) {
   event.preventDefault(); const oldPassword = document.getElementById('oldPassword').value; const newPassword = document.getElementById('newPassword').value; const confirmPassword = document.getElementById('confirmPassword').value; if (newPassword !== confirmPassword) { showAlert('Password baru tidak cocok', 'error'); return }
@@ -55,18 +49,24 @@ function handleUpdateProfile(event) { event.preventDefault(); const namaLengkap 
 function handlePhotoUpload(event) {
   const file = event.target.files[0]; if (!file) return; if (!file.type.startsWith('image/')) { showAlert('File harus berupa gambar', 'error'); return }
   if (file.size > 5 * 1024 * 1024) { showAlert('Ukuran file terlalu besar (max 5MB)', 'error'); return }
-  showLoading('Mengupload foto...'); uploadPhotoToDrive(file)
+  showLoading('Memproses foto...'); uploadAdminPhotoToRTDB(file)
 }
-function uploadPhotoToDrive(file) {
+function uploadAdminPhotoToRTDB(file) {
   const reader = new FileReader(); reader.onload = function (e) {
-    const base64 = e.target.result.split(',')[1]; apiCall('uploadAdminPhoto', { adminId: currentAdminId, fileName: `admin_${currentAdminId}_${Date.now()}.jpg`, base64: base64, mimeType: file.type }).then(data => {
-      hideLoading(); if (!data.fotoUrl && !data.publicUrl) { showAlert('Foto URL tidak valid', 'error'); return }
-      const urls = [data.fotoUrl, data.publicUrl, `https://drive.google.com/uc?export=view&id=${data.fileId}`].filter(url => url); const photoPreview = document.getElementById('adminPhotoPreview'); let urlIndex = 0; function tryLoadPhoto() {
-        if (urlIndex >= urls.length) { showAlert('Foto diupload ke Drive tapi tidak bisa ditampilkan. Cek di folder: My Drive > Perpustakaan > admin', 'warning'); document.getElementById('adminPhotoPreview').style.display = 'none'; return }
-        const currentUrl = urls[urlIndex]; photoPreview.src = currentUrl; photoPreview.onerror = function () { urlIndex++; tryLoadPhoto() }; photoPreview.onload = function () { showAlert('Foto berhasil diupload', 'success'); document.getElementById('adminPhotoPlaceholder').style.display = 'none'; document.getElementById('adminPhotoPreview').style.display = 'block'; const headerPhoto = document.getElementById('headerAdminPhoto'); headerPhoto.src = currentUrl; headerPhoto.style.display = 'block' }
-      }
-      photoPreview.style.display = 'block'; tryLoadPhoto(); document.getElementById('photoUpload').value = ''
-    }).catch(err => { hideLoading(); showAlert(`Gagal upload foto: ${err}`, 'error') })
+    const img = new Image(); img.onload = function () {
+      const canvas = document.createElement('canvas'); const maxDim = 300; let w = img.width; let h = img.height;
+      if (w > h) { if (w > maxDim) { h = Math.round((h * maxDim) / w); w = maxDim } } else { if (h > maxDim) { w = Math.round((w * maxDim) / h); h = maxDim } }
+      canvas.width = w; canvas.height = h; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, w, h);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+      const id = currentAdminId || localStorage.getItem('adminId') || 'admin';
+      apiCall('uploadAdminPhoto', { adminId: id, dataUrl: dataUrl }).then(data => {
+        hideLoading(); showAlert('Foto profil berhasil disimpan di RTDB', 'success');
+        const photoPreview = document.getElementById('adminPhotoPreview'); if (photoPreview) { photoPreview.src = dataUrl; photoPreview.style.display = 'block'; }
+        const placeholder = document.getElementById('adminPhotoPlaceholder'); if (placeholder) placeholder.style.display = 'none';
+        const headerPhoto = document.getElementById('headerAdminPhoto'); if (headerPhoto) { headerPhoto.src = dataUrl; headerPhoto.style.display = 'block'; }
+        document.getElementById('photoUpload').value = ''
+      }).catch(err => { hideLoading(); showAlert(`Gagal menyimpan foto: ${err}`, 'error') })
+    }; img.src = e.target.result
   }; reader.readAsDataURL(file)
 }
 window.addEventListener('DOMContentLoaded', function () { startClock(); startLoginClock(); const session = localStorage.getItem('sessionToken'); if (session) { showDashboard() } }); function showLoading(message = 'Memproses...') { isLoading = !0; Swal.fire({ title: message, didOpen: (modal) => { Swal.showLoading() }, allowOutsideClick: !1, allowEscapeKey: !1 }) }
