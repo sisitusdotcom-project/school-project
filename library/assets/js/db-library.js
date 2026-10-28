@@ -373,11 +373,13 @@ const DBLibrary = {
   },
   async updateAdminProfile(username, data) {
     this.init();
-    await this.db.ref(`library/admins/${username}`).update({
-      namaLengkap: data.namaLengkap,
-      email: data.email,
-      ...(data.fotoUrl ? { fotoUrl: data.fotoUrl } : {})
-    });
+    const updates = {};
+    if (data.namaLengkap !== undefined) updates.namaLengkap = data.namaLengkap;
+    if (data.email !== undefined) updates.email = data.email;
+    if (data.fotoUrl !== undefined) updates.fotoUrl = data.fotoUrl;
+    if (Object.keys(updates).length > 0) {
+      await this.db.ref(`library/admins/${username}`).update(updates);
+    }
   },
   async updateAdminPassword(username, oldPassword, newPassword) {
     this.init();
