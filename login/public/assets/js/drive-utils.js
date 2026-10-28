@@ -127,7 +127,7 @@ const DriveBridge = {
     };
   },
   async convertDocxToPdf(file, onProgress) {
-    if (onProgress) onProgress('Mengonversi Word ke PDF di server...');
+    if (onProgress) onProgress('Menyiapkan dokumen...');
     const b64 = await new Promise((res, rej) => {
       const r = new FileReader();
       r.onload = () => res(r.result);
@@ -278,7 +278,7 @@ const SmartFileCompressor = {
   },
   async compressPdf(file, onProgress) {
     try {
-      if (onProgress) onProgress('Menyiapkan peramping PDF...');
+      if (onProgress) onProgress('Menyiapkan dokumen...');
       const pdfjs = await this.ensurePdfJs();
       const arrayBuffer = await file.arrayBuffer();
       const loadingTask = pdfjs.getDocument({ data: arrayBuffer });
@@ -291,7 +291,7 @@ const SmartFileCompressor = {
       if (!jsPdfClass) return file;
       let newPdf = null;
       for (let i = 1; i <= numPages; i++) {
-        if (onProgress) onProgress(`Mengoptimalkan halaman ${i} dari ${numPages}...`);
+        if (onProgress) onProgress(`Memproses halaman ${i} dari ${numPages}...`);
         const page = await pdfDoc.getPage(i);
         const unscaledViewport = page.getViewport({ scale: 1.0 });
         const targetWidth = Math.min(1400, unscaledViewport.width * 1.5);
@@ -342,17 +342,16 @@ const SmartFileCompressor = {
         }
       }
     }
-    const sizeMb = file.size / (1024 * 1024);
     if (file.type.startsWith('image/')) {
       if (file.size > 500 * 1024) {
-        if (onProgress) onProgress(`Mengoptimalkan foto (${sizeMb.toFixed(1)} MB)...`);
+        if (onProgress) onProgress('Memproses foto...');
         return this.compressImage(file, onProgress);
       }
       return file;
     }
     if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
       if (file.size > 2 * 1024 * 1024) {
-        if (onProgress) onProgress(`Berkas besar (${sizeMb.toFixed(1)} MB). Merampingkan dokumen...`);
+        if (onProgress) onProgress('Menyiapkan dokumen...');
         return this.compressPdf(file, onProgress);
       }
       return file;

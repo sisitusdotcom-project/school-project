@@ -441,12 +441,7 @@ const ModuleKit = {
               const curInfo = form.querySelector(`#mk-f-${f.key}_hint_info`);
               if (!curInfo) return;
               if (chosen) {
-                const mb = (chosen.size / (1024 * 1024)).toFixed(1);
-                if (chosen.size > 3 * 1024 * 1024) {
-                  curInfo.innerHTML = `<span class="text-primary font-weight-medium"><i class="ph ph-sparkle"></i> Berkas "${this.esc(chosen.name)}" (${mb} MB). Sistem otomatis merampingkan dokumen saat disimpan agar cepat terkirim.</span>`;
-                } else {
-                  curInfo.innerHTML = `<span class="text-success"><i class="ph ph-check"></i> Berkas dipilih: "${this.esc(chosen.name)}" (${mb} MB)</span>`;
-                }
+                curInfo.innerHTML = `<span class="text-success"><i class="ph ph-check-circle"></i> Berkas dipilih: ${this.esc(chosen.name)}</span>`;
               } else {
                 curInfo.innerHTML = '';
               }

@@ -158,42 +158,34 @@
     </main>
   </div>
   <div class="modal-overlay" id="modal-profile">
-    <div class="modal">
+    <div class="modal modal-profile-dialog">
       <div class="modal-header">
         <h3 class="modal-title">Profil Saya</h3>
         <button class="btn-icon" data-close-modal="modal-profile"><i class="ph ph-x"></i></button>
       </div>
       <form id="form-profile">
         <div class="modal-body">
-          <div class="profile-avatar-editor">
+          <div class="profile-card-summary">
             <div class="profile-avatar-preview" id="profile-avatar-preview">
               <i class="ph ph-user"></i>
             </div>
-            <div class="profile-avatar-info">
+            <div class="profile-meta">
+              <div class="profile-name-text" id="profile-name"></div>
+              <div class="profile-role-badge" id="profile-role"></div>
               <input type="file" id="profile-photo-input" accept="image/*" class="hidden">
-              <div class="profile-avatar-btns">
-                <button type="button" class="btn btn-outline btn-sm" id="btn-change-photo"><i class="ph ph-camera"></i> Ganti Foto</button>
-                <button type="button" class="btn btn-outline btn-sm text-danger" id="btn-remove-photo" style="display:none;"><i class="ph ph-trash"></i> Hapus</button>
+              <div class="profile-avatar-actions">
+                <button type="button" class="btn btn-outline btn-xs" id="btn-change-photo"><i class="ph ph-camera"></i> Ganti Foto</button>
+                <button type="button" class="btn btn-outline btn-xs text-danger hidden" id="btn-remove-photo"><i class="ph ph-trash"></i> Hapus</button>
               </div>
-              <small class="text-muted">Format JPG/PNG, otomatis dioptimalkan maks 320x320 px.</small>
             </div>
           </div>
           <div class="form-group">
-            <label>Nama Pengguna</label>
-            <input type="text" id="profile-name" disabled class="input-disabled">
-          </div>
-          <div class="form-group">
-            <label>Peran / Tugas</label>
-            <input type="text" id="profile-role" disabled class="input-disabled">
-          </div>
-          <div class="form-group">
-            <label>Email</label>
+            <label for="profile-email">Email</label>
             <input type="email" id="profile-email" placeholder="contoh@gmail.com">
           </div>
           <div class="form-group">
-            <label>Ganti Password</label>
-            <input type="password" id="profile-password" minlength="6" placeholder="(Kosongkan jika tidak diubah)">
-            <small class="text-muted">Minimal 6 karakter.</small>
+            <label for="profile-password">Ganti Password</label>
+            <input type="password" id="profile-password" minlength="6" placeholder="(Kosongkan jika tidak diubah, min. 6 karakter)">
           </div>
         </div>
         <div class="modal-footer">

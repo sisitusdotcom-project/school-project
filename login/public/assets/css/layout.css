@@ -751,6 +751,16 @@
     padding: 12px 12px 18px;
     max-width: 100%;
   }
+  .profile-card-summary {
+    padding: 10px 12px;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .profile-avatar-preview {
+    width: 52px;
+    height: 52px;
+    font-size: 22px;
+  }
 }
 @media (min-width:1024px) {
   .sidebar {
@@ -764,26 +774,30 @@
   }
 }
 .nav-section-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin: 1.5rem 1rem 0.5rem 1rem; }
-.profile-avatar-editor {
+.modal-profile-dialog {
+  max-width: 440px;
+}
+.profile-card-summary {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   padding: 12px 14px;
   background: var(--bg-hover, #f8fafc);
   border: 1px solid var(--border-color, #e2e8f0);
   border-radius: 12px;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
+  min-width: 0;
 }
 .profile-avatar-preview {
-  width: 72px;
-  height: 72px;
+  width: 58px;
+  height: 58px;
   border-radius: 50%;
   background: #0f172a;
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 32px;
+  font-size: 26px;
   overflow: hidden;
   flex-shrink: 0;
   border: 2px solid var(--primary-color, #2563eb);
@@ -793,15 +807,39 @@
   height: 100%;
   object-fit: cover;
 }
-.profile-avatar-info {
+.profile-meta {
   display: flex;
   flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
+}
+.profile-name-text {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-main, #0f172a);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.profile-role-badge {
+  font-size: 11px;
+  color: var(--text-muted, #64748b);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-bottom: 2px;
+}
+.profile-avatar-actions {
+  display: flex;
+  flex-wrap: wrap;
   gap: 6px;
 }
-.profile-avatar-btns {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.profile-avatar-actions .btn {
+  padding: 4px 8px;
+  font-size: 11px;
+  border-radius: 6px;
+  line-height: 1.2;
 }
 .input-disabled {
   background-color: var(--bg-hover, #f1f5f9) !important;

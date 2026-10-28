@@ -129,8 +129,16 @@ const App = {
         const previewEl = document.getElementById('profile-avatar-preview');
         const removeBtn = document.getElementById('btn-remove-photo');
         const fileInput = document.getElementById('profile-photo-input');
-        if (nameEl) nameEl.value = AppConfig.formatUserName(u);
-        if (roleEl) roleEl.value = AppConfig.getRoleAssignmentLabel(u || { role: Auth.currentRole });
+        if (nameEl) {
+          const val = AppConfig.formatUserName(u);
+          if (nameEl.tagName === 'INPUT') nameEl.value = val;
+          else nameEl.textContent = val;
+        }
+        if (roleEl) {
+          const val = AppConfig.getRoleAssignmentLabel(u || { role: Auth.currentRole });
+          if (roleEl.tagName === 'INPUT') roleEl.value = val;
+          else roleEl.textContent = val;
+        }
         if (emailEl) emailEl.value = Auth.currentUser.email || '';
         if (pwdEl) pwdEl.value = '';
         if (fileInput) fileInput.value = '';
@@ -139,10 +147,16 @@ const App = {
           if (photoUrl) {
             const normalized = DriveBridge.normalizeDriveImageUrl(photoUrl, 'w200', '');
             previewEl.innerHTML = `<img src="${normalized}" alt="Foto profil">`;
-            if (removeBtn) removeBtn.style.display = 'inline-flex';
+            if (removeBtn) {
+              removeBtn.classList.remove('hidden');
+              removeBtn.style.display = 'inline-flex';
+            }
           } else {
             previewEl.innerHTML = '<i class="ph ph-user"></i>';
-            if (removeBtn) removeBtn.style.display = 'none';
+            if (removeBtn) {
+              removeBtn.classList.add('hidden');
+              removeBtn.style.display = 'none';
+            }
           }
         }
         App.openModal('modal-profile');
@@ -168,7 +182,10 @@ const App = {
           if (previewEl) {
             previewEl.innerHTML = `<img src="${dataUrl}" alt="Pratinjau foto baru">`;
           }
-          if (removePhotoBtn) removePhotoBtn.style.display = 'inline-flex';
+          if (removePhotoBtn) {
+            removePhotoBtn.classList.remove('hidden');
+            removePhotoBtn.style.display = 'inline-flex';
+          }
         } catch (err) {
           alert('Gagal memproses foto: ' + err.message);
         }
@@ -182,6 +199,7 @@ const App = {
         const fileInput = document.getElementById('profile-photo-input');
         if (previewEl) previewEl.innerHTML = '<i class="ph ph-user"></i>';
         if (fileInput) fileInput.value = '';
+        removePhotoBtn.classList.add('hidden');
         removePhotoBtn.style.display = 'none';
       });
     }
