@@ -1559,17 +1559,22 @@ alert('Kamera belum siap. Silakan tunggu sebentar lalu coba lagi.');
 return;
 }
 try {
+const maxDim = 720;
+const w = cameraVideo.videoWidth;
+const h = cameraVideo.videoHeight;
+const scale = Math.min(1, maxDim / Math.max(w, h));
+const targetW = Math.max(1, Math.round(w * scale));
+const targetH = Math.max(1, Math.round(h * scale));
 const canvas = document.createElement('canvas');
-canvas.width = cameraVideo.videoWidth;
-canvas.height = cameraVideo.videoHeight;
+canvas.width = targetW;
+canvas.height = targetH;
 const ctx = canvas.getContext('2d');
 ctx.translate(canvas.width, 0);
 ctx.scale(-1, 1);
-ctx.drawImage(cameraVideo, 0, 0, canvas.width, canvas.height);
-const snapshot = canvas.toDataURL('image/jpeg', 0.82);
-const compressed = await compressImageDataUrl(snapshot, 1600, 0.82);
-capturedProofDataUrl = compressed;
-proofPreview.src = compressed;
+ctx.drawImage(cameraVideo, 0, 0, targetW, targetH);
+const snapshot = canvas.toDataURL('image/jpeg', 0.75);
+capturedProofDataUrl = snapshot;
+proofPreview.src = snapshot;
 proofWrapper.style.display = 'block';
 proofStatus.innerText = 'Foto siap dikirim';
 cameraCaptureBtn.innerText = 'Ambil Ulang Foto';
@@ -1943,9 +1948,8 @@ alert('Harap ambil foto bukti kehadiran dari kamera sebelum presensi disimpan.')
 return;
 }
 btn.disabled = true;
-btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Memproses...';
+btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Mengirim presensi...';
 try {
-const compressedProof = await compressImageDataUrl(capturedProofDataUrl, 1600, 0.82);
 const isUmmi = AppConfig.isUserUmmi(Auth.userData || Auth.currentUser);
 const lateInput = document.getElementById('attendance-late-reason-input');
 const lateReasonVal = (type === 'in' && lateInput) ? lateInput.value.trim() : '';
@@ -1953,7 +1957,7 @@ const result = await DB.submitTeacherAttendanceToWorker({
 dateStr,
 teacherId,
 type,
-photoDataUrl: compressedProof,
+photoDataUrl: capturedProofDataUrl,
 location: currentLocation,
 accuracy: currentAccuracy,
 isUmmi,
