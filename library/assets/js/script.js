@@ -609,30 +609,26 @@ function submitRombel(event) {
 }
 function handleResetData() {
   Swal.fire({
-    title: '<i class="fas fa-exclamation-triangle" style="color: #EF4444;"></i> Reset & Rapikan Data', html: `
+    title: '<i class="fas fa-sync-alt" style="color: #EF4444;"></i> Reset Operasional Sirkulasi', html: `
       <div style="text-align: left; font-size: 0.92rem; line-height: 1.8; color: #475569;">
-        <p style="margin-bottom: 12px;">Proses ini akan:</p>
+        <p style="margin-bottom: 12px;">Proses tutup periode / reset operasional ini akan:</p>
         <div style="background: #F8FAFC; padding: 12px 16px; border-radius: 8px; margin-bottom: 12px;">
           <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-            <i class="fas fa-users" style="color: #667eea; width: 16px;"></i>
-            <span>Sortir & reset kode <strong>semua anggota</strong></span>
+            <i class="fas fa-book" style="color: #10B981; width: 16px;"></i>
+            <span>Pulihkan stok seluruh buku ke kondisi tersedia (100%)</span>
           </div>
           <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-            <i class="fas fa-book" style="color: #8B5CF6; width: 16px;"></i>
-            <span>Sortir & reset kode <strong>semua buku</strong></span>
-          </div>
-          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-            <i class="fas fa-exchange-alt" style="color: #10B981; width: 16px;"></i>
-            <span>Update referensi di <strong>transaksi & kunjungan</strong></span>
+            <i class="fas fa-exchange-alt" style="color: #667eea; width: 16px;"></i>
+            <span>Selesaikan seluruh sisa peminjaman aktif yang belum kembali</span>
           </div>
           <div style="display: flex; align-items: center; gap: 8px;">
-            <i class="fas fa-print" style="color: #F59E0B; width: 16px;"></i>
-            <span>Reset <strong>status cetak</strong> semua data</span>
+            <i class="fas fa-shield-alt" style="color: #059669; width: 16px;"></i>
+            <span>Kode anggota (SSOT NIS) & kode rak buku tetap aman</span>
           </div>
         </div>
-        <p style="color: #EF4444; font-weight: 600; margin: 0;">⚠️ Tindakan ini tidak dapat dibatalkan!</p>
+        <p style="color: #EF4444; font-weight: 600; margin: 0;">⚠️ Tindakan ini menyetel ulang status sirkulasi buku.</p>
       </div>
-    `, icon: 'warning', showCancelButton: !0, confirmButtonText: '<i class="fas fa-check"></i> Ya, Lanjutkan Reset', cancelButtonText: '<i class="fas fa-times"></i> Batal', confirmButtonColor: '#EF4444', cancelButtonColor: '#6b7280', focusCancel: !0, customClass: { popup: 'swal-wide' }
+    `, icon: 'warning', showCancelButton: !0, confirmButtonText: '<i class="fas fa-check"></i> Ya, Lanjutkan', cancelButtonText: '<i class="fas fa-times"></i> Batal', confirmButtonColor: '#EF4444', cancelButtonColor: '#6b7280', focusCancel: !0, customClass: { popup: 'swal-wide' }
   }).then((result) => {
     if (result.isConfirmed) {
       Swal.fire({
@@ -650,31 +646,27 @@ function handleResetData() {
   })
 }
 function executeResetData() {
-  showLoading('Sedang mereset & merapikan data...\nProses ini mungkin membutuhkan beberapa saat.'); const btnReset = document.getElementById('btnResetData'); if (btnReset) btnReset.disabled = !0; apiCall('resetData', {}).then(data => {
+  showLoading('Sedang mereset operasional sirkulasi...\nMohon tunggu...'); const btnReset = document.getElementById('btnResetData'); if (btnReset) btnReset.disabled = !0; apiCall('resetData', {}).then(data => {
     hideLoading(); if (btnReset) btnReset.disabled = !1; Swal.fire({
       title: '<i class="fas fa-check-circle" style="color: #10B981;"></i> Reset Berhasil!', html: `
           <div style="text-align: left; font-size: 0.92rem; line-height: 1.8; color: #475569;">
             <div style="background: linear-gradient(135deg, #ECFDF5, #D1FAE5); padding: 16px; border-radius: 10px; margin-bottom: 12px;">
               <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-                <i class="fas fa-users" style="color: #059669;"></i>
-                <strong>${data.anggotaCount || 0} anggota</strong> berhasil diurutkan
-              </div>
-              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
                 <i class="fas fa-book" style="color: #059669;"></i>
-                <strong>${data.bukuCount || 0} buku</strong> berhasil diurutkan
+                <strong>${data.bukuCount || 0} buku</strong> stok berhasil dipulihkan
               </div>
               <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-                <i class="fas fa-code" style="color: #059669;"></i>
-                <strong>${data.anggotaChanges || 0} kode anggota</strong> diperbarui
+                <i class="fas fa-exchange-alt" style="color: #059669;"></i>
+                <strong>${data.transaksiCount || 0} transaksi aktif</strong> diselesaikan
               </div>
               <div style="display: flex; align-items: center; gap: 8px;">
-                <i class="fas fa-code" style="color: #059669;"></i>
-                <strong>${data.bukuChanges || 0} kode buku</strong> diperbarui
+                <i class="fas fa-users" style="color: #059669;"></i>
+                <strong>${data.anggotaCount || 0} anggota</strong> kuota siap digunakan
               </div>
             </div>
             <p style="margin: 0; color: #64748b; font-size: 0.85rem;">
               <i class="fas fa-info-circle"></i> 
-              Semua referensi di transaksi dan kunjungan telah diperbarui secara otomatis.
+              Master data siswa (SSOT NIS) dan kode rak buku tetap terjaga utuh.
             </p>
           </div>
         `, icon: 'success', confirmButtonText: 'Selesai', confirmButtonColor: '#667eea'

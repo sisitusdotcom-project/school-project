@@ -509,13 +509,7 @@ const DBLibrary = {
     let booksCount = 0;
     Object.keys(books).forEach(k => {
       updates[`library/books/${k}/stockAvailable`] = parseInt(books[k].stockTotal, 10) || 1;
-      updates[`library/books/${k}/printStatus`] = '';
       booksCount++;
-    });
-    let membersCount = 0;
-    Object.keys(members).forEach(k => {
-      updates[`library/members/${k}/printStatus`] = '';
-      membersCount++;
     });
     let trxCount = 0;
     Object.keys(trxs).forEach(k => {
@@ -527,10 +521,10 @@ const DBLibrary = {
     });
     await this.db.ref().update(updates);
     return {
-      message: 'Data berhasil direset dan dirapikan',
-      anggotaCount: membersCount,
+      message: 'Operasional perpustakaan berhasil direset dan dirapikan',
       bukuCount: booksCount,
-      transaksiCount: trxCount
+      transaksiCount: trxCount,
+      anggotaCount: Object.keys(members).length
     };
   }
 };

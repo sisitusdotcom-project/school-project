@@ -725,26 +725,25 @@
                     </form>
                   </div>
                   <div class="card settings-card">
-                    <h3 class="settings-title"><i class="fas fa-sync-alt text-danger"></i> Reset & Rapikan Data</h3>
+                    <h3 class="settings-title"><i class="fas fa-sync-alt text-danger"></i> Reset Operasional Sirkulasi</h3>
                     <div class="reset-desc text-muted text-sm mb-20 line-height-17">
-                      <p class="mb-10">Fitur ini akan melakukan:</p>
+                      <p class="mb-10">Fitur penutupan periode tahun ajaran untuk merapikan sirkulasi:</p>
                       <ul class="pl-20 m-0">
-                        <li>Reset Status semua buku menjadi "Tersedia"</li>
-                        <li>Hapus riwayat Transaksi aktif (buku yang sedang dipinjam dianggap hilang/selesai)</li>
-                        <li>Rapikan sisa kuota anggota agar kembali utuh (2 buku maksimal)</li>
-                        <li>Sangat disarankan dilakukan setiap akhir tahun ajaran baru</li>
+                        <li>Mengembalikan seluruh stok buku ke kondisi tersedia penuh (100%)</li>
+                        <li>Menutup seluruh sisa transaksi peminjaman aktif yang belum kembali</li>
+                        <li>Menyegarkan kuota peminjaman seluruh anggota perpustakaan</li>
+                        <li>Master data siswa (SSOT NIS) dan kode rak buku tetap aman & terjaga utuh</li>
                       </ul>
                     </div>
                     <div class="reset-warning">
                       <div class="flex-center-left gap-10">
                         <i class="fas fa-exclamation-triangle text-warning-dark text-lg"></i>
-                        <span class="text-warning-dark fw-500 text-sm"> Peringatan: Data yang direset tidak dapat
-                          dikembalikan. Pastikan semua buku fisik sudah berada di perpus! </span>
+                        <span class="text-warning-dark fw-500 text-sm"> Peringatan: Seluruh stok akan disetel ke kondisi tersedia. Pastikan buku fisik sudah berada di perpustakaan! </span>
                       </div>
                     </div>
                     <button type="button" class="btn-danger w-100 p-15 text-md fw-600 btn-rounded flex-center gap-10"
                       data-action="handleResetData" id="btnResetData">
-                      <i class="fas fa-sync-alt"></i> Reset & Rapikan Data </button>
+                      <i class="fas fa-sync-alt"></i> Reset Operasional Sirkulasi </button>
                   </div>
                 </div>
               </div>
