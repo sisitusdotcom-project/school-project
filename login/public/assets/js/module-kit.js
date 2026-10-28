@@ -432,7 +432,26 @@ const ModuleKit = {
         }
         if (f.type === 'file') {
           const fileInput = form.querySelector(`#mk-f-${f.key}_file`);
-          if (fileInput) fileInput.value = '';
+          const infoEl = form.querySelector(`#mk-f-${f.key}_hint_info`);
+          if (infoEl) infoEl.innerHTML = '';
+          if (fileInput) {
+            fileInput.value = '';
+            fileInput.onchange = (e) => {
+              const chosen = e.target.files && e.target.files[0];
+              const curInfo = form.querySelector(`#mk-f-${f.key}_hint_info`);
+              if (!curInfo) return;
+              if (chosen) {
+                const mb = (chosen.size / (1024 * 1024)).toFixed(1);
+                if (chosen.size > 3 * 1024 * 1024) {
+                  curInfo.innerHTML = `<span class="text-primary font-weight-medium"><i class="ph ph-sparkle"></i> Berkas "${this.esc(chosen.name)}" (${mb} MB). Sistem otomatis merampingkan dokumen saat disimpan agar cepat terkirim.</span>`;
+                } else {
+                  curInfo.innerHTML = `<span class="text-success"><i class="ph ph-check"></i> Berkas dipilih: "${this.esc(chosen.name)}" (${mb} MB)</span>`;
+                }
+              } else {
+                curInfo.innerHTML = '';
+              }
+            };
+          }
           const curEl = form.querySelector(`#mk-f-${f.key}_current`);
           if (curEl) {
             if (row && row[f.key]) {
@@ -591,8 +610,21 @@ const ModuleKit = {
             const hiddenEl = form.querySelector(`#mk-f-${f.key}`);
             let value = hiddenEl.value.trim();
             if (fileEl && fileEl.files && fileEl.files[0]) {
-              btn.textContent = 'Mengunggah file...';
-              const file = fileEl.files[0];
+              btn.textContent = 'Memeriksa berkas...';
+              let file = fileEl.files[0];
+              const origSize = file.size;
+              if (window.SmartFileCompressor) {
+                file = await window.SmartFileCompressor.processFile(file, (msg) => {
+                  btn.textContent = msg;
+                });
+              }
+              const finalMb = (file.size / (1024 * 1024)).toFixed(1);
+              const origMb = (origSize / (1024 * 1024)).toFixed(1);
+              if (file.size < origSize) {
+                btn.textContent = `Optimal (${origMb} MB → ${finalMb} MB). Mengunggah...`;
+              } else {
+                btn.textContent = 'Mengunggah berkas...';
+              }
               const b64 = await new Promise((res, rej) => {
                 const r = new FileReader();
                 r.onload = () => res(r.result);
@@ -747,7 +779,7 @@ const ModuleKit = {
     } else if (field.type === 'textarea') {
       control = `<textarea id="${id}" rows="3"${req}${dis}></textarea>`;
     } else if (field.type === 'file') {
-      control = `<div class="mk-file-box"><input type="hidden" id="${id}"><input type="file" id="${id}_file" class="mk-file-input" accept="${field.accept || '*/*'}"><div class="mk-file-hint text-muted"><i class="ph ph-upload-simple"></i> Unggah berkas dari perangkat (PDF, Dokumen, atau Gambar)</div><div id="${id}_current" class="mk-file-current"></div></div>`;
+      control = `<div class="mk-file-box"><input type="hidden" id="${id}"><input type="file" id="${id}_file" class="mk-file-input" accept="${field.accept || '*/*'}"><div class="mk-file-hint text-muted"><i class="ph ph-upload-simple"></i> Unggah berkas dari perangkat (PDF, Dokumen, atau Gambar)</div><div id="${id}_hint_info" class="mk-file-hint-info mt-5 text-sm"></div><div id="${id}_current" class="mk-file-current"></div></div>`;
     } else if (field.type === 'money') {
       control = `<div class="input-money-wrap"><span class="input-money-prefix">Rp</span><input type="text" inputmode="numeric" id="${id}" class="input-money" placeholder="0" data-type="money"${req}${dis}></div>`;
     } else {
