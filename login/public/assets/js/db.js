@@ -92,6 +92,9 @@ const DB = {
     const result = await DriveBridge.uploadBase64({ fileName, mimeType, base64Data, folderId });
     return result.fileUrl || null;
   },
+  async uploadFile(file, options = {}) {
+    return DriveBridge.uploadFile(file, options);
+  },
   async createUserInDB(uid, data) {
     if (!isDBReady()) return;
     await db.ref(`users/${uid}`).set({

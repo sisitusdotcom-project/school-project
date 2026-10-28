@@ -611,29 +611,10 @@ const ModuleKit = {
             let value = hiddenEl.value.trim();
             if (fileEl && fileEl.files && fileEl.files[0]) {
               btn.textContent = 'Memeriksa berkas...';
-              let file = fileEl.files[0];
-              const origSize = file.size;
-              if (window.SmartFileCompressor) {
-                file = await window.SmartFileCompressor.processFile(file, (msg) => {
-                  btn.textContent = msg;
-                });
-              }
-              const finalMb = (file.size / (1024 * 1024)).toFixed(1);
-              const origMb = (origSize / (1024 * 1024)).toFixed(1);
-              if (file.size < origSize) {
-                btn.textContent = `Optimal (${origMb} MB → ${finalMb} MB). Mengunggah...`;
-              } else {
-                btn.textContent = 'Mengunggah berkas...';
-              }
-              const b64 = await new Promise((res, rej) => {
-                const r = new FileReader();
-                r.onload = () => res(r.result);
-                r.onerror = rej;
-                r.readAsDataURL(file);
+              const up = await DriveBridge.uploadFile(fileEl.files[0], {
+                folderKey: f.folderKey || 'uploads',
+                onProgress: (msg) => { btn.textContent = msg; }
               });
-              const ext = file.name.split('.').pop();
-              const fileName = `${f.folderKey || 'uploads'}_${Date.now()}.${ext}`;
-              const up = await DriveBridge.uploadBase64({ fileName, mimeType: file.type, base64Data: b64, folderKey: f.folderKey || 'uploads' });
               value = up.fileUrl;
               hiddenEl.value = value;
             }

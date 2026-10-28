@@ -85,6 +85,47 @@ const DriveBridge = {
     }
     return this.sendPost('upload', { fileName, mimeType, fileData: normalizedBase64, folderId, folderKey });
   },
+  async uploadFile(file, { folderKey = 'uploads', folderId = null, onProgress = null } = {}) {
+    if (!file) throw new Error('Berkas tidak ditemukan.');
+    const origSize = file.size;
+    let processed = file;
+    if (window.SmartFileCompressor && typeof window.SmartFileCompressor.processFile === 'function') {
+      processed = await window.SmartFileCompressor.processFile(file, onProgress);
+    }
+    const origMb = (origSize / (1024 * 1024)).toFixed(1);
+    const finalMb = (processed.size / (1024 * 1024)).toFixed(1);
+    if (onProgress) {
+      if (processed.size < origSize) {
+        onProgress(`Optimal (${origMb} MB → ${finalMb} MB). Mengunggah...`);
+      } else {
+        onProgress('Mengunggah berkas...');
+      }
+    }
+    const b64 = await new Promise((res, rej) => {
+      const r = new FileReader();
+      r.onload = () => res(r.result);
+      r.onerror = rej;
+      r.readAsDataURL(processed);
+    });
+    const normalizedB64 = b64.includes('base64,') ? b64.split('base64,')[1] : b64;
+    const ext = processed.name.split('.').pop() || 'bin';
+    const fileName = `${folderKey}_${Date.now()}.${ext}`;
+    const up = await this.uploadBase64({
+      fileName,
+      mimeType: processed.type || 'application/octet-stream',
+      base64Data: normalizedB64,
+      folderKey,
+      folderId
+    });
+    return {
+      fileUrl: up.fileUrl,
+      fileName: up.fileName || fileName,
+      fileId: up.fileId,
+      originalSize: origSize,
+      finalSize: processed.size,
+      isCompressed: processed.size < origSize
+    };
+  },
   async convertDocxToPdf(file, onProgress) {
     if (onProgress) onProgress('Mengonversi Word ke PDF di server...');
     const b64 = await new Promise((res, rej) => {
