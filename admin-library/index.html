@@ -340,8 +340,8 @@
                     </select>
                   </div>
                   <div class="filter-item flex-grow-1">
-                    <label>Cari Kode Anggota</label>
-                    <input type="text" id="filterAnggota" class="form-control" placeholder="S-001">
+                    <label>Cari NIS / Kode Anggota</label>
+                    <input type="text" id="filterAnggota" class="form-control" placeholder="Contoh: 0581 (NIS)">
                   </div>
                   <div class="filter-actions">
                     <button class="btn-secondary" data-action="loadTransaksi">
@@ -506,9 +506,9 @@
                   <div id="member-search-mode" class="mt-25 d-none">
                     <div class="filter-bar-modern">
                       <div class="filter-item flex-grow-1">
-                        <label>Cari Kode atau Nama Anggota</label>
+                        <label>Cari NIS atau Nama Anggota</label>
                         <input type="text" id="memberSearchInput" class="form-control"
-                          placeholder="Contoh: S-1A-001 atau Adam">
+                          placeholder="Contoh: 0581 (NIS) atau Adam">
                       </div>
                       <div class="filter-actions">
                         <button class="btn-dark" data-action="searchMember">
@@ -763,15 +763,23 @@
       </div>
       <form id="anggotaForm">
         <div class="form-group">
-          <label>Kode</label>
-          <input type="text" id="formKodeAnggota" placeholder="Sebaiknya dikosongkan (dibuat otomatis oleh sistem)">
+          <label for="formTipeAnggota">Tipe</label>
+          <select id="formTipeAnggota" required>
+            <option value="Siswa">Siswa</option>
+            <option value="Gukar">Gukar</option>
+            <option value="Other">Other</option>
+          </select>
         </div>
         <div class="form-group">
-          <label>Nama</label>
+          <label id="formKodeAnggotaLabel" for="formKodeAnggota">NIS Siswa (SSOT)</label>
+          <input type="text" id="formKodeAnggota" placeholder="Masukkan NIS Siswa (SSOT, contoh: 0581)" required>
+        </div>
+        <div class="form-group">
+          <label for="formNamaAnggota">Nama</label>
           <input type="text" id="formNamaAnggota" required>
         </div>
         <div class="form-group">
-          <label>Jenis Kelamin</label>
+          <label for="formJenisKelamin">Jenis Kelamin</label>
           <select id="formJenisKelamin" required>
             <option value="">Pilih Jenis Kelamin</option>
             <option value="Laki-Laki">Laki-Laki</option>
@@ -779,16 +787,7 @@
           </select>
         </div>
         <div class="form-group">
-          <label>Tipe</label>
-          <select id="formTipeAnggota" required>
-            <option value="">Pilih Tipe</option>
-            <option value="Siswa">Siswa</option>
-            <option value="Gukar">Gukar</option>
-            <option value="Other">Other</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Keterangan</label>
+          <label for="formKeteranganAnggota">Keterangan</label>
           <textarea id="formKeteranganAnggota" rows="2"></textarea>
         </div>
         <div class="button-group">

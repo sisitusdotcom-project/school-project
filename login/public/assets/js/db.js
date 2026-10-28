@@ -535,6 +535,20 @@ const DB = {
         isActive: true
       });
     }
+    if (data && data.nis) {
+      const cleanNis = String(data.nis).trim().padStart(4, '0');
+      const cName = data.status === 'Lulus' || data.classId === 'ALUMNI' ? 'Alumni' : (data.classId || '').replace('CLASS_', 'Kelas ').replace(/_/g, ' ');
+      await db.ref(`library/members/${cleanNis}`).update({
+        code: cleanNis,
+        nis: cleanNis,
+        studentId: studentId || ('SISWA_' + cleanNis),
+        name: data.name || '',
+        gender: data.gender === 'L' ? 'Laki-Laki' : (data.gender === 'P' ? 'Perempuan' : (data.gender || '')),
+        type: 'Siswa',
+        note: cName || 'Siswa Aktif',
+        updatedAt: new Date().toISOString()
+      });
+    }
     return studentId || ref.key;
   },
   async getNextNis() {

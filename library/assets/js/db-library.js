@@ -103,18 +103,12 @@ const DBLibrary = {
   async getMember(code) {
     this.init();
     if (!code) return null;
-    const snap = await this.db.ref(`library/members/${code}`).once('value');
+    const clean = String(code).trim();
+    const snap = await this.db.ref(`library/members/${clean}`).once('value');
     let m = snap.val();
     if (m) return m;
-    const snapLegacy = await this.db.ref(`library/legacyMapping/${code}`).once('value');
-    const mapped = snapLegacy.val();
-    if (mapped) {
-      const snapMapped = await this.db.ref(`library/members/${mapped}`).once('value');
-      m = snapMapped.val();
-      if (m) return m;
-    }
     const all = await this.getMembers();
-    return all.find(item => item.code === code || item.nis === code || item.nbm === code || item.legacyCode === code || item.studentId === code) || null;
+    return all.find(item => item.code === clean || item.nis === clean || item.nbm === clean || item.studentId === clean || item.studentId === `SISWA_${clean}`) || null;
   },
   async saveMember(code, data) {
     this.init();
@@ -129,6 +123,12 @@ const DBLibrary = {
       email: data.email || '',
       updatedAt: new Date().toISOString()
     };
+    if (payload.type === 'Siswa') {
+      payload.nis = data.nis || code;
+      payload.studentId = data.studentId || `SISWA_${payload.nis}`;
+    } else if (data.nbm) {
+      payload.nbm = data.nbm;
+    }
     await this.db.ref(`library/members/${code}`).update(payload);
     return payload;
   },
@@ -388,12 +388,19 @@ const DBLibrary = {
           type: 'Siswa',
           note: cName || 'Siswa Aktif',
           printStatus: '',
-          legacyCode: '',
           updatedAt: new Date().toISOString()
         };
       } else if (found.studentId === id || found.nis === nis || found.code === code) {
+        let changed = false;
         if (cName && found.note !== cName) {
           updates[`library/members/${found.code}/note`] = cName;
+          changed = true;
+        }
+        if (s.name && found.name !== s.name) {
+          updates[`library/members/${found.code}/name`] = s.name;
+          changed = true;
+        }
+        if (changed) {
           updates[`library/members/${found.code}/updatedAt`] = new Date().toISOString();
         }
       }
@@ -415,7 +422,6 @@ const DBLibrary = {
             type: u.role === 'guru' || (u.position && u.position.toLowerCase().includes('guru')) ? 'Guru' : 'Tenaga Kependidikan',
             note: u.position || u.role || 'GTK MUSADA',
             printStatus: '',
-            legacyCode: '',
             updatedAt: new Date().toISOString()
           };
         }

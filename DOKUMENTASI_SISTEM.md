@@ -362,6 +362,12 @@ Untuk menjamin sistem bebas dari duplikasi data (*DRY*) dan memiliki satu sumber
      - Akses query data terpusat di `DB.getClassRankings(year, sem, classId)` dan `DB.getStudentClassRank(year, sem, studentId, classId)`.
      - Terintegrasi secara seragam pada lembar cetak rapor F4 (`print.html` / `print.js`), modal cetak rapor guru (`guru/index.js`), kartu e-rapor wali murid (`ortu/index.js`), serta profil perkembangan siswa.
 
+9. **Standarisasi Sistem Perpustakaan Berbasis NIS SSOT:**
+   * **NIS sebagai Kode Anggota Siswa (SSOT)**: Setiap siswa yang terdaftar di sistem perpustakaan (library/members) wajib menggunakan NIS sebagai Kode Anggota primer (code === nis, studentId === 'SISWA_' + nis). Sistem tidak lagi mengizinkan penerbitan kode siswa lama (seperti format S-xxxx acak).
+   * **Sinkronisasi Otomatis & Lookup Master Data**: Penambahan atau pembaruan data siswa di master sekolah otomatis tersinkronisasi ke basis data anggota perpustakaan via DB.saveStudent() dan DBLibrary.syncMembersFromMaster(). Pada modal Tambah Anggota di portal admin perpustakaan, pemilihan tipe Siswa mewajibkan NIS dan langsung melacak data dari students/SISWA_[NIS] untuk mengisi Nama, Jenis Kelamin, dan Kelas/Rombel secara otomatis (*DRY*).
+   * **Murni Berbasis NIS Tanpa Kode Legacy**: Karena belum pernah ada kartu anggota siswa fisik yang dicetak dengan format lama, sistem sepenuhnya dibersihkan dari pemetaan kode lama (*legacy mapping*). Identitas siswa di perpustakaan 100% murni mengacu pada NIS sebagai sumber tunggal kebenaran (*Pure SSOT*).
+   * **Pencetakan Kartu & Label Sirkulasi**: Format cetak kartu anggota siswa menampilkan label NIS Siswa: [NIS] dengan kode QR mengarah pada NIS, menyatukan seluruh identitas siswa di seluruh modul sekolah.
+
 ---
 
 ## V. ATURAN HAK AKSES BASIS DATA (FIREBASE SECURITY RULES)
