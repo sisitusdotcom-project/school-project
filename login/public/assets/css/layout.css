@@ -764,3 +764,50 @@
   }
 }
 .nav-section-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin: 1.5rem 1rem 0.5rem 1rem; }
+.profile-avatar-editor {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 14px;
+  background: var(--bg-hover, #f8fafc);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+.profile-avatar-preview {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #0f172a;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 2px solid var(--primary-color, #2563eb);
+}
+.profile-avatar-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.profile-avatar-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.profile-avatar-btns {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.input-disabled {
+  background-color: var(--bg-hover, #f1f5f9) !important;
+  color: var(--text-muted, #64748b) !important;
+  cursor: not-allowed;
+}
+#profile-photo-input {
+  display: none !important;
+}

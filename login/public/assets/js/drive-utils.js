@@ -209,6 +209,36 @@ const SmartFileCompressor = {
       reader.readAsDataURL(file);
     });
   },
+  async cropAndResizeAvatar(file, maxDim = 320) {
+    if (!file) throw new Error('Berkas foto tidak ditemukan.');
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        img.onload = () => {
+          const w = img.width;
+          const h = img.height;
+          const minSide = Math.min(w, h);
+          const startX = (w - minSide) / 2;
+          const startY = (h - minSide) / 2;
+          const finalDim = Math.min(maxDim, minSide);
+          const canvas = document.createElement('canvas');
+          canvas.width = finalDim;
+          canvas.height = finalDim;
+          const ctx = canvas.getContext('2d');
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, finalDim, finalDim);
+          ctx.drawImage(img, startX, startY, minSide, minSide, 0, 0, finalDim, finalDim);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+          resolve(dataUrl);
+        };
+        img.onerror = () => reject(new Error('Gagal memuat gambar foto profil'));
+        img.src = e.target.result;
+      };
+      reader.onerror = () => reject(new Error('Gagal membaca berkas gambar'));
+      reader.readAsDataURL(file);
+    });
+  },
   async ensurePdfJs() {
     if (window.pdfjsLib) {
       if (!window.pdfjsLib.GlobalWorkerOptions.workerSrc) {

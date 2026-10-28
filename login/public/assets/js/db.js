@@ -87,6 +87,10 @@ const DB = {
     await db.ref(`users/${uid}/photoURL`).set(fileUrl);
     return fileUrl;
   },
+  async removeProfilePhoto(uid) {
+    if (!uid || !isDBReady()) return;
+    await db.ref(`users/${uid}/photoURL`).remove();
+  },
   async uploadDriveFile(fileName, mimeType, base64Data, folderId = null) {
     if (!fileName || !mimeType || !base64Data) return null;
     const result = await DriveBridge.uploadBase64({ fileName, mimeType, base64Data, folderId });

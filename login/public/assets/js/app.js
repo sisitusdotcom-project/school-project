@@ -113,14 +113,76 @@ const App = {
     if (backdrop) backdrop.addEventListener('click', toggleMenu);
     const pageLogout = document.getElementById('page-user-logout');
     if (pageLogout) pageLogout.addEventListener('click', () => Auth.logout());
+    let pendingProfilePhotoDataUrl = null;
+    let pendingProfilePhotoAction = 'keep';
     const profileButton = document.getElementById('page-user-profile');
     if (profileButton) {
       profileButton.addEventListener('click', async () => {
         const u = await DB.getUser(Auth.currentUser.uid);
         if (!u) return;
-        document.getElementById('profile-email').value = Auth.currentUser.email || '';
-        document.getElementById('profile-password').value = '';
+        pendingProfilePhotoDataUrl = null;
+        pendingProfilePhotoAction = 'keep';
+        const nameEl = document.getElementById('profile-name');
+        const roleEl = document.getElementById('profile-role');
+        const emailEl = document.getElementById('profile-email');
+        const pwdEl = document.getElementById('profile-password');
+        const previewEl = document.getElementById('profile-avatar-preview');
+        const removeBtn = document.getElementById('btn-remove-photo');
+        const fileInput = document.getElementById('profile-photo-input');
+        if (nameEl) nameEl.value = AppConfig.formatUserName(u);
+        if (roleEl) roleEl.value = AppConfig.getRoleAssignmentLabel(u || { role: Auth.currentRole });
+        if (emailEl) emailEl.value = Auth.currentUser.email || '';
+        if (pwdEl) pwdEl.value = '';
+        if (fileInput) fileInput.value = '';
+        if (previewEl) {
+          const photoUrl = u.photoURL || Auth.userData?.photoURL || '';
+          if (photoUrl) {
+            const normalized = DriveBridge.normalizeDriveImageUrl(photoUrl, 'w200', '');
+            previewEl.innerHTML = `<img src="${normalized}" alt="Foto profil">`;
+            if (removeBtn) removeBtn.style.display = 'inline-flex';
+          } else {
+            previewEl.innerHTML = '<i class="ph ph-user"></i>';
+            if (removeBtn) removeBtn.style.display = 'none';
+          }
+        }
         App.openModal('modal-profile');
+      });
+    }
+    const changePhotoBtn = document.getElementById('btn-change-photo');
+    const photoInput = document.getElementById('profile-photo-input');
+    const removePhotoBtn = document.getElementById('btn-remove-photo');
+    if (changePhotoBtn && photoInput) {
+      changePhotoBtn.addEventListener('click', () => photoInput.click());
+      photoInput.addEventListener('change', async (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        if (!file.type.startsWith('image/')) {
+          alert('Harap pilih berkas foto/gambar (JPG/PNG).');
+          return;
+        }
+        try {
+          const previewEl = document.getElementById('profile-avatar-preview');
+          const dataUrl = await SmartFileCompressor.cropAndResizeAvatar(file, 320);
+          pendingProfilePhotoDataUrl = dataUrl;
+          pendingProfilePhotoAction = 'update';
+          if (previewEl) {
+            previewEl.innerHTML = `<img src="${dataUrl}" alt="Pratinjau foto baru">`;
+          }
+          if (removePhotoBtn) removePhotoBtn.style.display = 'inline-flex';
+        } catch (err) {
+          alert('Gagal memproses foto: ' + err.message);
+        }
+      });
+    }
+    if (removePhotoBtn) {
+      removePhotoBtn.addEventListener('click', () => {
+        pendingProfilePhotoDataUrl = null;
+        pendingProfilePhotoAction = 'remove';
+        const previewEl = document.getElementById('profile-avatar-preview');
+        const fileInput = document.getElementById('profile-photo-input');
+        if (previewEl) previewEl.innerHTML = '<i class="ph ph-user"></i>';
+        if (fileInput) fileInput.value = '';
+        removePhotoBtn.style.display = 'none';
       });
     }
     const formProfile = document.getElementById('form-profile');
@@ -133,7 +195,21 @@ const App = {
         btn.disabled = true;
         btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Menyimpan...';
         try {
-          await Auth.updateProfileCredentials(email, pwd);
+          if (pendingProfilePhotoAction === 'update' && pendingProfilePhotoDataUrl) {
+            btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Mengunggah foto...';
+            const uploadedUrl = await DB.saveProfilePhoto(Auth.currentUser.uid, pendingProfilePhotoDataUrl, 'image/jpeg');
+            if (uploadedUrl && Auth.userData) {
+              Auth.userData.photoURL = uploadedUrl;
+            }
+          } else if (pendingProfilePhotoAction === 'remove') {
+            await DB.removeProfilePhoto(Auth.currentUser.uid);
+            if (Auth.userData) Auth.userData.photoURL = '';
+          }
+          if (email !== (Auth.currentUser.email || '') || pwd) {
+            btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Memperbarui akun...';
+            await Auth.updateProfileCredentials(email, pwd);
+          }
+          Auth.updateProfileUI();
           alert('Profil berhasil diperbarui!');
           App.closeModal('modal-profile');
         } catch (err) {
