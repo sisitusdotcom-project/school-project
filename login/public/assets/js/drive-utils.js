@@ -22,16 +22,6 @@ const DriveBridge = {
     if (/^[a-zA-Z0-9_-]{25,}$/.test(cleanUrl)) return cleanUrl;
     return '';
   },
-  getServerDisplayUrl(rawUrl) {
-    const id = this.extractFileId(rawUrl);
-    if (id) return `https://server.musada.sch.id/docs/${id}`;
-    return rawUrl || '';
-  },
-  getPreviewEmbedUrl(rawUrl) {
-    const id = this.extractFileId(rawUrl);
-    if (id) return `https://drive.google.com/file/d/${id}/preview`;
-    return rawUrl || '';
-  },
   getDownloadUrl(fileId) {
     if (!fileId) return '';
     return `https://drive.google.com/uc?export=download&id=${fileId}`;
