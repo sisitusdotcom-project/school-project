@@ -57,6 +57,14 @@ const DB = {
     if (data.proofUrl) payload.proof_url = data.proofUrl;
     if (data.late_reason) payload.late_reason = data.late_reason;
     if (data.lateReason) payload.late_reason = data.lateReason;
+    if (data.appeal_status) payload.appeal_status = data.appeal_status;
+    if (data.appealStatus) payload.appeal_status = data.appealStatus;
+    if (data.appeal_note) payload.appeal_note = data.appeal_note;
+    if (data.appealNote) payload.appeal_note = data.appealNote;
+    if (data.appeal_reviewed_by) payload.appeal_reviewed_by = data.appeal_reviewed_by;
+    if (data.appealReviewedBy) payload.appeal_reviewed_by = data.appealReviewedBy;
+    if (data.appeal_reviewed_at) payload.appeal_reviewed_at = data.appeal_reviewed_at;
+    if (data.appealReviewedAt) payload.appeal_reviewed_at = data.appealReviewedAt;
     return payload;
   },
   _serializeStudentAttendance(data = {}) {

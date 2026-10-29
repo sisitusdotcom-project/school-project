@@ -552,9 +552,12 @@ noLatePenalty,
 label
 };
 }
-function isAttendanceLate(timeIn, sched) {
+function isAttendanceLate(timeIn, sched, attRecord = null) {
 if (!timeIn || !sched) return false;
 if (sched.isOff || sched.noLatePenalty) return false;
+if (attRecord && (attRecord.appeal_status === 'approved' || attRecord.appeal_status === 'accepted' || attRecord.appeal_status === 'tolerated')) {
+return false;
+}
 const limit = sched.inEnd || '06:45';
 return timeIn > limit;
 }

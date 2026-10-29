@@ -1662,10 +1662,16 @@ histContainer.innerHTML = '<p class="text-muted" style="font-size: 13px; margin:
 const proofMarkup = myAtt.proof_url
 ? `<div style="margin-top: 12px;"><img src="${DriveBridge.normalizeDriveImageUrl(myAtt.proof_url, 'w300', '')}" alt="Bukti presensi" style="width: 100%; max-height: 180px; object-fit: cover; border-radius: 10px; border: 1px solid #E5E7EB;"></div>`
 : '';
-const isMyAttLate = myAtt.time_in && AppConfig.isAttendanceLate ? AppConfig.isAttendanceLate(myAtt.time_in, sched) : false;
+const isMyAttLate = myAtt.time_in && AppConfig.isAttendanceLate ? AppConfig.isAttendanceLate(myAtt.time_in, sched, myAtt) : false;
 let lateSectionHtml = '';
-if (isMyAttLate && !sched.noLatePenalty && (!sched.isOptional || !isUmmi)) {
-lateSectionHtml = `<div class="attendance-late-history-item"><div class="attendance-late-tag"><i class="ph ph-clock-countdown"></i> Status: Terlambat (${myAtt.time_in})</div>${myAtt.late_reason ? `<div class="attendance-late-saved-reason"><strong>Alasan / Banding Tercatat:</strong><p class="attendance-late-reason-text">"${AppConfig.escapeHtml(myAtt.late_reason)}"</p></div>` : `<div class="attendance-appeal-form" id="attendance-appeal-form"><p class="attendance-appeal-hint">Belum ada catatan alasan. Anda dapat menambahkan alasan/banding keterlambatan:</p><div style="display:flex; gap:8px;"><input type="text" id="attendance-post-appeal-input" class="form-control form-control-sm" placeholder="Tulis alasan keterlambatan..."><button type="button" id="btn-submit-post-appeal" class="btn btn-sm btn-primary">Simpan</button></div></div>`}</div>`;
+if (!sched.noLatePenalty && (!sched.isOptional || !isUmmi)) {
+if (myAtt.appeal_status === 'approved') {
+lateSectionHtml = `<div class="attendance-late-history-item"><div class="attendance-late-tag" style="background:#ECFDF5; color:#065F46; border:1px solid #A7F3D0;"><i class="ph ph-check-circle"></i> Status: Banding Diterima (Ditoleransi Waka Personalia)</div><div class="attendance-late-saved-reason"><strong>Alasan Disetujui:</strong><p class="attendance-late-reason-text">"${AppConfig.escapeHtml(myAtt.appeal_note || myAtt.late_reason)}"</p></div></div>`;
+} else if (myAtt.appeal_status === 'rejected') {
+lateSectionHtml = `<div class="attendance-late-history-item"><div class="attendance-late-tag" style="background:#FEF2F2; color:#991B1B; border:1px solid #FECACA;"><i class="ph ph-x-circle"></i> Status: Terlambat (${myAtt.time_in}) — Banding Ditolak</div><div class="attendance-late-saved-reason"><strong>Alasan Penolakan:</strong><p class="attendance-late-reason-text">"${AppConfig.escapeHtml(myAtt.appeal_note || 'Tidak memenuhi syarat toleransi')}"</p></div></div>`;
+} else if (isMyAttLate) {
+lateSectionHtml = `<div class="attendance-late-history-item"><div class="attendance-late-tag" style="background:#FFFBEB; color:#92400E; border:1px solid #FDE68A;"><i class="ph ph-clock-countdown"></i> Status: Terlambat (${myAtt.time_in})${myAtt.late_reason ? ' — Banding Menunggu Persetujuan' : ''}</div>${myAtt.late_reason ? `<div class="attendance-late-saved-reason"><strong>Alasan Banding Terkirim:</strong><p class="attendance-late-reason-text">"${AppConfig.escapeHtml(myAtt.late_reason)}"</p><small class="text-muted" style="font-size:11px;">Sedang ditinjau oleh Waka Personalia.</small></div>` : `<div class="attendance-appeal-form" id="attendance-appeal-form"><p class="attendance-appeal-hint">Belum ada catatan alasan. Anda dapat menambahkan alasan/banding keterlambatan:</p><div style="display:flex; gap:8px;"><input type="text" id="attendance-post-appeal-input" class="form-control form-control-sm" placeholder="Tulis alasan keterlambatan..."><button type="button" id="btn-submit-post-appeal" class="btn btn-sm btn-primary">Ajukan Banding</button></div></div>`}</div>`;
+}
 }
 histContainer.innerHTML = `
 <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #E5E7EB; padding-bottom: 8px; margin-bottom: 8px;">
@@ -1691,7 +1697,7 @@ return;
 postAppealBtn.disabled = true;
 postAppealBtn.innerText = 'Menyimpan...';
 try {
-await DB.saveTeacherAttendance(dateStr, teacherId, { late_reason: postReason });
+await DB.saveTeacherAttendance(dateStr, teacherId, { late_reason: postReason, appeal_status: "pending", appeal_created_at: new Date().toISOString() });
 alert('Catatan alasan keterlambatan berhasil disimpan untuk ditinjau pihak sekolah.');
 await loadHistory();
 } catch (e) {
@@ -1716,16 +1722,24 @@ if (fullTbody && fullHist) {
 let onTimeCount = 0;
 let lateCount = 0;
 const rowsHtml = fullHist.map((h) => {
-const lateReasonNote = h.late_reason ? `<br><small class="text-muted" style="font-size:11px;" title="Catatan/Alasan">Banding: "${AppConfig.escapeHtml(h.late_reason)}"</small>` : '';
-let statusBadge = `<span class="badge badge-warning">Terlambat</span>${lateReasonNote}`;
-const isLate = AppConfig.isAttendanceLate ? AppConfig.isAttendanceLate(h.time_in, sched) : (h.time_in > (sched.inEnd || '06:45'));
+const isLate = AppConfig.isAttendanceLate ? AppConfig.isAttendanceLate(h.time_in, sched, h) : (h.time_in > (sched.inEnd || '06:45'));
+let statusBadge = '<span class="badge badge-warning">Terlambat</span>';
 if (sched.noLatePenalty || (sched.isOptional && isUmmi)) {
 statusBadge = '<span class="badge badge-success">Hadir (Pembinaan)</span>';
 onTimeCount++;
 } else if (!isLate && h.time_in) {
+if (h.appeal_status === 'approved') {
+statusBadge = '<span class="badge badge-success" title="Ditoleransi Waka Personalia"><i class="ph ph-check"></i> Tepat Waktu (Disetujui)</span>';
+} else {
 statusBadge = '<span class="badge badge-success">Tepat Waktu</span>';
+}
 onTimeCount++;
 } else {
+if (h.appeal_status === 'rejected') {
+statusBadge = '<span class="badge badge-danger" title="Banding ditolak"><i class="ph ph-x"></i> Terlambat (Ditolak)</span>';
+} else if (h.appeal_status === 'pending' || h.late_reason) {
+statusBadge = '<span class="badge badge-warning" title="Menunggu verifikasi Waka Personalia"><i class="ph ph-clock"></i> Terlambat (Banding Diajukan)</span>';
+}
 lateCount++;
 }
 const proofBtn = h.proof_url
@@ -1972,7 +1986,7 @@ if (result.record && Object.keys(result.record).length) Object.assign(payload, r
 if (type === 'in') {
 const lateInput = document.getElementById('attendance-late-reason-input');
 const lateReasonVal = lateInput ? lateInput.value.trim() : '';
-if (lateReasonVal) payload.late_reason = lateReasonVal;
+if (lateReasonVal) { payload.late_reason = lateReasonVal; payload.appeal_status = "pending"; payload.appeal_created_at = new Date().toISOString(); }
 }
 await DB.saveTeacherAttendance(dateStr, teacherId, payload);
 const recordedTime = type === 'in' ? (payload.time_in || new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })) : (payload.time_out || new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }));
@@ -3016,7 +3030,7 @@ Object.entries(rangeAttData || {}).forEach(([dk, byTeacher]) => {
 const att = byTeacher && byTeacher[uid];
 if (att && att.time_in) {
 const sched = AppConfig.getAttendanceSchedule ? AppConfig.getAttendanceSchedule(settings.attendanceRules, isUmmi, dk) : null;
-const isLate = sched && AppConfig.isAttendanceLate ? AppConfig.isAttendanceLate(att.time_in, sched) : false;
+const isLate = sched && AppConfig.isAttendanceLate ? AppConfig.isAttendanceLate(att.time_in, sched, att) : false;
 if (isLate) lateCount++;
 else onTimeCount++;
 }

@@ -1501,7 +1501,7 @@ const dayAtt = rangeAttData[dk] && rangeAttData[dk][g.id];
 if (dayAtt && dayAtt.time_in) {
 const isUmmi = AppConfig.isUserUmmi(g);
 const sched = AppConfig.getAttendanceSchedule ? AppConfig.getAttendanceSchedule(settings.attendanceRules, isUmmi, dk) : null;
-const isLate = sched && AppConfig.isAttendanceLate ? AppConfig.isAttendanceLate(dayAtt.time_in, sched) : false;
+const isLate = sched && AppConfig.isAttendanceLate ? AppConfig.isAttendanceLate(dayAtt.time_in, sched, dayAtt) : false;
 if (isLate) late++;
 else onTime++;
 }
@@ -1533,9 +1533,18 @@ const isUmmi = AppConfig.isUserUmmi(g);
 const sched = AppConfig.getAttendanceSchedule ? AppConfig.getAttendanceSchedule(settings.attendanceRules, isUmmi, selectedDailyDate) : null;
 let lateBadge = '';
 if (att.time_in && sched) {
-const isLate = AppConfig.isAttendanceLate ? AppConfig.isAttendanceLate(att.time_in, sched) : false;
-const lateReasonNote = att.late_reason ? `<br><small class="text-danger" style="font-size:11px;" title="Alasan/Banding"><em>"${AppConfig.escapeHtml(att.late_reason)}"</em></small>` : '';
-lateBadge = isLate ? ` <span class="badge badge-warning">Terlambat</span>${lateReasonNote}` : ' <span class="badge badge-success">Tepat Waktu</span>';
+const isLate = AppConfig.isAttendanceLate ? AppConfig.isAttendanceLate(att.time_in, sched, att) : false;
+if (att.late_reason) {
+if (att.appeal_status === 'approved') {
+lateBadge = ` <span class="badge badge-success"><i class="ph ph-check"></i> Tepat Waktu (Ditoleransi)</span><br><small class="text-success" style="font-size:11px;">Alasan: "${AppConfig.escapeHtml(att.late_reason)}" · ACC: ${AppConfig.escapeHtml(att.appeal_reviewed_by || 'Personalia')}</small> <button type="button" class="btn btn-link btn-xs btn-appeal-action" data-action="reopen" data-date="${selectedDailyDate}" data-uid="${g.id}" data-name="${AppConfig.escapeHtml(g.name)}" style="display:inline; padding:0; font-size:10px; margin-left:4px;">(Ubah)</button>`;
+} else if (att.appeal_status === 'rejected') {
+lateBadge = ` <span class="badge badge-danger"><i class="ph ph-x"></i> Terlambat (Banding Ditolak)</span><br><small class="text-danger" style="font-size:11px;">Alasan: "${AppConfig.escapeHtml(att.late_reason)}" · Tolak: ${AppConfig.escapeHtml(att.appeal_note || '-')}</small> <button type="button" class="btn btn-link btn-xs btn-appeal-action" data-action="reopen" data-date="${selectedDailyDate}" data-uid="${g.id}" data-name="${AppConfig.escapeHtml(g.name)}" style="display:inline; padding:0; font-size:10px; margin-left:4px;">(Ubah)</button>`;
+} else {
+lateBadge = ` <span class="badge badge-warning"><i class="ph ph-clock"></i> Terlambat (Banding Menunggu)</span><br><small class="text-warning" style="font-size:11px;">Alasan: "${AppConfig.escapeHtml(att.late_reason)}"</small><div style="display:flex; gap:4px; margin-top:4px;"><button type="button" class="btn btn-xs btn-success btn-appeal-action" data-action="approve" data-date="${selectedDailyDate}" data-uid="${g.id}" data-name="${AppConfig.escapeHtml(g.name)}"><i class="ph ph-check"></i> Terima</button><button type="button" class="btn btn-xs btn-danger btn-appeal-action" data-action="reject" data-date="${selectedDailyDate}" data-uid="${g.id}" data-name="${AppConfig.escapeHtml(g.name)}"><i class="ph ph-x"></i> Tolak</button></div>`;
+}
+} else {
+lateBadge = isLate ? ' <span class="badge badge-warning">Terlambat</span>' : ' <span class="badge badge-success">Tepat Waktu</span>';
+}
 }
 const proofBtn = att.proof_url
 ? `<button type="button" class="btn btn-outline btn-sm mk-preview-btn" data-preview-url="${AppConfig.escapeHtml(att.proof_url)}" data-preview-title="Bukti Presensi ${AppConfig.escapeHtml(g.name)} (${selectedDailyDate})"><i class="ph ph-eye"></i> Lihat bukti</button>`
@@ -1699,6 +1708,51 @@ const btnPrint = document.getElementById('btn-print-recap');
 if (btnPrint) {
 btnPrint.onclick = () => window.print();
 }
+container.querySelectorAll('.btn-appeal-action').forEach(btn => {
+btn.onclick = async () => {
+const action = btn.dataset.action;
+const date = btn.dataset.date;
+const uid = btn.dataset.uid;
+const name = btn.dataset.name;
+const reviewer = Auth.userData?.name || Auth.currentUser?.displayName || 'Waka Personalia';
+if (action === 'approve') {
+const note = prompt(`Terima Banding Kehadiran: ${name} (${date})
+Masukkan catatan dispensasi / alasan persetujuan:`, 'Toleransi disetujui Waka Personalia');
+if (note === null) return;
+btn.disabled = true;
+await DB.saveTeacherAttendance(date, uid, {
+appeal_status: 'approved',
+appeal_note: note.trim() || 'Toleransi disetujui Waka Personalia',
+appeal_reviewed_by: reviewer,
+appeal_reviewed_at: new Date().toISOString()
+});
+await renderContent();
+} else if (action === 'reject') {
+const note = prompt(`Tolak Banding Kehadiran: ${name} (${date})
+Masukkan alasan penolakan:`, 'Alasan keterlambatan tidak memenuhi syarat dispensasi');
+if (note === null) return;
+btn.disabled = true;
+await DB.saveTeacherAttendance(date, uid, {
+appeal_status: 'rejected',
+appeal_note: note.trim() || 'Alasan keterlambatan tidak memenuhi syarat dispensasi',
+appeal_reviewed_by: reviewer,
+appeal_reviewed_at: new Date().toISOString()
+});
+await renderContent();
+} else if (action === 'reopen') {
+if (confirm(`Kembalikan status banding ${name} (${date}) menjadi 'Menunggu Verifikasi'?`)) {
+btn.disabled = true;
+await DB.saveTeacherAttendance(date, uid, {
+appeal_status: 'pending',
+appeal_note: '',
+appeal_reviewed_by: reviewer,
+appeal_reviewed_at: new Date().toISOString()
+});
+await renderContent();
+}
+}
+};
+});
 };
 await renderContent();
 }
