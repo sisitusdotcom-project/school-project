@@ -179,12 +179,19 @@ function initInfografisSliders() {
   var sliders = document.querySelectorAll('.infografis-slider');
   if (!sliders.length) return;
   sliders.forEach(function(slider) {
+    if (slider.dataset.sliderInitialized === 'true') return;
+    slider.dataset.sliderInitialized = 'true';
     var slides = slider.querySelectorAll('.infografis-slide');
     if (slides.length < 2) return;
     var currentIndex = 0;
     var defaultInterval = Number(slider.dataset.interval) || 2600;
     var timerId = null;
-    var isPaused = false;
+    var isHovered = false;
+    var isInViewport = false;
+    function hasDataSaver() {
+      var conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+      return conn && (conn.saveData === true || conn.effectiveType === 'slow-2g' || conn.effectiveType === '2g');
+    }
     function showSlide(index) {
       slides.forEach(function(slide, slideIndex) {
         var isActive = slideIndex === index;
@@ -192,13 +199,19 @@ function initInfografisSliders() {
         var video = slide.querySelector('video') || (slide.tagName === 'VIDEO' ? slide : null);
         if (video) {
           if (isActive) {
-            try {
-              video.currentTime = 0;
-              var playPromise = video.play();
-              if (playPromise !== undefined) {
-                playPromise.catch(function() {});
-              }
-            } catch (e) {}
+            if (video.dataset.src && (!video.src || video.src === window.location.href)) {
+              video.src = video.dataset.src;
+              video.load();
+            }
+            if (isInViewport && !isHovered && !hasDataSaver()) {
+              try {
+                video.currentTime = 0;
+                var playPromise = video.play();
+                if (playPromise !== undefined) {
+                  playPromise.catch(function() {});
+                }
+              } catch (e) {}
+            }
           } else {
             try {
               video.pause();
@@ -214,14 +227,14 @@ function initInfografisSliders() {
     }
     function scheduleNext() {
       clearTimeout(timerId);
-      if (isPaused) return;
+      if (isHovered || !isInViewport || document.hidden) return;
       var currentSlide = slides[currentIndex];
       var video = currentSlide.querySelector('video') || (currentSlide.tagName === 'VIDEO' ? currentSlide : null);
-      if (video) {
+      if (video && !hasDataSaver()) {
         function onVideoEnd() {
           video.removeEventListener('ended', onVideoEnd);
           clearTimeout(timerId);
-          if (!isPaused) {
+          if (!isHovered && isInViewport && !document.hidden) {
             advance();
           }
         }
@@ -235,11 +248,11 @@ function initInfografisSliders() {
       }
     }
     slider.addEventListener('mouseenter', function() {
-      isPaused = true;
+      isHovered = true;
       clearTimeout(timerId);
     });
     slider.addEventListener('mouseleave', function() {
-      isPaused = false;
+      isHovered = false;
       var currentSlide = slides[currentIndex];
       var video = currentSlide.querySelector('video') || (currentSlide.tagName === 'VIDEO' ? currentSlide : null);
       if (video && video.ended) {
@@ -248,8 +261,46 @@ function initInfografisSliders() {
         scheduleNext();
       }
     });
+    if ('IntersectionObserver' in window) {
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          isInViewport = entry.isIntersecting;
+          var currentSlide = slides[currentIndex];
+          var video = currentSlide.querySelector('video') || (currentSlide.tagName === 'VIDEO' ? currentSlide : null);
+          if (isInViewport) {
+            if (video && !video.ended && !hasDataSaver()) {
+              video.play().catch(function() {});
+            }
+            scheduleNext();
+          } else {
+            clearTimeout(timerId);
+            if (video) {
+              video.pause();
+            }
+          }
+        });
+      }, { threshold: 0.1 });
+      observer.observe(slider);
+    } else {
+      isInViewport = true;
+      scheduleNext();
+    }
+    document.addEventListener('visibilitychange', function() {
+      if (document.hidden) {
+        clearTimeout(timerId);
+        var currentSlide = slides[currentIndex];
+        var video = currentSlide.querySelector('video') || (currentSlide.tagName === 'VIDEO' ? currentSlide : null);
+        if (video) video.pause();
+      } else if (isInViewport && !isHovered) {
+        var currentSlide = slides[currentIndex];
+        var video = currentSlide.querySelector('video') || (currentSlide.tagName === 'VIDEO' ? currentSlide : null);
+        if (video && !video.ended && !hasDataSaver()) {
+          video.play().catch(function() {});
+        }
+        scheduleNext();
+      }
+    });
     showSlide(0);
-    scheduleNext();
   });
 }
 window.initInfografisSliders = initInfografisSliders;
