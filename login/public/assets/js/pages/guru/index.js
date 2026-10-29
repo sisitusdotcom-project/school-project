@@ -13,7 +13,7 @@ return;
 }
 Router.setTitle('Beranda', 'Selamat datang di Dasbor Digital Sekolah.');
 const today = new Date();
-const dateStr = today.toISOString().slice(0, 10);
+const dateStr = AppConfig.getLocalDateStr ? AppConfig.getLocalDateStr(today) : today.toISOString().slice(0, 10);
 const timeStr = today.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
 const [classArr, students, myAtt] = await Promise.all([DB.getClassesForTeacher(Auth.currentUser.uid), DB.getAllStudents(), DB.getTeacherAttendance(dateStr, Auth.currentUser.uid)]);
 const studentCount = DB.toArray(students).filter(s => classArr.some(c => c.id === s.classId)).length;
@@ -397,7 +397,7 @@ e.preventDefault();
 const btn = e.target.querySelector('button[type="submit"]');
 btn.disabled = true;
 btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Menyimpan...';
-const today = new Date().toISOString().slice(0, 10);
+const today = AppConfig.getLocalDateStr ? AppConfig.getLocalDateStr() : new Date().toISOString().slice(0, 10);
 await DB.saveObservation({
 studentId: document.getElementById('oq-stu').value,
 teacherId: Auth.currentUser.uid,
@@ -1252,7 +1252,7 @@ form.onsubmit = async (e) => {
 e.preventDefault();
 const btn = form.querySelector('button[type="submit"]');
 btn.disabled = true;
-const today = new Date().toISOString().slice(0, 10);
+const today = AppConfig.getLocalDateStr ? AppConfig.getLocalDateStr() : new Date().toISOString().slice(0, 10);
 await DB.saveObservation({
 studentId: document.getElementById('obs-stu-id').value,
 teacherId: Auth.currentUser.uid,
@@ -1606,7 +1606,7 @@ alert('Gagal mengakses kamera. Silakan coba lagi.');
 }
 });
 const today = new Date();
-const dateStr = today.toISOString().slice(0, 10);
+const dateStr = AppConfig.getLocalDateStr ? AppConfig.getLocalDateStr(today) : today.toISOString().slice(0, 10);
 const teacherId = Auth.currentUser.uid;
 const loadHistory = async () => {
 const [myAtt, fullHist, settings] = await Promise.all([
@@ -2021,7 +2021,7 @@ container.innerHTML = '<div class="card"><p class="error-text">Kelas tidak ditem
 return;
 }
 const today = new Date();
-const dateStr = today.toISOString().slice(0, 10);
+const dateStr = AppConfig.getLocalDateStr ? AppConfig.getLocalDateStr(today) : today.toISOString().slice(0, 10);
 const dateDisplay = today.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 Router.setTitle(`Absensi ${AppConfig.escapeHtml(cls.name)}`, dateDisplay);
 const studentData = await DB.getStudentsByClass(classId);
@@ -2163,7 +2163,7 @@ btn.innerHTML = '<i class="ph ph-floppy-disk"></i> Simpan Absensi';
 async renderTendikDashboard(container) {
 Router.setTitle('Beranda Tenaga Kependidikan', 'Selamat datang di Dasbor Digital Tenaga Kependidikan SD Muhammadiyah 1 Sedati.');
 const today = new Date();
-const dateStr = today.toISOString().slice(0, 10);
+const dateStr = AppConfig.getLocalDateStr ? AppConfig.getLocalDateStr(today) : today.toISOString().slice(0, 10);
 const timeStr = today.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
 const user = Auth.currentUser || {};
 const uid = user.uid;
@@ -2266,7 +2266,7 @@ container.innerHTML = `
 async renderUmmiDashboard(container) {
 Router.setTitle('Beranda Guru UMMI', "Selamat datang di Dasbor Pembelajaran Al-Qur'an & Metode Ummi.");
 const today = new Date();
-const dateStr = today.toISOString().slice(0, 10);
+const dateStr = AppConfig.getLocalDateStr ? AppConfig.getLocalDateStr(today) : today.toISOString().slice(0, 10);
 const timeStr = today.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
 const uid = Auth.currentUser.uid;
 const [ummiClasses, myAtt] = await Promise.all([
@@ -2432,7 +2432,7 @@ ${isKoord ? `
 async renderEkstraDashboard(container) {
 Router.setTitle('Beranda Pembina Ekstrakurikuler', 'Selamat datang di Dasbor Digital Ekstrakurikuler.');
 const today = new Date();
-const dateStr = today.toISOString().slice(0, 10);
+const dateStr = AppConfig.getLocalDateStr ? AppConfig.getLocalDateStr(today) : today.toISOString().slice(0, 10);
 const timeStr = today.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
 const uid = Auth.currentUser.uid;
 const [ekskuls, snapAtt] = await Promise.all([
@@ -2659,7 +2659,7 @@ renderContent(activeEksId);
 renderContent(activeEksId);
 },
 _ekstraAttendanceModal(currentEks, enrolledStudents, classMap) {
-const today = new Date().toISOString().slice(0, 10);
+const today = AppConfig.getLocalDateStr ? AppConfig.getLocalDateStr() : new Date().toISOString().slice(0, 10);
 const stuCards = enrolledStudents.length ? enrolledStudents.map(s => {
 const className = classMap[s.classId] || s.classId || '-';
 const idLabel = AppConfig.formatStudentIdentity(s.nis, s.nisn);

@@ -177,7 +177,7 @@ const ModuleKit = {
     return `Rp ${Number(value || 0).toLocaleString('id-ID')}`;
   },
   today() {
-    return new Date().toISOString().slice(0, 10);
+    return typeof AppConfig !== 'undefined' && AppConfig.getLocalDateStr ? AppConfig.getLocalDateStr() : new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
   },
   optionList(field) {
     return (field.options || []).map((opt) => (typeof opt === 'string' ? { value: opt, label: opt } : opt));

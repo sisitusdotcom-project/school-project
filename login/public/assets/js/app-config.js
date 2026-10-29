@@ -504,11 +504,25 @@ const assignments = getRoleAssignments(user);
 const unitList = Array.isArray(units) ? units : [units];
 return unitList.some(u => assignments.includes(u));
 }
+function getLocalDateStr(date = new Date()) {
+const d = date instanceof Date ? date : new Date(date);
+return new Intl.DateTimeFormat('en-CA', {
+timeZone: 'Asia/Jakarta',
+year: 'numeric',
+month: '2-digit',
+day: '2-digit'
+}).format(d);
+}
+function getLocalMonthStr(date = new Date()) {
+const d = date instanceof Date ? date : new Date(date);
+return getLocalDateStr(d).slice(0, 7);
+}
 function getAttendanceSchedule(rules = {}, isUmmi = false, date = new Date()) {
 const r = rules || {};
 const d = date instanceof Date ? date : new Date(date);
-const dayNames = ['minggu', 'senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu'];
-const dayKey = dayNames[d.getDay()] || 'senin';
+const dayEn = new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Jakarta', weekday: 'long' }).format(d).toLowerCase();
+const dayMap = { sunday: 'minggu', monday: 'senin', tuesday: 'selasa', wednesday: 'rabu', thursday: 'kamis', friday: 'jumat', saturday: 'sabtu' };
+const dayKey = dayMap[dayEn] || 'senin';
 const groupKey = isUmmi ? 'ummi' : 'gtk';
 const schedules = r.schedules || DEFAULT_SETTINGS.attendanceRules.schedules;
 const groupSched = schedules[groupKey] || DEFAULT_SETTINGS.attendanceRules.schedules[groupKey] || {};
@@ -1258,6 +1272,9 @@ getStudentNisn,
 formatStudentIdentity,
 getClassPhase,
 hasAnyUnit,
+getLocalDateStr,
+getTodayDateStr: getLocalDateStr,
+getLocalMonthStr,
 getAttendanceSchedule,
 isAttendanceLate,
 calculateGradeSummary,

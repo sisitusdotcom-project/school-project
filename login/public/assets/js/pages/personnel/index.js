@@ -5,7 +5,7 @@ const PersonnelPages = {
     Router.setTitle('Humas & Personalia', 'Pusat komando administrasi kepegawaian, disiplin kerja, dan kemitraan sekolah.');
     const isAdmin = role === AppConfig.ROLES.ADMIN;
     const isWaka = isAdmin || assignments.includes('WAKA_HUMAS_PERSONALIA');
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = AppConfig.getLocalDateStr ? AppConfig.getLocalDateStr() : new Date().toISOString().split('T')[0];
     const [usersData, settingsData, attendanceData] = await Promise.all([
       DB.getAllUsers(),
       DB.getSettings(),

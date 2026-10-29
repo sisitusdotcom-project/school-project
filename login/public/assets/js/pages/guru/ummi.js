@@ -607,7 +607,7 @@ const UMMIPages = {
       const journalsObj = await DB.getUmmiJournals(activeStudent.id);
       const journalsArr = DB.toArray(journalsObj).sort((a, b) => (Number(a.meetingNo) || 0) - (Number(b.meetingNo) || 0));
       const nextMeetingNo = journalsArr.length ? (Math.max(...journalsArr.map(j => Number(j.meetingNo) || 0)) + 1) : 1;
-      const todayStr = new Date().toISOString().slice(0, 10);
+      const todayStr = AppConfig.getLocalDateStr ? AppConfig.getLocalDateStr() : new Date().toISOString().slice(0, 10);
       const curStudentLevel = activeStudent.ummiLevel || (activeCls.students[activeStudent.id] && activeCls.students[activeStudent.id].level) || activeCls.level || 'Jilid 1';
       const levelOpts = UMMI_LEVELS.map(lvl => `<option value="${lvl}" ${lvl === curStudentLevel ? 'selected' : ''}>${lvl} — ${UMMI_LEVEL_DESCS[lvl] || ''}</option>`).join('');
       const gradeOpts = UMMI_GRADES.map(g => `<option value="${g.score}">${g.label}</option>`).join('');
@@ -1084,7 +1084,7 @@ const UMMIPages = {
     document.getElementById('acc-exam-id').value = target.id;
     document.getElementById('acc-stu-name').value = target.studentName || '-';
     document.getElementById('acc-target-level').value = `${target.currentLevel} -> ${target.targetLevel}`;
-    const today = new Date().toISOString().slice(0, 10);
+    const today = AppConfig.getLocalDateStr ? AppConfig.getLocalDateStr() : new Date().toISOString().slice(0, 10);
     document.getElementById('acc-date').value = today;
     document.getElementById('acc-examiner').value = Auth.currentUser.uid;
     App.openModal('modal-acc-exam');

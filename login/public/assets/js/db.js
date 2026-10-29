@@ -703,7 +703,7 @@ const DB = {
     const normalized = {
       itemName: data.itemName || 'Barang',
       type: data.type || 'Pemeliharaan',
-      date: data.date || new Date().toISOString().slice(0, 10),
+      date: data.date || (typeof AppConfig !== "undefined" && AppConfig.getLocalDateStr ? AppConfig.getLocalDateStr() : new Date().toISOString().slice(0, 10)),
       description: data.description || '-',
       status: data.status || 'Diajukan',
       createdAt: data.createdAt || firebase.database.ServerValue.TIMESTAMP
@@ -738,7 +738,7 @@ const DB = {
     const normalized = {
       title: data.title || 'Pengumuman baru',
       description: data.description || '',
-      date: data.date || new Date().toISOString().slice(0, 10),
+      date: data.date || (typeof AppConfig !== "undefined" && AppConfig.getLocalDateStr ? AppConfig.getLocalDateStr() : new Date().toISOString().slice(0, 10)),
       createdAt: data.createdAt || firebase.database.ServerValue.TIMESTAMP
     };
     const ref = id ? db.ref(`personnel/announcements/${id}`) : db.ref('personnel/announcements').push();
@@ -755,7 +755,7 @@ const DB = {
       title: data.title || 'Prestasi Baru',
       category: data.category || 'Umum',
       description: data.description || '',
-      date: data.date || new Date().toISOString().slice(0, 10),
+      date: data.date || (typeof AppConfig !== "undefined" && AppConfig.getLocalDateStr ? AppConfig.getLocalDateStr() : new Date().toISOString().slice(0, 10)),
       createdAt: data.createdAt || firebase.database.ServerValue.TIMESTAMP
     };
     const ref = id ? db.ref(`student_affairs/achievements/${id}`) : db.ref('student_affairs/achievements').push();
@@ -772,7 +772,7 @@ const DB = {
       title: data.title || 'Catatan Pelanggaran',
       category: data.category || 'Kedisiplinan',
       description: data.description || '',
-      date: data.date || new Date().toISOString().slice(0, 10),
+      date: data.date || (typeof AppConfig !== "undefined" && AppConfig.getLocalDateStr ? AppConfig.getLocalDateStr() : new Date().toISOString().slice(0, 10)),
       createdAt: data.createdAt || firebase.database.ServerValue.TIMESTAMP
     };
     const ref = id ? db.ref(`student_affairs/violations/${id}`) : db.ref('student_affairs/violations').push();
@@ -940,7 +940,7 @@ const DB = {
       method: data.method || 'Tunai',
       description: data.description || 'Transaksi baru',
       amount: Number(data.amount || 0),
-      date: data.date || new Date().toISOString().slice(0, 10),
+      date: data.date || (typeof AppConfig !== "undefined" && AppConfig.getLocalDateStr ? AppConfig.getLocalDateStr() : new Date().toISOString().slice(0, 10)),
       sourceBillId: data.sourceBillId || null,
       createdAt: data.createdAt || firebase.database.ServerValue.TIMESTAMP
     };
@@ -966,8 +966,8 @@ const DB = {
       month: data.month || '',
       studentId: data.studentId || '',
       amount: Number(data.amount || 0),
-      dueDate: data.dueDate || data.paymentDate || new Date().toISOString().slice(0, 10),
-      paymentDate: data.paymentDate || (normStatus === 'Lunas' ? new Date().toISOString().slice(0, 10) : ''),
+      dueDate: data.dueDate || data.paymentDate || (typeof AppConfig !== "undefined" && AppConfig.getLocalDateStr ? AppConfig.getLocalDateStr() : new Date().toISOString().slice(0, 10)),
+      paymentDate: data.paymentDate || (normStatus === 'Lunas' ? (typeof AppConfig !== "undefined" && AppConfig.getLocalDateStr ? AppConfig.getLocalDateStr() : new Date().toISOString().slice(0, 10)) : ''),
       status: normStatus,
       receipt: data.receipt || '',
       note: data.note || '',
@@ -983,7 +983,7 @@ const DB = {
     const bills = await this.getStudentBills();
     const bill = bills[id];
     if (!bill) return null;
-    const payDate = opts.paymentDate || new Date().toISOString().slice(0, 10);
+    const payDate = opts.paymentDate || (typeof AppConfig !== "undefined" && AppConfig.getLocalDateStr ? AppConfig.getLocalDateStr() : new Date().toISOString().slice(0, 10));
     const method = opts.method || 'Transfer';
     const updates = {
       [`finance/student_bills/${id}/status`]: 'Lunas',

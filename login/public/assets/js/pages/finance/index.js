@@ -16,7 +16,7 @@ const FinancePages = {
     const ledger = DB.toArray(ledgerData).sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')) || String(b.id).localeCompare(String(a.id)));
     const rkasList = DB.toArray(rkasData);
     const assetList = DB.toArray(assetsData);
-    const currentMonth = new Date().toISOString().slice(0, 7);
+    const currentMonth = typeof AppConfig !== "undefined" && AppConfig.getLocalMonthStr ? AppConfig.getLocalMonthStr() : new Date().toISOString().slice(0, 7);
     const currentYear = settings?.currentAcademicYear || settings?.academicYear || AppConfig.DEFAULT_SETTINGS.currentAcademicYear;
     const kepsekName = settings?.kepsekName || 'Dhani Harsyahyadi, S.H.I.';
     const kepsekNBM = settings?.kepsekNBM || settings?.kepsekNuptk || '8962767668130162';
@@ -728,7 +728,7 @@ const FinancePages = {
                 </div>
                 <div class="form-group">
                   <label for="fin-ledger-date">Tanggal Transaksi</label>
-                  <input type="date" id="fin-ledger-date" class="form-input" required value="${new Date().toISOString().slice(0, 10)}">
+                  <input type="date" id="fin-ledger-date" class="form-input" required value="${typeof AppConfig !== "undefined" && AppConfig.getLocalDateStr ? AppConfig.getLocalDateStr() : new Date().toISOString().slice(0, 10)}">
                 </div>
                 <div class="form-group">
                   <label for="fin-ledger-ref">Nomor Bukti / Kuitansi (Opsional)</label>
@@ -787,7 +787,7 @@ const FinancePages = {
                 </div>
                 <div class="form-group">
                   <label for="fin-bill-date">Jatuh Tempo</label>
-                  <input type="date" id="fin-bill-date" class="form-input" required value="${new Date().toISOString().slice(0, 10)}">
+                  <input type="date" id="fin-bill-date" class="form-input" required value="${typeof AppConfig !== "undefined" && AppConfig.getLocalDateStr ? AppConfig.getLocalDateStr() : new Date().toISOString().slice(0, 10)}">
                 </div>
                 <div class="form-group">
                   <label for="fin-bill-status">Status Tagihan</label>

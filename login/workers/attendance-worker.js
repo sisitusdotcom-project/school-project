@@ -270,6 +270,13 @@ export default {
         }, request);
       }
       const serverTimestamp = new Date().toISOString();
+      const serverDateStr = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Asia/Jakarta',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      }).format(new Date());
+      const effectiveDateStr = serverDateStr;
       const jakartaNow = new Date(new Date(serverTimestamp).toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }));
       const currentTimeText = jakartaNow.toTimeString().slice(0, 5);
       const windowName = type === 'in' ? 'hadir' : 'pulang';
@@ -318,7 +325,7 @@ export default {
       });
       const signedPayload = {
         teacherId,
-        dateStr,
+        dateStr: effectiveDateStr,
         type,
         lat: Number(location.lat),
         lng: Number(location.lng),
@@ -330,7 +337,7 @@ export default {
         photoHash: await hashString(stampedPhotoDataUrl)
       };
       const serverSignature = await signPayload(signedPayload, env.WORKER_SECRET || 'local-dev-secret');
-      const fileName = `attendance_${teacherId}_${dateStr}_${Date.now()}.jpg`;
+      const fileName = `attendance_${teacherId}_${effectiveDateStr}_${Date.now()}.jpg`;
       const proofUrl = await forwardToDriveUploadUrl({
         gasUploadUrl: env.GOOGLE_DRIVE_UPLOAD_URL || env.GAS_UPLOAD_URL,
         fileName,
@@ -338,7 +345,7 @@ export default {
         photoDataUrl: stampedPhotoDataUrl
       });
       const record = {
-        dateStr,
+        dateStr: effectiveDateStr,
         teacherId,
         type,
         proof_url: proofUrl,
@@ -353,7 +360,7 @@ export default {
         photoHash: signedPayload.photoHash,
         distanceMeters: Math.round(distance)
       };
-      await saveAttendanceRecord({ dateStr, teacherId, record });
+      await saveAttendanceRecord({ dateStr: effectiveDateStr, teacherId, record });
       return jsonResponse(200, {
         status: 'success',
         message: 'Absensi valid dan berhasil disimpan.',

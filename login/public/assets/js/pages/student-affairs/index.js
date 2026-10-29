@@ -1,7 +1,7 @@
 const StudentAffairsPages = {
   async renderDashboard(container) {
     Router.setTitle('Kesiswaan', 'Pusat pembinaan murid, pemantauan disiplin, prestasi kejuaraan, dan pendaftaran siswa baru.');
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = AppConfig.getLocalDateStr ? AppConfig.getLocalDateStr() : new Date().toISOString().split('T')[0];
     const [students, classes, spmbData, leavesData] = await Promise.all([
       DB.getAllStudents(),
       DB.getClasses(),
