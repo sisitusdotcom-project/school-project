@@ -121,82 +121,6 @@ async function signPayload(payload, secret) {
   const hash = await hashString(text);
   return hash;
 }
-async function blobToBase64(blob) {
-  const buffer = await blob.arrayBuffer();
-  let binary = '';
-  const bytes = new Uint8Array(buffer);
-  const chunkSize = 0x8000;
-  for (let i = 0; i < bytes.length; i += chunkSize) {
-    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
-  }
-  return btoa(binary);
-}
-async function loadImageForStamping(dataUrl) {
-  if (typeof createImageBitmap === 'function') {
-    const blob = await fetch(dataUrl).then((response) => response.blob());
-    return await createImageBitmap(blob);
-  }
-  if (typeof Image !== 'undefined') {
-    const image = new Image();
-    await new Promise((resolve, reject) => {
-      image.onload = resolve;
-      image.onerror = reject;
-      image.src = dataUrl;
-    });
-    return image;
-  }
-  return null;
-}
-async function stampPhotoOnImage({ photoDataUrl, location, accuracy, serverTimestamp }) {
-  if (!photoDataUrl || !photoDataUrl.startsWith('data:image')) {
-    return photoDataUrl;
-  }
-  let imageBitmap = null;
-  try {
-    imageBitmap = await loadImageForStamping(photoDataUrl);
-  } catch (error) {
-    return photoDataUrl;
-  }
-  if (!imageBitmap) {
-    return photoDataUrl;
-  }
-  const width = imageBitmap.width || imageBitmap.naturalWidth || 0;
-  const height = imageBitmap.height || imageBitmap.naturalHeight || 0;
-  const canvas = typeof OffscreenCanvas !== 'undefined'
-    ? new OffscreenCanvas(width || 1, height || 1)
-    : (typeof document !== 'undefined' ? document.createElement('canvas') : null);
-  if (!canvas) {
-    return photoDataUrl;
-  }
-  canvas.width = width || 1;
-  canvas.height = height || 1;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) {
-    return photoDataUrl;
-  }
-  ctx.drawImage(imageBitmap, 0, 0, canvas.width, canvas.height);
-  const stampText1 = new Date(serverTimestamp).toLocaleString('id-ID', {
-    timeZone: 'Asia/Jakarta',
-    dateStyle: 'short',
-    timeStyle: 'medium'
-  });
-  const stampText2 = `Lokasi: ${Number(location.lat).toFixed(6)}, ${Number(location.lng).toFixed(6)} | Akurasi ${Number(accuracy || 0).toFixed(0)} m`;
-  const padding = 22;
-  const barHeight = 90;
-  const fontSize = 22;
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.62)';
-  ctx.fillRect(0, canvas.height - barHeight, canvas.width, barHeight);
-  ctx.fillStyle = '#ffffff';
-  ctx.font = `700 ${fontSize}px Arial`;
-  ctx.fillText(stampText1, padding, canvas.height - 42);
-  ctx.font = `500 18px Arial`;
-  ctx.fillText(stampText2, padding, canvas.height - 16);
-  if (typeof canvas.convertToBlob === 'function') {
-    const stampedBlob = await canvas.convertToBlob({ type: 'image/jpeg', quality: 0.9 });
-    return `data:image/jpeg;base64,${await blobToBase64(stampedBlob)}`;
-  }
-  return canvas.toDataURL('image/jpeg', 0.9);
-}
 async function forwardToDriveUploadUrl({ gasUploadUrl, fileName, mimeType, photoDataUrl }) {
   const gasUrl = (gasUploadUrl || '').trim();
   if (!gasUrl) {
@@ -367,19 +291,13 @@ export default {
       await saveAttendanceRecord({ dateStr: effectiveDateStr, teacherId, record: initialPatch }, env);
       const backgroundTask = async () => {
         try {
-          const stampedPhoto = await stampPhotoOnImage({
-            photoDataUrl,
-            location,
-            accuracy: accuracyValue,
-            serverTimestamp
-          });
           const fileName = `attendance_${teacherId}_${effectiveDateStr}_${Date.now()}.jpg`;
           const gasUrl = env?.GOOGLE_DRIVE_UPLOAD_URL || env?.GAS_UPLOAD_URL;
           const proofUrl = await forwardToDriveUploadUrl({
             gasUploadUrl: gasUrl,
             fileName,
             mimeType: 'image/jpeg',
-            photoDataUrl: stampedPhoto
+            photoDataUrl
           });
           if (proofUrl) {
             const proofPatch = type === 'out'
