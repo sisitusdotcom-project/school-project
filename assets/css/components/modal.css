@@ -216,14 +216,14 @@ background: rgba(0, 15, 45, 0.65)
 }
 .spmb-popup-dialog {
 position: relative;
-width: 90%;
+width: calc(100% - 44px);
 max-width: 350px;
 background: #ffffff;
-border-radius: 12px;
+border-radius: 14px;
 box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
 transform: translateY(20px) scale(0.95);
 transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
-overflow: hidden;
+overflow: visible;
 box-sizing: border-box
 }
 .modal-overlay.active .spmb-popup-dialog {
@@ -231,30 +231,34 @@ transform: translateY(0) scale(1)
 }
 .spmb-popup-close {
 position: absolute;
-top: 8px;
-right: 8px;
-z-index: 25;
+top: -14px;
+right: -14px;
+z-index: 30;
 width: 32px;
 height: 32px;
 border-radius: 50%;
-background: rgba(0, 0, 0, 0.68);
-color: #ffffff;
-border: 1px solid rgba(255, 255, 255, 0.3);
+background: #ffffff;
+color: #00225d;
+border: 2px solid #00225d;
+box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
 display: flex;
 align-items: center;
 justify-content: center;
-font-size: 1.1rem;
+font-size: 1.15rem;
 cursor: pointer;
-transition: transform 0.2s ease, background 0.2s ease;
-backdrop-filter: blur(4px)
+transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease, border-color 0.2s ease
 }
 .spmb-popup-close:hover {
-background: var(--strip-red, #dc2626);
+background: #dc2626;
+color: #ffffff;
+border-color: #dc2626;
 transform: rotate(90deg) scale(1.08)
 }
 .spmb-popup-body {
-padding: 8px 8px 10px;
-background: #ffffff
+padding: 10px 10px 12px;
+background: #ffffff;
+border-radius: 14px;
+overflow: hidden
 }
 .spmb-popup-body .infografis-item {
 margin-top: 0 !important
