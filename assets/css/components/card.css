@@ -352,7 +352,7 @@
   width: 100%;
   height: 280px;
   object-fit: cover;
-  object-position: top;
+  object-position: 50% 10%;
   border-radius: 4px;
   background-color: #f1f1f1;
   display: block
