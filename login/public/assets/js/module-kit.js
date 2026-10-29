@@ -30,23 +30,7 @@ const ModuleKit = {
         ctx.meta.allSubjects = subMap;
         ctx.meta.classes = classes || {};
       }
-      const isPriv = ctx && (ctx.admin || (typeof ModuleKit !== 'undefined' && ModuleKit.isPrivileged && ModuleKit.isPrivileged()));
-      if (isPriv) return subMap;
-      const uid = ctx ? ctx.uid : '';
-      const mySubjectIds = new Set();
-      Object.values(classes || {}).forEach((cls) => {
-        if (cls && cls.subjectTeachers) {
-          Object.entries(cls.subjectTeachers).forEach(([subId, tUid]) => {
-            if (tUid === uid) mySubjectIds.add(subId);
-          });
-        }
-      });
-      if (!mySubjectIds.size) return subMap;
-      const filtered = {};
-      mySubjectIds.forEach((sid) => {
-        if (subMap[sid]) filtered[sid] = subMap[sid];
-      });
-      return Object.keys(filtered).length ? filtered : subMap;
+      return subMap;
     },
     user: async () => {
       const users = await DB.getAllUsers();
@@ -311,7 +295,8 @@ const ModuleKit = {
           <div class="mk-toolbar">
             <input type="search" id="mk-search" class="mk-filter" placeholder="Cari data...">
             ${statusFilter}
-            <button type="button" class="btn btn-outline btn-sm" id="mk-export"><i class="ph ph-file-xls"></i> Excel</button>
+            <button type="button" class="btn btn-outline btn-sm" id="mk-export"><i class="ph ph-file-xls"></i> Unduh Excel</button>
+            ${(def.allowImport && writable) ? '<button type="button" class="btn btn-outline btn-sm" id="mk-import"><i class="ph ph-file-arrow-up"></i> Impor Excel</button><input type="file" id="mk-import-file" accept=".xlsx,.xls,.csv" style="display:none;">' : ''}
             ${canAdd ? '<button type="button" class="btn btn-primary btn-sm" id="mk-add"><i class="ph ph-plus"></i> Tambah</button>' : ''}
           </div>
         </div>
@@ -390,17 +375,142 @@ const ModuleKit = {
         alert('Library Excel belum dimuat.');
         return;
       }
-      const data = filtered().map((row, index) => {
+      let data = filtered().map((row, index) => {
         const out = { No: index + 1 };
         def.fields.forEach((f) => {
           out[f.label] = this.plain(def, f, row, refs);
         });
         return out;
       });
+      if (!data.length && def.node === 'curriculum/schedules') {
+        data = [
+          { No: 1, Hari: 'Senin', Mulai: '07:30', Selesai: '08:45', Kelas: '1 ABU BAKAR ASH SHIDDIQ', 'Mata Pelajaran': 'Matematika', Guru: 'Nur Fadhilah' },
+          { No: 2, Hari: 'Senin', Mulai: '08:45', Selesai: '10:00', Kelas: '1 ABU BAKAR ASH SHIDDIQ', 'Mata Pelajaran': 'Bahasa Indonesia', Guru: 'Nur Fadhilah' },
+          { No: 3, Hari: 'Selasa', Mulai: '07:30', Selesai: '08:45', Kelas: '1 ABU BAKAR ASH SHIDDIQ', 'Mata Pelajaran': 'Baca Tulis Qur\'an (BTQ)', Guru: 'Vindy Aprillia' }
+        ];
+      }
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(data), 'Data');
       XLSX.writeFile(wb, `${(def.noun || title).replace(/[^A-Za-z0-9]+/g, '_')}.xlsx`);
     });
+    const importBtn = container.querySelector('#mk-import');
+    const importFile = container.querySelector('#mk-import-file');
+    if (importBtn && importFile) {
+      importBtn.addEventListener('click', () => importFile.click());
+      importFile.addEventListener('change', async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        if (!window.XLSX) {
+          alert('Library Excel belum siap.');
+          return;
+        }
+        try {
+          const buffer = await file.arrayBuffer();
+          const wb = XLSX.read(buffer, { type: 'array' });
+          const firstSheet = wb.Sheets[wb.SheetNames[0]];
+          const rawRows = XLSX.utils.sheet_to_json(firstSheet, { defval: '' });
+          if (!rawRows.length) {
+            alert('File Excel kosong atau format tidak sesuai.');
+            importFile.value = '';
+            return;
+          }
+          const [allClasses, allSubjects, allUsers] = await Promise.all([
+            DB.getClasses(),
+            DB.getSubjects(),
+            DB.getAllUsers()
+          ]);
+          const classByName = {};
+          Object.entries(allClasses || {}).forEach(([id, c]) => {
+            classByName[String(c.name || '').trim().toLowerCase()] = id;
+            classByName[id.toLowerCase()] = id;
+          });
+          const subByName = {};
+          Object.entries(allSubjects || {}).forEach(([id, s]) => {
+            subByName[String(s.name || '').trim().toLowerCase()] = id;
+            subByName[id.toLowerCase()] = id;
+          });
+          const userByName = {};
+          Object.entries(allUsers || {}).forEach(([id, u]) => {
+            userByName[String(u.name || u.displayName || '').trim().toLowerCase()] = id;
+            userByName[id.toLowerCase()] = id;
+          });
+          const validDays = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+          const dayMap = {};
+          validDays.forEach(d => { dayMap[d.toLowerCase()] = d; });
+          const formatTimeVal = (val) => {
+            if (typeof val === 'number') {
+              const totalMinutes = Math.round(val * 24 * 60);
+              const h = String(Math.floor(totalMinutes / 60)).padStart(2, '0');
+              const m = String(totalMinutes % 60).padStart(2, '0');
+              return `${h}:${m}`;
+            }
+            const s = String(val).trim().replace('.', ':');
+            const m = s.match(/^([0-1]?\d|2[0-3]):([0-5]\d)$/);
+            if (m) return `${m[1].padStart(2, '0')}:${m[2]}`;
+            return s;
+          };
+          const updates = {};
+          let validCount = 0;
+          let skippedCount = 0;
+          rawRows.forEach((r) => {
+            const getCol = (...keys) => {
+              for (const k of keys) {
+                const found = Object.keys(r).find(rk => rk.trim().toLowerCase() === k.toLowerCase());
+                if (found && r[found] !== undefined && r[found] !== '') return r[found];
+              }
+              return '';
+            };
+            const rawDay = String(getCol('Hari', 'Day')).trim().toLowerCase();
+            const day = dayMap[rawDay];
+            const startTime = formatTimeVal(getCol('Mulai', 'Jam Mulai', 'Start', 'StartTime'));
+            const endTime = formatTimeVal(getCol('Selesai', 'Jam Selesai', 'End', 'EndTime'));
+            const rawCls = String(getCol('Kelas', 'Nama Kelas', 'Class', 'ClassId')).trim().toLowerCase();
+            const classId = classByName[rawCls];
+            const rawSub = String(getCol('Mata Pelajaran', 'Mapel', 'Subject', 'SubjectId')).trim().toLowerCase();
+            const subjectId = subByName[rawSub];
+            const rawTeacher = String(getCol('Guru', 'Nama Guru', 'Teacher', 'TeacherId')).trim().toLowerCase();
+            let teacherId = userByName[rawTeacher];
+            if (!teacherId && classId && subjectId && allClasses[classId]?.subjectTeachers?.[subjectId]) {
+              teacherId = allClasses[classId].subjectTeachers[subjectId];
+            }
+            if (!day || !startTime || !endTime || !classId || !subjectId) {
+              skippedCount++;
+              return;
+            }
+            const newKey = db.ref(def.node).push().key;
+            updates[`${def.node}/${newKey}`] = {
+              day,
+              startTime,
+              endTime,
+              classId,
+              subjectId,
+              teacherId: teacherId || '',
+              createdAt: new Date().toISOString()
+            };
+            validCount++;
+          });
+          if (!validCount) {
+            alert(`Tidak ada data jadwal valid untuk diimpor (${skippedCount} baris tidak sesuai). Pastikan nama kolom: Hari, Mulai, Selesai, Kelas, Mata Pelajaran, Guru.`);
+            importFile.value = '';
+            return;
+          }
+          if (!confirm(`Ditemukan ${validCount} jadwal pelajaran valid (${skippedCount} baris dilewati). Lanjutkan impor ke database?`)) {
+            importFile.value = '';
+            return;
+          }
+          await db.ref().update(updates);
+          alert(`Sukses mengimpor ${validCount} jadwal pelajaran!`);
+          importFile.value = '';
+          const freshRows = await ModuleKit.fetchRows(def.node);
+          state.rows = freshRows;
+          paint();
+        } catch (err) {
+          console.error(err);
+          alert('Gagal membaca file Excel: ' + (err?.message || err));
+          importFile.value = '';
+        }
+      });
+    }
     if (!writable) return;
     const modalId = 'mk-modal';
     const form = container.querySelector('#mk-form');
@@ -473,23 +583,68 @@ const ModuleKit = {
         const sf = form.querySelector(`#mk-f-${def.statusField || 'status'}`);
         if (sf) sf.disabled = false;
       }
+      const isSchedule = def.node === 'curriculum/schedules';
       const tf = form.querySelector('#mk-f-teacherId');
       if (tf) {
-        if (!isApprover) {
+        if (!isApprover && !isSchedule && def.approverRoles) {
           tf.value = row ? (row.teacherId || uid) : uid;
           tf.disabled = true;
         } else {
           tf.disabled = false;
         }
       }
+      const cf = form.querySelector('#mk-f-classId');
       const sfSub = form.querySelector('#mk-f-subjectId');
-      if (sfSub) {
+      if (isSchedule && cf && sfSub) {
+        const updateScheduleDependencies = () => {
+          const selectedClassId = cf.value;
+          const classes = refs.__ctx?.meta?.classes || {};
+          const allSubjects = refs.__ctx?.meta?.allSubjects || refs.subject || {};
+          const targetClass = classes[selectedClassId];
+          const classSubjectMap = targetClass?.subjectTeachers || {};
+          const curSubVal = sfSub.value;
+          let entries = Object.entries(allSubjects);
+          if (selectedClassId && Object.keys(classSubjectMap).length > 0) {
+            entries.sort((a, b) => {
+              const aHas = classSubjectMap[a[0]] ? 1 : 0;
+              const bHas = classSubjectMap[b[0]] ? 1 : 0;
+              if (aHas !== bHas) return bHas - aHas;
+              return String(a[1].name || a[1]).localeCompare(String(b[1].name || b[1]));
+            });
+          } else {
+            entries.sort((a, b) => String(a[1].name || a[1]).localeCompare(String(b[1].name || b[1])));
+          }
+          sfSub.innerHTML = '<option value="">-- Pilih --</option>' + entries.map(([id, s]) => {
+            const isClassSub = classSubjectMap[id] ? ' ✓ (Mapel Kelas)' : '';
+            return `<option value="${this.esc(id)}">${this.esc(s.name || s)}${isClassSub}</option>`;
+          }).join('');
+          if (curSubVal && entries.some(([id]) => id === curSubVal)) {
+            sfSub.value = curSubVal;
+          }
+          if (tf && selectedClassId && sfSub.value && classSubjectMap[sfSub.value]) {
+            tf.value = classSubjectMap[sfSub.value];
+          }
+        };
+        cf.onchange = () => {
+          updateScheduleDependencies();
+        };
+        sfSub.onchange = () => {
+          const selectedClassId = cf.value;
+          const classes = refs.__ctx?.meta?.classes || {};
+          const targetClass = classes[selectedClassId];
+          const assignedTeacher = targetClass?.subjectTeachers?.[sfSub.value];
+          if (tf && assignedTeacher) {
+            tf.value = assignedTeacher;
+          }
+        };
+        updateScheduleDependencies();
+      } else if (sfSub) {
         const activeTeacherId = tf ? tf.value : (row ? (row.teacherId || uid) : uid);
         const updateSubjectOptions = (tId) => {
           const allSubjects = refs.__ctx?.meta?.allSubjects || refs.subject || {};
           const classes = refs.__ctx?.meta?.classes || {};
           let allowedIds = null;
-          if (tId && !isApprover) {
+          if (tId && !isApprover && def.approverRoles) {
             const taught = new Set();
             Object.values(classes).forEach((cls) => {
               if (cls && cls.subjectTeachers) {

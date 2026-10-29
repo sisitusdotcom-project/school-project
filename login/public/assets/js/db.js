@@ -655,6 +655,23 @@ const DB = {
     if (!isDBReady()) return;
     await db.ref(`subjects/${id}`).remove();
   },
+  async getSchedules() {
+    return this._readCollection('curriculum/schedules', {});
+  },
+  async getSchedulesByClass(classId) {
+    if (!classId) return [];
+    const all = await this.getSchedules();
+    return Object.entries(all || {})
+      .filter(([id, s]) => s && s.classId === classId)
+      .map(([id, s]) => ({ id, ...s }));
+  },
+  async getSchedulesByTeacher(teacherId) {
+    if (!teacherId) return [];
+    const all = await this.getSchedules();
+    return Object.entries(all || {})
+      .filter(([id, s]) => s && s.teacherId === teacherId)
+      .map(([id, s]) => ({ id, ...s }));
+  },
   async getExtracurriculars() {
     return this._readCollection('extracurriculars', {});
   },

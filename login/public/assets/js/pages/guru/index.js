@@ -15,8 +15,43 @@ Router.setTitle('Beranda', 'Selamat datang di Dasbor Digital Sekolah.');
 const today = new Date();
 const dateStr = AppConfig.getLocalDateStr ? AppConfig.getLocalDateStr(today) : today.toISOString().slice(0, 10);
 const timeStr = today.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-const [classArr, students, myAtt] = await Promise.all([DB.getClassesForTeacher(Auth.currentUser.uid), DB.getAllStudents(), DB.getTeacherAttendance(dateStr, Auth.currentUser.uid)]);
+const [classArr, students, myAtt, mySchedules, allSubjects, allClasses] = await Promise.all([
+DB.getClassesForTeacher(Auth.currentUser.uid),
+DB.getAllStudents(),
+DB.getTeacherAttendance(dateStr, Auth.currentUser.uid),
+DB.getSchedulesByTeacher(Auth.currentUser.uid),
+DB.getSubjects(),
+DB.getClasses()
+]);
 const studentCount = DB.toArray(students).filter(s => classArr.some(c => c.id === s.classId)).length;
+const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+const todayDayName = dayNames[today.getDay()];
+const tomorrowDate = new Date(today);
+tomorrowDate.setDate(today.getDate() + 1);
+const tomorrowDayName = dayNames[tomorrowDate.getDay()];
+const teacherScheds = mySchedules || [];
+const todayScheds = teacherScheds.filter(s => s.day === todayDayName).sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''));
+const tomorrowScheds = teacherScheds.filter(s => s.day === tomorrowDayName).sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''));
+const renderSchedItems = (items) => {
+if (!items.length) return '<p class="text-muted" style="margin:0; font-size:13px;">Tidak ada jadwal mengajar tatap muka.</p>';
+return items.map(s => {
+const cls = allClasses[s.classId];
+const sub = allSubjects[s.subjectId];
+const clsName = cls ? cls.name : s.classId;
+const subName = sub ? sub.name : s.subjectId;
+return `<div style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; margin-bottom:6px; background:var(--bg-card,#fff); border:1px solid var(--border-color,#e2e8f0); border-radius:6px;"><div><strong style="color:var(--text-main); font-size:13px;">${AppConfig.escapeHtml(subName)}</strong><div class="text-muted" style="font-size:12px;">Kelas: ${AppConfig.escapeHtml(clsName)}</div></div><span class="badge badge-primary" style="font-size:11px;">${s.startTime || '-'} - ${s.endTime || '-'}</span></div>`;
+}).join('');
+};
+const fullWeekSchedRows = teacherScheds.length ? [...teacherScheds].sort((a, b) => {
+const dA = dayNames.indexOf(a.day);
+const dB = dayNames.indexOf(b.day);
+if (dA !== dB) return dA - dB;
+return (a.startTime || '').localeCompare(b.startTime || '');
+}).map(s => {
+const cls = allClasses[s.classId];
+const sub = allSubjects[s.subjectId];
+return `<tr><td><strong>${AppConfig.escapeHtml(s.day)}</strong></td><td><span class="badge badge-outline">${s.startTime || '-'} - ${s.endTime || '-'}</span></td><td>${AppConfig.escapeHtml(cls ? cls.name : s.classId)}</td><td>${AppConfig.escapeHtml(sub ? sub.name : s.subjectId)}</td></tr>`;
+}).join('') : '<tr><td colspan="4" class="text-center text-muted">Belum ada jadwal mengajar yang diterbitkan.</td></tr>';
 let attStatus = 'Belum Presensi';
 let attClass = 'badge-warning';
 if (myAtt) {
@@ -53,6 +88,40 @@ container.innerHTML = `
 <div class="card stat-card">
 <div class="stat-icon stat-icon--danger"><i class="ph ph-chalkboard-teacher"></i></div>
 <div><p class="stat-value">${classArr.length}</p><p class="stat-label text-muted">Kelas terlibat</p></div>
+</div>
+</section>
+<section class="card section-spacer">
+<div class="card-header">
+<h3 class="card-title"><i class="ph ph-calendar-check"></i> Jadwal Mengajar Guru</h3>
+<div class="card-actions">
+<button type="button" class="btn btn-outline btn-sm" id="btn-toggle-guru-sched"><i class="ph ph-calendar"></i> Jadwal 1 Pekan</button>
+</div>
+</div>
+<div class="card-body">
+<div class="card-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+<div style="background:var(--bg-subtle,#f8fafc); border:1px solid var(--border-color,#e2e8f0); border-radius:10px; padding:16px;">
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+<strong style="color:var(--text-main); font-size:14px;"><i class="ph ph-clock"></i> Mengajar Hari Ini (${todayDayName})</strong>
+<span class="badge ${todayScheds.length ? 'badge-primary' : 'badge-neutral'}">${todayScheds.length} Sesi</span>
+</div>
+${renderSchedItems(todayScheds)}
+</div>
+<div style="background:var(--bg-subtle,#f8fafc); border:1px solid var(--border-color,#e2e8f0); border-radius:10px; padding:16px;">
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+<strong style="color:var(--text-main); font-size:14px;"><i class="ph ph-arrow-right"></i> Persiapan Mengajar Besok (${tomorrowDayName})</strong>
+<span class="badge ${tomorrowScheds.length ? 'badge-success' : 'badge-neutral'}">${tomorrowScheds.length} Sesi</span>
+</div>
+${renderSchedItems(tomorrowScheds)}
+</div>
+</div>
+<div id="guru-sched-week-wrap" style="display:none; margin-top:16px;">
+<div class="table-responsive">
+<table class="table">
+<thead><tr><th>Hari</th><th>Jam</th><th>Kelas</th><th>Mata Pelajaran</th></tr></thead>
+<tbody>${fullWeekSchedRows}</tbody>
+</table>
+</div>
+</div>
 </div>
 </section>
 <section class="card section-spacer">
@@ -125,6 +194,15 @@ container.innerHTML = `
 <p class="text-muted soft-note">Validasi lokasi dilakukan oleh server secara aman. Browser tidak menyimpan koordinat sekolah untuk keperluan validasi presensi.</p>
 </div>
 `;
+const btnToggle = container.querySelector('#btn-toggle-guru-sched');
+const schedWrap = container.querySelector('#guru-sched-week-wrap');
+if (btnToggle && schedWrap) {
+btnToggle.onclick = () => {
+const isHidden = schedWrap.style.display === 'none';
+schedWrap.style.display = isHidden ? 'block' : 'none';
+btnToggle.innerHTML = isHidden ? '<i class="ph ph-eye-slash"></i> Tutup 1 Pekan' : '<i class="ph ph-calendar"></i> Jadwal 1 Pekan';
+};
+}
 },
 async renderClasses(container) {
 Router.setTitle('Kelas & E-Rapor', 'Pusat pengelolaan penilaian akademik, karakter, dan pencetakan rapor rombel.');

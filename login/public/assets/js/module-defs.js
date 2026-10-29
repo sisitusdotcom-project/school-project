@@ -851,8 +851,10 @@
       ]
     },
     '#/curriculum/schedules': {
-      node: 'curriculum/schedules', noun: 'Jadwal Pelajaran', writeRoles: CU, statusField: 'day', badges: {},
-      subtitle: 'Jadwal pelajaran per kelas.',
+      node: 'curriculum/schedules', noun: 'Jadwal Pelajaran', writeRoles: [R.CURRICULUM, R.ADMIN], statusField: 'day', badges: {},
+      allowImport: true,
+      units: ['WAKA_KURIKULUM', 'STAF_KURIKULUM'],
+      subtitle: 'Jadwal pelajaran per kelas dan guru pengampu.',
       summary: [
         { label: 'Total Slot', icon: 'ph-calendar', tone: 'primary' }
       ],
