@@ -19,7 +19,6 @@ window.initBackToTop = initBackToTop; function initDarkMode() {
   toggleBtns.forEach(function(btn) { btn.addEventListener('click', function () { document.documentElement.classList.toggle('dark-mode'); var isDark = document.documentElement.classList.contains('dark-mode'); localStorage.setItem('theme', isDark ? 'dark' : 'light') }) })
 }
 window.initDarkMode = initDarkMode;
-
 function initClearCache() {
   var clearBtns = document.querySelectorAll('.clear-cache-toggle');
   clearBtns.forEach(function(btn) {
@@ -34,31 +33,24 @@ function initClearCache() {
   });
 }
 window.initClearCache = initClearCache;
-
 let deferredPWAPrompt = null;
 window.addEventListener('beforeinstallprompt', function (e) {
   e.preventDefault();
   deferredPWAPrompt = e;
 });
-
 function initPWAInstall() {
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js').catch(function(err) {
       console.log('Service Worker registration failed: ', err);
     });
   }
-
   var installContainer = document.getElementById('pwa-install-container');
   var installBtn = document.getElementById('pwa-install-btn');
-
   var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
   var isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
-
-  // Jika sudah diinstal, sembunyikan tombolnya
   if (isStandalone && installContainer) {
     installContainer.style.display = 'none';
   }
-
   if (installBtn) {
     installBtn.addEventListener('click', function () {
       if (deferredPWAPrompt) {
@@ -78,7 +70,6 @@ function initPWAInstall() {
   }
 }
 window.initPWAInstall = initPWAInstall;
-
 function initNumberCounters() {
   var counters = document.querySelectorAll('.stat-number');
   if (counters.length === 0) return;
@@ -117,7 +108,6 @@ function initNumberCounters() {
   });
 }
 window.initNumberCounters = initNumberCounters;
-
 function initSponsorsMarquee() {
   const template = document.getElementById("sponsors-template");
   const row1 = document.getElementById("row1");
@@ -141,98 +131,128 @@ function initSponsorsMarquee() {
   }
 }
 window.initSponsorsMarquee = initSponsorsMarquee;
-
 function initGallerySlider() {
   var sliders = document.querySelectorAll('.auto-slide-gallery, #gallery-slider');
   if (!sliders.length) return;
-
   sliders.forEach(function(slider) {
     if (slider.dataset.autoSliderInitialized === 'true') return;
     slider.dataset.autoSliderInitialized = 'true';
-
     var scrollInterval;
     var pauseTimeout;
-
     function getScrollAmount() {
       var firstItem = slider.querySelector('.gallery-item-home');
       if (!firstItem) return 0;
-
       var itemStyle = window.getComputedStyle(firstItem);
       var itemWidth = firstItem.offsetWidth + parseFloat(itemStyle.marginRight || 0);
       var gap = parseFloat(window.getComputedStyle(slider).gap || 0);
       return itemWidth + gap;
     }
-
     function scrollStep() {
       var maxScroll = slider.scrollWidth - slider.clientWidth - 10;
       if (maxScroll <= 0 || slider.scrollLeft >= maxScroll) {
         slider.scrollTo({ left: 0, behavior: 'smooth' });
         return;
       }
-
       slider.scrollBy({ left: getScrollAmount(), behavior: 'smooth' });
     }
-
     function startAutoScroll() {
       clearInterval(scrollInterval);
       scrollInterval = setInterval(scrollStep, 2200);
     }
-
     function pauseAutoScroll() {
       clearInterval(scrollInterval);
       clearTimeout(pauseTimeout);
     }
-
     function resumeAutoScroll() {
       pauseAutoScroll();
       pauseTimeout = setTimeout(startAutoScroll, 1800);
     }
-
     slider.addEventListener('mouseenter', pauseAutoScroll);
     slider.addEventListener('mouseleave', resumeAutoScroll);
     slider.addEventListener('touchstart', pauseAutoScroll, { passive: true });
     slider.addEventListener('touchend', resumeAutoScroll, { passive: true });
-
     startAutoScroll();
   });
 }
 window.initGallerySlider = initGallerySlider;
-
 function initInfografisSliders() {
   var sliders = document.querySelectorAll('.infografis-slider');
   if (!sliders.length) return;
-
   sliders.forEach(function(slider) {
     var slides = slider.querySelectorAll('.infografis-slide');
     if (slides.length < 2) return;
-
     var currentIndex = 0;
-    var intervalMs = Number(slider.dataset.interval) || 2600;
-
+    var defaultInterval = Number(slider.dataset.interval) || 2600;
+    var timerId = null;
+    var isPaused = false;
     function showSlide(index) {
       slides.forEach(function(slide, slideIndex) {
-        slide.classList.toggle('active', slideIndex === index);
+        var isActive = slideIndex === index;
+        slide.classList.toggle('active', isActive);
+        var video = slide.querySelector('video') || (slide.tagName === 'VIDEO' ? slide : null);
+        if (video) {
+          if (isActive) {
+            try {
+              video.currentTime = 0;
+              var playPromise = video.play();
+              if (playPromise !== undefined) {
+                playPromise.catch(function() {});
+              }
+            } catch (e) {}
+          } else {
+            try {
+              video.pause();
+            } catch (e) {}
+          }
+        }
       });
     }
-
-    function nextSlide() {
+    function advance() {
       currentIndex = (currentIndex + 1) % slides.length;
       showSlide(currentIndex);
+      scheduleNext();
     }
-
-    var intervalId = setInterval(nextSlide, intervalMs);
-
+    function scheduleNext() {
+      clearTimeout(timerId);
+      if (isPaused) return;
+      var currentSlide = slides[currentIndex];
+      var video = currentSlide.querySelector('video') || (currentSlide.tagName === 'VIDEO' ? currentSlide : null);
+      if (video) {
+        function onVideoEnd() {
+          video.removeEventListener('ended', onVideoEnd);
+          clearTimeout(timerId);
+          if (!isPaused) {
+            advance();
+          }
+        }
+        video.removeEventListener('ended', onVideoEnd);
+        video.addEventListener('ended', onVideoEnd);
+        var fallbackMs = (video.duration && !isNaN(video.duration)) ? Math.ceil((video.duration + 1) * 1000) : 30000;
+        timerId = setTimeout(onVideoEnd, fallbackMs);
+      } else {
+        var duration = (currentSlide && Number(currentSlide.dataset.duration)) || defaultInterval;
+        timerId = setTimeout(advance, duration);
+      }
+    }
     slider.addEventListener('mouseenter', function() {
-      clearInterval(intervalId);
+      isPaused = true;
+      clearTimeout(timerId);
     });
-
     slider.addEventListener('mouseleave', function() {
-      intervalId = setInterval(nextSlide, intervalMs);
+      isPaused = false;
+      var currentSlide = slides[currentIndex];
+      var video = currentSlide.querySelector('video') || (currentSlide.tagName === 'VIDEO' ? currentSlide : null);
+      if (video && video.ended) {
+        advance();
+      } else {
+        scheduleNext();
+      }
     });
+    showSlide(0);
+    scheduleNext();
   });
 }
 window.initInfografisSliders = initInfografisSliders;
-
 document.addEventListener('click', function(e) {
   var waBtn = e.target.closest('.btn-whatsapp-float') || e.target.closest('.footer-wa-link');
   if (waBtn) {
@@ -245,9 +265,7 @@ document.addEventListener('click', function(e) {
     } else if (hour >= 18 || hour < 4) {
       greeting = 'Malam';
     }
-    
     var text = "_Assalamu'alaikum Warahmatullahi Wabarakatuh_\nSelamat " + greeting + " Musada!\n\u3164";
     waBtn.href = 'https://wa.me/6285964399398?text=' + encodeURIComponent(text);
-    // Don't preventDefault, let the browser open the updated href naturally.
   }
 });
