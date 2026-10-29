@@ -1559,7 +1559,7 @@ alert('Kamera belum siap. Silakan tunggu sebentar lalu coba lagi.');
 return;
 }
 try {
-const maxDim = 720;
+const maxDim = 480;
 const w = cameraVideo.videoWidth;
 const h = cameraVideo.videoHeight;
 const scale = Math.min(1, maxDim / Math.max(w, h));
@@ -1572,7 +1572,7 @@ const ctx = canvas.getContext('2d');
 ctx.translate(canvas.width, 0);
 ctx.scale(-1, 1);
 ctx.drawImage(cameraVideo, 0, 0, targetW, targetH);
-const snapshot = canvas.toDataURL('image/jpeg', 0.75);
+const snapshot = canvas.toDataURL('image/jpeg', 0.65);
 capturedProofDataUrl = snapshot;
 proofPreview.src = snapshot;
 proofWrapper.style.display = 'block';
@@ -1978,18 +1978,7 @@ isUmmi,
 roleGroup: isUmmi ? 'ummi' : 'gtk',
 lateReason: lateReasonVal
 });
-const payload = type === 'in'
-? { time_in: result.serverTimestamp ? new Date(result.serverTimestamp).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }), location_in: result.location || currentLocation }
-: { time_out: result.serverTimestamp ? new Date(result.serverTimestamp).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }), location_out: result.location || currentLocation };
-if (result.proof_url) payload.proof_url = result.proof_url;
-if (result.record && Object.keys(result.record).length) Object.assign(payload, result.record);
-if (type === 'in') {
-const lateInput = document.getElementById('attendance-late-reason-input');
-const lateReasonVal = lateInput ? lateInput.value.trim() : '';
-if (lateReasonVal) { payload.late_reason = lateReasonVal; payload.appeal_status = "pending"; payload.appeal_created_at = new Date().toISOString(); }
-}
-await DB.saveTeacherAttendance(dateStr, teacherId, payload);
-const recordedTime = type === 'in' ? (payload.time_in || new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })) : (payload.time_out || new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }));
+const recordedTime = result?.record?.time_in || result?.record?.time_out || (type === 'in' ? (result.serverTimestamp ? new Date(result.serverTimestamp).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })) : (result.serverTimestamp ? new Date(result.serverTimestamp).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })));
 AppConfig.showAttendanceSuccessModal({ type, timeStr: recordedTime, user: Auth.userData || Auth.currentUser, isUmmi, date: dateStr });
 capturedProofDataUrl = null;
 proofPreview.src = '';
@@ -1997,7 +1986,7 @@ proofWrapper.style.display = 'none';
 proofStatus.innerText = 'Belum ada foto';
 cameraCaptureBtn.innerText = 'Ambil Foto Kamera';
 stopCamera();
-await loadHistory();
+void loadHistory();
 } catch (err) {
 console.error(err);
 alert(err && err.message ? err.message : 'Gagal mencatat presensi. Pastikan foto dan lokasi benar, serta endpoint server aktif.');

@@ -213,16 +213,18 @@ const DB = {
   async submitTeacherAttendanceToWorker({ dateStr, teacherId, type, photoDataUrl, location, accuracy, isUmmi, roleGroup, lateReason }) {
     const workerUrl = (window.CLOUDFLARE_ATTENDANCE_WORKER_URL || '').trim();
     if (!workerUrl || workerUrl.includes('your-subdomain')) {
-      const proofUrl = await this.saveTeacherAttendanceProof(dateStr, teacherId, photoDataUrl, 'image/jpeg');
+      const timeStr = new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit' }).format(new Date()).replace('.', ':');
       const payload = {
-        ...(type === 'in' ? { time_in: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) } : {}),
-        ...(type === 'out' ? { time_out: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) } : {}),
+        ...(type === 'in' ? { time_in: timeStr } : {}),
+        ...(type === 'out' ? { time_out: timeStr } : {}),
         ...(location ? (type === 'in' ? { location_in: location } : { location_out: location }) : {}),
-        ...(proofUrl ? { proof_url: proofUrl } : {}),
-        ...(lateReason ? { late_reason: lateReason } : {})
+        ...(lateReason ? { late_reason: lateReason, appeal_status: 'pending', appeal_created_at: new Date().toISOString() } : {})
       };
       await this.saveTeacherAttendance(dateStr, teacherId, payload);
-      return { status: 'success', proof_url: proofUrl, record: payload };
+      if (photoDataUrl) {
+        void this.saveTeacherAttendanceProof(dateStr, teacherId, photoDataUrl, 'image/jpeg');
+      }
+      return { status: 'success', proof_url: '', record: payload };
     }
     const user = typeof firebase !== 'undefined' && firebase.auth ? firebase.auth().currentUser : null;
     const idToken = user ? await user.getIdToken() : '';

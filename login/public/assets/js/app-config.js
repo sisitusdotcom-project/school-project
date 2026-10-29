@@ -558,8 +558,9 @@ if (sched.isOff || sched.noLatePenalty) return false;
 if (attRecord && (attRecord.appeal_status === 'approved' || attRecord.appeal_status === 'accepted' || attRecord.appeal_status === 'tolerated')) {
 return false;
 }
-const limit = sched.inEnd || '06:45';
-return timeIn > limit;
+const limit = (sched.inEnd || '06:45').replace('.', ':');
+const normalizedTime = String(timeIn).replace('.', ':');
+return normalizedTime > limit;
 }
 function calculateGradeSummary(chapters = [], sts1 = null, sas = null, sts2 = null, sat = null) {
 const validCh = (chapters || []).filter(c => Number.isFinite(Number(c.score)) && Number(c.score) >= 75);

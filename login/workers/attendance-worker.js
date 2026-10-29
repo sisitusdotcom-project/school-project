@@ -75,7 +75,14 @@ function isDateRangeAllowed(dateStr, startDate, endDate) {
   }
   return true;
 }
+let cachedAttendanceRules = null;
+let cachedAttendanceRulesTime = 0;
+const ATTENDANCE_RULES_CACHE_TTL = 300000;
 async function getAttendanceRules(env) {
+  const now = Date.now();
+  if (cachedAttendanceRules && (now - cachedAttendanceRulesTime) < ATTENDANCE_RULES_CACHE_TTL) {
+    return cachedAttendanceRules;
+  }
   const runtimeEnv = typeof globalThis !== 'undefined' && globalThis.ATTENDANCE_ENV ? globalThis.ATTENDANCE_ENV : {};
   const databaseUrl = env?.FIREBASE_DATABASE_URL || runtimeEnv.FIREBASE_DATABASE_URL || '';
   const secret = env?.FIREBASE_DB_SECRET || runtimeEnv.FIREBASE_DB_SECRET || '';
@@ -93,10 +100,12 @@ async function getAttendanceRules(env) {
     }
     const settings = await response.json();
     const rules = settings && typeof settings.attendanceRules === 'object' ? settings.attendanceRules : {};
-    return {
+    cachedAttendanceRules = {
       ...DEFAULT_ATTENDANCE_RULES,
       ...rules
     };
+    cachedAttendanceRulesTime = now;
+    return cachedAttendanceRules;
   } catch (error) {
     return { ...DEFAULT_ATTENDANCE_RULES };
   }
@@ -220,26 +229,26 @@ async function forwardToDriveUploadUrl({ gasUploadUrl, fileName, mimeType, photo
     throw new Error(text || 'Upload ke server gagal.');
   }
   if (!response.ok || result.status !== 'success') {
-    throw new Error(result && result.message ? result.message : 'Upload ke server gagal.');
+    return '';
   }
   return result.fileUrl || '';
 }
-async function saveAttendanceRecord(record) {
+async function saveAttendanceRecord(record, env) {
   const runtimeEnv = typeof globalThis !== 'undefined' && globalThis.ATTENDANCE_ENV ? globalThis.ATTENDANCE_ENV : {};
-  const databaseUrl = runtimeEnv.FIREBASE_DATABASE_URL || (typeof process !== 'undefined' ? process.env.FIREBASE_DATABASE_URL : '');
-  const secret = runtimeEnv.FIREBASE_DB_SECRET || (typeof process !== 'undefined' ? process.env.FIREBASE_DB_SECRET : '');
+  const databaseUrl = env?.FIREBASE_DATABASE_URL || runtimeEnv.FIREBASE_DATABASE_URL || (typeof process !== 'undefined' ? process.env.FIREBASE_DATABASE_URL : '');
+  const secret = env?.FIREBASE_DB_SECRET || runtimeEnv.FIREBASE_DB_SECRET || (typeof process !== 'undefined' ? process.env.FIREBASE_DB_SECRET : '');
   if (!databaseUrl || !secret) {
     return;
   }
   const url = `${databaseUrl}/teacher_attendance/${record.dateStr}/${record.teacherId}.json?auth=${encodeURIComponent(secret)}`;
   await fetch(url, {
-    method: 'PUT',
+    method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(record.record)
   });
 }
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     if (request.method === 'OPTIONS') {
       return new Response(null, {
         status: 204,
@@ -317,12 +326,7 @@ export default {
       if (accuracyValue > MAX_ACCURACY_METERS) {
         return jsonResponse(403, { status: 'error', message: `Akurasi posisi terlalu besar: ${Math.round(accuracyValue)}m. Maksimal ${MAX_ACCURACY_METERS}m.` }, request);
       }
-      const stampedPhotoDataUrl = await stampPhotoOnImage({
-        photoDataUrl,
-        location,
-        accuracy: accuracyValue,
-        serverTimestamp
-      });
+      const photoHash = await hashString(photoDataUrl);
       const signedPayload = {
         teacherId,
         dateStr: effectiveDateStr,
@@ -334,41 +338,71 @@ export default {
         clientTimestamp: clientTimestamp || serverTimestamp,
         serverTimestamp,
         userTokenPresent: !!idToken,
-        photoHash: await hashString(stampedPhotoDataUrl)
+        photoHash
       };
-      const serverSignature = await signPayload(signedPayload, env.WORKER_SECRET || 'local-dev-secret');
-      const fileName = `attendance_${teacherId}_${effectiveDateStr}_${Date.now()}.jpg`;
-      const proofUrl = await forwardToDriveUploadUrl({
-        gasUploadUrl: env.GOOGLE_DRIVE_UPLOAD_URL || env.GAS_UPLOAD_URL,
-        fileName,
-        mimeType: 'image/jpeg',
-        photoDataUrl: stampedPhotoDataUrl
-      });
-      const record = {
-        dateStr: effectiveDateStr,
-        teacherId,
-        type,
-        proof_url: proofUrl,
-        location: {
-          lat: Number(location.lat),
-          lng: Number(location.lng),
-          accuracy: accuracyValue,
-          checkedAt: serverTimestamp
-        },
+      const serverSignature = await signPayload(signedPayload, env?.WORKER_SECRET || 'local-dev-secret');
+      const timeFormatted = new Intl.DateTimeFormat('id-ID', {
+        timeZone: 'Asia/Jakarta',
+        hour: '2-digit',
+        minute: '2-digit'
+      }).format(new Date(serverTimestamp)).replace('.', ':');
+      const initialPatch = {
         serverTimestamp,
         serverSignature,
-        photoHash: signedPayload.photoHash,
-        distanceMeters: Math.round(distance)
+        photoHash,
+        distanceMeters: Math.round(distance),
+        ...(type === 'in' ? {
+          time_in: timeFormatted,
+          location_in: { lat: Number(location.lat), lng: Number(location.lng), accuracy: accuracyValue, checkedAt: serverTimestamp },
+          ...(body.lateReason ? {
+            late_reason: body.lateReason,
+            appeal_status: 'pending',
+            appeal_created_at: serverTimestamp
+          } : {})
+        } : {
+          time_out: timeFormatted,
+          location_out: { lat: Number(location.lat), lng: Number(location.lng), accuracy: accuracyValue, checkedAt: serverTimestamp }
+        })
       };
-      await saveAttendanceRecord({ dateStr: effectiveDateStr, teacherId, record });
+      await saveAttendanceRecord({ dateStr: effectiveDateStr, teacherId, record: initialPatch }, env);
+      const backgroundTask = async () => {
+        try {
+          const stampedPhoto = await stampPhotoOnImage({
+            photoDataUrl,
+            location,
+            accuracy: accuracyValue,
+            serverTimestamp
+          });
+          const fileName = `attendance_${teacherId}_${effectiveDateStr}_${Date.now()}.jpg`;
+          const gasUrl = env?.GOOGLE_DRIVE_UPLOAD_URL || env?.GAS_UPLOAD_URL;
+          const proofUrl = await forwardToDriveUploadUrl({
+            gasUploadUrl: gasUrl,
+            fileName,
+            mimeType: 'image/jpeg',
+            photoDataUrl: stampedPhoto
+          });
+          if (proofUrl) {
+            const proofPatch = type === 'out'
+              ? { proof_url_out: proofUrl, proof_url: proofUrl }
+              : { proof_url: proofUrl };
+            await saveAttendanceRecord({ dateStr: effectiveDateStr, teacherId, record: proofPatch }, env);
+          }
+        } catch (bgError) {
+        }
+      };
+      if (ctx && typeof ctx.waitUntil === 'function') {
+        ctx.waitUntil(backgroundTask());
+      } else {
+        void backgroundTask();
+      }
       return jsonResponse(200, {
         status: 'success',
         message: 'Absensi valid dan berhasil disimpan.',
-        proof_url: proofUrl,
-        location: record.location,
+        proof_url: '',
+        location: type === 'in' ? initialPatch.location_in : initialPatch.location_out,
         serverTimestamp,
         serverSignature,
-        record,
+        record: initialPatch,
         distanceMeters: Math.round(distance)
       }, request);
     } catch (error) {
