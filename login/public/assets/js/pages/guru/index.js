@@ -1543,12 +1543,12 @@ ${initIconHtml}
 <div class="loading-state loading-state-compact"><div class="loader loader-sm loading-state__loader"></div><span>Memuat data presensi...</span></div>
 </div>
 </div>
-<section class="card section-block" style="margin-top:16px;">
+<section class="card section-block">
 <div class="card-header mk-header">
 <h3 class="card-title"><i class="ph ph-calendar-check"></i> Rekap & Riwayat Presensi Saya</h3>
 </div>
 <div class="card-body">
-<div class="card-grid section-spacer" id="att-rekap-stats" style="margin-bottom:16px;"></div>
+<div id="att-grade-container" class="att-grade-container"></div>
 <div class="table-wrap">
 <table class="table">
 <thead><tr><th>Tanggal</th><th>Jam Datang</th><th>Jam Pulang</th><th>Status</th><th>Bukti</th></tr></thead>
@@ -1810,31 +1810,103 @@ statusTitle.innerText = "Presensi Selesai";
 statusText.innerText = "Anda sudah menyelesaikan presensi hari ini.";
 }
 }
+let currentPeriodMode = (new Date()).getDate() > 28 ? 'cutoff_prev' : 'cutoff';
+const gradeContainer = document.getElementById('att-grade-container');
 const fullTbody = document.getElementById('att-full-history-tbody');
-const statsGrid = document.getElementById('att-rekap-stats');
+const renderHistoryAndGrade = () => {
+const nowD = new Date();
+const curCutoff = AppConfig.getPayrollCutoffRange(nowD);
+const prevCutoffDate = new Date(curCutoff.sD.getFullYear(), curCutoff.sD.getMonth(), curCutoff.sD.getDate() - 1);
+const prevCutoff = AppConfig.getPayrollCutoffRange(prevCutoffDate);
+const curMonthEnd = new Date(nowD.getFullYear(), nowD.getMonth() + 1, 0);
+const curCutoffShort = `${curCutoff.sD.getDate()} ${curCutoff.sD.toLocaleString('id-ID', { month: 'short' })} - ${curCutoff.eD.getDate()} ${curCutoff.eD.toLocaleString('id-ID', { month: 'short' })}`;
+const prevCutoffShort = `${prevCutoff.sD.getDate()} ${prevCutoff.sD.toLocaleString('id-ID', { month: 'short' })} - ${prevCutoff.eD.getDate()} ${prevCutoff.eD.toLocaleString('id-ID', { month: 'short' })}`;
+const curMonthShort = `1 - ${curMonthEnd.getDate()} ${nowD.toLocaleString('id-ID', { month: 'short' })}`;
+let gradeOptions = {
+attendanceRules: settings?.attendanceRules,
+isUmmi,
+maxSurplusPerDay: 15
+};
+if (currentPeriodMode === 'calendar_month') {
+gradeOptions.periodType = 'calendar_month';
+gradeOptions.refDate = nowD;
+} else if (currentPeriodMode === 'cutoff_prev') {
+gradeOptions.periodType = 'cutoff';
+gradeOptions.refDate = prevCutoffDate;
+} else {
+gradeOptions.periodType = 'cutoff';
+gradeOptions.refDate = nowD;
+}
+const gradeResult = AppConfig.calculateAttendanceGrade(fullHist, gradeOptions);
+if (gradeContainer) {
+gradeContainer.innerHTML = `
+<div class="att-grade-card">
+<div class="att-grade-header">
+<div class="att-grade-head-title"><i class="ph ph-medal"></i><span>Evaluasi Kehadiran</span></div>
+<div class="att-grade-select-wrap">
+<select id="att-grade-period-select" class="att-grade-select" aria-label="Pilih Periode Evaluasi">
+<option value="cutoff"${currentPeriodMode === 'cutoff' ? ' selected' : ''}>Cutoff: ${curCutoffShort}</option>
+<option value="cutoff_prev"${currentPeriodMode === 'cutoff_prev' ? ' selected' : ''}>Cutoff: ${prevCutoffShort}</option>
+<option value="calendar_month"${currentPeriodMode === 'calendar_month' ? ' selected' : ''}>Bulan: ${curMonthShort}</option>
+</select>
+</div>
+</div>
+<div class="att-grade-row">
+<div class="att-grade-badge ${gradeResult.attendanceGradeClass}"><span>${gradeResult.attendanceGrade}</span></div>
+<div class="att-grade-body">
+<div class="att-grade-title">Grade Kehadiran</div>
+<div class="att-grade-val">${gradeResult.attendancePercent.toFixed(1)}%</div>
+<div class="att-grade-meta">${gradeResult.totalEffectiveDays} hari efektif | Alpha: ${gradeResult.alphaCount} | Izin Pribadi: ${gradeResult.personalPermitCount}</div>
+</div>
+</div>
+<div class="att-grade-progress">
+<div class="att-grade-progress-bar ${gradeResult.progressBarClass}" id="att-grade-progress-fill"></div>
+</div>
+<div class="att-grade-divider"></div>
+<div class="att-grade-row">
+<div class="att-grade-badge ${gradeResult.punctualityGradeClass}"><span>${gradeResult.punctualityGrade}</span></div>
+<div class="att-grade-body">
+<div class="att-grade-title">Poin Ketepatan Hadir</div>
+<div class="att-grade-val">${gradeResult.punctualityLabel}</div>
+<div class="att-grade-meta">Rata-rata ${gradeResult.avgPunctuality >= 0 ? '+' : ''}${gradeResult.avgPunctuality} mnt/hari | Tepat Waktu: ${gradeResult.onTimeCount} | Terlambat: ${gradeResult.lateCount}</div>
+</div>
+</div>
+</div>`;
+const progressFill = document.getElementById('att-grade-progress-fill');
+if (progressFill) {
+progressFill.style.width = `${gradeResult.attendancePercent}%`;
+}
+const periodSelect = document.getElementById('att-grade-period-select');
+if (periodSelect) {
+periodSelect.onchange = (e) => {
+currentPeriodMode = e.target.value;
+renderHistoryAndGrade();
+};
+}
+}
 if (fullTbody && fullHist) {
-let onTimeCount = 0;
-let lateCount = 0;
-const rowsHtml = fullHist.map((h) => {
+let filteredHist = fullHist;
+if (gradeResult.startDateStr && gradeResult.endDateStr) {
+filteredHist = fullHist.filter((h) => h.date >= gradeResult.startDateStr && h.date <= gradeResult.endDateStr);
+}
+const displayList = filteredHist.length > 0 ? filteredHist : fullHist;
+const rowsHtml = displayList.map((h) => {
 const isLate = AppConfig.isAttendanceLate ? AppConfig.isAttendanceLate(h.time_in, sched, h) : (h.time_in > (sched.inEnd || '06:45'));
 let statusBadge = '<span class="badge badge-warning">Terlambat</span>';
 if (sched.noLatePenalty || (sched.isOptional && isUmmi)) {
 statusBadge = '<span class="badge badge-success">Hadir (Pembinaan)</span>';
-onTimeCount++;
 } else if (!isLate && h.time_in) {
 if (h.appeal_status === 'approved') {
 statusBadge = '<span class="badge badge-success" title="Ditoleransi Waka Personalia"><i class="ph ph-check"></i> Tepat Waktu (Disetujui)</span>';
 } else {
 statusBadge = '<span class="badge badge-success">Tepat Waktu</span>';
 }
-onTimeCount++;
 } else {
 if (h.appeal_status === 'rejected') {
 statusBadge = '<span class="badge badge-danger" title="Banding ditolak"><i class="ph ph-x"></i> Terlambat (Ditolak)</span>';
 } else if (h.appeal_status === 'pending' || h.late_reason) {
 statusBadge = '<span class="badge badge-warning" title="Menunggu verifikasi Waka Personalia"><i class="ph ph-clock"></i> Terlambat (Banding Diajukan)</span>';
 }
-lateCount++;
 }
 const proofBtn = h.proof_url
 ? `<button type="button" class="btn btn-xs btn-outline mk-preview-btn" data-preview-url="${AppConfig.escapeHtml(h.proof_url)}" data-preview-title="Bukti Presensi ${h.date}"><i class="ph ph-eye"></i> Bukti</button>`
@@ -1846,24 +1918,11 @@ return `<tr>
 <td>${statusBadge}</td>
 <td>${proofBtn}</td>
 </tr>`;
-}).join('') || '<tr><td colspan="5" class="text-muted">Belum ada riwayat kehadiran sebelumnya.</td></tr>';
+}).join('') || '<tr><td colspan="5" class="text-muted">Belum ada riwayat kehadiran pada periode ini.</td></tr>';
 fullTbody.innerHTML = rowsHtml;
-if (statsGrid) {
-statsGrid.innerHTML = `
-<div class="card stat-card">
-<div class="stat-icon stat-icon--primary"><i class="ph ph-calendar-check"></i></div>
-<div><p class="stat-value">${fullHist.length}</p><p class="stat-label text-muted">Total Kehadiran</p></div>
-</div>
-<div class="card stat-card">
-<div class="stat-icon stat-icon--success"><i class="ph ph-check-circle"></i></div>
-<div><p class="stat-value">${onTimeCount}</p><p class="stat-label text-muted">Tepat Waktu</p></div>
-</div>
-<div class="card stat-card">
-<div class="stat-icon stat-icon--warning"><i class="ph ph-clock-countdown"></i></div>
-<div><p class="stat-value">${lateCount}</p><p class="stat-label text-muted">Terlambat</p></div>
-</div>`;
 }
-}
+};
+renderHistoryAndGrade();
 };
 await loadHistory();
 const getDistance = (lat1, lon1, lat2, lon2) => {

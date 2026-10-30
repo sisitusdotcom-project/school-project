@@ -807,6 +807,215 @@ sD,
 eD
 };
 }
+function calculateAttendanceGrade(records = [], options = {}) {
+const opts = options || {};
+const periodType = opts.periodType === 'calendar_month' ? 'calendar_month' : 'cutoff';
+const refDate = opts.refDate ? (opts.refDate instanceof Date ? opts.refDate : new Date(opts.refDate)) : new Date();
+const isUmmi = Boolean(opts.isUmmi);
+const attendanceRules = opts.attendanceRules || null;
+const maxSurplusPerDay = Number.isFinite(opts.maxSurplusPerDay) ? opts.maxSurplusPerDay : 15;
+const pad = (n) => String(n).padStart(2, '0');
+let sD, eD, periodLabel, monthLabel;
+if (periodType === 'calendar_month') {
+const y = refDate.getFullYear();
+const m = refDate.getMonth();
+sD = new Date(y, m, 1);
+eD = new Date(y, m + 1, 0);
+monthLabel = `${refDate.toLocaleString('id-ID', { month: 'long' })} ${refDate.getFullYear()}`;
+periodLabel = `1 ${sD.toLocaleString('id-ID', { month: 'short' })} ${sD.getFullYear()} s/d ${eD.getDate()} ${eD.toLocaleString('id-ID', { month: 'short' })} ${eD.getFullYear()}`;
+} else {
+const cutoff = getPayrollCutoffRange(refDate);
+sD = cutoff.sD;
+eD = cutoff.eD;
+periodLabel = cutoff.cutoffLabel;
+monthLabel = cutoff.monthLabel;
+}
+const startDateStr = `${sD.getFullYear()}-${pad(sD.getMonth() + 1)}-${pad(sD.getDate())}`;
+const endDateStr = `${eD.getFullYear()}-${pad(eD.getMonth() + 1)}-${pad(eD.getDate())}`;
+const today = new Date();
+const todayStr = getLocalDateStr ? getLocalDateStr(today) : `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
+const recordMap = {};
+if (Array.isArray(records)) {
+records.forEach((r) => {
+if (r && r.date) {
+recordMap[r.date] = r;
+}
+});
+}
+let totalEffectiveDays = 0;
+let elapsedEffectiveDays = 0;
+let presentCount = 0;
+let onTimeCount = 0;
+let lateCount = 0;
+let alphaCount = 0;
+let personalPermitCount = 0;
+let officialDutyCount = 0;
+let totalPunctualityMin = 0;
+const dailyBreakdown = [];
+const cur = new Date(sD.getFullYear(), sD.getMonth(), sD.getDate());
+while (cur <= eD) {
+const curDateStr = `${cur.getFullYear()}-${pad(cur.getMonth() + 1)}-${pad(cur.getDate())}`;
+const sched = getAttendanceSchedule(attendanceRules, isUmmi, cur);
+const isFuture = curDateStr > todayStr;
+const isToday = curDateStr === todayStr;
+const rec = recordMap[curDateStr] || null;
+if (sched.isOff) {
+cur.setDate(cur.getDate() + 1);
+continue;
+}
+if (sched.isOptional) {
+if (rec && rec.time_in) {
+presentCount++;
+const normalizedIn = String(rec.time_in).replace('.', ':');
+const limitIn = (sched.inEnd || (isUmmi ? '07:15' : '08:00')).replace('.', ':');
+const [inH, inM] = normalizedIn.split(':').map(Number);
+const [limH, limM] = limitIn.split(':').map(Number);
+const diff = (limH * 60 + limM) - (inH * 60 + inM);
+if (diff >= 0) {
+const surplus = Math.min(diff, maxSurplusPerDay);
+totalPunctualityMin += surplus;
+onTimeCount++;
+} else {
+if (rec.appeal_status === 'approved' || rec.appeal_status === 'accepted' || sched.noLatePenalty) {
+onTimeCount++;
+} else {
+totalPunctualityMin += diff;
+lateCount++;
+}
+}
+dailyBreakdown.push({ date: curDateStr, status: 'present_optional', minutesDelta: diff, time_in: rec.time_in });
+}
+cur.setDate(cur.getDate() + 1);
+continue;
+}
+totalEffectiveDays++;
+if (!isFuture) {
+elapsedEffectiveDays++;
+}
+if (rec && (rec.status === 'official_duty' || rec.leave_type === 'dinas')) {
+officialDutyCount++;
+presentCount++;
+dailyBreakdown.push({ date: curDateStr, status: 'official_duty', minutesDelta: 0 });
+} else if (rec && rec.time_in) {
+presentCount++;
+const normalizedIn = String(rec.time_in).replace('.', ':');
+const limitIn = (sched.inEnd || (isUmmi ? '07:15' : '06:45')).replace('.', ':');
+const [inH, inM] = normalizedIn.split(':').map(Number);
+const [limH, limM] = limitIn.split(':').map(Number);
+const diff = (limH * 60 + limM) - (inH * 60 + inM);
+let delta = 0;
+if (diff >= 0) {
+delta = Math.min(diff, maxSurplusPerDay);
+totalPunctualityMin += delta;
+onTimeCount++;
+} else {
+if (rec.appeal_status === 'approved' || rec.appeal_status === 'accepted') {
+delta = 0;
+onTimeCount++;
+} else {
+delta = diff;
+totalPunctualityMin += delta;
+lateCount++;
+}
+}
+dailyBreakdown.push({ date: curDateStr, status: 'present', minutesDelta: delta, time_in: rec.time_in });
+} else if (rec && (rec.leave_type === 'pribadi' || rec.status === 'permit')) {
+if (!isFuture) {
+personalPermitCount++;
+}
+dailyBreakdown.push({ date: curDateStr, status: 'permit_personal', minutesDelta: 0 });
+} else if (rec && (rec.status === 'sick' || rec.leave_type === 'sakit' || rec.status === 'leave')) {
+dailyBreakdown.push({ date: curDateStr, status: 'excused', minutesDelta: 0 });
+} else {
+if (!isFuture && !isToday) {
+alphaCount++;
+dailyBreakdown.push({ date: curDateStr, status: 'alpha', minutesDelta: 0 });
+} else if (isToday) {
+const curTime = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace('.', ':');
+const limitIn = (sched.inEnd || (isUmmi ? '07:15' : '06:45')).replace('.', ':');
+if (curTime > limitIn) {
+alphaCount++;
+dailyBreakdown.push({ date: curDateStr, status: 'alpha_today', minutesDelta: 0 });
+} else {
+dailyBreakdown.push({ date: curDateStr, status: 'waiting_today', minutesDelta: 0 });
+}
+} else {
+dailyBreakdown.push({ date: curDateStr, status: 'upcoming', minutesDelta: 0 });
+}
+}
+cur.setDate(cur.getDate() + 1);
+}
+const evaluatedDays = endDateStr <= todayStr ? totalEffectiveDays : Math.max(1, elapsedEffectiveDays);
+let attendancePercent = 100;
+if (evaluatedDays > 0) {
+const calculatedPercent = ((presentCount) / evaluatedDays) * 100;
+attendancePercent = Math.max(0, Math.min(100, Math.round(calculatedPercent * 10) / 10));
+}
+let attendanceGrade = 'A';
+let attendanceGradeClass = 'att-grade-badge--a';
+let progressBarClass = 'att-grade-progress-bar--a';
+if (attendancePercent >= 95.0) {
+attendanceGrade = 'A';
+attendanceGradeClass = 'att-grade-badge--a';
+progressBarClass = 'att-grade-progress-bar--a';
+} else if (attendancePercent >= 85.0) {
+attendanceGrade = 'B';
+attendanceGradeClass = 'att-grade-badge--b';
+progressBarClass = 'att-grade-progress-bar--b';
+} else if (attendancePercent >= 75.0) {
+attendanceGrade = 'C';
+attendanceGradeClass = 'att-grade-badge--c';
+progressBarClass = 'att-grade-progress-bar--c';
+} else {
+attendanceGrade = 'D';
+attendanceGradeClass = 'att-grade-badge--d';
+progressBarClass = 'att-grade-progress-bar--d';
+}
+let punctualityGrade = 'B';
+let punctualityGradeClass = 'att-grade-badge--b';
+if (totalPunctualityMin >= 100) {
+punctualityGrade = 'A';
+punctualityGradeClass = 'att-grade-badge--a';
+} else if (totalPunctualityMin >= 0) {
+punctualityGrade = 'B';
+punctualityGradeClass = 'att-grade-badge--b';
+} else if (totalPunctualityMin >= -30) {
+punctualityGrade = 'C';
+punctualityGradeClass = 'att-grade-badge--c';
+} else {
+punctualityGrade = 'D';
+punctualityGradeClass = 'att-grade-badge--d';
+}
+const punctualitySign = totalPunctualityMin > 0 ? '+' : '';
+const punctualityLabel = `${punctualitySign}${totalPunctualityMin} mnt`;
+const avgPunctuality = presentCount > 0 ? Math.round((totalPunctualityMin / presentCount) * 10) / 10 : 0;
+return {
+periodType,
+periodLabel,
+monthLabel,
+startDateStr,
+endDateStr,
+totalEffectiveDays,
+elapsedEffectiveDays,
+evaluatedDays,
+presentCount,
+onTimeCount,
+lateCount,
+alphaCount,
+personalPermitCount,
+officialDutyCount,
+attendancePercent,
+attendanceGrade,
+attendanceGradeClass,
+progressBarClass,
+totalPunctualityMin,
+punctualityGrade,
+punctualityGradeClass,
+punctualityLabel,
+avgPunctuality,
+dailyBreakdown
+};
+}
 function resolveSalarySlipData(user, empProfile = {}, matchedSalary = null, attStats = {}, context = {}) {
 const isUmmi = isUserUmmi(user);
 const isEkstra = isUserEkstra(user);
@@ -1285,6 +1494,7 @@ calculateGradeSummary,
 PAYROLL_CUTOFF_START,
 PAYROLL_CUTOFF_END,
 getPayrollCutoffRange,
+calculateAttendanceGrade,
 resolveSalarySlipData,
 ATTENDANCE_MOTIVATIONS,
 getDailyAttendanceMotivation,
