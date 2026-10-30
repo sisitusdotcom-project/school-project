@@ -1,14 +1,26 @@
 const CurriculumPages = {
   async renderDashboard(container) {
     Router.setTitle('Kurikulum', 'Pusat pengelolaan struktur akademik, kalender pembelajaran, dan supervisi mutu KBM.');
-    const [settings, subjects, classes] = await Promise.all([
+    const today = new Date();
+    const dateStr = AppConfig.getLocalDateStr ? AppConfig.getLocalDateStr(today) : today.toISOString().slice(0, 10);
+    const user = Auth.userData || Auth.currentUser || {};
+    const uid = user.uid || Auth.currentUser?.uid;
+    const [settings, subjects, classes, myAtt] = await Promise.all([
       DB.getSettings(),
       DB.getSubjects(),
-      DB.getClasses()
+      DB.getClasses(),
+      DB.getTeacherAttendance(dateStr, uid).catch(() => null)
     ]);
     const subjectList = DB.toArray(subjects);
     const classList = DB.toArray(classes);
+    const heroHtml = AppConfig.getDashboardHeroHtml({
+      user,
+      attendanceRecord: myAtt,
+      position: 'Waka / Staf Kurikulum',
+      date: today
+    });
     container.innerHTML = `
+      ${heroHtml}
       <section class="card-grid section-spacer">
         <div class="card stat-card">
           <div class="stat-icon stat-icon--primary"><i class="ph ph-books"></i></div>

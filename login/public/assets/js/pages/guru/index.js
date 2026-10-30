@@ -15,14 +15,31 @@ Router.setTitle('Beranda', 'Selamat datang di Dasbor Digital Sekolah.');
 const today = new Date();
 const dateStr = AppConfig.getLocalDateStr ? AppConfig.getLocalDateStr(today) : today.toISOString().slice(0, 10);
 const timeStr = today.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-const [classArr, students, myAtt, mySchedules, allSubjects, allClasses] = await Promise.all([
+const [classArr, students, myAtt, mySchedules, allSubjects, allClasses, directoryData] = await Promise.all([
 DB.getClassesForTeacher(Auth.currentUser.uid),
 DB.getAllStudents(),
 DB.getTeacherAttendance(dateStr, Auth.currentUser.uid),
 DB.getSchedulesByTeacher(Auth.currentUser.uid),
 DB.getSubjects(),
-DB.getClasses()
+DB.getClasses(),
+DB._readCollection ? DB._readCollection('personnel/directory', {}) : Promise.resolve({})
 ]);
+const user = Auth.userData || Auth.currentUser || {};
+const uid = user.uid || Auth.currentUser?.uid;
+const dirList = DB.toArray(directoryData);
+const cleanUserName = (user.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+const empProfile = dirList.find(d => d.userId === uid || (d.name && d.name.toLowerCase().replace(/[^a-z0-9]/g, '') === cleanUserName)) || {};
+let teacherPosition = empProfile.position || user.position || user.jabatan || '';
+if (!teacherPosition) {
+teacherPosition = classArr.length > 0 ? `Guru Kelas ${classArr.map(c => c.name).join(', ')}` : 'Guru Mata Pelajaran';
+}
+const heroHtml = AppConfig.getDashboardHeroHtml({
+user,
+empProfile,
+attendanceRecord: myAtt,
+position: teacherPosition,
+date: today
+});
 const studentCount = DB.toArray(students).filter(s => classArr.some(c => c.id === s.classId)).length;
 const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 const todayDayName = dayNames[today.getDay()];
@@ -52,30 +69,8 @@ const cls = allClasses[s.classId];
 const sub = allSubjects[s.subjectId];
 return `<tr><td><strong>${AppConfig.escapeHtml(s.day)}</strong></td><td><span class="badge badge-outline">${s.startTime || '-'} - ${s.endTime || '-'}</span></td><td>${AppConfig.escapeHtml(cls ? cls.name : s.classId)}</td><td>${AppConfig.escapeHtml(sub ? sub.name : s.subjectId)}</td></tr>`;
 }).join('') : '<tr><td colspan="4" class="text-center text-muted">Belum ada jadwal mengajar yang diterbitkan.</td></tr>';
-let attStatus = 'Belum Presensi';
-let attClass = 'badge-warning';
-if (myAtt) {
-if (myAtt.time_out) {
-attStatus = 'Sudah Pulang (' + myAtt.time_out + ')';
-attClass = 'badge-success';
-} else if (myAtt.time_in) {
-attStatus = 'Sudah Datang (' + myAtt.time_in + ')';
-attClass = 'badge-success';
-}
-}
 container.innerHTML = `
-<div class="card hero-panel">
-<div class="hero-panel__inner">
-<div>
-<p class="hero-panel__meta">${today.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
-<h2 class="hero-panel__time">${timeStr}</h2>
-</div>
-<div class="hero-panel__status">
-<p class="hero-panel__meta">Status Kehadiran</p>
-<span class="badge ${attClass}">${attStatus}</span>
-</div>
-</div>
-</div>
+${heroHtml}
 <section class="card-grid section-spacer">
 <div class="card stat-card">
 <div class="stat-icon stat-icon--success"><i class="ph ph-map-pin"></i></div>
@@ -2333,32 +2328,16 @@ const cleanUserName = (user.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
 const empProfile = dirList.find(d => d.userId === uid || (d.name && d.name.toLowerCase().replace(/[^a-z0-9]/g, '') === cleanUserName)) || {};
 const nbm = empProfile.nbm || empProfile.nuptk || user.nbm || user.nuptk || user.nip || '-';
 const position = empProfile.position || user.position || 'Tenaga Administrasi Sekolah';
-let attStatus = 'Belum Presensi';
-let attClass = 'badge-warning';
-if (myAtt) {
-if (myAtt.time_out) {
-attStatus = 'Sudah Pulang (' + myAtt.time_out + ')';
-attClass = 'badge-success';
-} else if (myAtt.time_in) {
-attStatus = 'Sudah Datang (' + myAtt.time_in + ')';
-attClass = 'badge-success';
-}
-}
 const myPerfList = DB.toArray(perfData).filter(p => p.employeeId === uid || p.userId === uid);
+const heroHtml = AppConfig.getDashboardHeroHtml({
+user,
+empProfile,
+attendanceRecord: myAtt,
+position,
+date: today
+});
 container.innerHTML = `
-<div class="card hero-panel">
-<div class="hero-panel__inner">
-<div>
-<p class="hero-panel__meta">${today.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
-<h2 class="hero-panel__time">${timeStr}</h2>
-<p class="hero-panel__meta" style="margin-top:6px;"><strong style="font-size:16px;">${AppConfig.escapeHtml(user.name || 'Pegawai Tendik')}</strong> · NBM: ${nbm} · ${AppConfig.escapeHtml(position)}</p>
-</div>
-<div class="hero-panel__status">
-<p class="hero-panel__meta">Status Kehadiran</p>
-<span class="badge ${attClass}">${attStatus}</span>
-</div>
-</div>
-</div>
+${heroHtml}
 <section class="card-grid section-spacer">
 <div class="card stat-card">
 <div class="stat-icon stat-icon--success"><i class="ph ph-map-pin"></i></div>
@@ -2425,10 +2404,14 @@ const today = new Date();
 const dateStr = AppConfig.getLocalDateStr ? AppConfig.getLocalDateStr(today) : today.toISOString().slice(0, 10);
 const timeStr = today.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
 const uid = Auth.currentUser.uid;
-const [ummiClasses, myAtt] = await Promise.all([
+const [ummiClasses, myAtt, directoryData] = await Promise.all([
 DB.getUmmiClasses(),
-DB.getTeacherAttendance(dateStr, uid)
+DB.getTeacherAttendance(dateStr, uid),
+DB._readCollection ? DB._readCollection('personnel/directory', {}) : Promise.resolve({})
 ]);
+const dirList = DB.toArray(directoryData);
+const cleanUserName = (teacherName || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+const empProfile = dirList.find(d => d.userId === uid || (d.name && d.name.toLowerCase().replace(/[^a-z0-9]/g, '') === cleanUserName)) || {};
 const classArr = DB.toArray(ummiClasses);
 let myClasses = classArr.filter(c => c.teacherId === uid);
 if (!myClasses.length) {
@@ -2438,33 +2421,18 @@ myClasses = classArr.filter(c => assigns.some(a => a.toLowerCase().includes(c.na
 const rombelName = myClasses.map(c => c.name).join(', ') || 'Metode Ummi';
 const totalEnrolled = myClasses.reduce((sum, c) => sum + Object.keys(c.students || {}).length, 0);
 const teacherName = AppConfig.formatUserName(Auth.userData || Auth.currentUser) || 'Ustadz / Ustadzah';
-let attStatus = 'Belum Presensi';
-let attClass = 'badge-warning';
-if (myAtt) {
-if (myAtt.time_out) {
-attStatus = 'Sudah Pulang (' + myAtt.time_out + ')';
-attClass = 'badge-success';
-} else if (myAtt.time_in) {
-attStatus = 'Sudah Datang (' + myAtt.time_in + ')';
-attClass = 'badge-success';
-}
-}
 const assigns = Auth.currentAssignments || AppConfig.getRoleAssignments(Auth.userData || {});
 const isKoord = assigns.includes('KOORD_UMMI');
+const heroHtml = AppConfig.getDashboardHeroHtml({
+user: Auth.userData || Auth.currentUser,
+empProfile,
+attendanceRecord: myAtt,
+name: teacherName,
+position: `Guru BTQ Ummi · Pengampu ${rombelName}`,
+date: today
+});
 container.innerHTML = `
-<div class="card hero-panel">
-<div class="hero-panel__inner">
-<div>
-<p class="hero-panel__meta">${today.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
-<h2 class="hero-panel__time">${timeStr}</h2>
-<p class="hero-panel__meta" style="margin-top:6px;"><strong style="font-size:16px;">${AppConfig.escapeHtml(teacherName)}</strong> · Pengampu ${AppConfig.escapeHtml(rombelName)}</p>
-</div>
-<div class="hero-panel__status">
-<p class="hero-panel__meta">Status Kehadiran</p>
-<span class="badge ${attClass}">${attStatus}</span>
-</div>
-</div>
-</div>
+${heroHtml}
 <section class="card-grid section-spacer">
 <div class="card stat-card">
 <div class="stat-icon stat-icon--primary"><i class="ph ph-chalkboard-teacher"></i></div>
@@ -2605,20 +2573,18 @@ const eksName = myEks.map(e => e.name).join(', ') || 'Ekstrakurikuler';
 const totalEnrolled = myEks.reduce((sum, e) => sum + Object.keys(e.students || {}).length, 0);
 const attList = DB.toArray(snapAtt.val() || {}).filter(a => myEks.some(e => e.id === a.ekstraId));
 const coachName = Auth.userData?.name || Auth.currentUser?.displayName || 'Pembina';
+const heroHtml = AppConfig.getDashboardHeroHtml({
+user: Auth.userData || Auth.currentUser,
+attendanceRecord: null,
+name: coachName,
+position: `Pembina ${eksName}`,
+statusTitle: 'Model Presensi',
+statusText: 'Berbasis Pertemuan',
+statusClass: 'badge-primary',
+date: today
+});
 container.innerHTML = `
-<div class="card hero-panel">
-<div class="hero-panel__inner">
-<div>
-<p class="hero-panel__meta">${today.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
-<h2 class="hero-panel__time">${timeStr}</h2>
-<p class="hero-panel__meta" style="margin-top:6px;"><strong style="font-size:16px;">${AppConfig.escapeHtml(coachName)}</strong> · Pembina ${AppConfig.escapeHtml(eksName)}</p>
-</div>
-<div class="hero-panel__status">
-<p class="hero-panel__meta">Model Presensi</p>
-<span class="badge badge-primary">Berbasis Pertemuan</span>
-</div>
-</div>
-</div>
+${heroHtml}
 <section class="card-grid section-spacer">
 <div class="card stat-card">
 <div class="stat-icon stat-icon--primary"><i class="ph ph-trophy"></i></div>

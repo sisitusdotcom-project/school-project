@@ -4,14 +4,30 @@ const KepsekPages = {
     const settings = await DB.getSettings();
     const year = settings.currentAcademicYear;
     const sem = settings.currentSemester;
-    const [students, classes, chars, allAssess, allAcad, obsData] = await Promise.all([
+    const today = new Date();
+    const dateStr = AppConfig.getLocalDateStr ? AppConfig.getLocalDateStr(today) : today.toISOString().slice(0, 10);
+    const user = Auth.userData || Auth.currentUser || {};
+    const uid = user.uid || Auth.currentUser?.uid;
+    const [students, classes, chars, allAssess, allAcad, obsData, myAtt, directoryData] = await Promise.all([
       DB.getAllStudents(),
       DB.getClasses(),
       DB.getCharacters(),
       DB.getAllAssessmentsForPeriod(year, sem),
       DB.getAllAcademicGrades(year, sem),
-      DB.getAllObservations()
+      DB.getAllObservations(),
+      DB.getTeacherAttendance(dateStr, uid).catch(() => null),
+      DB._readCollection ? DB._readCollection('personnel/directory', {}) : Promise.resolve({})
     ]);
+    const dirList = DB.toArray(directoryData);
+    const cleanUserName = (user.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const empProfile = dirList.find(d => d.userId === uid || (d.name && d.name.toLowerCase().replace(/[^a-z0-9]/g, '') === cleanUserName)) || {};
+    const heroHtml = AppConfig.getDashboardHeroHtml({
+      user,
+      empProfile,
+      attendanceRecord: myAtt,
+      position: 'Kepala Sekolah',
+      date: today
+    });
     const studentArr = DB.toArray(students);
     const classArr = DB.toArray(classes);
     const charArr = DB.toArray(chars).filter(c => c.active !== false).sort((a, b) => (a.order || 0) - (b.order || 0));
@@ -93,6 +109,7 @@ const KepsekPages = {
       `;
     }).join('') : '<tr><td colspan="4" class="text-center text-muted">Bagus! Tidak ada siswa yang terdeteksi memerlukan perhatian khusus.</td></tr>';
     container.innerHTML = `
+      ${heroHtml}
       <section class="card-grid section-spacer">
         <div class="card stat-card">
           <div class="stat-icon stat-icon--primary"><i class="ph ph-books"></i></div>

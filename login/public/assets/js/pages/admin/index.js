@@ -1,13 +1,24 @@
 const AdminPages = {
 async renderDashboard(container) {
 Router.setTitle('Dashboard admin', 'Ringkasan data dan pengaturan sistem.');
-const [settings, users, classes, chars, students] = await Promise.all([
+const today = new Date();
+const dateStr = AppConfig.getLocalDateStr ? AppConfig.getLocalDateStr(today) : today.toISOString().slice(0, 10);
+const user = Auth.userData || Auth.currentUser || {};
+const uid = user.uid || Auth.currentUser?.uid;
+const [settings, users, classes, chars, students, myAtt] = await Promise.all([
 DB.getSettings(),
 DB.getAllUsers(),
 DB.getClasses(),
 DB.getCharacters(),
-DB.getAllStudents()
+DB.getAllStudents(),
+DB.getTeacherAttendance(dateStr, uid).catch(() => null)
 ]);
+const heroHtml = AppConfig.getDashboardHeroHtml({
+user,
+attendanceRecord: myAtt,
+position: 'Administrator Sistem',
+date: today
+});
 const attendanceRules = settings.attendanceRules || {};
 const userArr = DB.toArray(users);
 const classArr = DB.toArray(classes);
@@ -22,6 +33,7 @@ const summaryCards = [
 { label: 'Siswa', value: studentArr.length, tone: 'danger', icon: 'ph-student' }
 ];
 container.innerHTML = `
+${heroHtml}
 <section class="card-grid section-spacer">
 ${summaryCards.map((item) => `
 <div class="card stat-card">

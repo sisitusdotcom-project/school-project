@@ -3,14 +3,48 @@ const SCHOOL_LOCATION = Object.freeze({
   lng: 112.75929775962251,
   radiusMeters: 50
 });
-const DEFAULT_ATTENDANCE_RULES = Object.freeze({
-  checkInStart: '07:00',
-  checkInEnd: '09:00',
-  checkOutStart: '15:00',
-  checkOutEnd: '17:00',
-  attendanceStartDate: '',
-  attendanceEndDate: ''
+const DEFAULT_SCHEDULES = Object.freeze({
+  gtk: Object.freeze({
+    senin: { inStart: '06:00', inEnd: '06:45', outStart: '14:30', outEnd: '17:30', isOff: false, isOptional: false },
+    selasa: { inStart: '06:00', inEnd: '06:45', outStart: '15:15', outEnd: '17:30', isOff: false, isOptional: false },
+    rabu: { inStart: '06:00', inEnd: '06:45', outStart: '15:15', outEnd: '17:30', isOff: false, isOptional: false },
+    kamis: { inStart: '06:00', inEnd: '06:45', outStart: '14:45', outEnd: '17:30', isOff: false, isOptional: false },
+    jumat: { inStart: '06:00', inEnd: '06:45', outStart: '12:45', outEnd: '17:30', isOff: false, isOptional: false },
+    sabtu: { inStart: '07:00', inEnd: '08:00', outStart: '11:00', outEnd: '13:00', isOff: false, isOptional: true },
+    minggu: { inStart: '06:00', inEnd: '07:00', outStart: '12:00', outEnd: '14:00', isOff: true, isOptional: true }
+  }),
+  ummi: Object.freeze({
+    senin: { inStart: '06:00', inEnd: '07:15', outStart: '12:30', outEnd: '15:00', isOff: false, isOptional: false },
+    selasa: { inStart: '06:00', inEnd: '07:15', outStart: '12:30', outEnd: '15:00', isOff: false, isOptional: false },
+    rabu: { inStart: '06:00', inEnd: '07:15', outStart: '12:30', outEnd: '15:00', isOff: false, isOptional: false },
+    kamis: { inStart: '06:00', inEnd: '07:00', outStart: '12:00', outEnd: '15:00', isOff: false, isOptional: false },
+    jumat: { inStart: '06:00', inEnd: '07:00', outStart: '11:00', outEnd: '13:00', isOff: true, isOptional: false },
+    sabtu: { inStart: '06:00', inEnd: '08:00', outStart: '10:00', outEnd: '13:00', isOff: false, isOptional: true, noLatePenalty: true },
+    minggu: { inStart: '06:00', inEnd: '07:00', outStart: '12:00', outEnd: '14:00', isOff: true, isOptional: true }
+  })
 });
+const DEFAULT_ATTENDANCE_RULES = Object.freeze({
+  scheduleVersion: 2,
+  checkInStart: '06:00',
+  checkInEnd: '06:45',
+  checkOutStart: '14:30',
+  checkOutEnd: '17:30',
+  attendanceStartDate: '',
+  attendanceEndDate: '',
+  schedules: DEFAULT_SCHEDULES
+});
+function normalizeWorkerAttendanceRules(rawRules) {
+  const rules = rawRules && typeof rawRules === 'object' ? rawRules : {};
+  const hasSchedules = rules.schedules && typeof rules.schedules === 'object' && Object.keys(rules.schedules).length > 0;
+  const isAncientLegacy = rules.schedules?.gtk?.senin?.inStart === '06:30' && (!rules.scheduleVersion || rules.scheduleVersion < 2);
+  const resolvedSchedules = (hasSchedules && !isAncientLegacy) ? rules.schedules : DEFAULT_SCHEDULES;
+  return {
+    ...DEFAULT_ATTENDANCE_RULES,
+    ...rules,
+    scheduleVersion: 2,
+    schedules: resolvedSchedules
+  };
+}
 const MAX_ACCURACY_METERS = 200;
 function getCorsHeaders(origin) {
   const allowOrigin = origin && /^https?:\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0)(:\d+)?$/.test(origin)
@@ -100,14 +134,11 @@ async function getAttendanceRules(env) {
     }
     const settings = await response.json();
     const rules = settings && typeof settings.attendanceRules === 'object' ? settings.attendanceRules : {};
-    cachedAttendanceRules = {
-      ...DEFAULT_ATTENDANCE_RULES,
-      ...rules
-    };
+    cachedAttendanceRules = normalizeWorkerAttendanceRules(rules);
     cachedAttendanceRulesTime = now;
     return cachedAttendanceRules;
   } catch (error) {
-    return { ...DEFAULT_ATTENDANCE_RULES };
+    return normalizeWorkerAttendanceRules({});
   }
 }
 async function hashString(value) {

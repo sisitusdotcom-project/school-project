@@ -595,6 +595,17 @@ font-weight: 700
 .hero-panel__status {
 text-align: right
 }
+.hero-panel__profile {
+margin-top: 6px;
+font-size: 14px;
+opacity: 0.95;
+overflow-wrap: break-word;
+word-break: break-word;
+}
+.hero-panel__name {
+font-size: 16px;
+font-weight: 700;
+}
 .form-split {
 display: flex;
 gap: 12px;
@@ -2817,6 +2828,8 @@ body{background:#fff !important;color:#000 !important;}
 .att-grade-title{font-size:10.5px;}
 .att-grade-meta{font-size:10px;}
 .att-grade-row{gap:8px;}
+.hero-panel__profile{font-size:12px;margin-top:4px;}
+.hero-panel__name{font-size:14px;}
 }
 @media(max-width:380px){
 .att-grade-header{flex-direction:column;align-items:stretch;gap:5px;}

@@ -3,15 +3,26 @@ const FinancePages = {
     const role = Auth.currentRole || AppConfig.ROLES.ADMIN;
     const isReadOnly = role !== AppConfig.ROLES.ADMIN;
     Router.setTitle('Dashboard Keuangan', 'Ringkasan kas, 4 laporan pokok, tagihan SPP, dan realisasi RKAS.');
-    const [settings, summary, billsData, ledgerData, studentIndex, rkasData, assetsData] = await Promise.all([
+    const today = new Date();
+    const dateStr = AppConfig.getLocalDateStr ? AppConfig.getLocalDateStr(today) : today.toISOString().slice(0, 10);
+    const user = Auth.userData || Auth.currentUser || {};
+    const uid = user.uid || Auth.currentUser?.uid;
+    const [settings, summary, billsData, ledgerData, studentIndex, rkasData, assetsData, myAtt] = await Promise.all([
       DB.getSettings(),
       DB.getFinanceSummary(),
       DB.getStudentBills(),
       DB.getFinanceLedger(),
       DB.getStudentReferenceIndex(),
       DB.getRKAS(),
-      DB.getFacilityAssets()
+      DB.getFacilityAssets(),
+      DB.getTeacherAttendance(dateStr, uid).catch(() => null)
     ]);
+    const heroHtml = AppConfig.getDashboardHeroHtml({
+      user,
+      attendanceRecord: myAtt,
+      position: 'Staf Keuangan',
+      date: today
+    });
     const bills = DB.toArray(billsData);
     const ledger = DB.toArray(ledgerData).sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')) || String(b.id).localeCompare(String(a.id)));
     const rkasList = DB.toArray(rkasData);
@@ -819,6 +830,7 @@ const FinancePages = {
       else if (activeTab === 'rkas') contentHtml = renderRKASView();
       else if (activeTab === 'balance') contentHtml = renderBalanceView();
       container.innerHTML = `
+        ${heroHtml}
         <div id="fin-main-content">
           ${renderToolbar()}
           <div id="fin-tab-content">${contentHtml}</div>

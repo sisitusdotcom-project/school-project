@@ -1,12 +1,16 @@
 const StudentAffairsPages = {
   async renderDashboard(container) {
     Router.setTitle('Kesiswaan', 'Pusat pembinaan murid, pemantauan disiplin, prestasi kejuaraan, dan pendaftaran siswa baru.');
-    const todayStr = AppConfig.getLocalDateStr ? AppConfig.getLocalDateStr() : new Date().toISOString().split('T')[0];
-    const [students, classes, spmbData, leavesData] = await Promise.all([
+    const today = new Date();
+    const todayStr = AppConfig.getLocalDateStr ? AppConfig.getLocalDateStr(today) : today.toISOString().split('T')[0];
+    const user = Auth.userData || Auth.currentUser || {};
+    const uid = user.uid || Auth.currentUser?.uid;
+    const [students, classes, spmbData, leavesData, myAtt] = await Promise.all([
       DB.getAllStudents(),
       DB.getClasses(),
       DB._readCollection('spmb_registrations', {}).catch(() => ({})),
-      DB._readCollection('student_affairs/leaves', {}).catch(() => ({}))
+      DB._readCollection('student_affairs/leaves', {}).catch(() => ({})),
+      DB.getTeacherAttendance(todayStr, uid).catch(() => null)
     ]);
     const studentList = DB.toArray(students);
     const classList = DB.toArray(classes);
@@ -14,7 +18,14 @@ const StudentAffairsPages = {
     const leavesList = DB.toArray(leavesData);
     const activeStudents = studentList.length;
     const leavesToday = leavesList.filter((l) => l && l.date === todayStr).length;
+    const heroHtml = AppConfig.getDashboardHeroHtml({
+      user,
+      attendanceRecord: myAtt,
+      position: 'Waka / Staf Kesiswaan',
+      date: today
+    });
     container.innerHTML = `
+      ${heroHtml}
       <section class="card-grid section-spacer">
         <div class="card stat-card">
           <div class="stat-icon stat-icon--primary"><i class="ph ph-student"></i></div>

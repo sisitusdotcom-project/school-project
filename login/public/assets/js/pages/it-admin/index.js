@@ -1,7 +1,19 @@
 const ITAdminPages = {
   async renderDashboard(container) {
     Router.setTitle('IT & Sistem', 'Pusat telemetri infrastruktur teknologi, sinkronisasi data master, dan pemeliharaan server.');
+    const today = new Date();
+    const dateStr = AppConfig.getLocalDateStr ? AppConfig.getLocalDateStr(today) : today.toISOString().slice(0, 10);
+    const user = Auth.userData || Auth.currentUser || {};
+    const uid = user.uid || Auth.currentUser?.uid;
+    const myAtt = await DB.getTeacherAttendance(dateStr, uid).catch(() => null);
+    const heroHtml = AppConfig.getDashboardHeroHtml({
+      user,
+      attendanceRecord: myAtt,
+      position: 'Tim IT & Sistem',
+      date: today
+    });
     container.innerHTML = `
+      ${heroHtml}
       <section class="card section-spacer">
         <div class="card-header">
           <h3 class="card-title"><i class="ph ph-database"></i> Panel Ekspor & Sinkronisasi Master Data</h3>

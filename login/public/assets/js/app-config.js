@@ -1224,6 +1224,58 @@ document.removeEventListener('keydown', keyHandler);
 document.addEventListener('keydown', keyHandler);
 return modal;
 }
+function getDashboardHeroHtml(options = {}) {
+const opts = options || {};
+const user = opts.user || (typeof Auth !== 'undefined' ? (Auth.userData || Auth.currentUser) : null) || {};
+const empProfile = opts.empProfile || {};
+const myAtt = opts.attendanceRecord || null;
+const today = opts.date ? (opts.date instanceof Date ? opts.date : new Date(opts.date)) : new Date();
+const dateStr = today.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+const timeStr = today.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace(':', '.');
+const name = opts.name || user.name || user.displayName || empProfile.name || 'Pegawai Sekolah';
+const nbm = opts.nbm || empProfile.nbm || empProfile.nuptk || user.nbm || user.nuptk || user.nip || '-';
+let position = opts.position || '';
+if (!position) {
+if (empProfile.position) position = empProfile.position;
+else if (user.position || user.jabatan) position = user.position || user.jabatan;
+else if (user.role === ROLES.KEPSEK) position = 'Kepala Sekolah';
+else if (user.role === ROLES.TENDIK) position = 'Tenaga Administrasi Sekolah';
+else if (user.role === ROLES.GURU_UMMI) position = 'Guru BTQ Ummi';
+else if (user.role === ROLES.GURU_EKSKUL) position = 'Pembina Ekstrakurikuler';
+else if (user.role === ROLES.ADMIN) position = 'Administrator Sistem';
+else position = 'Guru Kelas/Mapel';
+}
+const statusTitle = opts.statusTitle || 'Status Kehadiran';
+let attStatus = opts.statusText || '';
+let attClass = opts.statusClass || '';
+if (!attStatus) {
+if (myAtt) {
+if (myAtt.time_out) {
+attStatus = `Sudah Pulang (${myAtt.time_out})`;
+attClass = 'badge-success';
+} else if (myAtt.time_in) {
+attStatus = `Sudah Datang (${myAtt.time_in})`;
+attClass = 'badge-success';
+} else if (myAtt.status === 'official_duty' || myAtt.leave_type === 'dinas') {
+attStatus = 'Tugas Dinas';
+attClass = 'badge-info';
+} else if (myAtt.status === 'sick' || myAtt.leave_type === 'sakit') {
+attStatus = 'Sakit';
+attClass = 'badge-danger';
+} else if (myAtt.status === 'permit' || myAtt.leave_type === 'pribadi') {
+attStatus = 'Izin Pribadi';
+attClass = 'badge-warning';
+} else {
+attStatus = 'Belum Presensi';
+attClass = 'badge-warning';
+}
+} else {
+attStatus = 'Belum Presensi';
+attClass = 'badge-warning';
+}
+}
+return `<div class="card hero-panel"><div class="hero-panel__inner"><div><p class="hero-panel__meta">${dateStr}</p><h2 class="hero-panel__time">${timeStr}</h2><p class="hero-panel__meta hero-panel__profile"><strong class="hero-panel__name">${escapeHtml(name)}</strong> · NBM: ${escapeHtml(nbm)} · ${escapeHtml(position)}</p></div><div class="hero-panel__status"><p class="hero-panel__meta">${escapeHtml(statusTitle)}</p><span class="badge ${attClass}">${attStatus}</span></div></div></div>`;
+}
 const SCHOOL_GEOFENCE = Object.freeze({
 lat: -7.378448579234777,
 lng: 112.75929775962251,
@@ -1500,6 +1552,7 @@ ATTENDANCE_MOTIVATIONS,
 getDailyAttendanceMotivation,
 getRandomAttendanceMotivation,
 showAttendanceSuccessModal,
+getDashboardHeroHtml,
 attendanceGeofence: SCHOOL_GEOFENCE,
 SCHOOL_GEOFENCE,
 ORIGINAL_SCHOOL_GEOFENCE

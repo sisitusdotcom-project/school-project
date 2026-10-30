@@ -18,6 +18,15 @@ const PersonnelPages = {
     const totalGtk = gtkList.length;
     const attList = DB.toArray(attendanceData);
     const hadirToday = attList.filter((a) => a && (a.time_in || a.status === 'Hadir')).length;
+    const user = Auth.userData || Auth.currentUser || {};
+    const uid = user.uid || Auth.currentUser?.uid;
+    const myAtt = attList.find((a) => a && (a.id === uid || a.teacherId === uid)) || null;
+    const heroHtml = AppConfig.getDashboardHeroHtml({
+      user,
+      attendanceRecord: myAtt,
+      position: 'Waka / Staf Personalia',
+      date: today
+    });
     const settings = settingsData || {};
     const scheduleDefs = AppConfig.SCHEDULE_DAY_DEFS || {
       gtk: [
@@ -75,6 +84,7 @@ const PersonnelPages = {
       }).join('');
     };
     container.innerHTML = `
+      ${heroHtml}
       <section class="card-grid section-spacer">
         <div class="card stat-card">
           <div class="stat-icon stat-icon--primary"><i class="ph ph-identification-card"></i></div>

@@ -1,16 +1,28 @@
 const FacilitiesPages = {
   async renderDashboard(container) {
     Router.setTitle('Sarana & Prasarana', 'Pusat pengelolaan inventaris aset, pemeliharaan fasilitas, dan perencanaan kebutuhan sekolah.');
-    const [assetsData, roomsData, maintenanceData] = await Promise.all([
+    const today = new Date();
+    const dateStr = AppConfig.getLocalDateStr ? AppConfig.getLocalDateStr(today) : today.toISOString().slice(0, 10);
+    const user = Auth.userData || Auth.currentUser || {};
+    const uid = user.uid || Auth.currentUser?.uid;
+    const [assetsData, roomsData, maintenanceData, myAtt] = await Promise.all([
       DB.getFacilityAssets(),
       DB.getFacilityRooms(),
-      DB.getFacilityMaintenance()
+      DB.getFacilityMaintenance(),
+      DB.getTeacherAttendance(dateStr, uid).catch(() => null)
     ]);
     const assets = DB.toArray(assetsData);
     const rooms = DB.toArray(roomsData);
     const maintenance = DB.toArray(maintenanceData);
     const baikCount = assets.filter((a) => !a.condition || a.condition === 'Baik' || a.status === 'Baik').length;
+    const heroHtml = AppConfig.getDashboardHeroHtml({
+      user,
+      attendanceRecord: myAtt,
+      position: 'Waka / Staf Sarpras',
+      date: today
+    });
     container.innerHTML = `
+      ${heroHtml}
       <section class="card-grid section-spacer">
         <div class="card stat-card">
           <div class="stat-icon stat-icon--primary"><i class="ph ph-building-office"></i></div>
