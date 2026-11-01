@@ -1549,3 +1549,196 @@ img { max-width: 100%; display: block; }
 .cart-item-img-clean {
   border: none;
 }
+.card-img-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  color: var(--gray);
+  padding: 16px;
+  text-align: center;
+  gap: 8px;
+}
+.card-img-placeholder i {
+  font-size: 32px;
+  color: var(--primary);
+  opacity: 0.85;
+}
+.card-img-placeholder span {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.card-sku {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--primary);
+  background: var(--primary-soft);
+  border: 1px solid var(--primary-border);
+  border-radius: var(--radius-xs);
+  padding: 2px 6px;
+  margin-top: 2px;
+}
+.buyer-type-pills {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.buyer-type-pills > * {
+  min-width: 0;
+}
+.buyer-type-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: #ffffff;
+  color: var(--dark-light);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+.buyer-type-btn.aktif {
+  background: var(--primary-soft);
+  color: var(--primary);
+  border-color: var(--primary);
+  font-weight: 700;
+}
+.receipt-card {
+  text-align: center;
+  padding: 8px 0;
+}
+.receipt-icon-wrap {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 12px;
+  background: #ecfdf5;
+  color: var(--green);
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+}
+.receipt-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--dark);
+  margin-bottom: 4px;
+}
+.receipt-subtitle {
+  font-size: 12px;
+  color: var(--gray);
+  margin-bottom: 16px;
+}
+.receipt-qr-wrap {
+  background: #ffffff;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  display: inline-block;
+  margin-bottom: 16px;
+}
+.receipt-qr-img {
+  width: 160px;
+  height: 160px;
+  display: block;
+  margin: 0 auto;
+}
+.receipt-order-id {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--primary);
+  letter-spacing: 1px;
+  margin-top: 8px;
+}
+.receipt-details-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  text-align: left;
+  margin-bottom: 16px;
+  background: var(--bg-page);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.receipt-details-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border-light);
+}
+.receipt-details-table td:first-child {
+  color: var(--gray);
+  font-weight: 600;
+  width: 40%;
+}
+.receipt-details-table td:last-child {
+  color: var(--dark);
+  font-weight: 700;
+}
+.receipt-items-list {
+  background: #ffffff;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  margin-bottom: 16px;
+  max-height: 140px;
+  overflow-y: auto;
+  font-size: 12px;
+  text-align: left;
+}
+.receipt-item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+  border-bottom: 1px dashed var(--border-light);
+}
+.receipt-item-row:last-child {
+  border-bottom: none;
+}
+.receipt-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.receipt-actions > * {
+  min-width: 0;
+}
+.badge-status-pending {
+  display: inline-block;
+  background: #fef3c7;
+  color: #92400e;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+}
+.badge-status-done {
+  display: inline-block;
+  background: #d1fae5;
+  color: #065f46;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+}
+.topbar-admin-link {
+  color: var(--secondary-dark);
+  font-weight: 700;
+}
+.form-dynamic-group {
+  display: none;
+}
+.form-dynamic-group.aktif {
+  display: block;
+}

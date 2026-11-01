@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard | MUSADA Mart</title>
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/img/favicon/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/img/favicon/favicon-16x16.png">
+<link rel="icon" href="/assets/img/favicon/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+<header class="admin-header">
+<div class="admin-header-inner">
+<a href="/admin-mart/" class="admin-brand">
+<div class="admin-brand-icon">
+<i class="fa-solid fa-store"></i>
+</div>
+<div>
+<span class="admin-brand-name">MUSADA MART ADMIN</span>
+<span class="admin-brand-tag">Koperasi Digital SD Muhammadiyah 1 Sedati</span>
+</div>
+</a>
+<div class="admin-header-actions">
+<button class="btn btn-outline btn-sm" data-action="refresh-data" title="Refresh Data"><i class="fa-solid fa-rotate"></i> Sinkron RTDB</button>
+<a href="/mart/" target="_blank" class="btn btn-primary btn-sm"><i class="fa-solid fa-arrow-up-right-from-square"></i> Portal Publik</a>
+</div>
+</div>
+</header>
+<nav class="admin-nav-bar">
+<div class="admin-nav-inner">
+<button class="admin-nav-tab active" data-action="switch-tab" data-tab="tabScanner"><i class="fa-solid fa-qrcode"></i> Scanner & Kasir</button>
+<button class="admin-nav-tab" data-action="switch-tab" data-tab="tabStock"><i class="fa-solid fa-boxes-stacked"></i> Stock Opname & Produk</button>
+<button class="admin-nav-tab" data-action="switch-tab" data-tab="tabOrders"><i class="fa-solid fa-clipboard-list"></i> Pesanan Siswa <span class="badge-tab-counter" id="badgePendingOrders">0</span></button>
+<button class="admin-nav-tab" data-action="switch-tab" data-tab="tabStats"><i class="fa-solid fa-chart-line"></i> Rekapitulasi</button>
+<button class="admin-nav-tab" data-action="switch-tab" data-tab="tabSettings"><i class="fa-solid fa-gear"></i> Pengaturan</button>
+</div>
+</nav>
+<main class="admin-main">
+<div id="tabScanner" class="admin-tab-content active">
+<div class="admin-grid-2">
+<div>
+<div class="admin-card">
+<div class="admin-card-header">
+<h3 class="admin-card-title"><i class="fa-solid fa-camera"></i> Kamera Scanner Barcode & QR</h3>
+<button class="btn btn-outline btn-sm" id="btnToggleScanner" data-action="toggle-scanner"><i class="fa-solid fa-play"></i> Nyalakan Kamera</button>
+</div>
+<div class="scanner-mode-switch">
+<button class="scanner-mode-btn active" data-action="set-scan-mode" data-mode="order"><i class="fa-solid fa-qrcode"></i> Scan Struk Pesanan</button>
+<button class="scanner-mode-btn" data-action="set-scan-mode" data-mode="product"><i class="fa-solid fa-barcode"></i> Scan SKU / Stock Opname</button>
+</div>
+<div class="scanner-viewport-box">
+<div id="reader"></div>
+</div>
+<div class="search-filter-bar">
+<input type="text" id="inpManualCode" class="form-control" style="flex: 1;" placeholder="Ketik No. Pesanan (MSD-...) atau SKU (ATK-...)" autocomplete="off">
+<button class="btn btn-primary btn-sm" data-action="submit-manual-code"><i class="fa-solid fa-magnifying-glass"></i> Proses</button>
+</div>
+<div class="scan-result-card" id="scanResultContainer">
+<div style="color:var(--gray);text-align:center;"><i class="fa-solid fa-qrcode" style="font-size:24px;margin-bottom:6px;display:block;"></i>Arahkan kamera ke QR Struk Siswa atau Barcode Produk Koperasi.</div>
+</div>
+</div>
+</div>
+<div>
+<div class="admin-card">
+<div class="admin-card-header">
+<h3 class="admin-card-title"><i class="fa-solid fa-cash-register"></i> Kasir Koperasi Langsung (POS)</h3>
+<button class="btn btn-outline btn-sm" data-action="clear-pos"><i class="fa-solid fa-trash-can"></i> Kosongkan</button>
+</div>
+<div id="posCartItems" style="min-height: 180px; max-height: 320px; overflow-y: auto; margin-bottom: 14px;">
+<div style="color:var(--gray);text-align:center;padding:40px 0;"><i class="fa-solid fa-cart-shopping" style="font-size:32px;margin-bottom:8px;display:block;opacity:0.4;"></i>Kasir masih kosong. Scan barcode produk atau klik "+ Kasir" di katalog.</div>
+</div>
+<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-top:2px solid var(--border);margin-bottom:14px;">
+<span style="font-size:14px;font-weight:700;">Total Transaksi:</span>
+<span id="posTotalBayar" style="font-size:18px;font-weight:800;color:var(--primary);">Rp 0</span>
+</div>
+<button class="btn btn-primary btn-block btn-lg" data-action="checkout-pos"><i class="fa-solid fa-check"></i> Selesaikan Transaksi Kasir</button>
+</div>
+</div>
+</div>
+</div>
+<div id="tabStock" class="admin-tab-content">
+<div class="admin-grid-4">
+<div class="metric-card">
+<div class="metric-icon primary"><i class="fa-solid fa-boxes-stacked"></i></div>
+<div class="metric-info">
+<div class="metric-val" id="statTotalSku">0</div>
+<div class="metric-lbl">Total SKU Produk</div>
+</div>
+</div>
+<div class="metric-card">
+<div class="metric-icon secondary"><i class="fa-solid fa-layer-group"></i></div>
+<div class="metric-info">
+<div class="metric-val" id="statTotalUnits">0</div>
+<div class="metric-lbl">Total Fisik Barang</div>
+</div>
+</div>
+<div class="metric-card">
+<div class="metric-icon yellow"><i class="fa-solid fa-triangle-exclamation"></i></div>
+<div class="metric-info">
+<div class="metric-val" id="statLowStock">0</div>
+<div class="metric-lbl">Stok Menipis (&lt; 10)</div>
+</div>
+</div>
+<div class="metric-card">
+<div class="metric-icon green"><i class="fa-solid fa-coins"></i></div>
+<div class="metric-info">
+<div class="metric-val" id="statTotalOmzet">Rp 0</div>
+<div class="metric-lbl">Total Penjualan</div>
+</div>
+</div>
+</div>
+<div class="admin-card">
+<div class="admin-card-header">
+<h3 class="admin-card-title"><i class="fa-solid fa-clipboard-check"></i> Stock Opname Cepat & Master Produk</h3>
+<button class="btn btn-primary btn-sm" data-action="open-add-product-modal"><i class="fa-solid fa-plus"></i> Tambah Produk Baru</button>
+</div>
+<div class="search-filter-bar">
+<input type="text" id="inpSearchProduct" class="form-control" style="max-width: 260px;" placeholder="Cari nama barang atau SKU...">
+<select id="selFilterProductKat" class="form-control" style="max-width: 180px;">
+<option value="all">Semua Kategori</option>
+<option value="atk">Alat Tulis (ATK)</option>
+<option value="seragam">Seragam Sekolah</option>
+<option value="buku">Buku & LKS</option>
+<option value="makanan">Makanan & Minuman</option>
+</select>
+<label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;">
+<input type="checkbox" id="cbFilterLowStock">
+<span>Hanya Stok Menipis (&lt; 10)</span>
+</label>
+</div>
+<div class="table-responsive">
+<table class="admin-table">
+<thead>
+<tr>
+<th>Foto</th>
+<th>Kode SKU</th>
+<th>Nama Produk</th>
+<th>Harga</th>
+<th>Stok Opname</th>
+<th>Aksi</th>
+</tr>
+</thead>
+<tbody id="stockTableBody"></tbody>
+</table>
+</div>
+</div>
+</div>
+<div id="tabOrders" class="admin-tab-content">
+<div class="admin-card">
+<div class="admin-card-header">
+<h3 class="admin-card-title"><i class="fa-solid fa-clipboard-list"></i> Daftar Pesanan Siswa, Wali & GTK</h3>
+<div class="search-filter-bar" style="margin-bottom: 0;">
+<select id="selFilterOrderStatus" class="form-control" style="max-width: 200px;">
+<option value="all">Semua Status</option>
+<option value="Menunggu Diambil">Menunggu Diambil</option>
+<option value="Selesai">Selesai</option>
+<option value="Dibatalkan">Dibatalkan</option>
+</select>
+</div>
+</div>
+<div class="table-responsive">
+<table class="admin-table">
+<thead>
+<tr>
+<th>No. Pesanan</th>
+<th>Pemesan</th>
+<th>Siswa / Kelas</th>
+<th>Opsi Penyerahan</th>
+<th>Total & Bayar</th>
+<th>Status</th>
+<th>Aksi</th>
+</tr>
+</thead>
+<tbody id="ordersTableBody"></tbody>
+</table>
+</div>
+</div>
+</div>
+<div id="tabStats" class="admin-tab-content">
+<div class="admin-card">
+<div class="admin-card-header">
+<h3 class="admin-card-title"><i class="fa-solid fa-chart-pie"></i> Rekapitulasi Operasional Koperasi</h3>
+</div>
+<p style="color:var(--gray);margin-bottom:14px;">Seluruh ringkasan transaksi, penerimaan dana, dan riwayat pesanan langsung tersinkronisasi secara real-time melalui Firebase RTDB.</p>
+<div class="admin-grid-4">
+<div class="metric-card">
+<div class="metric-icon primary"><i class="fa-solid fa-cart-check"></i></div>
+<div class="metric-info">
+<div class="metric-val" id="rekapDoneOrders">0</div>
+<div class="metric-lbl">Transaksi Berhasil</div>
+</div>
+</div>
+<div class="metric-card">
+<div class="metric-icon secondary"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+<div class="metric-info">
+<div class="metric-val" id="rekapPendapatan">Rp 0</div>
+<div class="metric-lbl">Total Omzet Kas Koperasi</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="tabSettings" class="admin-tab-content">
+<div class="admin-card" style="max-width: 600px;">
+<div class="admin-card-header">
+<h3 class="admin-card-title"><i class="fa-solid fa-sliders"></i> Pengaturan Toko Koperasi Sekolah</h3>
+</div>
+<div class="form-group">
+<label class="form-label">Nama Koperasi Sekolah</label>
+<input type="text" id="setStoreName" class="form-control" value="MUSADA Mart">
+</div>
+<div class="form-group">
+<label class="form-label">Nomor WhatsApp Petugas Koperasi</label>
+<input type="text" id="setContactWa" class="form-control" value="6285964399398">
+</div>
+<div class="form-group">
+<label class="form-label">Jam Operasional</label>
+<input type="text" id="setOpenHours" class="form-control" value="Senin - Jumat: 07.00 - 15.00 WIB">
+</div>
+<div class="form-group">
+<label class="form-label">Lokasi Toko</label>
+<input type="text" id="setLocation" class="form-control" value="Gedung Utama Lantai 1, SD Muhammadiyah 1 Sedati">
+</div>
+<button class="btn btn-primary" data-action="save-settings"><i class="fa-solid fa-floppy-disk"></i> Simpan Pengaturan</button>
+</div>
+</div>
+</main>
+<div class="modal-overlay" id="modalProduct">
+<div class="modal-dialog">
+<div class="modal-header">
+<h3 id="modalProductTitle" style="font-size: 15px; font-weight: 700;">Tambah Produk Baru</h3>
+<button class="modal-close-btn" data-action="close-product-modal"><i class="fa-solid fa-xmark"></i></button>
+</div>
+<input type="hidden" id="inpProdId">
+<div class="form-group">
+<label class="form-label">Kode SKU Produk * (misal: ATK-001, SRG-001)</label>
+<input type="text" id="inpProdSku" class="form-control" placeholder="Contoh: ATK-009" required>
+</div>
+<div class="form-group">
+<label class="form-label">Nama Produk *</label>
+<input type="text" id="inpProdNama" class="form-control" placeholder="Contoh: Penggaris Besi 30cm Standar" required>
+</div>
+<div class="form-group">
+<label class="form-label">Kategori *</label>
+<select id="selProdKat" class="form-control">
+<option value="atk">Alat Tulis (ATK)</option>
+<option value="seragam">Seragam Sekolah</option>
+<option value="buku">Buku & LKS</option>
+<option value="makanan">Makanan & Minuman</option>
+<option value="umum">Lainnya / Umum</option>
+</select>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+<div class="form-group">
+<label class="form-label">Harga Jual (Rp) *</label>
+<input type="number" id="inpProdHarga" class="form-control" placeholder="15000" required>
+</div>
+<div class="form-group">
+<label class="form-label">Harga Coret (Rp, Opsional)</label>
+<input type="number" id="inpProdHargaCoret" class="form-control" placeholder="18000">
+</div>
+</div>
+<div class="form-group">
+<label class="form-label">Stok Fisik Awal *</label>
+<input type="number" id="inpProdStok" class="form-control" value="10" required>
+</div>
+<div style="display:grid;grid-template-columns:1fr 2fr;gap:10px;">
+<div class="form-group">
+<label class="form-label">Label Variasi</label>
+<input type="text" id="inpProdLabelVar" class="form-control" value="Pilihan">
+</div>
+<div class="form-group">
+<label class="form-label">Daftar Variasi (Pisah koma)</label>
+<input type="text" id="inpProdVariasi" class="form-control" value="Standar">
+</div>
+</div>
+<div class="form-group">
+<label class="form-label"><i class="fa-brands fa-google-drive" style="color:#0f9d58;"></i> Link Gambar Google Drive</label>
+<input type="text" id="inpProdDriveLink" class="form-control" placeholder="https://drive.google.com/file/d/.../view?usp=sharing">
+<div class="drive-preview-wrap">
+<img id="drivePreviewImg" class="drive-preview-img" src="" alt="Drive Preview" style="display:none;">
+<span id="drivePreviewText" style="font-size:11px;color:var(--gray);">Tempel link Google Drive di atas untuk melihat preview gambar.</span>
+</div>
+</div>
+<div class="form-group">
+<label class="form-label">Deskripsi Produk</label>
+<textarea id="inpProdDeskripsi" class="form-control" rows="3" placeholder="Tuliskan spesifikasi atau keterangan bahan produk..."></textarea>
+</div>
+<button class="btn btn-primary btn-block btn-lg" data-action="save-product"><i class="fa-solid fa-floppy-disk"></i> Simpan ke Database</button>
+</div>
+</div>
+<script src="https://unpkg.com/html5-qrcode"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="admin.js"></script>
+</body>
+</html>

@@ -427,13 +427,15 @@
       "products": {
         ".indexOn": [
           "kat",
-          "nama"
+          "nama",
+          "kode"
         ]
       },
       "orders": {
         ".indexOn": [
           "orderNumber",
-          "createdAt"
+          "createdAt",
+          "status"
         ]
       }
     }

@@ -4,9 +4,9 @@ Panduan resmi deployment arsitektur multi-domain untuk **MUSADA Mart (Koperasi S
 
 ## Arsitektur Subdomain
 1. **Portal Publik**: `https://mart.musada.sch.id/`
-   - Menampilkan Katalog Produk Koperasi (ATK, Seragam, Buku, Makanan), Galeri Detail Produk, Keranjang Belanja, dan Checkout Pesanan WhatsApp Otomatis.
-2. **Portal Administrator (Rencana)**: `https://admin-mart.musada.sch.id/`
-   - Manajemen Inventaris Produk, Penyesuaian Stok/Harga, Monitoring Pesanan Siswa, dan Sinkronisasi Firebase Realtime Database.
+   - Menampilkan Katalog Produk Koperasi (ATK, Seragam, Buku, Makanan), Galeri Detail Produk, Keranjang Belanja, dan Checkout Pesanan Langsung (Beli > Checkout > Ambil di Sekolah dengan Struk QR Digital).
+2. **Portal Administrator**: `https://admin-mart.musada.sch.id/`
+   - Scanner Barcode/QR Kamera (Serah Terima Pesanan & Stock Opname), Kasir Koperasi Langsung (POS), Manajemen Inventaris Realtime, dan Sinkronisasi Firebase Realtime Database.
 
 ---
 
@@ -33,7 +33,7 @@ Panduan resmi deployment arsitektur multi-domain untuk **MUSADA Mart (Koperasi S
    - **Root directory**: `/` (biarkan root)
    - **Build Command**:
      ```bash
-     mkdir -p dist && cp -r admin-mart/* dist/ && cp -r mart/assets dist/assets
+     mkdir -p dist && cp -r admin-mart/* dist/
      ```
    - **Build Output Directory**: `dist`
 3. Klik **Save and Deploy**.

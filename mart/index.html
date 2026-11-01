@@ -20,11 +20,11 @@
 <div class="topbar-left">
 <span><i class="fa-solid fa-school topbar-icon"></i> Koperasi Resmi Sekolah MUSADA</span>
 <span><i class="fa-regular fa-clock topbar-icon"></i> Buka: Senin - Jumat (07.00 - 15.00 WIB)</span>
-<span class="topbar-badge">Antar Gratis ke Meja Kelas!</span>
+<span class="topbar-badge">Ambil di Sekolah / Antar Kelas</span>
 </div>
 <div class="topbar-right">
 <a href="/" class="topbar-portal-link"><i class="fa-solid fa-globe topbar-icon"></i> Portal Utama MUSADA</a>
-<a href="javascript:void(0)" data-action="toast" data-message="Hubungi Pembina Koperasi via WhatsApp: 0859-6439-9398" data-type="info"><i class="fa-brands fa-whatsapp topbar-icon"></i> Bantuan & Tanya CS</a>
+<a href="/admin-mart/" class="topbar-admin-link"><i class="fa-solid fa-user-shield topbar-icon"></i> Area Petugas</a>
 <a href="javascript:void(0)" data-action="toast" data-message="Lokasi Koperasi: Gedung Utama Lantai 1 (Sebelah Lab Komputer)" data-type="info"><i class="fa-solid fa-location-dot topbar-icon"></i> Lokasi Toko</a>
 </div>
 </div>
@@ -43,7 +43,7 @@
 <div class="search-container">
 <div class="search-wrapper">
 <i class="fa-solid fa-magnifying-glass search-icon"></i>
-<input type="text" id="inpCari" class="search-input" placeholder="Cari perlengkapan sekolah..." autocomplete="off">
+<input type="text" id="inpCari" class="search-input" placeholder="Cari nama barang atau kode SKU..." autocomplete="off">
 <i class="fa-solid fa-circle-xmark search-clear" id="btnSearchClear"></i>
 <button class="search-btn" id="btnSearchSubmit">Cari</button>
 </div>
@@ -79,12 +79,12 @@
 <div class="container">
 <div class="hero-banner">
 <div class="banner-inner">
-<span class="banner-tag"><i class="fa-solid fa-bolt"></i> Belanja Cepat & Hemat</span>
-<h2 class="banner-title">Koperasi Digital Musada Mart,<br>Antar ke Ruang Kelas!</h2>
-<p class="banner-desc">Belanja perlengkapan ujian, seragam baru, dan ATK harian langsung dari gadgetmu. Transaksi aman, harga terjangkau, dan bisa bayar tunai di tempat.</p>
+<span class="banner-tag"><i class="fa-solid fa-bolt"></i> Belanja Cepat & Terverifikasi</span>
+<h2 class="banner-title">Koperasi Digital Musada Mart,<br>Langsung Ambil di Sekolah!</h2>
+<p class="banner-desc">Wali murid dapat memesan perlengkapan untuk anak, guru & staf dapat memesan kebutuhan kantor, atau siswa dapat membeli mandiri dengan sistem digital terintegrasi.</p>
 <div class="banner-perks">
 <div class="banner-perk-item"><i class="fa-solid fa-circle-check"></i> 100% Produk Standar Sekolah</div>
-<div class="banner-perk-item"><i class="fa-solid fa-truck-fast"></i> Antar Saat Jam Istirahat</div>
+<div class="banner-perk-item"><i class="fa-solid fa-school"></i> Titip ke Anak / Ambil di Toko</div>
 <div class="banner-perk-item"><i class="fa-solid fa-wallet"></i> Bayar Tunai / QRIS Sekolah</div>
 </div>
 </div>
@@ -127,7 +127,7 @@
 </div>
 <div class="detail-layout">
 <div class="detail-gallery">
-<div class="detail-main-img-box">
+<div class="detail-main-img-box" id="detailMainImgWrap">
 <img id="detailImg" src="" alt="Produk">
 </div>
 <div class="gallery-thumbs" id="detailThumbs"></div>
@@ -141,7 +141,7 @@
 <span id="detailRating">4.9</span>
 </div>
 <span>•</span>
-<span id="detailTerjual">Terjual 150+</span>
+<span id="detailTerjual">SKU: -</span>
 <span>•</span>
 <span class="detail-stock-highlight"><i class="fa-solid fa-circle-check"></i> Stok: <span id="detailStok">0</span></span>
 </div>
@@ -174,9 +174,9 @@
 </button>
 </div>
 <div class="detail-perks-box">
-<div class="perk-item"><i class="fa-solid fa-shield-halved"></i> Garansi 100% Produk Asli</div>
+<div class="perk-item"><i class="fa-solid fa-shield-halved"></i> Garansi 100% Standar Sekolah</div>
 <div class="perk-item"><i class="fa-solid fa-rotate-left"></i> Bisa Tukar Ukuran Seragam</div>
-<div class="perk-item"><i class="fa-solid fa-hand-holding-dollar"></i> Bayar Tunai di Kelas</div>
+<div class="perk-item"><i class="fa-solid fa-hand-holding-dollar"></i> Bayar Tunai / QRIS di Koperasi</div>
 <div class="perk-item"><i class="fa-solid fa-comments"></i> Konsultasi Admin Cepat</div>
 </div>
 </div>
@@ -195,9 +195,9 @@
 </div>
 </div>
 <div class="mobile-bottom-bar bottom-bar-detail">
-<div class="bottom-chat-btn" data-action="toast" data-message="Menghubungi Admin Koperasi via WhatsApp: 0859-6439-9398" data-type="info">
-<i class="fa-regular fa-comment-dots"></i>
-<span>Chat</span>
+<div class="bottom-chat-btn" data-action="toast" data-message="Hubungi Petugas Koperasi: 0859-6439-9398" data-type="info">
+<i class="fa-solid fa-headset"></i>
+<span>Bantuan</span>
 </div>
 <div class="bottom-cart-btn" data-action="navigate-cart">
 <i class="fa-solid fa-cart-shopping"></i>
@@ -248,8 +248,8 @@ Beli Sekarang
 <span id="txtSumSubtotal">Rp 0</span>
 </div>
 <div class="summary-row">
-<span>Biaya Antar ke Kelas</span>
-<span class="summary-free-badge">GRATIS</span>
+<span>Layanan Pengambilan</span>
+<span class="summary-free-badge">DI SEKOLAH</span>
 </div>
 <div class="summary-row total">
 <span>Total Pembayaran</span>
@@ -259,7 +259,7 @@ Beli Sekarang
 <i class="fa-solid fa-credit-card"></i> Lanjut ke Checkout (<span id="txtSumBtnCount">0</span>)
 </button>
 <div class="cart-secure-notice">
-<i class="fa-solid fa-lock cart-secure-icon"></i> Transaksi resmi terverifikasi Koperasi Sekolah
+<i class="fa-solid fa-lock cart-secure-icon"></i> Pesanan resmi terhubung langsung ke sistem Koperasi Sekolah
 </div>
 </div>
 </div>
@@ -284,7 +284,9 @@ Checkout (<span id="txtJmlCheckoutMobile">0</span>)
 <div class="modal-dialog">
 <button class="modal-close-btn" data-action="close-modal" data-modal="modalVariasi"><i class="fa-solid fa-xmark"></i></button>
 <div class="modal-header-info">
+<div id="modVarImgWrap">
 <img id="modVarImg" class="modal-thumb" src="" alt="Thumbnail">
+</div>
 <div class="modal-header-text">
 <div class="modal-price" id="modVarHarga">Rp 0</div>
 <div class="modal-stock">Stok Tersedia: <span id="modVarStok" class="modal-stock-count">0</span></div>
@@ -314,7 +316,7 @@ Konfirmasi
 <div class="modal-dialog">
 <button class="modal-close-btn" data-action="close-modal" data-modal="modalCheckout"><i class="fa-solid fa-xmark"></i></button>
 <h3 class="modal-checkout-heading">
-<i class="fa-solid fa-clipboard-check modal-checkout-icon"></i> Form Pemesanan Siswa
+<i class="fa-solid fa-clipboard-check modal-checkout-icon"></i> Form Pemesanan Koperasi
 </h3>
 <div class="checkout-highlight-box">
 <div>
@@ -327,39 +329,92 @@ Konfirmasi
 </div>
 <div class="modal-body modal-body-tight">
 <div class="form-group">
-<label class="form-label"><i class="fa-solid fa-user form-label-icon"></i> Nama Lengkap Siswa / Pembeli *</label>
-<input type="text" id="inpNama" class="form-control" placeholder="Contoh: Budi Santoso" required>
+<label class="form-label">Kategori Pemesan *</label>
+<div class="buyer-type-pills">
+<div class="buyer-type-btn aktif" data-action="select-buyer-type" data-buyer="wali"><i class="fa-solid fa-hands-holding-child"></i> Wali Murid</div>
+<div class="buyer-type-btn" data-action="select-buyer-type" data-buyer="siswa"><i class="fa-solid fa-user-graduate"></i> Siswa</div>
+<div class="buyer-type-btn" data-action="select-buyer-type" data-buyer="guru"><i class="fa-solid fa-chalkboard-user"></i> Guru & Staff</div>
+<div class="buyer-type-btn" data-action="select-buyer-type" data-buyer="umum"><i class="fa-solid fa-user"></i> Umum</div>
+</div>
 </div>
 <div class="form-group">
-<label class="form-label"><i class="fa-solid fa-chalkboard-user form-label-icon"></i> Kelas / Ruangan / Jurusan *</label>
-<input type="text" id="inpKelas" class="form-control" placeholder="Contoh: Kelas 5 Al-Kindi / Gedung A" required>
+<label class="form-label"><i class="fa-solid fa-user form-label-icon"></i> Nama Pemesan *</label>
+<input type="text" id="inpNama" class="form-control" placeholder="Contoh: Ibu Rahmawati" required>
 </div>
 <div class="form-group">
-<label class="form-label"><i class="fa-brands fa-whatsapp form-label-icon-green"></i> Nomor WhatsApp Aktif *</label>
-<input type="tel" id="inpWa" class="form-control" placeholder="Contoh: 085964399398" required>
+<label class="form-label"><i class="fa-brands fa-whatsapp form-label-icon-green"></i> Nomor WhatsApp / HP Aktif *</label>
+<input type="tel" id="inpWa" class="form-control" placeholder="Contoh: 081234567890" required>
+</div>
+<div class="form-dynamic-group aktif" id="grpFieldSiswa">
+<div class="form-group">
+<label class="form-label"><i class="fa-solid fa-user-graduate form-label-icon"></i> Nama Lengkap Siswa *</label>
+<input type="text" id="inpNamaSiswa" class="form-control" placeholder="Contoh: Ahmad Farabi">
 </div>
 <div class="form-group">
-<label class="form-label"><i class="fa-solid fa-truck-ramp-box form-label-icon"></i> Opsi Pengambilan Pesanan</label>
+<label class="form-label"><i class="fa-solid fa-school-flag form-label-icon"></i> Kelas / Rombel Siswa *</label>
+<input type="text" id="inpKelasSiswa" class="form-control" placeholder="Contoh: Kelas 4 Al-Farabi">
+</div>
+</div>
+<div class="form-dynamic-group" id="grpFieldGtk">
+<div class="form-group">
+<label class="form-label"><i class="fa-solid fa-briefcase form-label-icon"></i> Unit / Ruang Guru / Bidang *</label>
+<input type="text" id="inpUnitGtk" class="form-control" placeholder="Contoh: Guru Kelas 2 / Kantor Tata Usaha">
+</div>
+</div>
+<div class="form-group">
+<label class="form-label"><i class="fa-solid fa-truck-ramp-box form-label-icon"></i> Opsi Pengambilan / Penyerahan *</label>
 <select id="selPengiriman" class="form-control">
-<option value="Antar ke Meja Kelas">Diantar ke Meja Kelas (Saat Jam Istirahat)</option>
-<option value="Ambil Mandiri di Toko Koperasi">Ambil Sendiri di Toko Koperasi</option>
+<option value="Ambil Sendiri di Toko Koperasi (Langsung)">Ambil Sendiri di Toko Koperasi (Langsung)</option>
+<option value="Diantar ke Meja Kelas Siswa (Saat Jam Istirahat)">Diantar ke Meja Kelas Siswa (Saat Jam Istirahat)</option>
+<option value="Dititipkan ke Siswa saat Pulang Sekolah">Dititipkan ke Siswa saat Pulang Sekolah</option>
+<option value="Diantar ke Ruang Guru / Kantor (Khusus GTK)">Diantar ke Ruang Guru / Kantor (Khusus GTK)</option>
 </select>
 </div>
 <div class="form-group">
-<label class="form-label"><i class="fa-solid fa-money-bill-wave form-label-icon"></i> Metode Pembayaran</label>
+<label class="form-label"><i class="fa-solid fa-money-bill-wave form-label-icon"></i> Metode Pembayaran *</label>
 <select id="selPembayaran" class="form-control">
-<option value="Tunai (Cash di Koperasi / saat antar)">Tunai / Cash (Saat Terima Pesanan)</option>
-<option value="QRIS Koperasi (BCA/Gopay/OVO/Dana)">QRIS Koperasi Sekolah</option>
-<option value="Transfer Bank Sekolah">Transfer Bank Sekolah</option>
+<option value="Bayar Tunai di Koperasi (Saat Terima Barang)">Bayar Tunai di Koperasi (Saat Terima Barang)</option>
+<option value="QRIS Koperasi Sekolah">QRIS Koperasi Sekolah (Scan di Tempat / Struk)</option>
+<option value="Transfer Rekening Sekolah (BSI / Bank Jatim)">Transfer Rekening Sekolah (BSI / Bank Jatim)</option>
 </select>
 </div>
 <div class="form-group">
-<label class="form-label"><i class="fa-solid fa-pen-to-square form-label-icon"></i> Catatan Pesanan (Opsional)</label>
-<textarea id="inpCatatan" class="form-control" rows="2" placeholder="Contoh: Tolong antarkan pas istirahat pertama jam 09.30 ya kak..."></textarea>
+<label class="form-label"><i class="fa-solid fa-pen-to-square form-label-icon"></i> Catatan Tambahan (Opsional)</label>
+<textarea id="inpCatatan" class="form-control" rows="2" placeholder="Contoh: Mohon dikemas rapi atau titipkan saat jam pulang sekolah..."></textarea>
 </div>
-<button class="btn btn-secondary btn-block btn-lg btn-whatsapp-order" id="btnKirimPesanan">
-<i class="fa-brands fa-whatsapp whatsapp-order-icon"></i> Kirim Pesanan via WhatsApp
+<button class="btn btn-primary btn-block btn-lg btn-whatsapp-order" id="btnSubmitPesanan">
+<i class="fa-solid fa-circle-check"></i> Konfirmasi & Buat Pesanan
 </button>
+</div>
+</div>
+</div>
+<div class="modal-overlay" id="modalReceipt">
+<div class="modal-dialog">
+<button class="modal-close-btn" data-action="close-modal" data-modal="modalReceipt"><i class="fa-solid fa-xmark"></i></button>
+<div class="receipt-card">
+<div class="receipt-icon-wrap">
+<i class="fa-solid fa-check"></i>
+</div>
+<h3 class="receipt-title">Pesanan Berhasil Dibuat!</h3>
+<p class="receipt-subtitle">Tunjukkan QR Code / Nomor Pesanan ini ke petugas koperasi saat pengambilan.</p>
+<div class="receipt-qr-wrap">
+<img id="receiptQrImg" class="receipt-qr-img" src="" alt="QR Code Pesanan">
+<div class="receipt-order-id" id="receiptOrderId">#MSD-000000</div>
+<div style="margin-top: 6px;"><span class="badge-status-pending"><i class="fa-solid fa-clock"></i> Menunggu Diambil / Diproses</span></div>
+</div>
+<table class="receipt-details-table">
+<tr><td>Nama Pemesan</td><td id="rcpNamaPemesan">-</td></tr>
+<tr id="rcpRowSiswa"><td>Siswa / Kelas</td><td id="rcpNamaSiswa">-</td></tr>
+<tr><td>Opsi Pengambilan</td><td id="rcpPengambilan">-</td></tr>
+<tr><td>Metode Bayar</td><td id="rcpPembayaran">-</td></tr>
+<tr><td>Total Pembayaran</td><td id="rcpTotalBayar" style="color:var(--primary);font-size:14px;">Rp 0</td></tr>
+</table>
+<div class="receipt-items-list" id="receiptItemsList"></div>
+<div class="receipt-actions">
+<button class="btn btn-outline-primary btn-sm" data-action="print-receipt"><i class="fa-solid fa-print"></i> Cetak Struk</button>
+<button class="btn btn-secondary btn-sm" data-action="save-receipt-wa"><i class="fa-brands fa-whatsapp"></i> Simpan ke WA</button>
+</div>
+<button class="btn btn-primary btn-block" style="margin-top: 10px;" data-action="finish-receipt">Selesai & Kembali Belanja</button>
 </div>
 </div>
 </div>
@@ -378,7 +433,7 @@ Konfirmasi
 </div>
 </div>
 <p class="footer-desc">
-Layanan belanja koperasi digital resmi untuk siswa, guru, dan staf sekolah SD Muhammadiyah 1 Sedati. Belanja perlengkapan sekolah lebih cepat, mudah, dan hemat.
+Layanan belanja koperasi digital resmi untuk siswa, wali murid, guru, dan staf sekolah SD Muhammadiyah 1 Sedati.
 </p>
 <div class="footer-location">
 <i class="fa-solid fa-location-dot footer-location-icon"></i> Gedung Utama Lantai 1, SD Muhammadiyah 1 Sedati
@@ -398,17 +453,17 @@ Layanan belanja koperasi digital resmi untuk siswa, guru, dan staf sekolah SD Mu
 <ul class="footer-links">
 <li><a href="javascript:void(0)" data-action="navigate-cart">Keranjang Belanja</a></li>
 <li><a href="/" target="_blank"><i class="fa-solid fa-school topbar-icon"></i> Portal Sekolah MUSADA</a></li>
+<li><a href="/admin-mart/" target="_blank"><i class="fa-solid fa-user-shield topbar-icon"></i> Area Petugas Koperasi</a></li>
 <li><a href="https://library.musada.sch.id" target="_blank"><i class="fa-solid fa-book topbar-icon"></i> MUSADA Library</a></li>
-<li><a href="javascript:void(0)" data-action="toast" data-message="Tukar ukuran seragam dilayani di toko koperasi maksimal 3 hari kerja" data-type="info">Syarat Tukar Ukuran</a></li>
 </ul>
 </div>
 <div class="footer-col">
-<h4>Kontak & Bantuan</h4>
+<h4>Kontak Petugas Koperasi</h4>
 <p class="footer-help-text">Punya kendala atau butuh pesanan partai kelas?</p>
 <a href="https://wa.me/6285964399398" target="_blank" class="btn btn-outline btn-sm btn-block footer-wa-btn">
-<i class="fa-brands fa-whatsapp footer-wa-icon"></i> WhatsApp Admin CS
+<i class="fa-brands fa-whatsapp footer-wa-icon"></i> WhatsApp Petugas CS
 </a>
-<span class="footer-hours-note">Respon cepat di jam kerja sekolah (07.00 - 15.00)</span>
+<span class="footer-hours-note">Buka setiap hari sekolah (07.00 - 15.00 WIB)</span>
 </div>
 </div>
 <div class="footer-bottom">

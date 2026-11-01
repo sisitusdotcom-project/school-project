@@ -14,6 +14,7 @@ const HomeView = {
       const kw = this.searchKeyword.toLowerCase().trim();
       list = list.filter(p => 
         (p.nama && p.nama.toLowerCase().includes(kw)) || 
+        (p.kode && p.kode.toLowerCase().includes(kw)) ||
         (p.deskripsi && p.deskripsi.toLowerCase().includes(kw)) ||
         (p.kat && p.kat.toLowerCase().includes(kw))
       );
@@ -36,19 +37,26 @@ const HomeView = {
       card.className = 'card-produk';
       const diskonHtml = p.diskon ? '<span class="badge-discount">' + p.diskon + '</span>' : '';
       const hargaCoretHtml = p.hargaCoret ? '<span class="card-price-original">' + Utils.formatRupiah(p.hargaCoret) + '</span>' : '';
+      const skuHtml = p.kode ? '<span class="card-sku">' + p.kode + '</span>' : '';
+      const imgHtml = p.img
+        ? '<img src="' + p.img + '" alt="' + p.nama + '" loading="lazy">'
+        : '<div class="card-img-placeholder"><i class="' + Utils.getCategoryIcon(p.kat) + '"></i><span>' + (p.kat || 'KOPERASI').toUpperCase() + '</span></div>';
       card.innerHTML = '<div class="card-img-wrap" data-action="navigate-detail" data-id="' + p.id + '">' +
-        '<img src="' + p.img + '" alt="' + p.nama + '" loading="lazy">' +
+        imgHtml +
         '<div class="card-badge-top">' + diskonHtml + '</div>' +
         '</div>' +
         '<div class="card-body">' +
         '<div>' +
+        '<div style="display: flex; justify-content: space-between; align-items: center;">' +
         '<span class="card-category">' + (p.kat || 'PRODUK').toUpperCase() + '</span>' +
+        skuHtml +
+        '</div>' +
         '<div class="card-title" data-action="navigate-detail" data-id="' + p.id + '" title="' + p.nama + '">' + p.nama + '</div>' +
         '</div>' +
         '<div class="card-meta">' +
         '<span class="rating-star"><i class="fa-solid fa-star"></i></span>' +
         '<span class="card-rating-bold">' + (p.rating || '5.0') + '</span>' +
-        '<span>• Terjual ' + (p.terjual || '0') + '</span>' +
+        '<span>• Stok ' + (p.stok || '0') + '</span>' +
         '</div>' +
         '<div class="card-price-row">' +
         '<div class="card-price-group">' +
@@ -78,7 +86,7 @@ const DetailView = {
     document.getElementById('detailCategoryLabel').textContent = (product.kat || 'PRODUK').toUpperCase();
     document.getElementById('detailJudul').textContent = product.nama;
     document.getElementById('detailRating').textContent = product.rating || '5.0';
-    document.getElementById('detailTerjual').textContent = 'Terjual ' + (product.terjual || '0');
+    document.getElementById('detailTerjual').textContent = 'SKU: ' + (product.kode || product.id.toUpperCase());
     document.getElementById('detailStok').textContent = product.stok;
     document.getElementById('detailHarga').textContent = Utils.formatRupiah(product.harga);
     const hargaCoretEl = document.getElementById('detailHargaCoret');
@@ -95,11 +103,15 @@ const DetailView = {
     } else {
       diskonBadgeEl.style.display = 'none';
     }
-    const mainImg = document.getElementById('detailImg');
-    mainImg.src = product.img;
+    const mainImgWrap = document.getElementById('detailMainImgWrap');
+    if (mainImgWrap) {
+      mainImgWrap.innerHTML = product.img
+        ? '<img id="detailImg" src="' + product.img + '" alt="' + product.nama + '">'
+        : '<div class="card-img-placeholder" style="height: 320px;"><i class="' + Utils.getCategoryIcon(product.kat) + '" style="font-size: 56px;"></i><span>' + (product.kat || 'KOPERASI').toUpperCase() + '</span></div>';
+    }
     const thumbsContainer = document.getElementById('detailThumbs');
     thumbsContainer.innerHTML = '';
-    const gallery = product.galeri || [product.img];
+    const gallery = product.galeri || (product.img ? [product.img] : []);
     gallery.forEach((gSrc, index) => {
       const thumb = document.createElement('div');
       thumb.className = 'gallery-thumb' + (index === 0 ? ' aktif' : '');
@@ -125,14 +137,11 @@ const DetailView = {
     document.getElementById('detailTeks').textContent = product.deskripsi || 'Tidak ada deskripsi tersedia.';
     const specsTable = document.getElementById('detailSpecsTable');
     specsTable.innerHTML = '';
-    if (product.spesifikasi && Object.keys(product.spesifikasi).length > 0) {
-      for (const [key, val] of Object.entries(product.spesifikasi)) {
-        const row = document.createElement('tr');
-        row.innerHTML = '<th>' + key + '</th><td>' + val + '</td>';
-        specsTable.appendChild(row);
-      }
-    } else {
-      specsTable.innerHTML = '<tr><td colspan="2" style="text-align: center; color: var(--gray);">Spesifikasi tidak dicantumkan</td></tr>';
+    const specs = { 'Kode SKU': product.kode || product.id.toUpperCase(), ...(product.spesifikasi || {}) };
+    for (const [key, val] of Object.entries(specs)) {
+      const row = document.createElement('tr');
+      row.innerHTML = '<th>' + key + '</th><td>' + val + '</td>';
+      specsTable.appendChild(row);
     }
     AppService.switchDetailTab('desc');
   }
@@ -162,13 +171,16 @@ const CartView = {
     items.forEach(item => {
       const cartItem = document.createElement('div');
       cartItem.className = 'cart-item';
+      const imgHtml = item.img
+        ? '<img src="' + item.img + '" alt="' + item.nama + '" class="cart-item-img cart-item-img-clean">'
+        : '<div class="cart-item-img" style="display:flex;align-items:center;justify-content:center;background:#f1f5f9;color:var(--primary);font-size:18px;"><i class="' + Utils.getCategoryIcon(item.kat) + '"></i></div>';
       cartItem.innerHTML = '<div class="cart-item-check">' +
         '<input type="checkbox" class="custom-checkbox" data-action="toggle-cart-item" data-cart-id="' + item.cartId + '" ' + (item.selected ? 'checked' : '') + '>' +
         '</div>' +
-        '<img src="' + item.img + '" alt="' + item.nama + '" class="cart-item-img cart-item-img-clean">' +
+        imgHtml +
         '<div class="cart-item-info">' +
         '<div class="cart-item-title cart-item-title-bold">' + item.nama + '</div>' +
-        '<div class="cart-item-variant">' + (item.labelVar || 'Variasi') + ': ' + item.variasi + '</div>' +
+        '<div class="cart-item-variant"><span class="card-sku" style="margin-right:4px;">' + (item.kode || '') + '</span>' + (item.labelVar || 'Variasi') + ': ' + item.variasi + '</div>' +
         '<div class="cart-item-price">' + Utils.formatRupiah(item.harga) + '</div>' +
         '<div class="cart-item-actions">' +
         '<div class="qty-control">' +
@@ -189,13 +201,22 @@ const AppService = {
   modalMode: 'cart',
   currentDetailProduct: null,
   selectedDetailVariant: null,
+  selectedBuyerType: 'wali',
+  activeCheckoutItems: [],
+  checkoutSource: 'cart',
+  lastPlacedOrder: null,
   openVariantModal(productId, mode = 'cart') {
     const product = DataService.getById(productId);
     if (!product) return;
     this.modalProduct = product;
     this.modalMode = mode;
     this.modalVariant = (product.variasi && product.variasi.length > 0) ? product.variasi[0] : 'Standar';
-    document.getElementById('modVarImg').src = product.img;
+    const modImgWrap = document.getElementById('modVarImgWrap');
+    if (modImgWrap) {
+      modImgWrap.innerHTML = product.img
+        ? '<img class="modal-thumb" src="' + product.img + '" alt="Thumbnail">'
+        : '<div class="modal-thumb" style="display:flex;align-items:center;justify-content:center;background:#f1f5f9;color:var(--primary);font-size:22px;"><i class="' + Utils.getCategoryIcon(product.kat) + '"></i></div>';
+    }
     document.getElementById('modVarHarga').textContent = Utils.formatRupiah(product.harga);
     document.getElementById('modVarStok').textContent = product.stok;
     document.getElementById('modVarTitle').textContent = (product.labelVar || 'Pilih Variasi') + ':';
@@ -251,7 +272,8 @@ const AppService = {
     });
   },
   selectGalleryImage(thumbEl, src) {
-    document.getElementById('detailImg').src = src;
+    const mainImg = document.getElementById('detailImg');
+    if (mainImg) mainImg.src = src;
     document.querySelectorAll('#detailThumbs .gallery-thumb').forEach(t => t.classList.remove('aktif'));
     if (thumbEl) thumbEl.classList.add('aktif');
   },
@@ -281,6 +303,7 @@ const AppService = {
     this.triggerCheckout([{
       cartId: this.currentDetailProduct.id + '-' + this.selectedDetailVariant,
       id: this.currentDetailProduct.id,
+      kode: this.currentDetailProduct.kode || this.currentDetailProduct.id.toUpperCase(),
       nama: this.currentDetailProduct.nama,
       variasi: this.selectedDetailVariant,
       harga: this.currentDetailProduct.harga,
@@ -321,8 +344,16 @@ const AppService = {
     document.getElementById('txtJudulKoleksi').textContent = 'Katalog Produk';
     HomeView.render();
   },
-  activeCheckoutItems: [],
-  checkoutSource: 'cart',
+  selectBuyerType(type) {
+    this.selectedBuyerType = type;
+    document.querySelectorAll('.buyer-type-btn').forEach(btn => {
+      btn.classList.toggle('aktif', btn.dataset.buyer === type);
+    });
+    const grpSiswa = document.getElementById('grpFieldSiswa');
+    const grpGtk = document.getElementById('grpFieldGtk');
+    if (grpSiswa) grpSiswa.classList.toggle('aktif', type === 'wali' || type === 'siswa');
+    if (grpGtk) grpGtk.classList.toggle('aktif', type === 'guru');
+  },
   triggerCheckout(items, source = 'cart') {
     if (!items || items.length === 0) {
       Toast.show('Pilih minimal 1 produk untuk checkout', 'info');
@@ -334,56 +365,134 @@ const AppService = {
     const totalQty = items.reduce((acc, i) => acc + i.qty, 0);
     document.getElementById('txtTotalBayarCheckout').textContent = Utils.formatRupiah(totalBayar);
     document.getElementById('txtCheckoutItemCount').textContent = totalQty;
+    this.selectBuyerType('wali');
     ModalController.open('modalCheckout');
   },
-  sendWhatsAppOrder() {
+  async confirmAndPlaceOrder() {
     const nama = document.getElementById('inpNama').value.trim();
-    const kelas = document.getElementById('inpKelas').value.trim();
     const wa = document.getElementById('inpWa').value.trim();
     const pengiriman = document.getElementById('selPengiriman').value;
     const pembayaran = document.getElementById('selPembayaran').value;
     const catatan = document.getElementById('inpCatatan').value.trim();
-    if (!nama || !kelas || !wa) {
-      Toast.show('Harap isi Nama, Kelas, dan Nomor WhatsApp!', 'error');
+    const namaSiswa = document.getElementById('inpNamaSiswa') ? document.getElementById('inpNamaSiswa').value.trim() : '';
+    const kelasSiswa = document.getElementById('inpKelasSiswa') ? document.getElementById('inpKelasSiswa').value.trim() : '';
+    const unitGtk = document.getElementById('inpUnitGtk') ? document.getElementById('inpUnitGtk').value.trim() : '';
+    if (!nama || !wa) {
+      Toast.show('Harap isi Nama Pemesan dan Nomor WhatsApp aktif!', 'error');
       return;
     }
+    if ((this.selectedBuyerType === 'wali' || this.selectedBuyerType === 'siswa') && (!namaSiswa || !kelasSiswa)) {
+      Toast.show('Harap isi Nama Siswa dan Kelas untuk keperluan serah terima!', 'error');
+      return;
+    }
+    const btnSubmit = document.getElementById('btnSubmitPesanan');
+    if (btnSubmit) {
+      btnSubmit.disabled = true;
+      btnSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses Pesanan...';
+    }
     const totalBayar = this.activeCheckoutItems.reduce((acc, i) => acc + (i.harga * i.qty), 0);
+    const totalQty = this.activeCheckoutItems.reduce((acc, i) => acc + i.qty, 0);
     const orderNumber = 'MSD-' + Math.floor(100000 + Math.random() * 900000);
-    let msg = '*PESANAN BARU - MUSADA MART*\n';
-    msg += 'No. Invoice: #' + orderNumber + '\n';
-    msg += '------------------------------------------\n';
-    msg += '*DATA PEMESAN:*\n';
-    msg += '• Nama Siswa: ' + nama + '\n';
-    msg += '• Kelas / Ruang: ' + kelas + '\n';
-    msg += '• WhatsApp: ' + wa + '\n';
-    msg += '• Pengiriman: ' + pengiriman + '\n';
-    msg += '• Pembayaran: ' + pembayaran + '\n';
-    if (catatan) msg += '• Catatan: ' + catatan + '\n';
-    msg += '------------------------------------------\n';
-    msg += '*DAFTAR PRODUK:*\n';
-    this.activeCheckoutItems.forEach((i, idx) => {
-      msg += (idx + 1) + '. ' + i.nama + '\n';
-      msg += '   Variasi: ' + i.variasi + ' | Qty: ' + i.qty + 'x\n';
-      msg += '   Harga: ' + Utils.formatRupiah(i.harga * i.qty) + '\n';
-    });
-    msg += '------------------------------------------\n';
-    msg += '*TOTAL PEMBAYARAN: ' + Utils.formatRupiah(totalBayar) + '*\n';
-    msg += '------------------------------------------\n';
-    msg += 'Terima kasih telah berbelanja di Koperasi Sekolah SD Muhammadiyah 1 Sedati.';
-    const adminPhone = DataService.contactWa || '6285964399398';
-    const waUrl = 'https://api.whatsapp.com/send?phone=' + adminPhone + '&text=' + encodeURIComponent(msg);
+    const orderPayload = {
+      orderId: orderNumber,
+      orderNumber: orderNumber,
+      createdAt: new Date().toISOString(),
+      status: 'Menunggu Diambil',
+      tipePembeli: this.selectedBuyerType,
+      namaPemesan: nama,
+      noWa: wa,
+      namaSiswa: namaSiswa,
+      kelasSiswa: kelasSiswa,
+      unitGtk: unitGtk,
+      opsiPengambilan: pengiriman,
+      metodePembayaran: pembayaran,
+      catatan: catatan,
+      items: this.activeCheckoutItems.map(i => ({
+        id: i.id,
+        kode: i.kode || i.id.toUpperCase(),
+        nama: i.nama,
+        variasi: i.variasi,
+        harga: i.harga,
+        qty: i.qty,
+        subtotal: i.harga * i.qty
+      })),
+      totalItem: totalQty,
+      totalBayar: totalBayar
+    };
+    const result = await DataService.submitOrder(orderPayload);
+    if (btnSubmit) {
+      btnSubmit.disabled = false;
+      btnSubmit.innerHTML = '<i class="fa-solid fa-circle-check"></i> Konfirmasi & Buat Pesanan';
+    }
+    if (!result.success) {
+      Toast.show('Terjadi kendala saat mengirim pesanan. Silakan coba lagi.', 'error');
+      return;
+    }
+    this.lastPlacedOrder = orderPayload;
     if (this.checkoutSource === 'cart') {
       const purchasedCartIds = this.activeCheckoutItems.map(i => i.cartId);
       CartManager.clearPurchased(purchasedCartIds);
     }
     ModalController.close('modalCheckout');
-    Toast.show('Pesanan berhasil dibuat! Membuka WhatsApp...', 'success');
-    window.open(waUrl, '_blank');
-    document.getElementById('inpNama').value = '';
-    document.getElementById('inpKelas').value = '';
-    document.getElementById('inpWa').value = '';
-    document.getElementById('inpCatatan').value = '';
-    Router.navigate('home');
+    this.showReceiptModal(orderPayload);
+  },
+  showReceiptModal(order) {
+    document.getElementById('receiptOrderId').textContent = '#' + order.orderId;
+    const qrImg = document.getElementById('receiptQrImg');
+    if (qrImg) {
+      qrImg.src = 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + encodeURIComponent(order.orderId);
+    }
+    document.getElementById('rcpNamaPemesan').textContent = order.namaPemesan + ' (' + order.tipePembeli.toUpperCase() + ')';
+    const rowSiswa = document.getElementById('rcpRowSiswa');
+    if (rowSiswa) {
+      if (order.namaSiswa) {
+        rowSiswa.style.display = 'table-row';
+        document.getElementById('rcpNamaSiswa').textContent = order.namaSiswa + ' (' + order.kelasSiswa + ')';
+      } else {
+        rowSiswa.style.display = 'none';
+      }
+    }
+    document.getElementById('rcpPengambilan').textContent = order.opsiPengambilan;
+    document.getElementById('rcpPembayaran').textContent = order.metodePembayaran;
+    document.getElementById('rcpTotalBayar').textContent = Utils.formatRupiah(order.totalBayar);
+    const listWrap = document.getElementById('receiptItemsList');
+    if (listWrap) {
+      listWrap.innerHTML = '';
+      order.items.forEach(i => {
+        const row = document.createElement('div');
+        row.className = 'receipt-item-row';
+        row.innerHTML = '<div><strong>' + i.nama + '</strong> (' + i.variasi + ') <span style="color:var(--gray);">x' + i.qty + '</span></div><div>' + Utils.formatRupiah(i.subtotal) + '</div>';
+        listWrap.appendChild(row);
+      });
+    }
+    ModalController.open('modalReceipt');
+    Toast.show('Pesanan berhasil dibuat! Simpan kode struk Anda.', 'success');
+  },
+  printReceipt() {
+    window.print();
+  },
+  saveReceiptToWa() {
+    if (!this.lastPlacedOrder) return;
+    const o = this.lastPlacedOrder;
+    let msg = '*STRUK DIGITAL PEMESANAN - MUSADA MART*\n';
+    msg += 'No. Pesanan: #' + o.orderId + '\n';
+    msg += 'Tanggal: ' + new Date(o.createdAt).toLocaleString('id-ID') + '\n';
+    msg += 'Status: ' + o.status + '\n';
+    msg += '------------------------------------------\n';
+    msg += 'Pemesan: ' + o.namaPemesan + '\n';
+    if (o.namaSiswa) msg += 'Siswa: ' + o.namaSiswa + ' (' + o.kelasSiswa + ')\n';
+    msg += 'Opsi Pengambilan: ' + o.opsiPengambilan + '\n';
+    msg += 'Pembayaran: ' + o.metodePembayaran + '\n';
+    msg += '------------------------------------------\n';
+    msg += 'Daftar Barang:\n';
+    o.items.forEach((i, idx) => {
+      msg += (idx + 1) + '. ' + i.nama + ' (' + i.variasi + ') ' + i.qty + 'x - ' + Utils.formatRupiah(i.subtotal) + '\n';
+    });
+    msg += '------------------------------------------\n';
+    msg += '*Total Pembayaran: ' + Utils.formatRupiah(o.totalBayar) + '*\n';
+    msg += '------------------------------------------\n';
+    msg += 'Tunjukkan struk ini di koperasi sekolah saat pengambilan.';
+    window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(msg), '_blank');
   }
 };
 document.addEventListener('DOMContentLoaded', async () => {
@@ -447,6 +556,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         AppService.triggerCheckout([{
           cartId: AppService.modalProduct.id + '-' + AppService.modalVariant,
           id: AppService.modalProduct.id,
+          kode: AppService.modalProduct.kode || AppService.modalProduct.id.toUpperCase(),
           nama: AppService.modalProduct.nama,
           variasi: AppService.modalVariant,
           harga: AppService.modalProduct.harga,
@@ -456,10 +566,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     });
   }
-  const btnKirimPesanan = document.getElementById('btnKirimPesanan');
-  if (btnKirimPesanan) {
-    btnKirimPesanan.addEventListener('click', () => {
-      AppService.sendWhatsAppOrder();
+  const btnSubmitOrder = document.getElementById('btnSubmitPesanan');
+  if (btnSubmitOrder) {
+    btnSubmitOrder.addEventListener('click', () => {
+      AppService.confirmAndPlaceOrder();
     });
   }
   document.addEventListener('click', (e) => {
@@ -504,6 +614,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       AppService.selectModalVariant(actionEl.dataset.variant);
     } else if (action === 'change-modal-qty') {
       AppService.changeModalQty(parseInt(actionEl.dataset.delta) || 1);
+    } else if (action === 'select-buyer-type') {
+      AppService.selectBuyerType(actionEl.dataset.buyer);
+    } else if (action === 'print-receipt') {
+      AppService.printReceipt();
+    } else if (action === 'save-receipt-wa') {
+      AppService.saveReceiptToWa();
+    } else if (action === 'finish-receipt') {
+      ModalController.close('modalReceipt');
+      Router.navigate('home');
     }
   });
   document.addEventListener('change', (e) => {
@@ -512,12 +631,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       CartManager.toggleSelect(actionEl.dataset.cartId);
     }
   });
-  window.addEventListener('error', (e) => {
-    if (e.target && e.target.tagName === 'IMG' && !e.target.dataset.failed) {
-      e.target.dataset.failed = 'true';
-      e.target.src = 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80';
-    }
-  }, true);
 });
 window.HomeView = HomeView;
 window.DetailView = DetailView;

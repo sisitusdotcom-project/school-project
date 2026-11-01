@@ -13,6 +13,14 @@ const Utils = {
     }
     return trimmed;
   },
+  getCategoryIcon(kat) {
+    const k = (kat || '').toLowerCase();
+    if (k.includes('atk')) return 'fa-solid fa-pen-ruler';
+    if (k.includes('seragam')) return 'fa-solid fa-shirt';
+    if (k.includes('buku')) return 'fa-solid fa-book';
+    if (k.includes('makan') || k.includes('minum')) return 'fa-solid fa-cookie-bite';
+    return 'fa-solid fa-bag-shopping';
+  },
   debounce(func, wait = 200) {
     let timeout;
     return function(...args) {
@@ -24,6 +32,7 @@ const Utils = {
 const DataService = {
   rtdbUrl: 'https://musada-sd-default-rtdb.firebaseio.com/mart/products.json',
   settingsUrl: 'https://musada-sd-default-rtdb.firebaseio.com/mart/settings.json',
+  ordersUrl: 'https://musada-sd-default-rtdb.firebaseio.com/mart/orders',
   cacheKey: 'musada_mart_products_cache',
   contactWa: '6285964399398',
   productsCache: [],
@@ -77,7 +86,7 @@ const DataService = {
       img: Utils.resolveImageUrl(item.img),
       galeri: (item.galeri && item.galeri.length > 0)
         ? item.galeri.map(g => Utils.resolveImageUrl(g))
-        : [Utils.resolveImageUrl(item.img)]
+        : (item.img ? [Utils.resolveImageUrl(item.img)] : [])
     }));
   },
   getAll() {
@@ -85,6 +94,33 @@ const DataService = {
   },
   getById(id) {
     return this.productsCache.find(p => String(p.id) === String(id));
+  },
+  async submitOrder(order) {
+    try {
+      const res = await fetch(`${this.ordersUrl}/${order.orderId}.json`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(order)
+      });
+      if (!res.ok) throw new Error('Gagal menyimpan pesanan ke server');
+      if (Array.isArray(order.items)) {
+        for (const item of order.items) {
+          const product = this.getById(item.id);
+          if (product && typeof product.stok === 'number') {
+            const nextStok = Math.max(0, product.stok - item.qty);
+            product.stok = nextStok;
+            fetch(`https://musada-sd-default-rtdb.firebaseio.com/mart/products/${item.id}.json`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ stok: nextStok })
+            }).catch(() => {});
+          }
+        }
+      }
+      return { success: true, orderId: order.orderId };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
   }
 };
 const CartManager = {
@@ -115,7 +151,9 @@ const CartManager = {
       items.push({
         cartId: cartId,
         id: product.id,
+        kode: product.kode || product.id.toUpperCase(),
         nama: product.nama,
+        kat: product.kat,
         harga: product.harga,
         img: product.img,
         stok: product.stok,
