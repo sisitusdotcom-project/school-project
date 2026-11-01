@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MUSADA Mart | Koperasi Sekolah Digital</title>
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/img/favicon/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/img/favicon/favicon-16x16.png">
+<link rel="icon" href="/assets/img/favicon/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<div class="topbar">
+<div class="container topbar-content">
+<div class="topbar-left">
+<span><i class="fa-solid fa-school topbar-icon"></i> Koperasi Resmi Sekolah MUSADA</span>
+<span><i class="fa-regular fa-clock topbar-icon"></i> Buka: Senin - Jumat (07.00 - 15.00 WIB)</span>
+<span class="topbar-badge">Antar Gratis ke Meja Kelas!</span>
+</div>
+<div class="topbar-right">
+<a href="/" class="topbar-portal-link"><i class="fa-solid fa-globe topbar-icon"></i> Portal Utama MUSADA</a>
+<a href="javascript:void(0)" data-action="toast" data-message="Hubungi Pembina Koperasi via WhatsApp: 0859-6439-9398" data-type="info"><i class="fa-brands fa-whatsapp topbar-icon"></i> Bantuan & Tanya CS</a>
+<a href="javascript:void(0)" data-action="toast" data-message="Lokasi Koperasi: Gedung Utama Lantai 1 (Sebelah Lab Komputer)" data-type="info"><i class="fa-solid fa-location-dot topbar-icon"></i> Lokasi Toko</a>
+</div>
+</div>
+</div>
+<header class="main-header">
+<div class="container header-wrapper">
+<div class="brand-logo" data-action="navigate-home">
+<div class="brand-icon">
+<i class="fa-solid fa-bag-shopping"></i>
+</div>
+<div class="brand-text">
+<span class="brand-name">MUSADA MART</span>
+<span class="brand-tag">Koperasi Sekolah Digital</span>
+</div>
+</div>
+<div class="search-container">
+<div class="search-wrapper">
+<i class="fa-solid fa-magnifying-glass search-icon"></i>
+<input type="text" id="inpCari" class="search-input" placeholder="Cari perlengkapan sekolah..." autocomplete="off">
+<i class="fa-solid fa-circle-xmark search-clear" id="btnSearchClear"></i>
+<button class="search-btn" id="btnSearchSubmit">Cari</button>
+</div>
+</div>
+<div class="header-actions">
+<button class="action-item wishlist-btn" data-action="toast" data-message="Fitur Wishlist disimpan di sesi lokal" data-type="info" title="Favorit">
+<i class="fa-regular fa-heart"></i>
+</button>
+<button class="action-item" id="btnHeaderCartMobile" data-action="navigate-cart" title="Keranjang Belanja">
+<i class="fa-solid fa-cart-shopping"></i>
+<span class="badge-counter" id="badgeKeranjangMobile">0</span>
+</button>
+<button class="btn-header-cart" data-action="navigate-cart">
+<i class="fa-solid fa-cart-shopping"></i>
+<span>Keranjang</span>
+<span class="badge-counter" id="badgeKeranjangDesktop">0</span>
+</button>
+</div>
+</div>
+<nav class="nav-subcategories">
+<div class="container">
+<div class="subcat-list" id="categoryPillsContainer">
+<div class="subcat-pill aktif" data-kat="semua" data-action="filter-category" data-category="semua"><i class="fa-solid fa-border-all"></i> Semua Produk</div>
+<div class="subcat-pill" data-kat="atk" data-action="filter-category" data-category="atk"><i class="fa-solid fa-pen-ruler"></i> Alat Tulis (ATK)</div>
+<div class="subcat-pill" data-kat="seragam" data-action="filter-category" data-category="seragam"><i class="fa-solid fa-shirt"></i> Seragam & Atribut</div>
+<div class="subcat-pill" data-kat="buku" data-action="filter-category" data-category="buku"><i class="fa-solid fa-book"></i> Buku & LKS</div>
+<div class="subcat-pill" data-kat="makanan" data-action="filter-category" data-category="makanan"><i class="fa-solid fa-cookie-bite"></i> Makanan & Minuman</div>
+</div>
+</div>
+</nav>
+</header>
+<main id="viewHome" class="view-page aktif">
+<div class="container">
+<div class="hero-banner">
+<div class="banner-inner">
+<span class="banner-tag"><i class="fa-solid fa-bolt"></i> Belanja Cepat & Hemat</span>
+<h2 class="banner-title">Koperasi Digital Musada Mart,<br>Antar ke Ruang Kelas!</h2>
+<p class="banner-desc">Belanja perlengkapan ujian, seragam baru, dan ATK harian langsung dari gadgetmu. Transaksi aman, harga terjangkau, dan bisa bayar tunai di tempat.</p>
+<div class="banner-perks">
+<div class="banner-perk-item"><i class="fa-solid fa-circle-check"></i> 100% Produk Standar Sekolah</div>
+<div class="banner-perk-item"><i class="fa-solid fa-truck-fast"></i> Antar Saat Jam Istirahat</div>
+<div class="banner-perk-item"><i class="fa-solid fa-wallet"></i> Bayar Tunai / QRIS Sekolah</div>
+</div>
+</div>
+<i class="fa-solid fa-basket-shopping banner-bg-decoration"></i>
+</div>
+<div class="section-header">
+<div class="section-title-wrap">
+<div class="section-indicator"></div>
+<h3 class="section-title" id="txtJudulKoleksi">Katalog Produk</h3>
+<span class="badge badge-primary" id="txtJumlahKatalog">0 Produk</span>
+</div>
+<select class="sort-dropdown" id="selSortir">
+<option value="default">Urutkan: Rekomendasi</option>
+<option value="termurah">Harga: Termurah</option>
+<option value="termahal">Harga: Termahal</option>
+<option value="terlaris">Paling Banyak Terjual</option>
+</select>
+</div>
+<div class="grid-produk" id="gridProduk"></div>
+</div>
+</main>
+<main id="viewDetail" class="view-page">
+<div class="container">
+<div class="breadcrumbs" id="detailBreadcrumbs">
+<a href="javascript:void(0)" data-action="navigate-home"><i class="fa-solid fa-house"></i> Beranda</a>
+<i class="fa-solid fa-chevron-right breadcrumb-sep"></i>
+<span id="bcCategory">Kategori</span>
+<i class="fa-solid fa-chevron-right breadcrumb-sep"></i>
+<span id="bcTitle" class="breadcrumb-active">Nama Produk</span>
+</div>
+<div class="view-header">
+<div class="view-header-content">
+<button class="btn-nav-back" data-action="navigate-home"><i class="fa-solid fa-arrow-left"></i></button>
+<h3 class="view-title">Detail Produk</h3>
+<button class="action-item" data-action="navigate-cart">
+<i class="fa-solid fa-cart-shopping"></i>
+<span class="badge-counter" id="badgeKeranjangDetail">0</span>
+</button>
+</div>
+</div>
+<div class="detail-layout">
+<div class="detail-gallery">
+<div class="detail-main-img-box">
+<img id="detailImg" src="" alt="Produk">
+</div>
+<div class="gallery-thumbs" id="detailThumbs"></div>
+</div>
+<div class="detail-main-card">
+<span class="badge badge-primary detail-category-badge" id="detailCategoryLabel">ATK</span>
+<h1 class="detail-title" id="detailJudul">Nama Produk</h1>
+<div class="detail-stats-row">
+<div class="detail-rating">
+<i class="fa-solid fa-star"></i>
+<span id="detailRating">4.9</span>
+</div>
+<span>•</span>
+<span id="detailTerjual">Terjual 150+</span>
+<span>•</span>
+<span class="detail-stock-highlight"><i class="fa-solid fa-circle-check"></i> Stok: <span id="detailStok">0</span></span>
+</div>
+<div class="detail-price-box">
+<div class="detail-price-large" id="detailHarga">Rp 0</div>
+<div class="detail-price-was" id="detailHargaCoret">Rp 0</div>
+<span class="badge-discount" id="detailDiskonBadge">HEMAT 15%</span>
+</div>
+<div class="detail-section-group">
+<div class="detail-section-label">
+<span id="detailLabelVariasi">Pilih Variasi:</span>
+<span class="detail-variant-value" id="txtVariasiTerpilih">-</span>
+</div>
+<div class="variant-chips-wrap" id="detailVariasiContainer"></div>
+</div>
+<div class="detail-section-group">
+<div class="detail-section-label">Jumlah Pembelian:</div>
+<div class="qty-control">
+<button data-action="change-detail-qty" data-delta="-1"><i class="fa-solid fa-minus"></i></button>
+<input type="number" id="inpDetailQty" value="1" readonly>
+<button data-action="change-detail-qty" data-delta="1"><i class="fa-solid fa-plus"></i></button>
+</div>
+</div>
+<div class="detail-actions-desktop">
+<button class="btn btn-outline-primary btn-lg btn-action-cart-desktop" id="btnDetailCartDesktop" data-action="add-detail-cart">
+<i class="fa-solid fa-cart-plus"></i> Masukkan Keranjang
+</button>
+<button class="btn btn-primary btn-lg btn-action-buy-desktop" id="btnDetailBeliDesktop" data-action="buy-detail-now">
+<i class="fa-solid fa-bolt"></i> Beli Sekarang
+</button>
+</div>
+<div class="detail-perks-box">
+<div class="perk-item"><i class="fa-solid fa-shield-halved"></i> Garansi 100% Produk Asli</div>
+<div class="perk-item"><i class="fa-solid fa-rotate-left"></i> Bisa Tukar Ukuran Seragam</div>
+<div class="perk-item"><i class="fa-solid fa-hand-holding-dollar"></i> Bayar Tunai di Kelas</div>
+<div class="perk-item"><i class="fa-solid fa-comments"></i> Konsultasi Admin Cepat</div>
+</div>
+</div>
+<div class="detail-tabs-card">
+<div class="detail-tabs-nav">
+<button class="detail-tab-btn aktif" data-action="switch-detail-tab" data-tab="desc">Deskripsi Produk</button>
+<button class="detail-tab-btn" data-action="switch-detail-tab" data-tab="specs">Spesifikasi Detail</button>
+</div>
+<div class="detail-tab-body" id="tabContentDesc">
+<div id="detailTeks" class="detail-text-content"></div>
+</div>
+<div class="detail-tab-body tab-content-hidden" id="tabContentSpecs">
+<table class="specs-table" id="detailSpecsTable"></table>
+</div>
+</div>
+</div>
+</div>
+<div class="mobile-bottom-bar bottom-bar-detail">
+<div class="bottom-chat-btn" data-action="toast" data-message="Menghubungi Admin Koperasi via WhatsApp: 0859-6439-9398" data-type="info">
+<i class="fa-regular fa-comment-dots"></i>
+<span>Chat</span>
+</div>
+<div class="bottom-cart-btn" data-action="navigate-cart">
+<i class="fa-solid fa-cart-shopping"></i>
+<span>Keranjang</span>
+</div>
+<button class="btn bottom-add-btn" id="btnDetailCartMobile" data-action="add-detail-cart">
++ Keranjang
+</button>
+<button class="btn bottom-buy-btn" id="btnDetailBeliMobile" data-action="buy-detail-now">
+Beli Sekarang
+</button>
+</div>
+</main>
+<main id="viewCart" class="view-page">
+<div class="container">
+<div class="breadcrumbs">
+<a href="javascript:void(0)" data-action="navigate-home"><i class="fa-solid fa-house"></i> Beranda</a>
+<i class="fa-solid fa-chevron-right breadcrumb-sep"></i>
+<span class="breadcrumb-active">Keranjang Belanja</span>
+</div>
+<div class="view-header">
+<div class="view-header-content">
+<button class="btn-nav-back" data-action="navigate-home"><i class="fa-solid fa-arrow-left"></i></button>
+<h3 class="view-title">Keranjang Saya (<span id="cartHeaderCount">0</span>)</h3>
+</div>
+</div>
+<div class="cart-layout">
+<div class="cart-card">
+<div class="cart-card-header">
+<label class="cart-select-all">
+<input type="checkbox" class="custom-checkbox" id="cbPilihSemua" checked>
+<span>Pilih Semua Produk (<span id="cartTotalItemsCount">0</span>)</span>
+</label>
+<button class="btn btn-sm btn-outline btn-cart-delete-selected" data-action="clear-selected-cart">
+<i class="fa-regular fa-trash-can"></i> Hapus Terpilih
+</button>
+</div>
+<div class="cart-items-container" id="cartListContainer"></div>
+</div>
+<div class="cart-summary-card">
+<h4 class="summary-title">Ringkasan Belanja</h4>
+<div class="summary-row">
+<span>Total Item Terpilih</span>
+<span id="txtSumTotalItem">0 pcs</span>
+</div>
+<div class="summary-row">
+<span>Subtotal Produk</span>
+<span id="txtSumSubtotal">Rp 0</span>
+</div>
+<div class="summary-row">
+<span>Biaya Antar ke Kelas</span>
+<span class="summary-free-badge">GRATIS</span>
+</div>
+<div class="summary-row total">
+<span>Total Pembayaran</span>
+<span class="summary-total-price" id="txtSumGrandTotal">Rp 0</span>
+</div>
+<button class="btn btn-primary btn-lg btn-block" id="btnCheckoutDesktop">
+<i class="fa-solid fa-credit-card"></i> Lanjut ke Checkout (<span id="txtSumBtnCount">0</span>)
+</button>
+<div class="cart-secure-notice">
+<i class="fa-solid fa-lock cart-secure-icon"></i> Transaksi resmi terverifikasi Koperasi Sekolah
+</div>
+</div>
+</div>
+</div>
+<div class="mobile-bottom-bar">
+<div class="bottom-cart-bar-content">
+<label class="cart-select-all cart-select-all-mobile">
+<input type="checkbox" class="custom-checkbox" id="cbPilihSemuaMobile" checked>
+<span>Semua</span>
+</label>
+<div class="cart-bottom-price-box">
+<div class="cart-bottom-price-label">Total Pembayaran:</div>
+<div class="cart-bottom-price-val" id="txtTotalBayarMobile">Rp 0</div>
+</div>
+</div>
+<button class="btn btn-primary btn-checkout-mobile" id="btnCheckoutMobile">
+Checkout (<span id="txtJmlCheckoutMobile">0</span>)
+</button>
+</div>
+</main>
+<div class="modal-overlay" id="modalVariasi">
+<div class="modal-dialog">
+<button class="modal-close-btn" data-action="close-modal" data-modal="modalVariasi"><i class="fa-solid fa-xmark"></i></button>
+<div class="modal-header-info">
+<img id="modVarImg" class="modal-thumb" src="" alt="Thumbnail">
+<div class="modal-header-text">
+<div class="modal-price" id="modVarHarga">Rp 0</div>
+<div class="modal-stock">Stok Tersedia: <span id="modVarStok" class="modal-stock-count">0</span></div>
+<div class="modal-selected-label" id="modVarSelectedLabel">Pilihan: -</div>
+</div>
+</div>
+<div class="modal-body">
+<div class="form-group">
+<label class="form-label" id="modVarTitle">Pilihan Variasi</label>
+<div class="variant-chips-wrap" id="modVarChipsContainer"></div>
+</div>
+<div class="form-group modal-qty-group">
+<label class="form-label modal-qty-label">Jumlah Pembelian</label>
+<div class="qty-control">
+<button data-action="change-modal-qty" data-delta="-1"><i class="fa-solid fa-minus"></i></button>
+<input type="number" id="inpModalQty" value="1" readonly>
+<button data-action="change-modal-qty" data-delta="1"><i class="fa-solid fa-plus"></i></button>
+</div>
+</div>
+<button class="btn btn-primary btn-block btn-lg" id="btnSubmitModalVariasi">
+Konfirmasi
+</button>
+</div>
+</div>
+</div>
+<div class="modal-overlay" id="modalCheckout">
+<div class="modal-dialog">
+<button class="modal-close-btn" data-action="close-modal" data-modal="modalCheckout"><i class="fa-solid fa-xmark"></i></button>
+<h3 class="modal-checkout-heading">
+<i class="fa-solid fa-clipboard-check modal-checkout-icon"></i> Form Pemesanan Siswa
+</h3>
+<div class="checkout-highlight-box">
+<div>
+<div class="checkout-highlight-label">Total Pembayaran:</div>
+<div class="checkout-highlight-total" id="txtTotalBayarCheckout">Rp 0</div>
+</div>
+<div class="checkout-highlight-count">
+<span id="txtCheckoutItemCount">0</span> Produk
+</div>
+</div>
+<div class="modal-body modal-body-tight">
+<div class="form-group">
+<label class="form-label"><i class="fa-solid fa-user form-label-icon"></i> Nama Lengkap Siswa / Pembeli *</label>
+<input type="text" id="inpNama" class="form-control" placeholder="Contoh: Budi Santoso" required>
+</div>
+<div class="form-group">
+<label class="form-label"><i class="fa-solid fa-chalkboard-user form-label-icon"></i> Kelas / Ruangan / Jurusan *</label>
+<input type="text" id="inpKelas" class="form-control" placeholder="Contoh: Kelas 5 Al-Kindi / Gedung A" required>
+</div>
+<div class="form-group">
+<label class="form-label"><i class="fa-brands fa-whatsapp form-label-icon-green"></i> Nomor WhatsApp Aktif *</label>
+<input type="tel" id="inpWa" class="form-control" placeholder="Contoh: 085964399398" required>
+</div>
+<div class="form-group">
+<label class="form-label"><i class="fa-solid fa-truck-ramp-box form-label-icon"></i> Opsi Pengambilan Pesanan</label>
+<select id="selPengiriman" class="form-control">
+<option value="Antar ke Meja Kelas">Diantar ke Meja Kelas (Saat Jam Istirahat)</option>
+<option value="Ambil Mandiri di Toko Koperasi">Ambil Sendiri di Toko Koperasi</option>
+</select>
+</div>
+<div class="form-group">
+<label class="form-label"><i class="fa-solid fa-money-bill-wave form-label-icon"></i> Metode Pembayaran</label>
+<select id="selPembayaran" class="form-control">
+<option value="Tunai (Cash di Koperasi / saat antar)">Tunai / Cash (Saat Terima Pesanan)</option>
+<option value="QRIS Koperasi (BCA/Gopay/OVO/Dana)">QRIS Koperasi Sekolah</option>
+<option value="Transfer Bank Sekolah">Transfer Bank Sekolah</option>
+</select>
+</div>
+<div class="form-group">
+<label class="form-label"><i class="fa-solid fa-pen-to-square form-label-icon"></i> Catatan Pesanan (Opsional)</label>
+<textarea id="inpCatatan" class="form-control" rows="2" placeholder="Contoh: Tolong antarkan pas istirahat pertama jam 09.30 ya kak..."></textarea>
+</div>
+<button class="btn btn-secondary btn-block btn-lg btn-whatsapp-order" id="btnKirimPesanan">
+<i class="fa-brands fa-whatsapp whatsapp-order-icon"></i> Kirim Pesanan via WhatsApp
+</button>
+</div>
+</div>
+</div>
+<div class="toast-container" id="toastContainer"></div>
+<footer class="site-footer">
+<div class="container">
+<div class="footer-grid">
+<div class="footer-col">
+<div class="brand-logo footer-logo">
+<div class="brand-icon footer-logo-icon">
+<i class="fa-solid fa-bag-shopping"></i>
+</div>
+<div class="brand-text">
+<span class="brand-name footer-logo-name">MUSADA MART</span>
+<span class="brand-tag">Koperasi Digital</span>
+</div>
+</div>
+<p class="footer-desc">
+Layanan belanja koperasi digital resmi untuk siswa, guru, dan staf sekolah SD Muhammadiyah 1 Sedati. Belanja perlengkapan sekolah lebih cepat, mudah, dan hemat.
+</p>
+<div class="footer-location">
+<i class="fa-solid fa-location-dot footer-location-icon"></i> Gedung Utama Lantai 1, SD Muhammadiyah 1 Sedati
+</div>
+</div>
+<div class="footer-col">
+<h4>Kategori Populer</h4>
+<ul class="footer-links">
+<li><a href="javascript:void(0)" data-action="filter-category" data-category="atk">Alat Tulis & Buku</a></li>
+<li><a href="javascript:void(0)" data-action="filter-category" data-category="seragam">Seragam Sekolah</a></li>
+<li><a href="javascript:void(0)" data-action="filter-category" data-category="buku">Buku Pelajaran & LKS</a></li>
+<li><a href="javascript:void(0)" data-action="filter-category" data-category="makanan">Snack Koperasi</a></li>
+</ul>
+</div>
+<div class="footer-col">
+<h4>Layanan Sekolah</h4>
+<ul class="footer-links">
+<li><a href="javascript:void(0)" data-action="navigate-cart">Keranjang Belanja</a></li>
+<li><a href="/" target="_blank"><i class="fa-solid fa-school topbar-icon"></i> Portal Sekolah MUSADA</a></li>
+<li><a href="https://library.musada.sch.id" target="_blank"><i class="fa-solid fa-book topbar-icon"></i> MUSADA Library</a></li>
+<li><a href="javascript:void(0)" data-action="toast" data-message="Tukar ukuran seragam dilayani di toko koperasi maksimal 3 hari kerja" data-type="info">Syarat Tukar Ukuran</a></li>
+</ul>
+</div>
+<div class="footer-col">
+<h4>Kontak & Bantuan</h4>
+<p class="footer-help-text">Punya kendala atau butuh pesanan partai kelas?</p>
+<a href="https://wa.me/6285964399398" target="_blank" class="btn btn-outline btn-sm btn-block footer-wa-btn">
+<i class="fa-brands fa-whatsapp footer-wa-icon"></i> WhatsApp Admin CS
+</a>
+<span class="footer-hours-note">Respon cepat di jam kerja sekolah (07.00 - 15.00)</span>
+</div>
+</div>
+<div class="footer-bottom">
+<p>&copy; 2026 Musada Mart — Koperasi Sekolah Digital SD Muhammadiyah 1 Sedati. All Rights Reserved.</p>
+</div>
+</div>
+</footer>
+<script src="assets/js/services.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>

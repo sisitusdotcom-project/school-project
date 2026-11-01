@@ -420,6 +420,22 @@
         ".read": "auth != null && auth.uid === $uid",
         ".write": "auth != null"
       }
+    },
+    "mart": {
+      ".read": "true",
+      ".write": "true",
+      "products": {
+        ".indexOn": [
+          "kat",
+          "nama"
+        ]
+      },
+      "orders": {
+        ".indexOn": [
+          "orderNumber",
+          "createdAt"
+        ]
+      }
     }
   }
 }
