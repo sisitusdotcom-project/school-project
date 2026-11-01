@@ -20,7 +20,7 @@ Panduan resmi deployment arsitektur multi-domain untuk **MUSADA Mart (Koperasi S
    - **Root directory**: `/` (biarkan root)
    - **Build Command**:
      ```bash
-     mkdir -p dist && cp -r mart/* dist/
+     mkdir -p dist && cp -r mart/. dist/
      ```
    - **Build Output Directory**: `dist`
 4. Klik **Save and Deploy**.
@@ -33,7 +33,7 @@ Panduan resmi deployment arsitektur multi-domain untuk **MUSADA Mart (Koperasi S
    - **Root directory**: `/` (biarkan root)
    - **Build Command**:
      ```bash
-     mkdir -p dist && cp -r admin-mart/* dist/
+     mkdir -p dist && cp -r admin-mart/. dist/
      ```
    - **Build Output Directory**: `dist`
 3. Klik **Save and Deploy**.
