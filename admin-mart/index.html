@@ -38,7 +38,6 @@
 <button class="admin-nav-tab" data-action="switch-tab" data-tab="tabStock"><i class="fa-solid fa-boxes-stacked"></i> Stock Opname & Produk</button>
 <button class="admin-nav-tab" data-action="switch-tab" data-tab="tabOrders"><i class="fa-solid fa-clipboard-list"></i> Pesanan Siswa <span class="badge-tab-counter" id="badgePendingOrders">0</span></button>
 <button class="admin-nav-tab" data-action="switch-tab" data-tab="tabStats"><i class="fa-solid fa-chart-line"></i> Rekapitulasi</button>
-<button class="admin-nav-tab" data-action="switch-tab" data-tab="tabSettings"><i class="fa-solid fa-gear"></i> Pengaturan</button>
 </div>
 </nav>
 <main class="admin-main">
@@ -192,36 +191,6 @@
 <div class="stat-card-value" id="statTotalSku">0</div>
 <div class="stat-card-sub">Tersedia di katalog koperasi</div>
 </div>
-</div>
-</div>
-<div id="tabSettings" class="admin-tab-content">
-<div class="admin-card max-w-600">
-<div class="admin-card-header">
-<h3 class="admin-card-title"><i class="fa-solid fa-gear"></i> Pengaturan Sistem Koperasi</h3>
-</div>
-<p class="settings-desc">Konfigurasi informasi umum, nomor narahubung koperasi, dan server penyimpanan foto produk.</p>
-<div class="form-group">
-<label class="form-label">Nama Koperasi / Toko</label>
-<input type="text" id="inpSettingNamaKoperasi" class="form-control" value="MUSADA Mart - Koperasi Sekolah">
-</div>
-<div class="form-group">
-<label class="form-label">Nomor WhatsApp Admin Koperasi (Konfirmasi)</label>
-<input type="text" id="inpSettingWa" class="form-control" value="6281234567890" placeholder="628xxxxxxxx">
-</div>
-<div class="form-group">
-<label class="form-label">Jam Pelayanan Pengambilan di Sekolah</label>
-<input type="text" id="inpSettingJam" class="form-control" value="Senin - Jumat: 07.00 - 14.30 WIB">
-</div>
-<div class="form-group">
-<label class="form-label">Batas Minimum Peringatan Stok Opname</label>
-<input type="number" id="inpSettingMinStock" class="form-control" value="5">
-</div>
-<div class="form-group">
-<label class="form-label"><i class="fa-solid fa-server server-status-icon"></i> ID Folder Server Media (Google Drive)</label>
-<input type="text" id="inpSettingDriveFolder" class="form-control" placeholder="Contoh: 1abc... atau biarkan kosong (default)">
-<span class="text-xs-muted">Folder terisolasi khusus penyimpanan foto produk Musada Mart (Folder Key: musada_mart).</span>
-</div>
-<button class="btn btn-primary" data-action="save-settings"><i class="fa-solid fa-floppy-disk"></i> Simpan Pengaturan</button>
 </div>
 </div>
 </main>

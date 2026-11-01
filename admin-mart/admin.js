@@ -53,7 +53,6 @@ const AdminApp = {
   GAS_URL: 'https://script.google.com/macros/s/AKfycbxk4PM_VNZt__dwfXuk5v3pI366vHDFG31HZNx2t_4jpmomd-2aUXgKkEHimB8DfJQcrg/exec',
   products: {},
   orders: {},
-  settings: {},
   posCart: [],
   scanner: null,
   isScanning: false,
@@ -99,14 +98,12 @@ const AdminApp = {
   },
   async loadAllData() {
     try {
-      const [resProd, resOrders, resSettings] = await Promise.all([
+      const [resProd, resOrders] = await Promise.all([
         fetch(this.RTDB_BASE + '/products.json'),
-        fetch(this.RTDB_BASE + '/orders.json'),
-        fetch(this.RTDB_BASE + '/settings.json')
+        fetch(this.RTDB_BASE + '/orders.json')
       ]);
       this.products = (await resProd.json()) || {};
       this.orders = (await resOrders.json()) || {};
-      this.settings = (await resSettings.json()) || {};
     } catch (e) {
       console.error(e);
     }
@@ -138,7 +135,6 @@ const AdminApp = {
     if (tabId === 'tabStock') this.renderStockTable();
     if (tabId === 'tabOrders') this.renderOrdersTable();
     if (tabId === 'tabStats') this.renderStats();
-    if (tabId === 'tabSettings') this.renderSettingsForm();
   },
   initScanner() {
     if (!window.Html5Qrcode) return;
@@ -319,7 +315,6 @@ const AdminApp = {
     this.renderStockTable();
     this.renderOrdersTable();
     this.renderStats();
-    this.renderSettingsForm();
     this.renderPosCart();
   },
   updateOrderBadges() {
@@ -691,14 +686,12 @@ const AdminApp = {
       const cleanSku = (skuVal || 'item').replace(/[^a-zA-Z0-9_-]/g, '_');
       const ext = compressed.mimeType === 'image/webp' ? '.webp' : '.jpg';
       const fileName = 'mart_' + cleanSku + '_' + Date.now() + ext;
-      const folderId = (this.settings && this.settings.driveFolderId) ? this.settings.driveFolderId.trim() : '';
       const params = new URLSearchParams();
       params.append('action', 'upload');
       params.append('fileName', fileName);
       params.append('mimeType', compressed.mimeType);
       params.append('fileData', compressed.base64Data);
       params.append('folderKey', 'musada_mart');
-      if (folderId) params.append('folderId', folderId);
       const res = await fetch(this.GAS_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
@@ -798,34 +791,6 @@ const AdminApp = {
     } catch (e) {
       Swal.fire('Error', 'Gagal menghapus produk', 'error');
     }
-  },
-  renderSettingsForm() {
-    if (!this.settings) return;
-    if (this.settings.namaKoperasi) document.getElementById('inpSettingNamaKoperasi').value = this.settings.namaKoperasi;
-    if (this.settings.waAdmin) document.getElementById('inpSettingWa').value = this.settings.waAdmin;
-    if (this.settings.jamPelayanan) document.getElementById('inpSettingJam').value = this.settings.jamPelayanan;
-    if (this.settings.minStockAlert) document.getElementById('inpSettingMinStock').value = this.settings.minStockAlert;
-    if (this.settings.driveFolderId) document.getElementById('inpSettingDriveFolder').value = this.settings.driveFolderId;
-  },
-  async saveSettings() {
-    const payload = {
-      namaKoperasi: document.getElementById('inpSettingNamaKoperasi').value.trim(),
-      waAdmin: document.getElementById('inpSettingWa').value.trim(),
-      jamPelayanan: document.getElementById('inpSettingJam').value.trim(),
-      minStockAlert: parseInt(document.getElementById('inpSettingMinStock').value) || 5,
-      driveFolderId: document.getElementById('inpSettingDriveFolder').value.trim()
-    };
-    try {
-      await fetch(this.RTDB_BASE + '/settings.json', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      this.settings = payload;
-      Swal.fire('Pengaturan Tersimpan', 'Informasi koperasi berhasil diperbarui.', 'success');
-    } catch (e) {
-      Swal.fire('Error', 'Gagal menyimpan pengaturan', 'error');
-    }
   }
 };
 document.addEventListener('DOMContentLoaded', () => {
@@ -881,8 +846,6 @@ document.addEventListener('DOMContentLoaded', () => {
       AdminApp.cancelOrder(el.dataset.id);
     } else if (action === 'view-order-detail') {
       AdminApp.viewOrderDetail(el.dataset.id);
-    } else if (action === 'save-settings') {
-      AdminApp.saveSettings();
     } else if (action === 'refresh-data') {
       AdminApp.loadAllData().then(() => {
         AdminApp.renderAll();
