@@ -239,7 +239,7 @@ const AdminApp = {
     let scanThumb = '';
     if (product.img && product.img.trim()) {
       const resolved = Utils.resolveImageUrl(product.img);
-      scanThumb = '<img src="' + resolved + '" class="table-prod-thumb" alt="' + product.nama + '" onerror="this.onerror=null;this.replaceWith(document.createRange().createContextualFragment('<div class=\'table-prod-thumb fallback\'><i class=\'fa-solid ' + Utils.getCategoryIcon(product.kat) + '\'></i></div>'));">';
+      scanThumb = '<img src="' + resolved + '" class="table-prod-thumb" alt="' + product.nama + '" data-kat="' + (product.kat || 'umum') + '">';
     } else {
       scanThumb = '<div class="table-prod-thumb fallback"><i class="fa-solid ' + Utils.getCategoryIcon(product.kat) + '"></i></div>';
     }
@@ -372,7 +372,7 @@ const AdminApp = {
       let thumbHtml = '';
       if (p.img && p.img.trim()) {
         const resolved = Utils.resolveImageUrl(p.img);
-        thumbHtml = '<img src="' + resolved + '" class="table-prod-thumb" alt="' + p.nama + '" onerror="this.onerror=null;this.replaceWith(document.createRange().createContextualFragment('<div class=\'table-prod-thumb fallback\'><i class=\'fa-solid ' + Utils.getCategoryIcon(p.kat) + '\'></i></div>'));">';
+        thumbHtml = '<img src="' + resolved + '" class="table-prod-thumb" alt="' + p.nama + '" data-kat="' + (p.kat || 'umum') + '">';
       } else {
         thumbHtml = '<div class="table-prod-thumb fallback"><i class="fa-solid ' + Utils.getCategoryIcon(p.kat) + '"></i></div>';
       }
@@ -830,6 +830,15 @@ const AdminApp = {
 };
 document.addEventListener('DOMContentLoaded', () => {
   AdminApp.init();
+  document.addEventListener('error', (e) => {
+    if (e.target && e.target.classList && e.target.classList.contains('table-prod-thumb')) {
+      const kat = e.target.dataset.kat || 'umum';
+      const fallback = document.createElement('div');
+      fallback.className = 'table-prod-thumb fallback';
+      fallback.innerHTML = '<i class="fa-solid ' + Utils.getCategoryIcon(kat) + '"></i>';
+      e.target.replaceWith(fallback);
+    }
+  }, true);
   document.addEventListener('click', (e) => {
     const el = e.target.closest('[data-action]');
     if (!el) return;
