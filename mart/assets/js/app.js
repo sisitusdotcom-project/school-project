@@ -41,13 +41,20 @@ const HomeView = {
       const imgHtml = p.img
         ? '<img src="' + p.img + '" alt="' + p.nama + '" loading="lazy">'
         : '<div class="card-img-placeholder"><i class="' + Utils.getCategoryIcon(p.kat) + '"></i><span>' + (p.kat || 'KOPERASI').toUpperCase() + '</span></div>';
+      const isFav = FavoritesService.isFavorite(p.id);
+      const favIcon = isFav ? 'fa-solid fa-heart' : 'fa-regular fa-heart';
+      const favClass = isFav ? 'card-btn-fav aktif' : 'card-btn-fav';
+      const favTitle = isFav ? 'Hapus dari Favorit' : 'Tambah ke Favorit';
       card.innerHTML = '<div class="card-img-wrap" data-action="navigate-detail" data-id="' + p.id + '">' +
         imgHtml +
         '<div class="card-badge-top">' + diskonHtml + '</div>' +
+        '<button class="' + favClass + '" data-action="toggle-fav" data-id="' + p.id + '" title="' + favTitle + '">' +
+        '<i class="' + favIcon + '"></i>' +
+        '</button>' +
         '</div>' +
         '<div class="card-body">' +
         '<div>' +
-        '<div style="display: flex; justify-content: space-between; align-items: center;">' +
+        '<div class="card-cat-row">' +
         '<span class="card-category">' + (p.kat || 'PRODUK').toUpperCase() + '</span>' +
         skuHtml +
         '</div>' +
@@ -105,9 +112,13 @@ const DetailView = {
     }
     const mainImgWrap = document.getElementById('detailMainImgWrap');
     if (mainImgWrap) {
-      mainImgWrap.innerHTML = product.img
+      const isFav = FavoritesService.isFavorite(product.id);
+      const favIcon = isFav ? 'fa-solid fa-heart' : 'fa-regular fa-heart';
+      const favClass = isFav ? 'detail-btn-fav aktif' : 'detail-btn-fav';
+      const imgHtml = product.img
         ? '<img id="detailImg" src="' + product.img + '" alt="' + product.nama + '">'
-        : '<div class="card-img-placeholder" style="height: 320px;"><i class="' + Utils.getCategoryIcon(product.kat) + '" style="font-size: 56px;"></i><span>' + (product.kat || 'KOPERASI').toUpperCase() + '</span></div>';
+        : '<div class="card-img-placeholder detail-placeholder"><i class="' + Utils.getCategoryIcon(product.kat) + '"></i><span>' + (product.kat || 'KOPERASI').toUpperCase() + '</span></div>';
+      mainImgWrap.innerHTML = imgHtml + '<button class="' + favClass + '" id="btnDetailFav" data-action="toggle-detail-fav" title="Favorit"><i class="' + favIcon + '"></i></button>';
     }
     const thumbsContainer = document.getElementById('detailThumbs');
     thumbsContainer.innerHTML = '';
@@ -173,14 +184,14 @@ const CartView = {
       cartItem.className = 'cart-item';
       const imgHtml = item.img
         ? '<img src="' + item.img + '" alt="' + item.nama + '" class="cart-item-img cart-item-img-clean">'
-        : '<div class="cart-item-img" style="display:flex;align-items:center;justify-content:center;background:#f1f5f9;color:var(--primary);font-size:18px;"><i class="' + Utils.getCategoryIcon(item.kat) + '"></i></div>';
+        : '<div class="cart-item-img cart-item-placeholder"><i class="' + Utils.getCategoryIcon(item.kat) + '"></i></div>';
       cartItem.innerHTML = '<div class="cart-item-check">' +
         '<input type="checkbox" class="custom-checkbox" data-action="toggle-cart-item" data-cart-id="' + item.cartId + '" ' + (item.selected ? 'checked' : '') + '>' +
         '</div>' +
         imgHtml +
         '<div class="cart-item-info">' +
         '<div class="cart-item-title cart-item-title-bold">' + item.nama + '</div>' +
-        '<div class="cart-item-variant"><span class="card-sku" style="margin-right:4px;">' + (item.kode || '') + '</span>' + (item.labelVar || 'Variasi') + ': ' + item.variasi + '</div>' +
+        '<div class="cart-item-variant"><span class="card-sku card-sku-inline">' + (item.kode || '') + '</span>' + (item.labelVar || 'Variasi') + ': ' + item.variasi + '</div>' +
         '<div class="cart-item-price">' + Utils.formatRupiah(item.harga) + '</div>' +
         '<div class="cart-item-actions">' +
         '<div class="qty-control">' +
@@ -215,7 +226,7 @@ const AppService = {
     if (modImgWrap) {
       modImgWrap.innerHTML = product.img
         ? '<img class="modal-thumb" src="' + product.img + '" alt="Thumbnail">'
-        : '<div class="modal-thumb" style="display:flex;align-items:center;justify-content:center;background:#f1f5f9;color:var(--primary);font-size:22px;"><i class="' + Utils.getCategoryIcon(product.kat) + '"></i></div>';
+        : '<div class="modal-thumb modal-thumb-placeholder"><i class="' + Utils.getCategoryIcon(product.kat) + '"></i></div>';
     }
     document.getElementById('modVarHarga').textContent = Utils.formatRupiah(product.harga);
     document.getElementById('modVarStok').textContent = product.stok;
@@ -461,7 +472,7 @@ const AppService = {
       order.items.forEach(i => {
         const row = document.createElement('div');
         row.className = 'receipt-item-row';
-        row.innerHTML = '<div><strong>' + i.nama + '</strong> (' + i.variasi + ') <span style="color:var(--gray);">x' + i.qty + '</span></div><div>' + Utils.formatRupiah(i.subtotal) + '</div>';
+        row.innerHTML = '<div><strong>' + i.nama + '</strong> (' + i.variasi + ') <span class="receipt-item-muted">x' + i.qty + '</span></div><div>' + Utils.formatRupiah(i.subtotal) + '</div>';
         listWrap.appendChild(row);
       });
     }
@@ -498,6 +509,7 @@ const AppService = {
 document.addEventListener('DOMContentLoaded', async () => {
   await DataService.loadProducts();
   CartManager.updateBadges();
+  FavoritesService.updateBadges();
   HomeView.render();
   const inpCari = document.getElementById('inpCari');
   const btnClear = document.getElementById('btnSearchClear');
@@ -576,7 +588,38 @@ document.addEventListener('DOMContentLoaded', async () => {
     const actionEl = e.target.closest('[data-action]');
     if (!actionEl) return;
     const action = actionEl.dataset.action;
-    if (action === 'navigate-home') {
+    if (actionEl.dataset.closeModal) {
+      ModalController.close(actionEl.dataset.closeModal);
+    }
+    if (action === 'open-wishlist-modal') {
+      WishlistController.open();
+    } else if (action === 'toggle-fav') {
+      const id = actionEl.dataset.id;
+      const newState = FavoritesService.toggle(id);
+      actionEl.className = newState ? 'card-btn-fav aktif' : 'card-btn-fav';
+      actionEl.innerHTML = '<i class="' + (newState ? 'fa-solid' : 'fa-regular') + ' fa-heart"></i>';
+      actionEl.title = newState ? 'Hapus dari Favorit' : 'Tambah ke Favorit';
+      Toast.show(newState ? 'Ditambahkan ke Favorit' : 'Dihapus dari Favorit', newState ? 'success' : 'info');
+    } else if (action === 'toggle-detail-fav') {
+      if (AppService.currentDetailProduct) {
+        const id = AppService.currentDetailProduct.id;
+        const newState = FavoritesService.toggle(id);
+        actionEl.className = newState ? 'detail-btn-fav aktif' : 'detail-btn-fav';
+        actionEl.innerHTML = '<i class="' + (newState ? 'fa-solid' : 'fa-regular') + ' fa-heart"></i>';
+        Toast.show(newState ? 'Ditambahkan ke Favorit' : 'Dihapus dari Favorit', newState ? 'success' : 'info');
+      }
+    } else if (action === 'remove-fav-item') {
+      const id = actionEl.dataset.id;
+      FavoritesService.remove(id);
+      WishlistController.render();
+      if (window.HomeView && window.HomeView.render) window.HomeView.render();
+      Toast.show('Dihapus dari Favorit', 'info');
+    } else if (action === 'clear-wishlist') {
+      FavoritesService.clear();
+      WishlistController.render();
+      if (window.HomeView && window.HomeView.render) window.HomeView.render();
+      Toast.show('Semua produk favorit berhasil dikosongkan', 'info');
+    } else if (action === 'navigate-home') {
       Router.navigate('home');
     } else if (action === 'navigate-cart') {
       Router.navigate('cart');
@@ -634,5 +677,53 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 window.HomeView = HomeView;
 window.DetailView = DetailView;
+const WishlistController = {
+  open() {
+    this.render();
+    ModalController.open('modalWishlist');
+  },
+  render() {
+    const container = document.getElementById('wishlistItemsContainer');
+    if (!container) return;
+    const ids = FavoritesService.getIds();
+    FavoritesService.updateBadges();
+    if (ids.length === 0) {
+      container.innerHTML = '<div class="empty-state"><i class="fa-regular fa-heart"></i><h3>Belum Ada Produk Favorit</h3><p>Klik ikon hati pada produk untuk menyimpannya ke daftar ini.</p><button class="btn btn-primary btn-sm" data-action="close-modal" data-modal="modalWishlist">Mulai Belanja</button></div>';
+      return;
+    }
+    const allProducts = DataService.getAll();
+    const favProducts = allProducts.filter(p => ids.includes(String(p.id)));
+    if (favProducts.length === 0) {
+      container.innerHTML = '<div class="empty-state"><i class="fa-regular fa-heart"></i><h3>Belum Ada Produk Favorit</h3><p>Klik ikon hati pada produk untuk menyimpannya ke daftar ini.</p><button class="btn btn-primary btn-sm" data-action="close-modal" data-modal="modalWishlist">Mulai Belanja</button></div>';
+      return;
+    }
+    container.innerHTML = '';
+    favProducts.forEach(p => {
+      const item = document.createElement('div');
+      item.className = 'wishlist-item';
+      const imgHtml = p.img
+        ? '<img src="' + p.img + '" alt="' + p.nama + '">'
+        : '<i class="' + Utils.getCategoryIcon(p.kat) + '"></i>';
+      item.innerHTML = '<div class="wishlist-item-img-wrap" data-action="navigate-detail" data-id="' + p.id + '" data-close-modal="modalWishlist">' +
+        imgHtml +
+        '</div>' +
+        '<div class="wishlist-item-info">' +
+        '<span class="wishlist-item-cat">' + (p.kat || 'Umum').toUpperCase() + '</span>' +
+        '<div class="wishlist-item-title" data-action="navigate-detail" data-id="' + p.id + '" data-close-modal="modalWishlist">' + p.nama + '</div>' +
+        '<div class="wishlist-item-price">' + Utils.formatRupiah(p.harga) + '</div>' +
+        '</div>' +
+        '<div class="wishlist-item-actions">' +
+        '<button class="btn btn-primary btn-sm" data-action="open-variant-modal" data-id="' + p.id + '" data-mode="cart" title="Beli / Tambah Keranjang">' +
+        '<i class="fa-solid fa-cart-plus"></i>' +
+        '</button>' +
+        '<button class="btn-wishlist-remove" data-action="remove-fav-item" data-id="' + p.id + '" title="Hapus dari Favorit">' +
+        '<i class="fa-solid fa-trash-can"></i>' +
+        '</button>' +
+        '</div>';
+      container.appendChild(item);
+    });
+  }
+};
+window.WishlistController = WishlistController;
 window.CartView = CartView;
 window.AppService = AppService;

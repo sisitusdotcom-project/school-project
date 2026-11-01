@@ -315,9 +315,68 @@ const Router = {
     }
   }
 };
+const FavoritesService = {
+  STORAGE_KEY: 'musada_mart_favorites',
+  getIds() {
+    try {
+      const raw = localStorage.getItem(this.STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      return [];
+    }
+  },
+  isFavorite(productId) {
+    if (!productId) return false;
+    const ids = this.getIds();
+    return ids.includes(String(productId));
+  },
+  toggle(productId) {
+    if (!productId) return false;
+    const strId = String(productId);
+    let ids = this.getIds();
+    const exists = ids.includes(strId);
+    if (exists) {
+      ids = ids.filter(id => id !== strId);
+    } else {
+      ids.push(strId);
+    }
+    try {
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(ids));
+    } catch (e) {}
+    this.updateBadges();
+    return !exists;
+  },
+  remove(productId) {
+    if (!productId) return;
+    const strId = String(productId);
+    let ids = this.getIds();
+    ids = ids.filter(id => id !== strId);
+    try {
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(ids));
+    } catch (e) {}
+    this.updateBadges();
+  },
+  clear() {
+    try {
+      localStorage.removeItem(this.STORAGE_KEY);
+    } catch (e) {}
+    this.updateBadges();
+  },
+  getCount() {
+    return this.getIds().length;
+  },
+  updateBadges() {
+    const count = this.getCount();
+    const el = document.getElementById('badgeFavorit');
+    if (el) el.textContent = count;
+    const txtCount = document.getElementById('txtWishlistCount');
+    if (txtCount) txtCount.textContent = count;
+  }
+};
 window.Utils = Utils;
 window.DataService = DataService;
 window.CartManager = CartManager;
+window.FavoritesService = FavoritesService;
 window.Toast = Toast;
 window.ModalController = ModalController;
 window.Router = Router;

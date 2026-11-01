@@ -48,8 +48,9 @@
 </div>
 </div>
 <div class="header-actions">
-<button class="action-item wishlist-btn" data-action="toast" data-message="Fitur Wishlist disimpan di sesi lokal" data-type="info" title="Favorit">
+<button class="action-item wishlist-btn" data-action="open-wishlist-modal" title="Favorit">
 <i class="fa-regular fa-heart"></i>
+<span class="badge-counter badge-counter-favorit" id="badgeFavorit">0</span>
 </button>
 <button class="action-item" id="btnHeaderCartMobile" data-action="navigate-cart" title="Keranjang Belanja">
 <i class="fa-solid fa-cart-shopping"></i>
@@ -128,6 +129,9 @@
 <div class="detail-gallery">
 <div class="detail-main-img-box" id="detailMainImgWrap">
 <img id="detailImg" src="" alt="Produk">
+<button class="detail-btn-fav" id="btnDetailFav" data-action="toggle-detail-fav" title="Favorit">
+<i class="fa-regular fa-heart"></i>
+</button>
 </div>
 <div class="gallery-thumbs" id="detailThumbs"></div>
 </div>
@@ -279,6 +283,22 @@ Checkout (<span id="txtJmlCheckoutMobile">0</span>)
 </button>
 </div>
 </main>
+<div class="modal-overlay" id="modalWishlist">
+<div class="modal-dialog modal-dialog-wishlist">
+<div class="modal-header-wishlist">
+<div class="wishlist-modal-title">
+<i class="fa-solid fa-heart"></i>
+<span>Produk Favorit Saya (<span id="txtWishlistCount">0</span>)</span>
+</div>
+<button class="modal-close-btn" data-action="close-modal" data-modal="modalWishlist"><i class="fa-solid fa-xmark"></i></button>
+</div>
+<div class="modal-body-wishlist" id="wishlistItemsContainer"></div>
+<div class="modal-footer-wishlist" id="wishlistModalFooter">
+<button class="btn btn-outline btn-sm" data-action="clear-wishlist">Hapus Semua</button>
+<button class="btn btn-primary btn-sm" data-action="close-modal" data-modal="modalWishlist">Tutup</button>
+</div>
+</div>
+</div>
 <div class="modal-overlay" id="modalVariasi">
 <div class="modal-dialog">
 <button class="modal-close-btn" data-action="close-modal" data-modal="modalVariasi"><i class="fa-solid fa-xmark"></i></button>
