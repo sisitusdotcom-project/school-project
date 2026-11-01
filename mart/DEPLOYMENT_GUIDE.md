@@ -5,7 +5,7 @@ Panduan resmi deployment arsitektur multi-domain untuk **MUSADA Mart (Koperasi S
 ## Arsitektur Subdomain
 1. **Portal Publik**: `https://mart.musada.sch.id/`
    - Menampilkan Katalog Produk Koperasi (ATK, Seragam, Buku, Makanan), Galeri Detail Produk, Keranjang Belanja, dan Checkout Pesanan Langsung (Beli > Checkout > Ambil di Sekolah dengan Struk QR Digital).
-2. **Portal Administrator**: `https://admin-mart.musada.sch.id/`
+2. **Portal Administrator**: `https://admin.mart.musada.sch.id/`
    - Scanner Barcode/QR Kamera (Serah Terima Pesanan & Stock Opname), Kasir Koperasi Langsung (POS), Manajemen Inventaris Realtime, dan Sinkronisasi Firebase Realtime Database.
 
 ---
@@ -26,7 +26,7 @@ Panduan resmi deployment arsitektur multi-domain untuk **MUSADA Mart (Koperasi S
 4. Klik **Save and Deploy**.
 5. Pada tab **Custom domains**, daftarkan: `mart.musada.sch.id`.
 
-### 2. Proyek Portal Administrator (`admin-mart.musada.sch.id`)
+### 2. Proyek Portal Administrator (`admin.mart.musada.sch.id`)
 1. Di **Cloudflare Dashboard** > **Workers & Pages**, buat proyek Pages baru dari repositori yang sama (`MUSADA.SCH.ID`).
 2. Pengaturan Build:
    - **Framework Preset**: `None`
@@ -37,7 +37,7 @@ Panduan resmi deployment arsitektur multi-domain untuk **MUSADA Mart (Koperasi S
      ```
    - **Build Output Directory**: `dist`
 3. Klik **Save and Deploy**.
-4. Pada tab **Custom domains**, daftarkan: `admin-mart.musada.sch.id`.
+4. Pada tab **Custom domains**, daftarkan: `admin.mart.musada.sch.id`.
 
 ---
 
