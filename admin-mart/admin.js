@@ -1,14 +1,24 @@
-const RTDB_BASE = 'https://musada-sd-default-rtdb.firebaseio.com/mart';
-const scanSound = new Audio('assets/audio/scanner-correct.mp3');
-const scanWrongSound = new Audio('assets/audio/scanner-wrong.mp3');
 function playScanSound(success = true) {
   try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
     if (success) {
-      scanSound.currentTime = 0;
-      scanSound.play().catch(() => {});
+      osc.frequency.setValueAtTime(800, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.15);
+      gain.gain.setValueAtTime(0.3, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.15);
     } else {
-      scanWrongSound.currentTime = 0;
-      scanWrongSound.play().catch(() => {});
+      osc.frequency.setValueAtTime(300, ctx.currentTime);
+      osc.frequency.setValueAtTime(200, ctx.currentTime + 0.1);
+      gain.gain.setValueAtTime(0.3, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.25);
     }
   } catch (e) {}
 }
@@ -17,10 +27,10 @@ const Utils = {
     return 'Rp ' + Number(amount || 0).toLocaleString('id-ID');
   },
   resolveImageUrl(url) {
-    if (!url || typeof url !== 'string') return '';
+    if (!url) return '';
     const trimmed = url.trim();
-    if (trimmed.includes('drive.google.com') || trimmed.includes('drive.usercontent.google.com')) {
-      const match = trimmed.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || trimmed.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+    if (trimmed.includes('drive.google.com') || trimmed.includes('drive.usercontent.google.com') || trimmed.includes('lh3.googleusercontent.com')) {
+      const match = trimmed.match(/[?&]id=([a-zA-Z0-9_-]+)/) || trimmed.match(/\/d\/([a-zA-Z0-9_-]+)/);
       if (match && match[1]) {
         return 'https://drive.google.com/thumbnail?id=' + match[1] + '&sz=w1000';
       }
@@ -28,86 +38,122 @@ const Utils = {
     return trimmed;
   },
   getCategoryIcon(kat) {
-    const k = (kat || '').toLowerCase();
-    if (k.includes('atk')) return 'fa-solid fa-pen-ruler';
-    if (k.includes('seragam')) return 'fa-solid fa-shirt';
-    if (k.includes('buku')) return 'fa-solid fa-book';
-    if (k.includes('makan') || k.includes('minum')) return 'fa-solid fa-cookie-bite';
-    return 'fa-solid fa-bag-shopping';
+    const map = {
+      'atk': 'fa-pen-ruler',
+      'seragam': 'fa-shirt',
+      'buku': 'fa-book-open',
+      'makanan': 'fa-utensils',
+      'umum': 'fa-box'
+    };
+    return map[kat] || 'fa-tag';
   }
 };
 const AdminApp = {
+  RTDB_BASE: 'https://musada-sd-default-rtdb.firebaseio.com/mart',
+  GAS_URL: 'https://script.google.com/macros/s/AKfycbxk4PM_VNZt__dwfXuk5v3pI366vHDFG31HZNx2t_4jpmomd-2aUXgKkEHimB8DfJQcrg/exec',
   products: {},
   orders: {},
   settings: {},
   posCart: [],
   scanner: null,
   isScanning: false,
-  scanMode: 'order',
+  currentScanMode: 'order',
   activeTab: 'tabScanner',
   filterOrderStatus: 'all',
-  searchProductQuery: '',
   filterProductCategory: 'all',
   filterLowStockOnly: false,
+  searchProductQuery: '',
+  pollingInterval: null,
   async init() {
     await this.loadAllData();
-    this.initScanner();
     this.renderAll();
-    setInterval(() => this.loadOrdersSilently(), 15000);
+    this.setupUploadZone();
+    this.pollingInterval = setInterval(() => {
+      this.loadOrdersSilently();
+    }, 15000);
+  },
+  setupUploadZone() {
+    const zone = document.getElementById('serverUploadZone');
+    const fileInp = document.getElementById('inpProdFile');
+    if (!zone || !fileInp) return;
+    zone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      zone.classList.add('dragover');
+    });
+    zone.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      zone.classList.remove('dragover');
+    });
+    zone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      zone.classList.remove('dragover');
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        this.uploadProductImage(e.dataTransfer.files[0]);
+      }
+    });
+    fileInp.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files[0]) {
+        this.uploadProductImage(e.target.files[0]);
+      }
+    });
   },
   async loadAllData() {
     try {
-      const [resProd, resOrd, resSet] = await Promise.all([
-        fetch(`${RTDB_BASE}/products.json`),
-        fetch(`${RTDB_BASE}/orders.json`),
-        fetch(`${RTDB_BASE}/settings.json`)
+      const [resProd, resOrders, resSettings] = await Promise.all([
+        fetch(this.RTDB_BASE + '/products.json'),
+        fetch(this.RTDB_BASE + '/orders.json'),
+        fetch(this.RTDB_BASE + '/settings.json')
       ]);
-      if (resProd.ok) this.products = (await resProd.json()) || {};
-      if (resOrd.ok) this.orders = (await resOrd.json()) || {};
-      if (resSet.ok) this.settings = (await resSet.json()) || {};
+      this.products = (await resProd.json()) || {};
+      this.orders = (await resOrders.json()) || {};
+      this.settings = (await resSettings.json()) || {};
     } catch (e) {
-      Swal.fire('Error', 'Gagal memuat data dari Firebase RTDB', 'error');
+      console.error(e);
     }
   },
   async loadOrdersSilently() {
     try {
-      const res = await fetch(`${RTDB_BASE}/orders.json`);
+      const res = await fetch(this.RTDB_BASE + '/orders.json');
       if (res.ok) {
         this.orders = (await res.json()) || {};
         this.updateOrderBadges();
         if (this.activeTab === 'tabOrders') this.renderOrdersTable();
+        if (this.activeTab === 'tabStats') this.renderStats();
       }
     } catch (e) {}
   },
   switchTab(tabId) {
     this.activeTab = tabId;
-    document.querySelectorAll('.admin-nav-tab').forEach(t => {
-      t.classList.toggle('active', t.dataset.tab === tabId);
+    document.querySelectorAll('.admin-nav-tab').forEach(b => {
+      b.classList.toggle('active', b.dataset.tab === tabId);
     });
     document.querySelectorAll('.admin-tab-content').forEach(c => {
       c.classList.toggle('active', c.id === tabId);
     });
     if (tabId === 'tabScanner') {
-      if (!this.isScanning) this.startScanner();
+      if (!this.scanner && this.isScanning) this.startScanner();
     } else {
-      if (this.isScanning) this.stopScanner();
+      if (this.scanner && this.isScanning) this.stopScanner();
     }
-    this.renderAll();
+    if (tabId === 'tabStock') this.renderStockTable();
+    if (tabId === 'tabOrders') this.renderOrdersTable();
+    if (tabId === 'tabStats') this.renderStats();
+    if (tabId === 'tabSettings') this.renderSettingsForm();
   },
   initScanner() {
-    if (typeof Html5Qrcode === 'undefined') return;
-    try {
+    if (!window.Html5Qrcode) return;
+    if (!this.scanner) {
       this.scanner = new Html5Qrcode('reader');
-      this.startScanner();
-    } catch (e) {}
+    }
   },
   async startScanner() {
-    if (!this.scanner || this.isScanning) return;
+    this.initScanner();
+    if (!this.scanner) return;
     try {
       await this.scanner.start(
         { facingMode: 'environment' },
         { fps: 10, qrbox: { width: 250, height: 250 } },
-        (decodedText) => this.handleScanSuccess(decodedText.trim()),
+        (decodedText) => this.handleScanSuccess(decodedText),
         () => {}
       );
       this.isScanning = true;
@@ -115,18 +161,18 @@ const AdminApp = {
       if (btn) btn.innerHTML = '<i class="fa-solid fa-stop"></i> Matikan Kamera';
     } catch (e) {
       this.isScanning = false;
-      const btn = document.getElementById('btnToggleScanner');
-      if (btn) btn.innerHTML = '<i class="fa-solid fa-play"></i> Nyalakan Kamera';
+      Swal.fire('Kamera Tidak Tersedia', 'Pastikan izin akses kamera diaktifkan di browser Anda.', 'warning');
     }
   },
   async stopScanner() {
-    if (!this.scanner || !this.isScanning) return;
-    try {
-      await this.scanner.stop();
+    if (this.scanner && this.isScanning) {
+      try {
+        await this.scanner.stop();
+      } catch (e) {}
       this.isScanning = false;
       const btn = document.getElementById('btnToggleScanner');
       if (btn) btn.innerHTML = '<i class="fa-solid fa-play"></i> Nyalakan Kamera';
-    } catch (e) {}
+    }
   },
   toggleScanner() {
     if (this.isScanning) {
@@ -136,9 +182,9 @@ const AdminApp = {
     }
   },
   setScanMode(mode) {
-    this.scanMode = mode;
-    document.querySelectorAll('.scanner-mode-btn').forEach(b => {
-      b.classList.toggle('active', b.dataset.mode === mode);
+    this.currentScanMode = mode;
+    document.querySelectorAll('.scanner-mode-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.mode === mode);
     });
   },
   handleScanSuccess(code) {
@@ -149,65 +195,61 @@ const AdminApp = {
     }
   },
   manualScanSubmit() {
-    const inp = document.getElementById('inpManualCode');
-    if (!inp || !inp.value.trim()) return;
-    const code = inp.value.trim();
-    this.handleScanSuccess(code);
-    inp.value = '';
+    const val = (document.getElementById('inpManualCode').value || '').trim();
+    if (!val) return;
+    this.handleScanSuccess(val);
+    document.getElementById('inpManualCode').value = '';
   },
   processOrderScan(orderId) {
-    const cleanId = orderId.replace(/^#/, '');
-    const order = this.orders[cleanId];
+    const order = this.orders[orderId];
     const container = document.getElementById('scanResultContainer');
     if (!order) {
       playScanSound(false);
-      container.innerHTML = '<div style="color:var(--red);font-weight:700;"><i class="fa-solid fa-triangle-exclamation"></i> Pesanan #' + cleanId + ' tidak ditemukan di database!</div>';
+      container.innerHTML = '<div class="scan-status-error"><i class="fa-solid fa-triangle-exclamation"></i> Pesanan ID #' + orderId + ' tidak ditemukan di database.</div>';
       return;
     }
     playScanSound(true);
-    let itemsHtml = '';
-    order.items.forEach(i => {
-      itemsHtml += '<div>• ' + i.nama + ' (' + i.variasi + ') <strong>x' + i.qty + '</strong></div>';
-    });
     const isDone = order.status === 'Selesai';
-    const statusClass = isDone ? 'done' : (order.status === 'Dibatalkan' ? 'cancelled' : 'pending');
-    container.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
-      '<strong style="font-size:14px;color:var(--primary);">PESANAN #' + order.orderId + '</strong>' +
-      '<span class="status-pill ' + statusClass + '">' + order.status + '</span>' +
+    const statusClass = isDone ? 'badge-status-done' : (order.status === 'Dibatalkan' ? 'badge-status-cancel' : 'badge-status-pending');
+    let itemsList = '';
+    (order.items || []).forEach(it => {
+      itemsList += '<div>- ' + it.qty + 'x ' + it.nama + ' (' + it.variasi + ')</div>';
+    });
+    container.innerHTML = '<div class="scan-order-header">' +
+      '<strong class="scan-order-id">PESANAN #' + order.orderId + '</strong>' +
+      '<span class="' + statusClass + '">' + order.status + '</span>' +
       '</div>' +
-      '<div style="font-size:12px;margin-bottom:6px;">Pemesan: <strong>' + order.namaPemesan + '</strong> (' + (order.tipePembeli || '').toUpperCase() + ')</div>' +
-      (order.namaSiswa ? '<div style="font-size:12px;margin-bottom:6px;">Siswa: <strong>' + order.namaSiswa + '</strong> (' + order.kelasSiswa + ')</div>' : '') +
-      '<div style="font-size:12px;margin-bottom:6px;">Penyerahan: <strong>' + order.opsiPengambilan + '</strong></div>' +
-      '<div style="font-size:12px;margin-bottom:6px;">Pembayaran: <strong>' + order.metodePembayaran + ' (' + Utils.formatRupiah(order.totalBayar) + ')</strong></div>' +
-      '<div style="background:#ffffff;padding:8px;border-radius:4px;border:1px solid var(--border);margin-bottom:10px;">' + itemsHtml + '</div>' +
-      (!isDone ? '<button class="btn btn-secondary btn-block" data-action="complete-scanned-order" data-id="' + order.orderId + '"><i class="fa-solid fa-check-double"></i> Serahkan Barang & Tandai Selesai</button>' : '<div style="color:var(--green);font-weight:700;text-align:center;"><i class="fa-solid fa-circle-check"></i> Pesanan ini sudah selesai diambil.</div>');
+      '<div class="scan-order-row">Pemesan: <strong>' + order.namaPemesan + '</strong> (' + order.tipePembeli + ')</div>' +
+      (order.namaSiswa ? '<div class="scan-order-row">Siswa: <strong>' + order.namaSiswa + '</strong> (Kelas ' + order.kelasSiswa + ')</div>' : '') +
+      '<div class="scan-order-row">Penyerahan: <strong>' + order.opsiPengambilan + '</strong></div>' +
+      '<div class="scan-order-row">Pembayaran: <strong>' + order.metodePembayaran + ' (' + Utils.formatRupiah(order.totalBayar) + ')</strong></div>' +
+      '<div class="scan-order-box">' + itemsList + '</div>' +
+      (!isDone ? '<button class="btn btn-secondary btn-block" data-action="complete-scanned-order" data-id="' + order.orderId + '"><i class="fa-solid fa-check-double"></i> Serahkan Barang & Selesaikan</button>' : '');
   },
   processProductScan(code) {
-    const product = Object.values(this.products).find(p => (p.kode && p.kode.toLowerCase() === code.toLowerCase()) || (p.id && p.id.toLowerCase() === code.toLowerCase()));
+    const searchCode = code.toUpperCase();
+    const product = Object.values(this.products).find(p => (p.kode && p.kode.toUpperCase() === searchCode) || p.id === code);
     const container = document.getElementById('scanResultContainer');
     if (!product) {
       playScanSound(false);
-      container.innerHTML = '<div style="color:var(--red);font-weight:700;"><i class="fa-solid fa-triangle-exclamation"></i> Produk dengan SKU/Kode "' + code + '" tidak ditemukan!</div>';
+      container.innerHTML = '<div class="scan-status-error"><i class="fa-solid fa-triangle-exclamation"></i> SKU / Barcode ' + code + ' belum terdaftar.</div>';
       return;
     }
     playScanSound(true);
-    const imgHtml = product.img
-      ? '<img src="' + Utils.resolveImageUrl(product.img) + '" class="table-img">'
-      : '<div class="table-placeholder"><i class="' + Utils.getCategoryIcon(product.kat) + '"></i></div>';
-    container.innerHTML = '<div style="display:flex;gap:12px;align-items:center;">' +
-      imgHtml +
-      '<div style="flex:1;">' +
-      '<span class="sku-badge">' + (product.kode || product.id) + '</span>' +
-      '<div style="font-size:14px;font-weight:700;color:var(--dark);">' + product.nama + '</div>' +
-      '<div style="color:var(--primary);font-weight:700;">' + Utils.formatRupiah(product.harga) + '</div>' +
+    const imgUrl = Utils.resolveImageUrl(product.img) || '/assets/img/icon-512x512.png';
+    container.innerHTML = '<div class="scan-prod-card">' +
+      '<img src="' + imgUrl + '" class="table-prod-thumb" alt="' + product.nama + '">' +
+      '<div class="flex-1">' +
+      '<span class="badge-sku">' + product.kode + '</span>' +
+      '<div class="scan-prod-title">' + product.nama + '</div>' +
+      '<div class="scan-prod-price">' + Utils.formatRupiah(product.harga) + '</div>' +
       '</div>' +
       '</div>' +
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:1px solid var(--border);">' +
-      '<div>Stok Fisik: <strong id="lblScanStock" style="font-size:16px;color:var(--primary);">' + product.stok + '</strong></div>' +
-      '<div style="display:flex;gap:6px;">' +
+      '<div class="scan-prod-stock-row">' +
+      '<div>Stok Fisik: <strong id="lblScanStock" class="scan-prod-stock-val">' + product.stok + '</strong></div>' +
+      '<div class="btn-group-sm">' +
       '<button class="btn btn-outline btn-sm" data-action="quick-adjust-scanned" data-id="' + product.id + '" data-delta="-1">-1</button>' +
       '<button class="btn btn-outline btn-sm" data-action="quick-adjust-scanned" data-id="' + product.id + '" data-delta="1">+1</button>' +
-      '<button class="btn btn-outline btn-sm" data-action="quick-adjust-scanned" data-id="' + product.id + '" data-delta="5">+5</button>' +
       '<button class="btn btn-primary btn-sm" data-action="add-pos-item" data-id="' + product.id + '"><i class="fa-solid fa-cart-plus"></i> + Kasir</button>' +
       '</div>' +
       '</div>';
@@ -217,41 +259,50 @@ const AdminApp = {
       const order = this.orders[orderId];
       if (!order) return;
       order.status = 'Selesai';
-      order.completedAt = new Date().toISOString();
-      await fetch(`${RTDB_BASE}/orders/${orderId}.json`, {
-        method: 'PATCH',
+      order.selesaiPada = new Date().toISOString();
+      await fetch(this.RTDB_BASE + '/orders/' + orderId + '.json', {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'Selesai', completedAt: order.completedAt })
+        body: JSON.stringify(order)
       });
       playScanSound(true);
-      Swal.fire({ title: 'Berhasil!', text: 'Pesanan #' + orderId + ' ditandai Selesai.', icon: 'success', timer: 1500 });
+      Swal.fire('Pesanan Selesai!', 'Pesanan #' + orderId + ' telah diserahkan.', 'success');
       this.renderOrdersTable();
+      this.renderStats();
       this.updateOrderBadges();
       const container = document.getElementById('scanResultContainer');
-      if (container) container.innerHTML = '<div style="color:var(--green);font-weight:700;"><i class="fa-solid fa-circle-check"></i> Pesanan #' + orderId + ' telah diserahkan & selesai!</div>';
+      if (container) container.innerHTML = '<div class="scan-status-success"><i class="fa-solid fa-circle-check"></i> Pesanan #' + orderId + ' telah ditandai Selesai.</div>';
     } catch (e) {
       Swal.fire('Error', 'Gagal memperbarui status pesanan', 'error');
     }
   },
   async cancelOrder(orderId) {
-    const confirm = await Swal.fire({
-      title: 'Batalkan Pesanan?',
-      text: 'Pesanan #' + orderId + ' akan dibatalkan.',
+    const res = await Swal.fire({
+      title: 'Batalkan Pesanan #' + orderId + '?',
+      text: 'Stok barang akan dikembalikan ke etalase.',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#ef4444',
-      confirmButtonText: 'Ya, Batalkan'
+      confirmButtonText: 'Ya, Batalkan',
+      cancelButtonText: 'Tutup'
     });
-    if (!confirm.isConfirmed) return;
+    if (!res.isConfirmed) return;
     try {
-      await fetch(`${RTDB_BASE}/orders/${orderId}.json`, {
-        method: 'PATCH',
+      const order = this.orders[orderId];
+      if (!order) return;
+      order.status = 'Dibatalkan';
+      await fetch(this.RTDB_BASE + '/orders/' + orderId + '.json', {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'Dibatalkan' })
+        body: JSON.stringify(order)
       });
-      this.orders[orderId].status = 'Dibatalkan';
+      for (const item of (order.items || [])) {
+        if (this.products[item.id]) {
+          await this.stepStock(item.id, item.qty);
+        }
+      }
       Swal.fire('Dibatalkan', 'Pesanan #' + orderId + ' telah dibatalkan.', 'info');
       this.renderOrdersTable();
+      this.renderStats();
       this.updateOrderBadges();
     } catch (e) {
       Swal.fire('Error', 'Gagal membatalkan pesanan', 'error');
@@ -259,36 +310,39 @@ const AdminApp = {
   },
   renderAll() {
     this.updateOrderBadges();
-    this.renderStats();
     this.renderStockTable();
     this.renderOrdersTable();
-    this.renderPosCart();
+    this.renderStats();
     this.renderSettingsForm();
+    this.renderPosCart();
   },
   updateOrderBadges() {
     const pendingCount = Object.values(this.orders).filter(o => o.status === 'Menunggu Diambil').length;
     const badge = document.getElementById('badgePendingOrders');
-    if (badge) badge.textContent = pendingCount;
+    if (badge) {
+      badge.textContent = pendingCount;
+      badge.classList.toggle('active', pendingCount > 0);
+    }
   },
   renderStats() {
-    const productList = Object.values(this.products);
     const orderList = Object.values(this.orders);
-    const totalSku = productList.length;
-    const totalUnits = productList.reduce((acc, p) => acc + (parseInt(p.stok) || 0), 0);
-    const lowStockCount = productList.filter(p => (parseInt(p.stok) || 0) < 10).length;
-    const completedOrders = orderList.filter(o => o.status === 'Selesai');
-    const totalOmzet = completedOrders.reduce((acc, o) => acc + (parseInt(o.totalBayar) || 0), 0);
-    const elSku = document.getElementById('statTotalSku');
-    const elUnits = document.getElementById('statTotalUnits');
-    const elLow = document.getElementById('statLowStock');
-    const elOmzet = document.getElementById('statTotalOmzet');
-    if (elSku) elSku.textContent = totalSku;
-    if (elUnits) elUnits.textContent = totalUnits;
-    if (elLow) elLow.textContent = lowStockCount;
-    if (elOmzet) elOmzet.textContent = Utils.formatRupiah(totalOmzet);
+    const productList = Object.values(this.products);
+    let totalOmset = 0;
+    let totalPesanan = orderList.length;
+    let pendingPesanan = 0;
+    orderList.forEach(o => {
+      if (o.status === 'Selesai') totalOmset += (o.totalBayar || 0);
+      if (o.status === 'Menunggu Diambil') pendingPesanan++;
+    });
+    const lowStockCount = productList.filter(p => (p.stok || 0) <= 5).length;
+    document.getElementById('statTotalOmset').textContent = Utils.formatRupiah(totalOmset);
+    document.getElementById('statTotalPesanan').textContent = totalPesanan;
+    document.getElementById('statPendingPesanan').textContent = pendingPesanan + ' pesanan menunggu diambil';
+    document.getElementById('statLowStock').textContent = lowStockCount;
+    document.getElementById('statTotalSku').textContent = productList.length;
   },
   renderStockTable() {
-    const tbody = document.getElementById('stockTableBody');
+    const tbody = document.getElementById('tbodyStock');
     if (!tbody) return;
     tbody.innerHTML = '';
     let list = Object.values(this.products);
@@ -296,32 +350,41 @@ const AdminApp = {
       list = list.filter(p => p.kat === this.filterProductCategory);
     }
     if (this.filterLowStockOnly) {
-      list = list.filter(p => (parseInt(p.stok) || 0) < 10);
+      list = list.filter(p => (p.stok || 0) <= 5);
     }
     if (this.searchProductQuery) {
       const q = this.searchProductQuery.toLowerCase();
       list = list.filter(p => (p.nama && p.nama.toLowerCase().includes(q)) || (p.kode && p.kode.toLowerCase().includes(q)));
     }
+    if (list.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" class="text-center-muted">Tidak ada produk yang cocok.</td></tr>';
+      return;
+    }
     list.forEach(p => {
       const tr = document.createElement('tr');
-      const imgHtml = p.img
-        ? '<img src="' + Utils.resolveImageUrl(p.img) + '" class="table-img">'
-        : '<div class="table-placeholder"><i class="' + Utils.getCategoryIcon(p.kat) + '"></i></div>';
-      tr.innerHTML = '<td>' + imgHtml + '</td>' +
-        '<td><span class="sku-badge">' + (p.kode || p.id) + '</span></td>' +
-        '<td><strong>' + p.nama + '</strong><br><span style="color:var(--gray);">' + (p.kat || '').toUpperCase() + '</span></td>' +
-        '<td><strong>' + Utils.formatRupiah(p.harga) + '</strong></td>' +
+      const isLow = (p.stok || 0) <= 5;
+      const imgUrl = Utils.resolveImageUrl(p.img) || '/assets/img/icon-512x512.png';
+      tr.innerHTML = '<td><span class="badge-sku">' + (p.kode || p.id) + '</span></td>' +
         '<td>' +
-        '<div class="stock-stepper">' +
-        '<button data-action="step-stock" data-id="' + p.id + '" data-delta="-1">-</button>' +
-        '<input type="number" value="' + p.stok + '" data-action="input-stock" data-id="' + p.id + '">' +
-        '<button data-action="step-stock" data-id="' + p.id + '" data-delta="1">+</button>' +
+        '<div class="table-prod-info">' +
+        '<img src="' + imgUrl + '" class="table-prod-thumb" alt="' + p.nama + '">' +
+        '<div><strong>' + p.nama + '</strong><br><span class="text-muted">' + (p.kat || '').toUpperCase() + '</span></div>' +
         '</div>' +
         '</td>' +
         '<td>' +
-        '<div style="display:flex;gap:4px;">' +
-        '<button class="btn btn-outline btn-sm" data-action="edit-product" data-id="' + p.id + '" title="Edit"><i class="fa-solid fa-pen-to-square"></i></button>' +
-        '<button class="btn btn-outline btn-sm" style="color:var(--red);" data-action="delete-product" data-id="' + p.id + '" title="Hapus"><i class="fa-solid fa-trash-can"></i></button>' +
+        '<div class="stock-counter">' +
+        '<button class="stock-counter-btn" data-action="step-stock" data-id="' + p.id + '" data-delta="-1">-</button>' +
+        '<input type="number" class="stock-counter-input ' + (isLow ? 'text-red' : '') + '" value="' + (p.stok || 0) + '" data-action="input-stock" data-id="' + p.id + '">' +
+        '<button class="stock-counter-btn" data-action="step-stock" data-id="' + p.id + '" data-delta="1">+</button>' +
+        '</div>' +
+        '</td>' +
+        '<td><strong>' + Utils.formatRupiah(p.harga) + '</strong></td>' +
+        '<td><span class="text-xs-muted">' + (p.variasi ? p.variasi.join(', ') : '-') + '</span></td>' +
+        '<td>' +
+        '<div class="btn-group-row">' +
+        '<button class="btn btn-outline btn-sm" data-action="add-pos-item" data-id="' + p.id + '" title="+ Kasir"><i class="fa-solid fa-cart-plus"></i></button>' +
+        '<button class="btn btn-outline btn-sm" data-action="edit-product" data-id="' + p.id + '" title="Edit"><i class="fa-solid fa-pen"></i></button>' +
+        '<button class="btn btn-outline btn-sm text-red" data-action="delete-product" data-id="' + p.id + '" title="Hapus"><i class="fa-solid fa-trash-can"></i></button>' +
         '</div>' +
         '</td>';
       tbody.appendChild(tr);
@@ -331,26 +394,24 @@ const AdminApp = {
     const val = Math.max(0, parseInt(newStok) || 0);
     if (this.products[productId]) {
       this.products[productId].stok = val;
-    }
-    try {
-      await fetch(`${RTDB_BASE}/products/${productId}.json`, {
-        method: 'PATCH',
+      await fetch(this.RTDB_BASE + '/products/' + productId + '/stok.json', {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ stok: val })
+        body: JSON.stringify(val)
       });
       this.renderStats();
-    } catch (e) {}
+    }
   },
   async stepStock(productId, delta) {
-    const current = parseInt(this.products[productId]?.stok) || 0;
-    const nextVal = Math.max(0, current + delta);
-    await this.updateStock(productId, nextVal);
+    const p = this.products[productId];
+    if (!p) return;
+    const current = parseInt(p.stok) || 0;
+    const updated = Math.max(0, current + delta);
+    await this.updateStock(productId, updated);
     this.renderStockTable();
-    const scanLbl = document.getElementById('lblScanStock');
-    if (scanLbl) scanLbl.textContent = nextVal;
   },
   renderOrdersTable() {
-    const tbody = document.getElementById('ordersTableBody');
+    const tbody = document.getElementById('tbodyOrders');
     if (!tbody) return;
     tbody.innerHTML = '';
     let list = Object.values(this.orders);
@@ -358,22 +419,26 @@ const AdminApp = {
     if (this.filterOrderStatus !== 'all') {
       list = list.filter(o => o.status === this.filterOrderStatus);
     }
+    if (list.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" class="text-center-muted">Tidak ada pesanan pada status ini.</td></tr>';
+      return;
+    }
     list.forEach(o => {
       const tr = document.createElement('tr');
       const isDone = o.status === 'Selesai';
-      const statusClass = isDone ? 'done' : (o.status === 'Dibatalkan' ? 'cancelled' : 'pending');
-      const dateStr = o.createdAt ? new Date(o.createdAt).toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' }) : '-';
-      tr.innerHTML = '<td><strong>#' + o.orderId + '</strong><br><span style="color:var(--gray);">' + dateStr + '</span></td>' +
-        '<td><strong>' + o.namaPemesan + '</strong><br><span style="color:var(--gray);">' + (o.tipePembeli || '').toUpperCase() + '</span></td>' +
-        '<td>' + (o.namaSiswa ? '<strong>' + o.namaSiswa + '</strong><br><span style="color:var(--gray);">' + o.kelasSiswa + '</span>' : '-') + '</td>' +
-        '<td>' + o.opsiPengambilan + '</td>' +
-        '<td><strong>' + Utils.formatRupiah(o.totalBayar) + '</strong><br><span style="color:var(--gray);">' + o.metodePembayaran + '</span></td>' +
-        '<td><span class="status-pill ' + statusClass + '">' + o.status + '</span></td>' +
+      const statusClass = isDone ? 'badge-status-done' : (o.status === 'Dibatalkan' ? 'badge-status-cancel' : 'badge-status-pending');
+      const dateStr = o.createdAt ? new Date(o.createdAt).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '-';
+      tr.innerHTML = '<td><strong>#' + o.orderId + '</strong><br><span class="text-muted">' + dateStr + '</span></td>' +
+        '<td><strong>' + o.namaPemesan + '</strong><br><span class="text-muted">' + (o.tipePembeli || 'Umum') + '</span></td>' +
+        '<td>' + (o.namaSiswa ? '<strong>' + o.namaSiswa + '</strong><br><span class="text-muted">Kelas ' + o.kelasSiswa + '</span>' : '<span class="text-muted">-</span>') + '</td>' +
+        '<td><strong>' + Utils.formatRupiah(o.totalBayar) + '</strong><br><span class="text-muted">' + (o.metodePembayaran || 'Tunai') + '</span></td>' +
+        '<td><span class="text-xs-muted">' + (o.opsiPengambilan || 'Ambil di Koperasi') + '</span></td>' +
+        '<td><span class="' + statusClass + '">' + o.status + '</span></td>' +
         '<td>' +
-        '<div style="display:flex;gap:4px;">' +
-        (!isDone && o.status !== 'Dibatalkan' ? '<button class="btn btn-secondary btn-sm" data-action="complete-order" data-id="' + o.orderId + '" title="Tandai Selesai"><i class="fa-solid fa-check"></i></button>' : '') +
-        (!isDone && o.status !== 'Dibatalkan' ? '<button class="btn btn-outline btn-sm" style="color:var(--red);" data-action="cancel-order" data-id="' + o.orderId + '" title="Batalkan"><i class="fa-solid fa-xmark"></i></button>' : '') +
-        '<button class="btn btn-outline btn-sm" data-action="view-order-detail" data-id="' + o.orderId + '" title="Detail"><i class="fa-solid fa-eye"></i></button>' +
+        '<div class="btn-group-row">' +
+        '<button class="btn btn-outline btn-sm" data-action="view-order-detail" data-id="' + o.orderId + '" title="Lihat Rincian"><i class="fa-solid fa-eye"></i></button>' +
+        (!isDone && o.status !== 'Dibatalkan' ? '<button class="btn btn-secondary btn-sm" data-action="complete-order" data-id="' + o.orderId + '" title="Selesai"><i class="fa-solid fa-check"></i></button>' : '') +
+        (!isDone && o.status !== 'Dibatalkan' ? '<button class="btn btn-outline btn-sm text-red" data-action="cancel-order" data-id="' + o.orderId + '" title="Batalkan"><i class="fa-solid fa-xmark"></i></button>' : '') +
         '</div>' +
         '</td>';
       tbody.appendChild(tr);
@@ -383,39 +448,39 @@ const AdminApp = {
     const o = this.orders[orderId];
     if (!o) return;
     let itemsHtml = '';
-    o.items.forEach(i => {
-      itemsHtml += '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dashed #eee;">' +
-        '<div>' + i.nama + ' (' + i.variasi + ') x' + i.qty + '</div>' +
-        '<div><strong>' + Utils.formatRupiah(i.subtotal) + '</strong></div>' +
+    (o.items || []).forEach(it => {
+      itemsHtml += '<div class="order-detail-item-row">' +
+        '<span>' + it.qty + 'x ' + it.nama + ' (' + it.variasi + ')</span>' +
+        '<strong>' + Utils.formatRupiah(it.subtotal) + '</strong>' +
         '</div>';
     });
     Swal.fire({
-      title: 'Detail Pesanan #' + o.orderId,
-      html: '<div style="text-align:left;font-size:12px;">' +
-        '<p><strong>Pemesan:</strong> ' + o.namaPemesan + ' (' + o.tipePembeli + ')</p>' +
-        (o.namaSiswa ? '<p><strong>Siswa:</strong> ' + o.namaSiswa + ' (' + o.kelasSiswa + ')</p>' : '') +
-        '<p><strong>No. WhatsApp:</strong> ' + o.noWa + '</p>' +
-        '<p><strong>Opsi Pengambilan:</strong> ' + o.opsiPengambilan + '</p>' +
-        '<p><strong>Pembayaran:</strong> ' + o.metodePembayaran + '</p>' +
-        (o.catatan ? '<p><strong>Catatan:</strong> ' + o.catatan + '</p>' : '') +
-        '<div style="margin:12px 0;background:#f8fafc;padding:10px;border-radius:6px;border:1px solid #e2e8f0;">' + itemsHtml + '</div>' +
-        '<div style="font-size:14px;font-weight:800;color:var(--primary);text-align:right;">Total: ' + Utils.formatRupiah(o.totalBayar) + '</div>' +
+      title: 'Rincian Pesanan #' + o.orderId,
+      html: '<div class="order-detail-modal">' +
+        '<div><strong>Pemesan:</strong> ' + o.namaPemesan + ' (' + o.tipePembeli + ')</div>' +
+        '<div><strong>WhatsApp:</strong> ' + (o.waPemesan || '-') + '</div>' +
+        (o.namaSiswa ? '<div><strong>Siswa:</strong> ' + o.namaSiswa + ' (Kelas ' + o.kelasSiswa + ')</div>' : '') +
+        '<div><strong>Metode Serah:</strong> ' + o.opsiPengambilan + '</div>' +
+        '<div><strong>Pembayaran:</strong> ' + o.metodePembayaran + '</div>' +
+        (o.catatan ? '<div><strong>Catatan:</strong> ' + o.catatan + '</div>' : '') +
+        '<div class="order-detail-items-box">' + itemsHtml + '</div>' +
+        '<div class="order-detail-total">Total: ' + Utils.formatRupiah(o.totalBayar) + '</div>' +
         '</div>',
       confirmButtonText: 'Tutup'
     });
   },
   addToPos(productId) {
-    const p = this.products[productId];
-    if (!p) return;
+    const prod = this.products[productId];
+    if (!prod) return;
     const existing = this.posCart.find(i => i.id === productId);
     if (existing) {
       existing.qty++;
     } else {
       this.posCart.push({
-        id: p.id,
-        kode: p.kode || p.id,
-        nama: p.nama,
-        harga: p.harga,
+        id: prod.id,
+        kode: prod.kode,
+        nama: prod.nama,
+        harga: prod.harga,
         qty: 1
       });
     }
@@ -436,63 +501,73 @@ const AdminApp = {
   renderPosCart() {
     const container = document.getElementById('posCartItems');
     if (!container) return;
+    if (this.posCart.length === 0) {
+      container.innerHTML = '<div class="pos-cart-empty"><i class="fa-solid fa-cart-shopping pos-empty-icon"></i>Kasir masih kosong. Scan barcode produk atau klik "+ Kasir" di katalog.</div>';
+      document.getElementById('posTotalBayar').textContent = 'Rp 0';
+      return;
+    }
     container.innerHTML = '';
     let total = 0;
     this.posCart.forEach((item, idx) => {
-      total += item.harga * item.qty;
+      const sub = item.harga * item.qty;
+      total += sub;
       const row = document.createElement('div');
-      row.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px dashed var(--border-light);';
-      row.innerHTML = '<div><strong>' + item.nama + '</strong><br><span style="color:var(--gray);">' + Utils.formatRupiah(item.harga) + '</span></div>' +
-        '<div style="display:flex;align-items:center;gap:6px;">' +
-        '<button class="btn btn-outline btn-sm" data-action="pos-qty" data-index="' + idx + '" data-delta="-1">-</button>' +
-        '<span>' + item.qty + '</span>' +
-        '<button class="btn btn-outline btn-sm" data-action="pos-qty" data-index="' + idx + '" data-delta="1">+</button>' +
+      row.className = 'pos-cart-row';
+      row.innerHTML = '<div><strong>' + item.nama + '</strong><br><span class="text-muted">' + Utils.formatRupiah(item.harga) + '</span></div>' +
+        '<div class="pos-row-action">' +
+        '<button class="stock-counter-btn" data-action="pos-qty" data-index="' + idx + '" data-delta="-1">-</button>' +
+        '<span><strong>' + item.qty + '</strong></span>' +
+        '<button class="stock-counter-btn" data-action="pos-qty" data-index="' + idx + '" data-delta="1">+</button>' +
         '</div>';
       container.appendChild(row);
     });
-    const elTotal = document.getElementById('posTotalBayar');
-    if (elTotal) elTotal.textContent = Utils.formatRupiah(total);
+    document.getElementById('posTotalBayar').textContent = Utils.formatRupiah(total);
   },
   async checkoutPos() {
     if (this.posCart.length === 0) {
-      Swal.fire('Kasir Kosong', 'Tambahkan produk terlebih dahulu.', 'info');
+      Swal.fire('Kasir Kosong', 'Tambahkan barang terlebih dahulu.', 'warning');
       return;
     }
-    const total = this.posCart.reduce((acc, i) => acc + (i.harga * i.qty), 0);
-    const orderId = 'POS-' + Math.floor(100000 + Math.random() * 900000);
-    const order = {
-      orderId: orderId,
-      orderNumber: orderId,
-      createdAt: new Date().toISOString(),
-      status: 'Selesai',
-      tipePembeli: 'Langsung Kasir',
-      namaPemesan: 'Pembeli Kasir Koperasi',
-      noWa: '-',
-      opsiPengambilan: 'Ambil Sendiri di Toko Koperasi (Langsung)',
-      metodePembayaran: 'Tunai Kasir',
-      items: this.posCart.map(i => ({
-        id: i.id,
-        kode: i.kode,
-        nama: i.nama,
+    let total = 0;
+    const items = this.posCart.map(it => {
+      const sub = it.harga * it.qty;
+      total += sub;
+      return {
+        id: it.id,
+        nama: it.nama,
         variasi: 'Standar',
-        harga: i.harga,
-        qty: i.qty,
-        subtotal: i.harga * i.qty
-      })),
-      totalItem: this.posCart.reduce((acc, i) => acc + i.qty, 0),
-      totalBayar: total
+        harga: it.harga,
+        qty: it.qty,
+        subtotal: sub
+      };
+    });
+    const orderId = 'POS-' + Date.now().toString().slice(-6);
+    const payment = document.getElementById('selPosPayment').value;
+    const notes = document.getElementById('inpPosNotes').value.trim() || 'Transaksi Langsung Kasir';
+    const payload = {
+      orderId: orderId,
+      namaPemesan: 'Kasir Langsung',
+      tipePembeli: 'Langsung',
+      metodePembayaran: payment,
+      opsiPengambilan: 'Langsung Kasir',
+      catatan: notes,
+      items: items,
+      totalBayar: total,
+      status: 'Selesai',
+      createdAt: new Date().toISOString(),
+      selesaiPada: new Date().toISOString()
     };
     try {
-      await fetch(`${RTDB_BASE}/orders/${orderId}.json`, {
+      await fetch(this.RTDB_BASE + '/orders/' + orderId + '.json', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(order)
+        body: JSON.stringify(payload)
       });
       for (const item of this.posCart) {
         const prod = this.products[item.id];
         if (prod) {
-          const nextStok = Math.max(0, (prod.stok || 0) - item.qty);
-          this.updateStock(item.id, nextStok);
+          const newStok = Math.max(0, (parseInt(prod.stok) || 0) - item.qty);
+          await this.updateStock(item.id, newStok);
         }
       }
       playScanSound(true);
@@ -516,9 +591,28 @@ const AdminApp = {
     document.getElementById('inpProdStok').value = p ? p.stok : '10';
     document.getElementById('inpProdLabelVar').value = p ? (p.labelVar || 'Pilihan') : 'Pilihan';
     document.getElementById('inpProdVariasi').value = p ? (p.variasi ? p.variasi.join(', ') : '') : 'Standar';
-    document.getElementById('inpProdDriveLink').value = p ? (p.img || '') : '';
     document.getElementById('inpProdDeskripsi').value = p ? (p.deskripsi || '') : '';
-    this.updateDrivePreview();
+    const fileInp = document.getElementById('inpProdFile');
+    if (fileInp) fileInp.value = '';
+    const promptEl = document.getElementById('uploadPrompt');
+    const progressEl = document.getElementById('uploadProgressBox');
+    const previewEl = document.getElementById('uploadPreviewBox');
+    if (progressEl) progressEl.classList.add('visually-hidden');
+    if (p && p.img) {
+      document.getElementById('inpProdDriveLink').value = p.img;
+      const prevImg = document.getElementById('serverPreviewImg');
+      if (prevImg) prevImg.src = Utils.resolveImageUrl(p.img);
+      const nameEl = document.getElementById('uploadServerFileName');
+      if (nameEl) nameEl.textContent = p.kode ? (p.kode + ' - Server Media MUSADA') : 'Foto Produk Tersimpan';
+      if (promptEl) promptEl.classList.add('visually-hidden');
+      if (previewEl) previewEl.classList.remove('visually-hidden');
+    } else {
+      document.getElementById('inpProdDriveLink').value = '';
+      const prevImg = document.getElementById('serverPreviewImg');
+      if (prevImg) prevImg.src = '';
+      if (promptEl) promptEl.classList.remove('visually-hidden');
+      if (previewEl) previewEl.classList.add('visually-hidden');
+    }
     const modal = document.getElementById('modalProduct');
     if (modal) modal.classList.add('active');
   },
@@ -526,21 +620,103 @@ const AdminApp = {
     const modal = document.getElementById('modalProduct');
     if (modal) modal.classList.remove('active');
   },
-  updateDrivePreview() {
-    const val = document.getElementById('inpProdDriveLink').value.trim();
-    const imgEl = document.getElementById('drivePreviewImg');
-    const txtEl = document.getElementById('drivePreviewText');
-    if (!val) {
-      if (imgEl) imgEl.style.display = 'none';
-      if (txtEl) txtEl.textContent = 'Tempel link share Google Drive di atas untuk melihat preview gambar.';
+  compressImage(file, maxDim = 1200, quality = 0.82) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          let w = img.width;
+          let h = img.height;
+          if (w > maxDim || h > maxDim) {
+            if (w > h) {
+              h = Math.round((h * maxDim) / w);
+              w = maxDim;
+            } else {
+              w = Math.round((w * maxDim) / h);
+              h = maxDim;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          let dataUrl = canvas.toDataURL('image/webp', quality);
+          let mime = 'image/webp';
+          if (!dataUrl.startsWith('data:image/webp')) {
+            dataUrl = canvas.toDataURL('image/jpeg', quality);
+            mime = 'image/jpeg';
+          }
+          const base64Data = dataUrl.includes('base64,') ? dataUrl.split('base64,')[1] : dataUrl;
+          resolve({ dataUrl, base64Data, mimeType: mime });
+        };
+        img.onerror = () => reject(new Error('Gagal membaca gambar'));
+        img.src = e.target.result;
+      };
+      reader.onerror = () => reject(new Error('Gagal membaca file'));
+      reader.readAsDataURL(file);
+    });
+  },
+  async uploadProductImage(file) {
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      Swal.fire('Format Salah', 'Pilih file gambar valid (JPG, PNG, atau WebP).', 'warning');
       return;
     }
-    const resolved = Utils.resolveImageUrl(val);
-    if (imgEl) {
-      imgEl.src = resolved;
-      imgEl.style.display = 'block';
+    const promptEl = document.getElementById('uploadPrompt');
+    const progressEl = document.getElementById('uploadProgressBox');
+    const previewEl = document.getElementById('uploadPreviewBox');
+    const progressTxt = document.getElementById('uploadProgressText');
+    if (promptEl) promptEl.classList.add('visually-hidden');
+    if (previewEl) previewEl.classList.add('visually-hidden');
+    if (progressEl) progressEl.classList.remove('visually-hidden');
+    if (progressTxt) progressTxt.textContent = 'Mengompresi foto produk...';
+    try {
+      const compressed = await this.compressImage(file);
+      if (progressTxt) progressTxt.textContent = 'Menyimpan di Server Media MUSADA...';
+      const skuVal = document.getElementById('inpProdSku').value.trim();
+      const cleanSku = (skuVal || 'item').replace(/[^a-zA-Z0-9_-]/g, '_');
+      const ext = compressed.mimeType === 'image/webp' ? '.webp' : '.jpg';
+      const fileName = 'mart_' + cleanSku + '_' + Date.now() + ext;
+      const folderId = (this.settings && this.settings.driveFolderId) ? this.settings.driveFolderId.trim() : '';
+      const params = new URLSearchParams();
+      params.append('action', 'upload');
+      params.append('fileName', fileName);
+      params.append('mimeType', compressed.mimeType);
+      params.append('fileData', compressed.base64Data);
+      params.append('folderKey', 'musada_mart');
+      if (folderId) params.append('folderId', folderId);
+      const res = await fetch(this.GAS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+        body: params.toString()
+      });
+      const result = await res.json();
+      if (!result || result.status !== 'success' || !result.fileUrl) {
+        throw new Error(result && result.message ? result.message : 'Koneksi server gagal');
+      }
+      document.getElementById('inpProdDriveLink').value = result.fileUrl;
+      const prevImg = document.getElementById('serverPreviewImg');
+      if (prevImg) prevImg.src = Utils.resolveImageUrl(result.fileUrl);
+      const nameEl = document.getElementById('uploadServerFileName');
+      if (nameEl) nameEl.textContent = fileName;
+      if (progressEl) progressEl.classList.add('visually-hidden');
+      if (previewEl) previewEl.classList.remove('visually-hidden');
+    } catch (err) {
+      if (progressEl) progressEl.classList.add('visually-hidden');
+      if (promptEl) promptEl.classList.remove('visually-hidden');
+      Swal.fire('Upload Gagal', 'Gagal mengunggah foto ke Server Media: ' + (err.message || 'Koneksi terganggu'), 'error');
     }
-    if (txtEl) txtEl.textContent = 'URL Drive terkonversi valid untuk web.';
+  },
+  removeProductImage() {
+    document.getElementById('inpProdDriveLink').value = '';
+    const fileInp = document.getElementById('inpProdFile');
+    if (fileInp) fileInp.value = '';
+    const previewEl = document.getElementById('uploadPreviewBox');
+    const promptEl = document.getElementById('uploadPrompt');
+    if (previewEl) previewEl.classList.add('visually-hidden');
+    if (promptEl) promptEl.classList.remove('visually-hidden');
   },
   async saveProduct() {
     const id = document.getElementById('inpProdId').value;
@@ -574,65 +750,67 @@ const AdminApp = {
       deskripsi: deskripsi
     };
     try {
-      await fetch(`${RTDB_BASE}/products/${id}.json`, {
+      await fetch(this.RTDB_BASE + '/products/' + id + '.json', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
       this.products[id] = payload;
       this.closeProductModal();
-      Swal.fire('Berhasil!', 'Data produk tersimpan ke Firebase RTDB.', 'success');
-      this.renderAll();
+      Swal.fire('Tersimpan', 'Produk ' + nama + ' berhasil diperbarui di database.', 'success');
+      this.renderStockTable();
+      this.renderStats();
     } catch (e) {
       Swal.fire('Error', 'Gagal menyimpan produk ke database', 'error');
     }
   },
   async deleteProduct(productId) {
-    const confirm = await Swal.fire({
+    const p = this.products[productId];
+    const res = await Swal.fire({
       title: 'Hapus Produk?',
-      text: 'Produk akan dihapus permanen dari katalog koperasi.',
+      text: 'Produk "' + (p ? p.nama : productId) + '" akan dihapus permanen dari etalase.',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#ef4444',
-      confirmButtonText: 'Ya, Hapus'
+      confirmButtonText: 'Ya, Hapus',
+      cancelButtonText: 'Batal'
     });
-    if (!confirm.isConfirmed) return;
+    if (!res.isConfirmed) return;
     try {
-      await fetch(`${RTDB_BASE}/products/${productId}.json`, { method: 'DELETE' });
+      await fetch(this.RTDB_BASE + '/products/' + productId + '.json', {
+        method: 'DELETE'
+      });
       delete this.products[productId];
-      Swal.fire('Terhapus', 'Produk berhasil dihapus.', 'success');
-      this.renderAll();
+      Swal.fire('Dihapus', 'Produk berhasil dihapus.', 'info');
+      this.renderStockTable();
+      this.renderStats();
     } catch (e) {
       Swal.fire('Error', 'Gagal menghapus produk', 'error');
     }
   },
   renderSettingsForm() {
-    const s = this.settings || {};
-    const inpNama = document.getElementById('setStoreName');
-    const inpWa = document.getElementById('setContactWa');
-    const inpHours = document.getElementById('setOpenHours');
-    const inpLoc = document.getElementById('setLocation');
-    if (inpNama) inpNama.value = s.storeName || 'MUSADA Mart';
-    if (inpWa) inpWa.value = s.contactWa || '6285964399398';
-    if (inpHours) inpHours.value = s.openHours || 'Senin - Jumat: 07.00 - 15.00 WIB';
-    if (inpLoc) inpLoc.value = s.location || 'Gedung Utama Lantai 1, SD Muhammadiyah 1 Sedati';
+    if (!this.settings) return;
+    if (this.settings.namaKoperasi) document.getElementById('inpSettingNamaKoperasi').value = this.settings.namaKoperasi;
+    if (this.settings.waAdmin) document.getElementById('inpSettingWa').value = this.settings.waAdmin;
+    if (this.settings.jamPelayanan) document.getElementById('inpSettingJam').value = this.settings.jamPelayanan;
+    if (this.settings.minStockAlert) document.getElementById('inpSettingMinStock').value = this.settings.minStockAlert;
+    if (this.settings.driveFolderId) document.getElementById('inpSettingDriveFolder').value = this.settings.driveFolderId;
   },
   async saveSettings() {
     const payload = {
-      storeName: document.getElementById('setStoreName').value.trim(),
-      contactWa: document.getElementById('setContactWa').value.trim(),
-      openHours: document.getElementById('setOpenHours').value.trim(),
-      location: document.getElementById('setLocation').value.trim(),
-      updatedAt: new Date().toISOString()
+      namaKoperasi: document.getElementById('inpSettingNamaKoperasi').value.trim(),
+      waAdmin: document.getElementById('inpSettingWa').value.trim(),
+      jamPelayanan: document.getElementById('inpSettingJam').value.trim(),
+      minStockAlert: parseInt(document.getElementById('inpSettingMinStock').value) || 5,
+      driveFolderId: document.getElementById('inpSettingDriveFolder').value.trim()
     };
     try {
-      await fetch(`${RTDB_BASE}/settings.json`, {
+      await fetch(this.RTDB_BASE + '/settings.json', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
       this.settings = payload;
-      Swal.fire('Berhasil', 'Pengaturan koperasi diperbarui di RTDB.', 'success');
+      Swal.fire('Pengaturan Tersimpan', 'Informasi koperasi berhasil diperbarui.', 'success');
     } catch (e) {
       Swal.fire('Error', 'Gagal menyimpan pengaturan', 'error');
     }
@@ -655,17 +833,17 @@ document.addEventListener('DOMContentLoaded', () => {
     } else if (action === 'complete-scanned-order') {
       AdminApp.completeOrder(el.dataset.id);
     } else if (action === 'quick-adjust-scanned') {
-      AdminApp.stepStock(el.dataset.id, parseInt(el.dataset.delta) || 1);
+      AdminApp.stepStock(el.dataset.id, parseInt(el.dataset.delta));
     } else if (action === 'add-pos-item') {
       AdminApp.addToPos(el.dataset.id);
     } else if (action === 'pos-qty') {
-      AdminApp.updatePosQty(parseInt(el.dataset.index), parseInt(el.dataset.delta) || 1);
+      AdminApp.updatePosQty(parseInt(el.dataset.index), parseInt(el.dataset.delta));
     } else if (action === 'clear-pos') {
       AdminApp.clearPosCart();
     } else if (action === 'checkout-pos') {
       AdminApp.checkoutPos();
     } else if (action === 'step-stock') {
-      AdminApp.stepStock(el.dataset.id, parseInt(el.dataset.delta) || 1);
+      AdminApp.stepStock(el.dataset.id, parseInt(el.dataset.delta));
     } else if (action === 'open-add-product-modal') {
       AdminApp.openProductModal();
     } else if (action === 'edit-product') {
@@ -687,8 +865,13 @@ document.addEventListener('DOMContentLoaded', () => {
     } else if (action === 'refresh-data') {
       AdminApp.loadAllData().then(() => {
         AdminApp.renderAll();
-        Swal.fire({ title: 'Tersinkronisasi', text: 'Data terbaru dari RTDB berhasil dimuat.', icon: 'success', timer: 1200 });
+        Swal.fire('Sinkron', 'Data RTDB berhasil diperbarui.', 'success');
       });
+    } else if (action === 'trigger-file-select') {
+      const fileInp = document.getElementById('inpProdFile');
+      if (fileInp) fileInp.click();
+    } else if (action === 'remove-product-image') {
+      AdminApp.removeProductImage();
     }
   });
   document.addEventListener('change', (e) => {
@@ -707,10 +890,8 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   document.addEventListener('input', (e) => {
     if (e.target.id === 'inpSearchProduct') {
-      AdminApp.searchProductQuery = e.target.value;
+      AdminApp.searchProductQuery = e.target.value.trim();
       AdminApp.renderStockTable();
-    } else if (e.target.id === 'inpProdDriveLink') {
-      AdminApp.updateDrivePreview();
     }
   });
   document.addEventListener('keydown', (e) => {
@@ -719,4 +900,3 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
-window.AdminApp = AdminApp;

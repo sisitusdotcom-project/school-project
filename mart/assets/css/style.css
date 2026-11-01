@@ -1742,3 +1742,14 @@ img { max-width: 100%; display: block; }
 .form-dynamic-group.aktif {
   display: block;
 }
+.mt-6 {
+  margin-top: 6px;
+}
+.mt-10 {
+  margin-top: 10px;
+}
+.receipt-pickup-code {
+  color: var(--primary);
+  font-size: 14px;
+  font-weight: 700;
+}

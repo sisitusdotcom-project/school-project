@@ -58,11 +58,11 @@
 <div id="reader"></div>
 </div>
 <div class="search-filter-bar">
-<input type="text" id="inpManualCode" class="form-control" style="flex: 1;" placeholder="Ketik No. Pesanan (MSD-...) atau SKU (ATK-...)" autocomplete="off">
+<input type="text" id="inpManualCode" class="form-control flex-1" placeholder="Ketik No. Pesanan (MSD-...) atau SKU (ATK-...)" autocomplete="off">
 <button class="btn btn-primary btn-sm" data-action="submit-manual-code"><i class="fa-solid fa-magnifying-glass"></i> Proses</button>
 </div>
 <div class="scan-result-card" id="scanResultContainer">
-<div style="color:var(--gray);text-align:center;"><i class="fa-solid fa-qrcode" style="font-size:24px;margin-bottom:6px;display:block;"></i>Arahkan kamera ke QR Struk Siswa atau Barcode Produk Koperasi.</div>
+<div class="text-center-muted"><i class="fa-solid fa-qrcode scan-empty-icon"></i>Arahkan kamera ke QR Struk Siswa atau Barcode Produk Koperasi.</div>
 </div>
 </div>
 </div>
@@ -72,81 +72,66 @@
 <h3 class="admin-card-title"><i class="fa-solid fa-cash-register"></i> Kasir Koperasi Langsung (POS)</h3>
 <button class="btn btn-outline btn-sm" data-action="clear-pos"><i class="fa-solid fa-trash-can"></i> Kosongkan</button>
 </div>
-<div id="posCartItems" style="min-height: 180px; max-height: 320px; overflow-y: auto; margin-bottom: 14px;">
-<div style="color:var(--gray);text-align:center;padding:40px 0;"><i class="fa-solid fa-cart-shopping" style="font-size:32px;margin-bottom:8px;display:block;opacity:0.4;"></i>Kasir masih kosong. Scan barcode produk atau klik "+ Kasir" di katalog.</div>
+<div id="posCartItems" class="pos-cart-list">
+<div class="pos-cart-empty"><i class="fa-solid fa-cart-shopping pos-empty-icon"></i>Kasir masih kosong. Scan barcode produk atau klik "+ Kasir" di katalog.</div>
 </div>
-<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-top:2px solid var(--border);margin-bottom:14px;">
-<span style="font-size:14px;font-weight:700;">Total Transaksi:</span>
-<span id="posTotalBayar" style="font-size:18px;font-weight:800;color:var(--primary);">Rp 0</span>
+<div class="pos-total-row">
+<span class="pos-total-label">Total Transaksi:</span>
+<span id="posTotalBayar" class="pos-total-value">Rp 0</span>
 </div>
-<button class="btn btn-primary btn-block btn-lg" data-action="checkout-pos"><i class="fa-solid fa-check"></i> Selesaikan Transaksi Kasir</button>
+<div class="form-group">
+<label class="form-label">Metode Pembayaran</label>
+<select id="selPosPayment" class="form-control">
+<option value="Tunai / Cash">Tunai / Cash Langsung</option>
+<option value="QRIS / Transfer">QRIS MUSADA / Transfer</option>
+<option value="Titip Tagihan Sekolah">Titip Tagihan Sekolah</option>
+</select>
+</div>
+<div class="form-group">
+<label class="form-label">Keterangan / Pembeli (Opsional)</label>
+<input type="text" id="inpPosNotes" class="form-control" placeholder="Contoh: Siswa Kelas 3A, Guru Piket, dll.">
+</div>
+<button class="btn btn-primary btn-block btn-lg" data-action="checkout-pos"><i class="fa-solid fa-circle-check"></i> Selesaikan Transaksi Kasir</button>
 </div>
 </div>
 </div>
 </div>
 <div id="tabStock" class="admin-tab-content">
-<div class="admin-grid-4">
-<div class="metric-card">
-<div class="metric-icon primary"><i class="fa-solid fa-boxes-stacked"></i></div>
-<div class="metric-info">
-<div class="metric-val" id="statTotalSku">0</div>
-<div class="metric-lbl">Total SKU Produk</div>
-</div>
-</div>
-<div class="metric-card">
-<div class="metric-icon secondary"><i class="fa-solid fa-layer-group"></i></div>
-<div class="metric-info">
-<div class="metric-val" id="statTotalUnits">0</div>
-<div class="metric-lbl">Total Fisik Barang</div>
-</div>
-</div>
-<div class="metric-card">
-<div class="metric-icon yellow"><i class="fa-solid fa-triangle-exclamation"></i></div>
-<div class="metric-info">
-<div class="metric-val" id="statLowStock">0</div>
-<div class="metric-lbl">Stok Menipis (&lt; 10)</div>
-</div>
-</div>
-<div class="metric-card">
-<div class="metric-icon green"><i class="fa-solid fa-coins"></i></div>
-<div class="metric-info">
-<div class="metric-val" id="statTotalOmzet">Rp 0</div>
-<div class="metric-lbl">Total Penjualan</div>
-</div>
-</div>
-</div>
 <div class="admin-card">
 <div class="admin-card-header">
-<h3 class="admin-card-title"><i class="fa-solid fa-clipboard-check"></i> Stock Opname Cepat & Master Produk</h3>
+<div>
+<h3 class="admin-card-title"><i class="fa-solid fa-boxes-stacked"></i> Stock Opname & Manajemen Produk</h3>
+<p class="admin-card-desc">Kelola ketersediaan fisik barang, harga jual, dan SKU produk koperasi.</p>
+</div>
 <button class="btn btn-primary btn-sm" data-action="open-add-product-modal"><i class="fa-solid fa-plus"></i> Tambah Produk Baru</button>
 </div>
 <div class="search-filter-bar">
-<input type="text" id="inpSearchProduct" class="form-control" style="max-width: 260px;" placeholder="Cari nama barang atau SKU...">
-<select id="selFilterProductKat" class="form-control" style="max-width: 180px;">
+<input type="text" id="inpSearchProduct" class="form-control max-w-260" placeholder="Cari nama atau SKU produk...">
+<select id="selFilterProductKat" class="form-control max-w-180">
 <option value="all">Semua Kategori</option>
 <option value="atk">Alat Tulis (ATK)</option>
 <option value="seragam">Seragam Sekolah</option>
 <option value="buku">Buku & LKS</option>
 <option value="makanan">Makanan & Minuman</option>
+<option value="umum">Lainnya / Umum</option>
 </select>
-<label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;">
-<input type="checkbox" id="cbFilterLowStock">
-<span>Hanya Stok Menipis (&lt; 10)</span>
+<label class="label-filter-checkbox">
+<input type="checkbox" id="cbFilterLowStock"> Hanya Stok Menipis (&le; 5)
 </label>
 </div>
-<div class="table-responsive">
+<div class="admin-table-wrap">
 <table class="admin-table">
 <thead>
 <tr>
-<th>Foto</th>
-<th>Kode SKU</th>
-<th>Nama Produk</th>
-<th>Harga</th>
-<th>Stok Opname</th>
+<th>SKU</th>
+<th>Produk</th>
+<th>Stok Fisik</th>
+<th>Harga Jual</th>
+<th>Variasi</th>
 <th>Aksi</th>
 </tr>
 </thead>
-<tbody id="stockTableBody"></tbody>
+<tbody id="tbodyStock"></tbody>
 </table>
 </div>
 </div>
@@ -154,78 +139,87 @@
 <div id="tabOrders" class="admin-tab-content">
 <div class="admin-card">
 <div class="admin-card-header">
-<h3 class="admin-card-title"><i class="fa-solid fa-clipboard-list"></i> Daftar Pesanan Siswa, Wali & GTK</h3>
-<div class="search-filter-bar" style="margin-bottom: 0;">
-<select id="selFilterOrderStatus" class="form-control" style="max-width: 200px;">
+<div>
+<h3 class="admin-card-title"><i class="fa-solid fa-clipboard-list"></i> Antrean Pesanan Siswa & Wali Murid</h3>
+<p class="admin-card-desc">Daftar pesanan online masuk yang perlu disiapkan dan diserahkan.</p>
+</div>
+<div class="search-filter-bar mb-0">
+<select id="selFilterOrderStatus" class="form-control max-w-200">
 <option value="all">Semua Status</option>
-<option value="Menunggu Diambil">Menunggu Diambil</option>
-<option value="Selesai">Selesai</option>
+<option value="Menunggu Diambil">Menunggu Diambil (Pending)</option>
+<option value="Selesai">Selesai (Sudah Diambil)</option>
 <option value="Dibatalkan">Dibatalkan</option>
 </select>
 </div>
 </div>
-<div class="table-responsive">
+<div class="admin-table-wrap">
 <table class="admin-table">
 <thead>
 <tr>
 <th>No. Pesanan</th>
 <th>Pemesan</th>
 <th>Siswa / Kelas</th>
-<th>Opsi Penyerahan</th>
-<th>Total & Bayar</th>
+<th>Total</th>
+<th>Penyerahan</th>
 <th>Status</th>
-<th>Aksi</th>
+<th>Aksi Cepat</th>
 </tr>
 </thead>
-<tbody id="ordersTableBody"></tbody>
+<tbody id="tbodyOrders"></tbody>
 </table>
 </div>
 </div>
 </div>
 <div id="tabStats" class="admin-tab-content">
-<div class="admin-card">
-<div class="admin-card-header">
-<h3 class="admin-card-title"><i class="fa-solid fa-chart-pie"></i> Rekapitulasi Operasional Koperasi</h3>
-</div>
-<p style="color:var(--gray);margin-bottom:14px;">Seluruh ringkasan transaksi, penerimaan dana, dan riwayat pesanan langsung tersinkronisasi secara real-time melalui Firebase RTDB.</p>
 <div class="admin-grid-4">
-<div class="metric-card">
-<div class="metric-icon primary"><i class="fa-solid fa-cart-check"></i></div>
-<div class="metric-info">
-<div class="metric-val" id="rekapDoneOrders">0</div>
-<div class="metric-lbl">Transaksi Berhasil</div>
+<div class="stat-card">
+<div class="stat-card-label">Total Omset Selesai</div>
+<div class="stat-card-value" id="statTotalOmset">Rp 0</div>
+<div class="stat-card-sub">Dari pesanan & transaksi kasir selesai</div>
 </div>
+<div class="stat-card">
+<div class="stat-card-label">Total Pesanan Diproses</div>
+<div class="stat-card-value" id="statTotalPesanan">0</div>
+<div class="stat-card-sub" id="statPendingPesanan">0 pesanan menunggu diambil</div>
 </div>
-<div class="metric-card">
-<div class="metric-icon secondary"><i class="fa-solid fa-hand-holding-dollar"></i></div>
-<div class="metric-info">
-<div class="metric-val" id="rekapPendapatan">Rp 0</div>
-<div class="metric-lbl">Total Omzet Kas Koperasi</div>
+<div class="stat-card">
+<div class="stat-card-label">Produk Stok Menipis</div>
+<div class="stat-card-value text-red" id="statLowStock">0</div>
+<div class="stat-card-sub">Perlu segera restock opname</div>
 </div>
-</div>
+<div class="stat-card">
+<div class="stat-card-label">Total SKU Produk Terdaftar</div>
+<div class="stat-card-value" id="statTotalSku">0</div>
+<div class="stat-card-sub">Tersedia di katalog koperasi</div>
 </div>
 </div>
 </div>
 <div id="tabSettings" class="admin-tab-content">
-<div class="admin-card" style="max-width: 600px;">
+<div class="admin-card max-w-600">
 <div class="admin-card-header">
-<h3 class="admin-card-title"><i class="fa-solid fa-sliders"></i> Pengaturan Toko Koperasi Sekolah</h3>
+<h3 class="admin-card-title"><i class="fa-solid fa-gear"></i> Pengaturan Sistem Koperasi</h3>
+</div>
+<p class="settings-desc">Konfigurasi informasi umum, nomor narahubung koperasi, dan server penyimpanan foto produk.</p>
+<div class="form-group">
+<label class="form-label">Nama Koperasi / Toko</label>
+<input type="text" id="inpSettingNamaKoperasi" class="form-control" value="MUSADA Mart - Koperasi Sekolah">
 </div>
 <div class="form-group">
-<label class="form-label">Nama Koperasi Sekolah</label>
-<input type="text" id="setStoreName" class="form-control" value="MUSADA Mart">
+<label class="form-label">Nomor WhatsApp Admin Koperasi (Konfirmasi)</label>
+<input type="text" id="inpSettingWa" class="form-control" value="6281234567890" placeholder="628xxxxxxxx">
 </div>
 <div class="form-group">
-<label class="form-label">Nomor WhatsApp Petugas Koperasi</label>
-<input type="text" id="setContactWa" class="form-control" value="6285964399398">
+<label class="form-label">Jam Pelayanan Pengambilan di Sekolah</label>
+<input type="text" id="inpSettingJam" class="form-control" value="Senin - Jumat: 07.00 - 14.30 WIB">
 </div>
 <div class="form-group">
-<label class="form-label">Jam Operasional</label>
-<input type="text" id="setOpenHours" class="form-control" value="Senin - Jumat: 07.00 - 15.00 WIB">
+<label class="form-label">Batas Minimum Peringatan Stok Opname</label>
+<input type="number" id="inpSettingMinStock" class="form-control" value="5">
 </div>
 <div class="form-group">
-<label class="form-label">Lokasi Toko</label>
-<input type="text" id="setLocation" class="form-control" value="Gedung Utama Lantai 1, SD Muhammadiyah 1 Sedati">
+<label class="form-label"><i class="fa-solid fa-server server-status-icon"></i> ID Folder Server Media (Google Drive)</label>
+<input type="text" id="inpSettingDriveFolder" class="form-control" placeholder="Contoh: 1abc... atau biarkan kosong (default)">
+<span class="text-xs-muted">Folder terisolasi khusus penyimpanan foto produk Musada Mart (Folder Key: musada_mart).</span>
 </div>
 <button class="btn btn-primary" data-action="save-settings"><i class="fa-solid fa-floppy-disk"></i> Simpan Pengaturan</button>
 </div>
@@ -234,7 +228,7 @@
 <div class="modal-overlay" id="modalProduct">
 <div class="modal-dialog">
 <div class="modal-header">
-<h3 id="modalProductTitle" style="font-size: 15px; font-weight: 700;">Tambah Produk Baru</h3>
+<h3 id="modalProductTitle" class="modal-heading">Tambah Produk Baru</h3>
 <button class="modal-close-btn" data-action="close-product-modal"><i class="fa-solid fa-xmark"></i></button>
 </div>
 <input type="hidden" id="inpProdId">
@@ -256,7 +250,7 @@
 <option value="umum">Lainnya / Umum</option>
 </select>
 </div>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+<div class="grid-2-col">
 <div class="form-group">
 <label class="form-label">Harga Jual (Rp) *</label>
 <input type="number" id="inpProdHarga" class="form-control" placeholder="15000" required>
@@ -270,7 +264,7 @@
 <label class="form-label">Stok Fisik Awal *</label>
 <input type="number" id="inpProdStok" class="form-control" value="10" required>
 </div>
-<div style="display:grid;grid-template-columns:1fr 2fr;gap:10px;">
+<div class="grid-1-2-col">
 <div class="form-group">
 <label class="form-label">Label Variasi</label>
 <input type="text" id="inpProdLabelVar" class="form-control" value="Pilihan">
@@ -281,12 +275,34 @@
 </div>
 </div>
 <div class="form-group">
-<label class="form-label"><i class="fa-brands fa-google-drive" style="color:#0f9d58;"></i> Link Gambar Google Drive</label>
-<input type="text" id="inpProdDriveLink" class="form-control" placeholder="https://drive.google.com/file/d/.../view?usp=sharing">
-<div class="drive-preview-wrap">
-<img id="drivePreviewImg" class="drive-preview-img" src="" alt="Drive Preview" style="display:none;">
-<span id="drivePreviewText" style="font-size:11px;color:var(--gray);">Tempel link Google Drive di atas untuk melihat preview gambar.</span>
+<div class="server-header-row">
+<label class="form-label mb-0"><i class="fa-solid fa-server server-status-icon"></i> Foto Produk (Server Media MUSADA)</label>
+<span class="server-status-pill"><i class="fa-solid fa-circle"></i> Server Media Terhubung</span>
 </div>
+<div class="server-upload-zone" id="serverUploadZone">
+<input type="file" id="inpProdFile" accept="image/png,image/jpeg,image/webp" class="visually-hidden">
+<div id="uploadPrompt" class="upload-prompt" data-action="trigger-file-select">
+<div class="upload-icon-circle"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+<div class="upload-title">Unggah Foto ke Server Media</div>
+<div class="upload-subtitle">Klik atau seret file foto produk dari perangkat (JPG, PNG, WebP)</div>
+</div>
+<div id="uploadProgressBox" class="upload-progress-box visually-hidden">
+<i class="fa-solid fa-spinner fa-spin upload-spinner-icon"></i>
+<div id="uploadProgressText" class="upload-progress-text">Mengunggah ke Server Media...</div>
+</div>
+<div id="uploadPreviewBox" class="upload-preview-box visually-hidden">
+<img id="serverPreviewImg" class="server-preview-img" src="" alt="Foto Produk">
+<div class="upload-preview-info">
+<div class="upload-preview-status"><i class="fa-solid fa-circle-check"></i> Tersimpan di Server Media MUSADA</div>
+<div id="uploadServerFileName" class="upload-server-filename">foto_produk.webp</div>
+<div class="upload-preview-actions">
+<button type="button" class="btn btn-outline btn-sm" data-action="trigger-file-select"><i class="fa-solid fa-arrows-rotate"></i> Ganti Foto</button>
+<button type="button" class="btn btn-outline btn-sm text-red" data-action="remove-product-image"><i class="fa-solid fa-trash-can"></i> Hapus Foto</button>
+</div>
+</div>
+</div>
+</div>
+<input type="hidden" id="inpProdDriveLink">
 </div>
 <div class="form-group">
 <label class="form-label">Deskripsi Produk</label>
