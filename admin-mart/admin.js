@@ -236,9 +236,15 @@ const AdminApp = {
       return;
     }
     playScanSound(true);
-    const imgUrl = Utils.resolveImageUrl(product.img) || '/assets/img/icon-512x512.png';
+    let scanThumb = '';
+    if (product.img && product.img.trim()) {
+      const resolved = Utils.resolveImageUrl(product.img);
+      scanThumb = '<img src="' + resolved + '" class="table-prod-thumb" alt="' + product.nama + '" onerror="this.onerror=null;this.replaceWith(document.createRange().createContextualFragment('<div class=\'table-prod-thumb fallback\'><i class=\'fa-solid ' + Utils.getCategoryIcon(product.kat) + '\'></i></div>'));">';
+    } else {
+      scanThumb = '<div class="table-prod-thumb fallback"><i class="fa-solid ' + Utils.getCategoryIcon(product.kat) + '"></i></div>';
+    }
     container.innerHTML = '<div class="scan-prod-card">' +
-      '<img src="' + imgUrl + '" class="table-prod-thumb" alt="' + product.nama + '">' +
+      scanThumb +
       '<div class="flex-1">' +
       '<span class="badge-sku">' + product.kode + '</span>' +
       '<div class="scan-prod-title">' + product.nama + '</div>' +
@@ -363,11 +369,17 @@ const AdminApp = {
     list.forEach(p => {
       const tr = document.createElement('tr');
       const isLow = (p.stok || 0) <= 5;
-      const imgUrl = Utils.resolveImageUrl(p.img) || '/assets/img/icon-512x512.png';
+      let thumbHtml = '';
+      if (p.img && p.img.trim()) {
+        const resolved = Utils.resolveImageUrl(p.img);
+        thumbHtml = '<img src="' + resolved + '" class="table-prod-thumb" alt="' + p.nama + '" onerror="this.onerror=null;this.replaceWith(document.createRange().createContextualFragment('<div class=\'table-prod-thumb fallback\'><i class=\'fa-solid ' + Utils.getCategoryIcon(p.kat) + '\'></i></div>'));">';
+      } else {
+        thumbHtml = '<div class="table-prod-thumb fallback"><i class="fa-solid ' + Utils.getCategoryIcon(p.kat) + '"></i></div>';
+      }
       tr.innerHTML = '<td><span class="badge-sku">' + (p.kode || p.id) + '</span></td>' +
         '<td>' +
         '<div class="table-prod-info">' +
-        '<img src="' + imgUrl + '" class="table-prod-thumb" alt="' + p.nama + '">' +
+        thumbHtml +
         '<div><strong>' + p.nama + '</strong><br><span class="text-muted">' + (p.kat || '').toUpperCase() + '</span></div>' +
         '</div>' +
         '</td>' +
@@ -598,7 +610,7 @@ const AdminApp = {
     const progressEl = document.getElementById('uploadProgressBox');
     const previewEl = document.getElementById('uploadPreviewBox');
     if (progressEl) progressEl.classList.add('visually-hidden');
-    if (p && p.img) {
+    if (p && p.img && p.img.trim()) {
       document.getElementById('inpProdDriveLink').value = p.img;
       const prevImg = document.getElementById('serverPreviewImg');
       if (prevImg) prevImg.src = Utils.resolveImageUrl(p.img);
