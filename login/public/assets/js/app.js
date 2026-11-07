@@ -105,6 +105,10 @@ const App = {
       if (notifDropdown && notifDropdown.classList.contains('active')) {
         notifDropdown.classList.remove('active');
       }
+      const notifBackdrop = document.getElementById('notif-backdrop');
+      if (notifBackdrop && notifBackdrop.classList.contains('active')) {
+        notifBackdrop.classList.remove('active');
+      }
       sidebar.classList.toggle('active');
       backdrop.classList.toggle('active');
     };

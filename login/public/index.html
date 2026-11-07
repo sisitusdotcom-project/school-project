@@ -131,6 +131,7 @@
               <i class="ph ph-bell"></i>
               <span class="notif-badge" id="notif-badge">0</span>
             </button>
+            <div class="notif-backdrop mobile-only" id="notif-backdrop"></div>
             <div class="notif-dropdown" id="notif-dropdown">
               <div class="notif-header">
                 <div class="notif-header-title">
@@ -138,10 +139,15 @@
                   <span>Notifikasi</span>
                   <span class="notif-unread-count" id="notif-unread-count">0</span>
                 </div>
-                <button type="button" class="btn-notif-read-all" id="btn-notif-read-all" title="Tandai semua dibaca">
-                  <i class="ph ph-checks"></i>
-                  <span>Tandai dibaca</span>
-                </button>
+                <div class="notif-header-actions">
+                  <button type="button" class="btn-notif-read-all" id="btn-notif-read-all" title="Tandai semua dibaca">
+                    <i class="ph ph-checks"></i>
+                    <span>Tandai dibaca</span>
+                  </button>
+                  <button type="button" class="btn-notif-close mobile-only" id="btn-notif-close" aria-label="Tutup notifikasi">
+                    <i class="ph ph-x"></i>
+                  </button>
+                </div>
               </div>
               <div class="notif-list" id="notif-list"></div>
             </div>

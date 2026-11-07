@@ -111,7 +111,7 @@ const NotificationService = {
         this.sendToRole({
           unit: ['WAKA_HUMAS_PERSONALIA', 'STAF_HUMAS_PERSONALIA'],
           title: 'Tugas Dinas Baru Perlu Verifikasi',
-          message: `${payload.gtkIdName || uploaderName} mengajukan dinas ke ${payload.location || ''} (${payload.institution || ''}).`,
+          message: `${payload.gtkIdName || uploaderName} mengajukan dinas ke ${payload.location || ''}${payload.institution ? ` (${payload.institution})` : ''}.`,
           link: '#/humas/official-travel',
           type: 'info',
           action: 'Verifikasi & Vakasi',
@@ -561,6 +561,10 @@ const NotificationService = {
         headerCount.classList.remove('active');
       }
     }
+    const readAllBtn = document.getElementById('btn-notif-read-all');
+    if (readAllBtn) {
+      readAllBtn.disabled = unreadCount === 0;
+    }
   },
   renderDropdown() {
     const listEl = document.getElementById('notif-list');
@@ -579,14 +583,20 @@ const NotificationService = {
       const actionBadge = n.action
         ? `<span class="notif-action-tag"><i class="ph ph-arrow-up-right"></i> ${AppConfig.escapeHtml(n.action)}</span>`
         : '';
+      const unreadDot = !n.read ? '<span class="notif-unread-dot"></span>' : '';
       return `
         <div class="notif-item${n.read ? '' : ' unread'}" data-notif-id="${n.id}" data-notif-link="${AppConfig.escapeHtml(n.link || '')}">
           <div class="notif-icon notif-icon--${n.type || 'info'}"><i class="ph ${icon}"></i></div>
           <div class="notif-content">
-            <div class="notif-title">${AppConfig.escapeHtml(n.title)}</div>
+            <div class="notif-title">
+              <span>${AppConfig.escapeHtml(n.title)}</span>
+              ${unreadDot}
+            </div>
             <div class="notif-message">${AppConfig.escapeHtml(n.message)}</div>
-            ${actionBadge}
-            <div class="notif-time text-muted">${timeStr}</div>
+            <div class="notif-meta">
+              ${actionBadge}
+              <span class="notif-time"><i class="ph ph-clock"></i> ${timeStr}</span>
+            </div>
           </div>
         </div>
       `;
@@ -594,22 +604,49 @@ const NotificationService = {
   },
   setupDropdownListeners(uid) {
     const dropdown = document.getElementById('notif-dropdown');
+    const backdrop = document.getElementById('notif-backdrop');
     const toggleBtns = [document.getElementById('btn-notif-toggle'), document.getElementById('btn-notif-toggle-mobile')].filter(Boolean);
     const readAllBtn = document.getElementById('btn-notif-read-all');
+    const closeBtn = document.getElementById('btn-notif-close');
+    const closeNotif = () => {
+      if (dropdown) dropdown.classList.remove('active');
+      if (backdrop) backdrop.classList.remove('active');
+    };
+    const openNotif = () => {
+      const sidebar = document.getElementById('sidebar');
+      const sideBackdrop = document.getElementById('sidebar-backdrop');
+      if (sidebar && sidebar.classList.contains('active')) {
+        sidebar.classList.remove('active');
+        if (sideBackdrop) sideBackdrop.classList.remove('active');
+      }
+      if (dropdown) {
+        const willOpen = !dropdown.classList.contains('active');
+        dropdown.classList.toggle('active', willOpen);
+        if (backdrop) backdrop.classList.toggle('active', willOpen);
+        if (willOpen) this.updateActionBadges();
+      }
+    };
     toggleBtns.forEach((btn) => {
       btn.onclick = (e) => {
         e.preventDefault();
         e.stopPropagation();
-        const sidebar = document.getElementById('sidebar');
-        const backdrop = document.getElementById('sidebar-backdrop');
-        if (sidebar && sidebar.classList.contains('active')) {
-          sidebar.classList.remove('active');
-          if (backdrop) backdrop.classList.remove('active');
-        }
-        if (dropdown) dropdown.classList.toggle('active');
-        this.updateActionBadges();
+        openNotif();
       };
     });
+    if (closeBtn) {
+      closeBtn.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        closeNotif();
+      };
+    }
+    if (backdrop) {
+      backdrop.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        closeNotif();
+      };
+    }
     if (readAllBtn) {
       readAllBtn.onclick = (e) => {
         e.preventDefault();
@@ -620,7 +657,7 @@ const NotificationService = {
     document.addEventListener('click', (e) => {
       if (dropdown && dropdown.classList.contains('active')) {
         if (!dropdown.contains(e.target) && !toggleBtns.some((b) => b.contains(e.target))) {
-          dropdown.classList.remove('active');
+          closeNotif();
         }
       }
       const item = e.target.closest('.notif-item');
@@ -628,13 +665,13 @@ const NotificationService = {
         const id = item.dataset.notifId;
         const link = item.dataset.notifLink;
         this.markAsRead(uid, id);
-        if (dropdown) dropdown.classList.remove('active');
+        closeNotif();
         if (link) window.location.hash = link;
       }
     });
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && dropdown && dropdown.classList.contains('active')) {
-        dropdown.classList.remove('active');
+        closeNotif();
       }
     });
   }
