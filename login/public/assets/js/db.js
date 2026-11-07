@@ -662,7 +662,11 @@ const DB = {
     await db.ref(`subjects/${id}`).remove();
   },
   async getSchedules() {
-    return this._readCollection('curriculum/schedules', {});
+    try {
+      return await this._readCollection('curriculum/schedules', {});
+    } catch (_) {
+      return {};
+    }
   },
   async getSchedulesByClass(classId) {
     if (!classId) return [];

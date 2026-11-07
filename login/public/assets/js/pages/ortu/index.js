@@ -9,15 +9,15 @@ const OrtuPages = {
       return;
     }
     const [settings, chars, classes, subjectsData, extrasData, allUmmiClasses, allUmmiExams, allSchedules, allUsers] = await Promise.all([
-      DB.getSettings(),
-      DB.getCharacters(),
-      DB.getClasses(),
-      DB.getSubjects(),
-      DB.getExtracurriculars(),
-      DB.getUmmiClasses(),
-      DB.getUmmiExams(),
-      DB.getSchedules(),
-      DB.getAllUsers()
+      DB.getSettings().catch(() => ({})),
+      DB.getCharacters().catch(() => ({})),
+      DB.getClasses().catch(() => ({})),
+      DB.getSubjects().catch(() => ({})),
+      DB.getExtracurriculars().catch(() => ({})),
+      DB.getUmmiClasses().catch(() => ({})),
+      DB.getUmmiExams().catch(() => ({})),
+      DB.getSchedules().catch(() => ({})),
+      DB.getAllUsers().catch(() => ({}))
     ]);
     const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
     const todayObj = new Date();
