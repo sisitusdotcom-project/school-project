@@ -80,8 +80,12 @@ const App = {
       if (guruAllowed.includes(path)) return true;
     }
     if (role === AppConfig.ROLES.KEPSEK) {
-      const kepsekPrefixes = ['#/dashboard', '#/attendance', '#/admin/attendance', '#/kepsek/', '#/curriculum', '#/student-affairs', '#/finance', '#/personnel', '#/facilities', '#/komite'];
+      const kepsekPrefixes = ['#/dashboard', '#/attendance', '#/admin/attendance', '#/kepsek/', '#/curriculum', '#/student-affairs', '#/finance', '#/personnel', '#/facilities', '#/komite', '#/guru/portfolio', '#/tendik/portfolio', '#/gtk/official-travel'];
       if (kepsekPrefixes.some(p => path === p || path.startsWith(p + '/'))) return true;
+    }
+    if (role === AppConfig.ROLES.PERSONNEL || assignments.includes('WAKA_HUMAS_PERSONALIA') || assignments.includes('STAF_HUMAS_PERSONALIA')) {
+      const persAllowed = ['#/guru/portfolio', '#/tendik/portfolio', '#/gtk/official-travel', '#/humas/official-travel'];
+      if (persAllowed.includes(path)) return true;
     }
     if (role === AppConfig.ROLES.TENDIK) {
       const tendikAllowed = ['#/attendance', '#/tendik/performance', '#/tendik/portfolio'];

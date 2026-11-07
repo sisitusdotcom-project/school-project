@@ -15,14 +15,17 @@ Router.setTitle('Beranda', 'Selamat datang di Dasbor Digital Sekolah.');
 const today = new Date();
 const dateStr = AppConfig.getLocalDateStr ? AppConfig.getLocalDateStr(today) : today.toISOString().slice(0, 10);
 const timeStr = today.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-const [classArr, students, myAtt, mySchedules, allSubjects, allClasses, directoryData] = await Promise.all([
+const [classArr, students, myAtt, mySchedules, allSubjects, allClasses, directoryData, travelData, myAttHist, settingsData] = await Promise.all([
 DB.getClassesForTeacher(Auth.currentUser.uid),
 DB.getAllStudents(),
 DB.getTeacherAttendance(dateStr, Auth.currentUser.uid),
 DB.getSchedulesByTeacher(Auth.currentUser.uid),
 DB.getSubjects(),
 DB.getClasses(),
-DB._readCollection ? DB._readCollection('personnel/directory', {}) : Promise.resolve({})
+DB._readCollection ? DB._readCollection('personnel/directory', {}) : Promise.resolve({}),
+DB._readCollection ? DB._readCollection('personnel/official_travel', {}) : Promise.resolve({}),
+DB.getTeacherAttendanceHistory(Auth.currentUser.uid, 60).catch(() => []),
+DB.getSettings().catch(() => ({}))
 ]);
 const user = Auth.userData || Auth.currentUser || {};
 const uid = user.uid || Auth.currentUser?.uid;
@@ -33,6 +36,8 @@ let teacherPosition = empProfile.position || user.position || user.jabatan || ''
 if (!teacherPosition) {
 teacherPosition = classArr.length > 0 ? `Guru Kelas ${classArr.map(c => c.name).join(', ')}` : 'Guru Mata Pelajaran';
 }
+const myTravels = DB.toArray(travelData).filter(t => (t.gtkId && t.gtkId === uid) || (t.teacherId && t.teacherId === uid) || (t.createdBy && t.createdBy === uid)).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+const gradeResult = AppConfig.calculateAttendanceGrade(DB.toArray(myAttHist), { attendanceRules: settingsData?.attendanceRules });
 const heroHtml = AppConfig.getDashboardHeroHtml({
 user,
 empProfile,
@@ -71,6 +76,11 @@ return `<tr><td><strong>${AppConfig.escapeHtml(s.day)}</strong></td><td><span cl
 }).join('') : '<tr><td colspan="4" class="text-center text-muted">Belum ada jadwal mengajar yang diterbitkan.</td></tr>';
 container.innerHTML = `
 ${heroHtml}
+${gradeResult.isPoorGrade ? `
+<div class="panel-callout att-warning-banner section-spacer">
+<div class="att-warning-title"><i class="ph ph-warning-circle"></i><span>${AppConfig.escapeHtml(gradeResult.warningTitle || 'Peringatan Evaluasi Kehadiran')} (${AppConfig.escapeHtml(gradeResult.academicYear || '')})</span></div>
+<p class="att-warning-desc">${AppConfig.escapeHtml(gradeResult.warningText || 'Grade kehadiran atau ketepatan Anda berada di bawah standar. Mohon tingkatkan disiplin kehadiran.')}</p>
+</div>` : ''}
 <section class="card-grid section-spacer">
 <div class="card stat-card">
 <div class="stat-icon stat-icon--success"><i class="ph ph-map-pin"></i></div>
@@ -117,6 +127,45 @@ ${renderSchedItems(tomorrowScheds)}
 </table>
 </div>
 </div>
+</div>
+</section>
+<section class="card section-spacer">
+<div class="card-header">
+<h3 class="card-title"><i class="ph ph-airplane-takeoff"></i> Riwayat Perjalanan Dinas Saya</h3>
+<div class="card-actions">
+<a href="#/gtk/official-travel" class="btn btn-outline btn-sm"><i class="ph ph-plus-circle"></i> Ajukan Dinas</a>
+</div>
+</div>
+<div class="card-body">
+${myTravels.length ? `
+<div class="table-responsive">
+<table class="table">
+<thead><tr><th>Tanggal</th><th>Acara / Kegiatan</th><th>Lokasi</th><th>Status</th><th>Vakasi</th></tr></thead>
+<tbody>
+${myTravels.slice(0, 5).map(tr => {
+const badgeClass = tr.status === 'Disetujui' ? 'badge-success' : (tr.status === 'Ditolak' ? 'badge-danger' : 'badge-warning');
+const vakasiFormatted = tr.vakasi ? AppConfig.formatRupiah(tr.vakasi) : '—';
+return `<tr>
+<td><strong>${AppConfig.formatDateId ? AppConfig.formatDateId(tr.date) : (tr.date || '-')}</strong></td>
+<td><strong>${AppConfig.escapeHtml(tr.eventTheme || '-')}</strong><div class="text-muted travel-sub-note">${AppConfig.escapeHtml(tr.invitingInstitution || '')}</div></td>
+<td>${AppConfig.escapeHtml(tr.location || '-')}</td>
+<td><span class="badge ${badgeClass}">${AppConfig.escapeHtml(tr.status || 'Diajukan')}</span></td>
+<td><strong class="travel-vakasi-val">${vakasiFormatted}</strong></td>
+</tr>`;
+}).join('')}
+</tbody>
+</table>
+</div>
+${myTravels.length > 5 ? `<div class="travel-all-wrap"><a href="#/gtk/official-travel" class="btn btn-sm btn-ghost">Lihat Seluruh Riwayat (${myTravels.length} tugas) &rarr;</a></div>` : ''}
+` : `
+<div class="travel-empty-box">
+<i class="ph ph-airplane-landing travel-empty-icon"></i>
+<p class="travel-empty-text">Belum ada riwayat tugas / perjalanan dinas yang tercatat.</p>
+<div class="travel-empty-btn-wrap">
+<a href="#/gtk/official-travel" class="btn btn-sm btn-primary"><i class="ph ph-plus-circle"></i> Buat Pengajuan Tugas Dinas</a>
+</div>
+</div>
+`}
 </div>
 </section>
 <section class="card section-spacer">
@@ -1740,7 +1789,10 @@ lateNoticeBox.style.display = 'block';
 lateNoticeBox.style.display = 'none';
 }
 }
-if (sched.isOptional) {
+if (sched.isCustom) {
+statusTitle.innerText = sched.customActivity ? `Presensi Custom: ${sched.customActivity}` : "Presensi Custom (Kajian / Pelatihan)";
+statusText.innerText = `Hari ini (${sched.dayKey}) berlaku absensi khusus kegiatan custom (${sched.customActivity || 'Kajian / Pelatihan'}). Presensi masuk dibuka ${sched.inStart || '07:00'} - ${sched.inEnd || '08:00'} WIB.`;
+} else if (sched.isOptional) {
 statusTitle.innerText = "Sabtu Opsional";
 statusText.innerText = `Hari ini (${sched.dayKey}) jadwal presensi opsional untuk pembinaan.${isUmmi ? ' Tidak ada hitungan keterlambatan.' : ' Presensi masuk dibuka 07.00-08.00 WIB, pulang bebas.'}`;
 }
@@ -1835,6 +1887,11 @@ gradeOptions.refDate = nowD;
 const gradeResult = AppConfig.calculateAttendanceGrade(fullHist, gradeOptions);
 if (gradeContainer) {
 gradeContainer.innerHTML = `
+${gradeResult.isPoorGrade ? `
+<div class="panel-callout att-warning-banner">
+<div class="att-warning-title"><i class="ph ph-warning-circle"></i><span>${AppConfig.escapeHtml(gradeResult.warningTitle || 'Peringatan Evaluasi Kehadiran')} (${AppConfig.escapeHtml(gradeResult.academicYear || '')})</span></div>
+<p class="att-warning-desc">${AppConfig.escapeHtml(gradeResult.warningText || 'Grade kehadiran atau ketepatan Anda berada di bawah standar. Mohon tingkatkan disiplin kehadiran.')}</p>
+</div>` : ''}
 <div class="att-grade-card">
 <div class="att-grade-header">
 <div class="att-grade-head-title"><i class="ph ph-medal"></i><span>Evaluasi Kehadiran</span></div>
@@ -1886,9 +1943,13 @@ filteredHist = fullHist.filter((h) => h.date >= gradeResult.startDateStr && h.da
 }
 const displayList = filteredHist.length > 0 ? filteredHist : fullHist;
 const rowsHtml = displayList.map((h) => {
+const isCustomAtt = h.attendance_type === 'custom' || !!h.activity_name;
+const typeBadge = isCustomAtt ? `<div class="att-type-tag badge-info">Custom: ${AppConfig.escapeHtml(h.activity_name || 'Kajian/Pelatihan')}</div>` : '';
 const isLate = AppConfig.isAttendanceLate ? AppConfig.isAttendanceLate(h.time_in, sched, h) : (h.time_in > (sched.inEnd || '06:45'));
 let statusBadge = '<span class="badge badge-warning">Terlambat</span>';
-if (sched.noLatePenalty || (sched.isOptional && isUmmi)) {
+if (isCustomAtt) {
+statusBadge = '<span class="badge badge-success">Hadir (Kegiatan Custom)</span>';
+} else if (sched.noLatePenalty || (sched.isOptional && isUmmi)) {
 statusBadge = '<span class="badge badge-success">Hadir (Pembinaan)</span>';
 } else if (!isLate && h.time_in) {
 if (h.appeal_status === 'approved') {
@@ -1907,7 +1968,7 @@ const proofBtn = h.proof_url
 ? `<button type="button" class="btn btn-xs btn-outline mk-preview-btn" data-preview-url="${AppConfig.escapeHtml(h.proof_url)}" data-preview-title="Bukti Presensi ${h.date}"><i class="ph ph-eye"></i> Bukti</button>`
 : '-';
 return `<tr>
-<td><strong>${h.date}</strong></td>
+<td><strong>${h.date}</strong>${typeBadge}</td>
 <td>${h.time_in || '-'}</td>
 <td>${h.time_out || '-'}</td>
 <td>${statusBadge}</td>
@@ -2124,7 +2185,9 @@ location: currentLocation,
 accuracy: currentAccuracy,
 isUmmi,
 roleGroup: isUmmi ? 'ummi' : 'gtk',
-lateReason: lateReasonVal
+lateReason: lateReasonVal,
+attendanceType: currentSchedule?.isCustom ? 'custom' : 'daily',
+activityName: currentSchedule?.customActivity || ''
 });
 const recordedTime = result?.record?.time_in || result?.record?.time_out || (type === 'in' ? (result.serverTimestamp ? new Date(result.serverTimestamp).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })) : (result.serverTimestamp ? new Date(result.serverTimestamp).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })));
 AppConfig.showAttendanceSuccessModal({ type, timeStr: recordedTime, user: Auth.userData || Auth.currentUser, isUmmi, date: dateStr });

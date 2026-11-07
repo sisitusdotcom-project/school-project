@@ -369,6 +369,16 @@ const NAV_ITEMS = Object.freeze({
 { hash: '#/guru/english/progress', icon: 'ph-translate', text: 'Jurnal Progres Speaking', group: 'English Lab' }
 ]
 });
+function getAcademicYearDateRange(academicYearStr) {
+const yearStr = String(academicYearStr || '2026/2027').trim();
+const parts = yearStr.split('/');
+const startYear = parseInt(parts[0], 10) || new Date().getFullYear();
+const endYear = parseInt(parts[1], 10) || (startYear + 1);
+return {
+startDateStr: `${startYear}-07-01`,
+endDateStr: `${endYear}-06-30`
+};
+}
 const SCHEDULE_DAY_DEFS = Object.freeze({
 gtk: Object.freeze([
 { key: 'senin', label: 'Senin', note: 'Batas Masuk 06.45 | Pulang 14.30', status: 'active', inStart: '06:00', inEnd: '06:45', outStart: '14:30', outEnd: '17:30' },
@@ -376,7 +386,8 @@ gtk: Object.freeze([
 { key: 'rabu', label: 'Rabu', note: 'Batas Masuk 06.45 | Pulang 15.15', status: 'active', inStart: '06:00', inEnd: '06:45', outStart: '15:15', outEnd: '17:30' },
 { key: 'kamis', label: 'Kamis', note: 'Batas Masuk 06.45 | Pulang 14.45', status: 'active', inStart: '06:00', inEnd: '06:45', outStart: '14:45', outEnd: '17:30' },
 { key: 'jumat', label: 'Jumat', note: 'Batas Masuk 06.45 | Pulang 12.45', status: 'active', inStart: '06:00', inEnd: '06:45', outStart: '12:45', outEnd: '17:30' },
-{ key: 'sabtu', label: 'Sabtu', note: 'Batas Masuk 08.00 | Opsional (Pembinaan)', status: 'optional', inStart: '07:00', inEnd: '08:00', outStart: '11:00', outEnd: '13:00' }
+{ key: 'sabtu', label: 'Sabtu', note: 'Absensi Custom (Kajian / Pelatihan)', status: 'custom', inStart: '07:00', inEnd: '08:00', outStart: '11:00', outEnd: '13:00', customActivity: 'Kajian Rutin GTK' },
+{ key: 'minggu', label: 'Minggu', note: 'Absensi Custom (Pelatihan / Kajian Ahad)', status: 'custom', inStart: '06:00', inEnd: '07:30', outStart: '11:00', outEnd: '13:00', customActivity: 'Pelatihan & Pembinaan GTK' }
 ]),
 ummi: Object.freeze([
 { key: 'senin', label: 'Senin', note: 'Batas Masuk 07.15 | Pulang 12.30', status: 'active', inStart: '06:00', inEnd: '07:15', outStart: '12:30', outEnd: '15:00' },
@@ -384,7 +395,8 @@ ummi: Object.freeze([
 { key: 'rabu', label: 'Rabu', note: 'Batas Masuk 07.15 | Pulang 12.30', status: 'active', inStart: '06:00', inEnd: '07:15', outStart: '12:30', outEnd: '15:00' },
 { key: 'kamis', label: 'Kamis', note: 'Batas Masuk 07.00 | Pulang 12.00', status: 'active', inStart: '06:00', inEnd: '07:00', outStart: '12:00', outEnd: '15:00' },
 { key: 'jumat', label: 'Jumat', note: 'Libur (Tidak Ada Absen)', status: 'off', inStart: '06:00', inEnd: '07:00', outStart: '11:00', outEnd: '13:00' },
-{ key: 'sabtu', label: 'Sabtu', note: 'Batas Masuk 08.00 | Opsional (Pembinaan Tanpa Terlambat)', status: 'optional', inStart: '06:00', inEnd: '08:00', outStart: '10:00', outEnd: '13:00' }
+{ key: 'sabtu', label: 'Sabtu', note: 'Absensi Custom (Kajian & Munaqosyah)', status: 'custom', inStart: '06:00', inEnd: '08:00', outStart: '10:00', outEnd: '13:00', customActivity: 'Kajian & Munaqosyah Ummi' },
+{ key: 'minggu', label: 'Minggu', note: 'Absensi Custom (Pelatihan Guru Ummi)', status: 'custom', inStart: '06:00', inEnd: '07:30', outStart: '11:00', outEnd: '13:00', customActivity: 'Pelatihan Guru Ummi' }
 ])
 });
 const DEFAULT_SETTINGS = Object.freeze({
@@ -400,22 +412,22 @@ attendanceStartDate: '',
 attendanceEndDate: '',
 schedules: Object.freeze({
 gtk: Object.freeze({
-senin: { inStart: '06:00', inEnd: '06:45', outStart: '14:30', outEnd: '17:30', isOff: false, isOptional: false },
-selasa: { inStart: '06:00', inEnd: '06:45', outStart: '15:15', outEnd: '17:30', isOff: false, isOptional: false },
-rabu: { inStart: '06:00', inEnd: '06:45', outStart: '15:15', outEnd: '17:30', isOff: false, isOptional: false },
-kamis: { inStart: '06:00', inEnd: '06:45', outStart: '14:45', outEnd: '17:30', isOff: false, isOptional: false },
-jumat: { inStart: '06:00', inEnd: '06:45', outStart: '12:45', outEnd: '17:30', isOff: false, isOptional: false },
-sabtu: { inStart: '07:00', inEnd: '08:00', outStart: '11:00', outEnd: '13:00', isOff: false, isOptional: true },
-minggu: { inStart: '06:00', inEnd: '07:00', outStart: '12:00', outEnd: '14:00', isOff: true, isOptional: true }
+senin: { inStart: '06:00', inEnd: '06:45', outStart: '14:30', outEnd: '17:30', isOff: false, isOptional: false, isCustom: false, attendanceType: 'daily' },
+selasa: { inStart: '06:00', inEnd: '06:45', outStart: '15:15', outEnd: '17:30', isOff: false, isOptional: false, isCustom: false, attendanceType: 'daily' },
+rabu: { inStart: '06:00', inEnd: '06:45', outStart: '15:15', outEnd: '17:30', isOff: false, isOptional: false, isCustom: false, attendanceType: 'daily' },
+kamis: { inStart: '06:00', inEnd: '06:45', outStart: '14:45', outEnd: '17:30', isOff: false, isOptional: false, isCustom: false, attendanceType: 'daily' },
+jumat: { inStart: '06:00', inEnd: '06:45', outStart: '12:45', outEnd: '17:30', isOff: false, isOptional: false, isCustom: false, attendanceType: 'daily' },
+sabtu: { inStart: '07:00', inEnd: '08:00', outStart: '11:00', outEnd: '13:00', isOff: false, isOptional: false, isCustom: true, customActivity: 'Kajian Rutin GTK', attendanceType: 'custom' },
+minggu: { inStart: '06:00', inEnd: '07:30', outStart: '11:00', outEnd: '13:00', isOff: false, isOptional: true, isCustom: true, customActivity: 'Pelatihan & Pembinaan GTK', attendanceType: 'custom' }
 }),
 ummi: Object.freeze({
-senin: { inStart: '06:00', inEnd: '07:15', outStart: '12:30', outEnd: '15:00', isOff: false, isOptional: false },
-selasa: { inStart: '06:00', inEnd: '07:15', outStart: '12:30', outEnd: '15:00', isOff: false, isOptional: false },
-rabu: { inStart: '06:00', inEnd: '07:15', outStart: '12:30', outEnd: '15:00', isOff: false, isOptional: false },
-kamis: { inStart: '06:00', inEnd: '07:00', outStart: '12:00', outEnd: '15:00', isOff: false, isOptional: false },
-jumat: { inStart: '06:00', inEnd: '07:00', outStart: '11:00', outEnd: '13:00', isOff: true, isOptional: false },
-sabtu: { inStart: '06:00', inEnd: '08:00', outStart: '10:00', outEnd: '13:00', isOff: false, isOptional: true, noLatePenalty: true },
-minggu: { inStart: '06:00', inEnd: '07:00', outStart: '12:00', outEnd: '14:00', isOff: true, isOptional: true }
+senin: { inStart: '06:00', inEnd: '07:15', outStart: '12:30', outEnd: '15:00', isOff: false, isOptional: false, isCustom: false, attendanceType: 'daily' },
+selasa: { inStart: '06:00', inEnd: '07:15', outStart: '12:30', outEnd: '15:00', isOff: false, isOptional: false, isCustom: false, attendanceType: 'daily' },
+rabu: { inStart: '06:00', inEnd: '07:15', outStart: '12:30', outEnd: '15:00', isOff: false, isOptional: false, isCustom: false, attendanceType: 'daily' },
+kamis: { inStart: '06:00', inEnd: '07:00', outStart: '12:00', outEnd: '15:00', isOff: false, isOptional: false, isCustom: false, attendanceType: 'daily' },
+jumat: { inStart: '06:00', inEnd: '07:00', outStart: '11:00', outEnd: '13:00', isOff: true, isOptional: false, isCustom: false, attendanceType: 'daily' },
+sabtu: { inStart: '06:00', inEnd: '08:00', outStart: '10:00', outEnd: '13:00', isOff: false, isOptional: true, isCustom: true, customActivity: 'Kajian & Munaqosyah Ummi', attendanceType: 'custom', noLatePenalty: true },
+minggu: { inStart: '06:00', inEnd: '07:30', outStart: '11:00', outEnd: '13:00', isOff: true, isOptional: true, isCustom: true, customActivity: 'Pelatihan Guru Ummi', attendanceType: 'custom' }
 })
 })
 })
@@ -530,10 +542,14 @@ const defGroup = DEFAULT_SETTINGS.attendanceRules.schedules[groupKey] || {};
 const daySched = groupSched[dayKey] || defGroup[dayKey] || {};
 const isOff = daySched.isOff === true;
 const isOptional = daySched.isOptional === true;
+const isCustom = daySched.isCustom === true || daySched.status === 'custom' || (!isOff && (dayKey === 'sabtu' || dayKey === 'minggu'));
+const customActivity = daySched.customActivity || (dayKey === 'sabtu' ? 'Kajian Rutin GTK' : (dayKey === 'minggu' ? 'Pelatihan & Pembinaan GTK' : 'Kegiatan Khusus'));
 const noLatePenalty = daySched.noLatePenalty === true || (isOptional && isUmmi);
 let label = '';
 if (isOff) {
 label = `${isUmmi ? 'Guru Ummi' : 'GTK'}: Hari Libur (Tidak Ada Presensi)`;
+} else if (isCustom) {
+label = `📌 Absensi Custom: ${customActivity} (${daySched.inStart || '07:00'}-${daySched.inEnd || '08:00'} | Pulang ${daySched.outStart || '11:00'})`;
 } else if (isOptional) {
 label = isUmmi ? 'Guru Ummi: Sabtu Opsional (Pembinaan)' : 'GTK: Sabtu Opsional (Masuk 07.00-08.00 | Pulang Bebas)';
 } else {
@@ -548,6 +564,9 @@ outStart: daySched.outStart || (groupKey === 'ummi' ? '12:30' : '14:30'),
 outEnd: daySched.outEnd || '17:30',
 isOff,
 isOptional,
+isCustom,
+customActivity,
+attendanceType: isCustom ? 'custom' : 'daily',
 noLatePenalty,
 label
 };
@@ -834,10 +853,12 @@ const startDateStr = `${sD.getFullYear()}-${pad(sD.getMonth() + 1)}-${pad(sD.get
 const endDateStr = `${eD.getFullYear()}-${pad(eD.getMonth() + 1)}-${pad(eD.getDate())}`;
 const today = new Date();
 const todayStr = getLocalDateStr ? getLocalDateStr(today) : `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
+const academicYear = opts.academicYear || DEFAULT_SETTINGS.currentAcademicYear;
+const yearRange = getAcademicYearDateRange(academicYear);
 const recordMap = {};
 if (Array.isArray(records)) {
 records.forEach((r) => {
-if (r && r.date) {
+if (r && r.date && (!opts.academicYear || (r.date >= yearRange.startDateStr && r.date <= yearRange.endDateStr))) {
 recordMap[r.date] = r;
 }
 });
@@ -989,6 +1010,18 @@ punctualityGradeClass = 'att-grade-badge--d';
 const punctualitySign = totalPunctualityMin > 0 ? '+' : '';
 const punctualityLabel = `${punctualitySign}${totalPunctualityMin} mnt`;
 const avgPunctuality = presentCount > 0 ? Math.round((totalPunctualityMin / presentCount) * 10) / 10 : 0;
+const isPoorGrade = attendanceGrade === 'D' || attendanceGrade === 'C' || punctualityGrade === 'D' || attendancePercent < 80.0 || alphaCount >= 2;
+let warningTitle = '';
+let warningText = '';
+if (isPoorGrade) {
+if (attendanceGrade === 'D' || alphaCount >= 3) {
+warningTitle = 'Peringatan Disiplin Kehadiran (Tingkat Kritis)';
+warningText = `Grade kehadiran Anda saat ini berada di tingkat D (${attendancePercent}% hadir, ${alphaCount} hari tanpa keterangan/alpha, ${lateCount} kali terlambat). Kinerja presensi Anda memerlukan perhatian serius dan pembinaan Waka Personalia.`;
+} else {
+warningTitle = 'Peringatan Disiplin Kehadiran';
+warningText = `Grade kehadiran Anda berada di tingkat ${attendanceGrade} (${attendancePercent}% hadir, ${alphaCount} hari alpha, terlambat ${lateCount} kali / ${totalPunctualityMin} menit). Tingkatkan kehadiran dan ketepatan waktu Anda.`;
+}
+}
 return {
 periodType,
 periodLabel,
@@ -1013,7 +1046,12 @@ punctualityGrade,
 punctualityGradeClass,
 punctualityLabel,
 avgPunctuality,
-dailyBreakdown
+dailyBreakdown,
+academicYear,
+academicYearRange: yearRange,
+isPoorGrade,
+warningTitle,
+warningText
 };
 }
 function resolveSalarySlipData(user, empProfile = {}, matchedSalary = null, attStats = {}, context = {}) {
@@ -1547,6 +1585,7 @@ PAYROLL_CUTOFF_START,
 PAYROLL_CUTOFF_END,
 getPayrollCutoffRange,
 calculateAttendanceGrade,
+getAcademicYearDateRange,
 resolveSalarySlipData,
 ATTENDANCE_MOTIVATIONS,
 getDailyAttendanceMotivation,

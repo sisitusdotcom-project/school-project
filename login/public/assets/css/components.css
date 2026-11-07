@@ -2518,6 +2518,19 @@ padding: 14px;
 .sched-day-note{font-size:11px;}
 .sched-status-select{font-size:12px;padding:4px 6px;min-width:110px;}
 .sched-time-input{min-width:85px;padding:4px 6px;font-size:12px;}
+.sched-custom-wrap{margin-top:6px;}
+.sched-custom-activity{font-size:12px;padding:4px 8px;border-radius:4px;width:100%;}
+.att-warning-banner{border-left:4px solid var(--danger,#ef4444);background:rgba(239,68,68,0.08);padding:12px 16px;border-radius:var(--radius-md);margin-bottom:14px;}
+.att-warning-title{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--danger,#ef4444);margin-bottom:4px;}
+.att-warning-desc{font-size:13px;color:var(--text-main);margin:0;line-height:1.45;}
+.att-type-tag{display:inline-block;font-size:10px;padding:2px 6px;border-radius:4px;margin-top:4px;font-weight:600;}
+.travel-sub-note{font-size:12px;}
+.travel-vakasi-val{color:var(--primary,#2563eb);}
+.travel-all-wrap{text-align:center;margin-top:10px;}
+.travel-empty-box{text-align:center;padding:24px 16px;color:var(--text-muted);}
+.travel-empty-icon{font-size:32px;opacity:.5;margin-bottom:8px;}
+.travel-empty-text{margin:0;font-size:13px;}
+.travel-empty-btn-wrap{margin-top:12px;}
 .sched-save-btn{margin-top:14px;}
 .attendance-date-desc{font-size:12px;margin:0 0 12px 0;line-height:1.5;}
 .attendance-date-form{display:flex;flex-direction:column;gap:12px;width:100%;}

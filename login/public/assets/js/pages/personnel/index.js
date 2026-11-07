@@ -35,7 +35,8 @@ const PersonnelPages = {
         { key: 'rabu', label: 'Rabu', note: 'Batas Masuk 06.45 | Pulang 15.15', status: 'active', inStart: '06:00', inEnd: '06:45', outStart: '15:15', outEnd: '17:30' },
         { key: 'kamis', label: 'Kamis', note: 'Batas Masuk 06.45 | Pulang 14.45', status: 'active', inStart: '06:00', inEnd: '06:45', outStart: '14:45', outEnd: '17:30' },
         { key: 'jumat', label: 'Jumat', note: 'Batas Masuk 06.45 | Pulang 12.45', status: 'active', inStart: '06:00', inEnd: '06:45', outStart: '12:45', outEnd: '17:30' },
-        { key: 'sabtu', label: 'Sabtu', note: 'Batas Masuk 08.00 | Opsional (Pembinaan)', status: 'optional', inStart: '07:00', inEnd: '08:00', outStart: '11:00', outEnd: '13:00' }
+        { key: 'sabtu', label: 'Sabtu', note: 'Absensi Custom (Kajian / Pelatihan)', status: 'custom', inStart: '07:00', inEnd: '08:00', outStart: '11:00', outEnd: '13:00', customActivity: 'Kajian Rutin GTK' },
+        { key: 'minggu', label: 'Minggu', note: 'Absensi Custom (Pelatihan / Kajian Ahad)', status: 'custom', inStart: '06:00', inEnd: '07:30', outStart: '11:00', outEnd: '13:00', customActivity: 'Pelatihan & Pembinaan GTK' }
       ],
       ummi: [
         { key: 'senin', label: 'Senin', note: 'Batas Masuk 07.15 | Pulang 12.30', status: 'active', inStart: '06:00', inEnd: '07:15', outStart: '12:30', outEnd: '15:00' },
@@ -43,7 +44,8 @@ const PersonnelPages = {
         { key: 'rabu', label: 'Rabu', note: 'Batas Masuk 07.15 | Pulang 12.30', status: 'active', inStart: '06:00', inEnd: '07:15', outStart: '12:30', outEnd: '15:00' },
         { key: 'kamis', label: 'Kamis', note: 'Batas Masuk 07.00 | Pulang 12.00', status: 'active', inStart: '06:00', inEnd: '07:00', outStart: '12:00', outEnd: '15:00' },
         { key: 'jumat', label: 'Jumat', note: 'Libur (Tidak Ada Absen)', status: 'off', inStart: '06:00', inEnd: '07:00', outStart: '11:00', outEnd: '13:00' },
-        { key: 'sabtu', label: 'Sabtu', note: 'Batas Masuk 08.00 | Opsional (Pembinaan Tanpa Terlambat)', status: 'optional', inStart: '06:00', inEnd: '08:00', outStart: '10:00', outEnd: '13:00' }
+        { key: 'sabtu', label: 'Sabtu', note: 'Absensi Custom (Kajian & Munaqosyah)', status: 'custom', inStart: '06:00', inEnd: '08:00', outStart: '10:00', outEnd: '13:00', customActivity: 'Kajian & Munaqosyah Ummi' },
+        { key: 'minggu', label: 'Minggu', note: 'Absensi Custom (Pelatihan Guru Ummi)', status: 'custom', inStart: '06:00', inEnd: '07:30', outStart: '11:00', outEnd: '13:00', customActivity: 'Pelatihan Guru Ummi' }
       ]
     };
     const renderScheduleRows = (group) => {
@@ -52,26 +54,37 @@ const PersonnelPages = {
       return defs.map((d) => {
         const cur = currentGroup[d.key] || {};
         let status = d.status;
-        if (cur.isOff) status = 'off';
+        if (cur.isCustom || cur.status === 'custom') status = 'custom';
+        else if (cur.isOff) status = 'off';
         else if (cur.isOptional) status = 'optional';
         else if (cur.inStart || cur.inEnd) status = 'active';
         const inStartVal = cur.inStart || d.inStart;
         const inEndVal = cur.inEnd || d.inEnd;
         const outStartVal = cur.outStart || d.outStart;
         const outEndVal = cur.outEnd || d.outEnd;
+        const customActivityVal = cur.customActivity || d.customActivity || '';
         let dynamicNote = d.note;
         if (status === 'off') {
           dynamicNote = 'Libur (Tidak Ada Absen)';
+        } else if (status === 'custom') {
+          dynamicNote = customActivityVal ? `Absensi Custom: ${customActivityVal}` : 'Absensi Custom (Kajian / Pelatihan)';
         } else if (status === 'optional') {
           dynamicNote = `Batas Masuk ${inEndVal} | Opsional (Pembinaan)`;
         } else if (inEndVal && outStartVal) {
           dynamicNote = `Batas Masuk ${inEndVal} | Pulang ${outStartVal}`;
         }
         return `<tr>
-  <td><strong>${d.label}</strong><div class="text-muted sched-day-note">${dynamicNote}</div></td>
   <td>
-    <select class="form-control sched-status-select sched-${group}-status" data-day="${d.key}">
-      <option value="active" ${status === 'active' ? 'selected' : ''}>Wajib Masuk</option>
+    <strong>${d.label}</strong>
+    <div class="text-muted sched-day-note">${dynamicNote}</div>
+    <div class="sched-custom-wrap ${status === 'custom' ? '' : 'hidden'}" id="wrap-custom-${group}-${d.key}">
+      <input type="text" class="form-control form-control-sm sched-custom-activity sched-${group}-activity" data-day="${d.key}" value="${AppConfig.escapeHtml(customActivityVal)}" placeholder="Nama Kegiatan (Kajian / Pelatihan)">
+    </div>
+  </td>
+  <td>
+    <select class="form-control sched-status-select sched-${group}-status" data-day="${d.key}" data-group="${group}">
+      <option value="active" ${status === 'active' ? 'selected' : ''}>Wajib Masuk (Harian)</option>
+      <option value="custom" ${status === 'custom' ? 'selected' : ''}>Absensi Custom (Kajian / Pelatihan)</option>
       <option value="optional" ${status === 'optional' ? 'selected' : ''}>Opsional (Pembinaan)</option>
       <option value="off" ${status === 'off' ? 'selected' : ''}>Libur</option>
     </select>
@@ -144,11 +157,18 @@ const PersonnelPages = {
                 <div class="quick-nav-desc">Rekam jejak pelatihan, diklat & sertifikasi</div>
               </div>
             </a>
-            <a href="#/admin/attendance" class="quick-nav-card">
-              <div class="quick-nav-icon"><i class="ph ph-clock"></i></div>
+            <a href="#/guru/portfolio" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-folder-check"></i></div>
               <div class="quick-nav-info">
-                <div class="quick-nav-title">Pantau Disiplin GTK</div>
-                <div class="quick-nav-desc">Monitoring presensi & rekap gaji cutoff 29-28</div>
+                <div class="quick-nav-title">Verifikasi Portofolio Guru</div>
+                <div class="quick-nav-desc">Telaah berkas & persetujuan (ACC)</div>
+              </div>
+            </a>
+            <a href="#/humas/official-travel" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-airplane-takeoff"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Verifikasi Perjalanan Dinas</div>
+                <div class="quick-nav-desc">Validasi surat tugas & penetapan vakasi</div>
               </div>
             </a>
             <a href="#/gtk/salary-slip" class="quick-nav-card">
@@ -318,7 +338,13 @@ const PersonnelPages = {
         ['gtk', 'ummi'].forEach((group) => {
           (scheduleDefs[group] || []).forEach((d) => {
             const sel = document.querySelector(`.sched-${group}-status[data-day="${d.key}"]`);
-            if (sel) sel.value = d.status;
+            if (sel) {
+              sel.value = d.status;
+              const wrap = document.getElementById(`wrap-custom-${group}-${d.key}`);
+              if (wrap) wrap.classList.toggle('hidden', d.status !== 'custom');
+            }
+            const act = document.querySelector(`.sched-${group}-activity[data-day="${d.key}"]`);
+            if (act) act.value = d.customActivity || '';
             const inS = document.querySelector(`.sched-${group}-in-start[data-day="${d.key}"]`);
             if (inS) inS.value = d.inStart;
             const inE = document.querySelector(`.sched-${group}-in-end[data-day="${d.key}"]`);
@@ -332,6 +358,15 @@ const PersonnelPages = {
         alert('Jadwal default resmi telah dimuat ke formulir! Silakan klik "Simpan Seluruh Jadwal Presensi" di bawah.');
       };
     }
+    container.addEventListener('change', (e) => {
+      const target = e.target;
+      if (target && target.classList.contains('sched-status-select')) {
+        const group = target.getAttribute('data-group');
+        const day = target.getAttribute('data-day');
+        const wrap = document.getElementById(`wrap-custom-${group}-${day}`);
+        if (wrap) wrap.classList.toggle('hidden', target.value !== 'custom');
+      }
+    });
     if (tabGtk && tabUmmi && paneGtk && paneUmmi) {
       tabGtk.onclick = () => {
         tabGtk.className = 'btn btn-sm btn-primary sched-tab-btn active';
@@ -356,11 +391,15 @@ const PersonnelPages = {
         const inEnd = document.querySelector(`.sched-gtk-in-end[data-day="${day}"]`)?.value || d.inEnd;
         const outStart = document.querySelector(`.sched-gtk-out-start[data-day="${day}"]`)?.value || d.outStart;
         const outEnd = document.querySelector(`.sched-gtk-out-end[data-day="${day}"]`)?.value || d.outEnd;
+        const customActivity = document.querySelector(`.sched-gtk-activity[data-day="${day}"]`)?.value || d.customActivity || '';
         gtkSched[day] = {
           inStart,
           inEnd,
           outStart,
           outEnd,
+          status,
+          isCustom: status === 'custom',
+          customActivity: status === 'custom' ? customActivity : '',
           isOff: status === 'off',
           isOptional: status === 'optional'
         };
@@ -372,18 +411,20 @@ const PersonnelPages = {
         const inEnd = document.querySelector(`.sched-ummi-in-end[data-day="${day}"]`)?.value || d.inEnd;
         const outStart = document.querySelector(`.sched-ummi-out-start[data-day="${day}"]`)?.value || d.outStart;
         const outEnd = document.querySelector(`.sched-ummi-out-end[data-day="${day}"]`)?.value || d.outEnd;
+        const customActivity = document.querySelector(`.sched-ummi-activity[data-day="${day}"]`)?.value || d.customActivity || '';
         ummiSched[day] = {
           inStart,
           inEnd,
           outStart,
           outEnd,
+          status,
+          isCustom: status === 'custom',
+          customActivity: status === 'custom' ? customActivity : '',
           isOff: status === 'off',
           isOptional: status === 'optional',
-          noLatePenalty: status === 'optional'
+          noLatePenalty: status === 'optional' || status === 'custom'
         };
       });
-      gtkSched['minggu'] = { inStart: '06:00', inEnd: '07:00', outStart: '12:00', outEnd: '14:00', isOff: true, isOptional: true };
-      ummiSched['minggu'] = { inStart: '06:00', inEnd: '07:00', outStart: '12:00', outEnd: '14:00', isOff: true, isOptional: true };
       const allowFlexible = document.getElementById('set-flexible-time')?.checked || false;
       return {
         scheduleVersion: 2,

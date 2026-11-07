@@ -163,27 +163,52 @@
         file('document', 'File Bukti Kinerja', 'tendik_performance')
       ]
     },
-    '#/tendik/portfolio': {
-      node: 'tendik/portfolio', noun: 'Portofolio Tendik', writeRoles: ['tendik'], dateField: 'date',
-      subtitle: 'Dokumen pencapaian tenaga kependidikan.',
+    '#/tendik/portfolio': { own: true,
+      node: 'tendik/portfolio', noun: 'Portofolio Tendik', writeRoles: [R.TENDIK, R.PERSONNEL, R.ADMIN, R.KEPSEK], dateField: 'date', statusField: 'status',
+      badges: { ...badges, 'Diajukan': 'warning', 'Disetujui (ACC)': 'success', 'Perlu Revisi': 'danger', 'Ditolak': 'danger' },
+      approverRoles: [R.PERSONNEL, R.KEPSEK],
+      approverUnits: ['WAKA_HUMAS_PERSONALIA', 'STAF_HUMAS_PERSONALIA'],
+      seeAllUnits: ['WAKA_HUMAS_PERSONALIA', 'STAF_HUMAS_PERSONALIA'],
+      subtitle: 'Dokumen pencapaian dan rekam jejak tenaga kependidikan terverifikasi Personalia.',
+      summary: [
+        { label: 'Total Portofolio', icon: 'ph-folder-star', tone: 'primary' },
+        { label: 'Menunggu ACC', icon: 'ph-hourglass', tone: 'warning', where: { status: 'Diajukan' } },
+        { label: 'Disetujui (ACC)', icon: 'ph-check-circle', tone: 'success', where: { status: 'Disetujui (ACC)' } }
+      ],
       fields: [
+        ref('employeeId', 'Nama Tenaga Kependidikan', 'employee', { required: true }),
         date('date', 'Tanggal', { required: true }),
-        t('title', 'Judul', { required: true }),
-        file('document', 'Dokumen Pendukung', 'tendik_portfolio', { required: true })
+        t('title', 'Judul Portofolio / Dokumen', { required: true }),
+        sel('status', 'Status Verifikasi & ACC', ['Diajukan', 'Disetujui (ACC)', 'Perlu Revisi', 'Ditolak'], { required: true, default: 'Diajukan' }),
+        file('document', 'Dokumen Pendukung', 'tendik_portfolio', { required: true }),
+        area('reviewerFeedback', 'Catatan Verifikator / ACC Personalia')
       ]
     },
     '#/guru/portfolio': { own: true,
-      node: 'guru/portfolio', noun: 'Portofolio & Rekam Jejak Guru', writeRoles: [R.GURU, R.GURU_EKSKUL, R.GURU_UMMI, R.TENDIK], dateField: 'date',
-      subtitle: 'Dokumen pelatihan, sertifikasi kompetensi, workshop, dan rekam jejak guru/pembina.',
+      node: 'guru/portfolio', noun: 'Portofolio & Rekam Jejak Guru', writeRoles: [R.GURU, R.GURU_EKSKUL, R.GURU_UMMI, R.TENDIK, R.PERSONNEL, R.ADMIN, R.KEPSEK], dateField: 'date', statusField: 'status',
+      badges: { ...badges, 'Diajukan': 'warning', 'Disetujui (ACC)': 'success', 'Perlu Revisi': 'danger', 'Ditolak': 'danger' },
+      approverRoles: [R.PERSONNEL, R.KEPSEK],
+      approverUnits: ['WAKA_HUMAS_PERSONALIA', 'STAF_HUMAS_PERSONALIA'],
+      seeAllUnits: ['WAKA_HUMAS_PERSONALIA', 'STAF_HUMAS_PERSONALIA'],
+      subtitle: 'Pengunggahan berkas pelatihan, workshop, sertifikasi, serta telaah & verifikasi ACC oleh Personalia.',
+      summary: [
+        { label: 'Total Portofolio', icon: 'ph-folder-star', tone: 'primary' },
+        { label: 'Menunggu ACC', icon: 'ph-hourglass', tone: 'warning', where: { status: 'Diajukan' } },
+        { label: 'Disetujui (ACC)', icon: 'ph-check-circle', tone: 'success', where: { status: 'Disetujui (ACC)' } },
+        { label: 'Perlu Revisi', icon: 'ph-warning-octagon', tone: 'danger', where: { status: 'Perlu Revisi' } }
+      ],
       fields: [
-        date('date', 'Tanggal', { required: true }),
+        ref('teacherId', 'Nama Guru / Pegawai', 'teacher', { required: true }),
+        date('date', 'Tanggal Perolehan / Kegiatan', { required: true }),
         sel('category', 'Kategori', ['Pelatihan & Workshop', 'Sertifikasi Profesi', 'Portofolio Prestasi', 'Karya Inovasi', 'Lainnya'], { required: true, default: 'Pelatihan & Workshop' }),
         t('title', 'Nama Pelatihan / Judul Portofolio', { required: true }),
-        t('organizer', 'Lembaga Penyelenggara'),
+        t('organizer', 'Lembaga Penyelenggara / Penerbit'),
         num('hours', 'Jumlah Jam (JP)'),
         t('certificateNo', 'Nomor Sertifikat / Dokumen'),
-        file('document', 'Dokumen Pendukung', 'guru_portfolio', { required: true }),
-        area('description', 'Keterangan Tambahan')
+        sel('status', 'Status Verifikasi & ACC', ['Diajukan', 'Disetujui (ACC)', 'Perlu Revisi', 'Ditolak'], { required: true, default: 'Diajukan' }),
+        file('document', 'Dokumen / Berkas Sertifikat', 'guru_portfolio', { required: true }),
+        area('description', 'Keterangan Tambahan'),
+        area('reviewerFeedback', 'Catatan Verifikator / ACC Personalia')
       ]
     },
     '#/komite/activities': {

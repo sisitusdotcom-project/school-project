@@ -106,6 +106,33 @@ const NotificationService = {
           action: isAcc ? 'Lihat Berkas' : 'Perbaiki Berkas'
         });
       }
+    } else if (node === 'guru/portfolio' || node === 'tendik/portfolio' || node === 'personnel/portfolio') {
+      if (!isApprover) {
+        this.sendToRole({
+          unit: ['WAKA_HUMAS_PERSONALIA', 'STAF_HUMAS_PERSONALIA'],
+          title: 'Portofolio Baru Perlu Verifikasi',
+          message: `${uploaderName} mengajukan portofolio "${payload.title || ''}" (${payload.category || 'Pelatihan'}) untuk diverifikasi.`,
+          link: '#/guru/portfolio',
+          type: 'info',
+          action: 'Verifikasi & ACC',
+          excludeUid: uid
+        });
+      } else {
+        const targetRecipient = payload.teacherId || payload.employeeId;
+        const isAcc = payload.status === 'Disetujui (ACC)';
+        if (targetRecipient) {
+          this.send({
+            recipientUid: targetRecipient,
+            title: isAcc ? 'Portofolio Disetujui (ACC)' : 'Portofolio Perlu Revisi',
+            message: isAcc
+              ? `Portofolio "${payload.title || ''}" Anda telah disetujui (ACC) oleh Personalia.`
+              : `Portofolio "${payload.title || ''}" Anda memerlukan revisi: ${payload.reviewerFeedback || 'Silakan cek catatan verifikator.'}`,
+            link: '#/guru/portfolio',
+            type: isAcc ? 'success' : 'warning',
+            action: isAcc ? 'Lihat Portofolio' : 'Perbaiki Berkas'
+          });
+        }
+      }
     } else if (node === 'personnel/official_travel') {
       if (!isApprover) {
         this.sendToRole({
@@ -482,6 +509,10 @@ const NotificationService = {
       tasks.push(db.ref('personnel/welfare').orderByChild('status').equalTo('Diajukan').once('value').then((s) => {
         setBadge('#/personnel/welfare', s.numChildren());
       }));
+      tasks.push(db.ref('guru/portfolio').orderByChild('status').equalTo('Diajukan').once('value').then((s) => {
+        setBadge('#/personnel/portfolio', s.numChildren());
+        setBadge('#/guru/portfolio', s.numChildren());
+      }));
     }
     if (isKes) {
       tasks.push(db.ref('student_affairs/leaves').orderByChild('status').equalTo('Diajukan').once('value').then((s) => {
@@ -533,6 +564,31 @@ const NotificationService = {
           setBadge('#/guru/student-attendance', count);
           setBadge('#/student-affairs/leaves', count);
         });
+      }));
+    }
+    if (window.Auth && Auth.userData && [AppConfig.ROLES.GURU, AppConfig.ROLES.GURU_UMMI, AppConfig.ROLES.GURU_EKSKUL, AppConfig.ROLES.TENDIK].includes(Auth.userData.role)) {
+      tasks.push(Promise.all([
+        DB.getTeacherAttendanceHistory(uid, 60).catch(() => []),
+        DB.getSettings().catch(() => ({}))
+      ]).then(([hist, settings]) => {
+        const gradeResult = AppConfig.calculateAttendanceGrade(DB.toArray(hist), { attendanceRules: settings?.attendanceRules });
+        if (gradeResult.isPoorGrade) {
+          const warnNotifId = `poor_grade_${(gradeResult.academicYear || 'current').replace('/', '_')}`;
+          if (!this.notifications.some((n) => n.id === warnNotifId)) {
+            this.notifications.unshift({
+              id: warnNotifId,
+              title: gradeResult.warningTitle || 'Peringatan Evaluasi Kehadiran',
+              message: gradeResult.warningText || 'Grade kehadiran semester ini berada di bawah batas standar.',
+              link: '#/attendance',
+              type: 'danger',
+              action: 'Cek Evaluasi',
+              read: false,
+              createdAt: Date.now()
+            });
+            this.renderBadge();
+            this.renderDropdown();
+          }
+        }
       }));
     }
     await Promise.allSettled(tasks);

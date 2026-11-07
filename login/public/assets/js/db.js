@@ -65,6 +65,8 @@ const DB = {
     if (data.appealReviewedBy) payload.appeal_reviewed_by = data.appealReviewedBy;
     if (data.appeal_reviewed_at) payload.appeal_reviewed_at = data.appeal_reviewed_at;
     if (data.appealReviewedAt) payload.appeal_reviewed_at = data.appealReviewedAt;
+    if (data.attendance_type) payload.attendance_type = data.attendance_type;
+    if (data.activity_name) payload.activity_name = data.activity_name;
     return payload;
   },
   _serializeStudentAttendance(data = {}) {
@@ -210,7 +212,7 @@ const DB = {
     await this.saveTeacherAttendance(dateStr, teacherId, { proof_url: fileUrl });
     return fileUrl;
   },
-  async submitTeacherAttendanceToWorker({ dateStr, teacherId, type, photoDataUrl, location, accuracy, isUmmi, roleGroup, lateReason }) {
+  async submitTeacherAttendanceToWorker({ dateStr, teacherId, type, photoDataUrl, location, accuracy, isUmmi, roleGroup, lateReason, attendanceType, activityName }) {
     const workerUrl = (window.CLOUDFLARE_ATTENDANCE_WORKER_URL || '').trim();
     if (!workerUrl || workerUrl.includes('your-subdomain')) {
       const timeStr = new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit' }).format(new Date()).replace('.', ':');
@@ -218,7 +220,9 @@ const DB = {
         ...(type === 'in' ? { time_in: timeStr } : {}),
         ...(type === 'out' ? { time_out: timeStr } : {}),
         ...(location ? (type === 'in' ? { location_in: location } : { location_out: location }) : {}),
-        ...(lateReason ? { late_reason: lateReason, appeal_status: 'pending', appeal_created_at: new Date().toISOString() } : {})
+        ...(lateReason ? { late_reason: lateReason, appeal_status: 'pending', appeal_created_at: new Date().toISOString() } : {}),
+        ...(attendanceType ? { attendance_type: attendanceType } : {}),
+        ...(activityName ? { activity_name: activityName } : {})
       };
       await this.saveTeacherAttendance(dateStr, teacherId, payload);
       if (photoDataUrl) {
@@ -244,7 +248,9 @@ const DB = {
         isUmmi: !!isUmmi,
         roleGroup: roleGroup || (isUmmi ? 'ummi' : 'gtk'),
         clientTimestamp: new Date().toISOString(),
-        lateReason: lateReason || ''
+        lateReason: lateReason || '',
+        attendance_type: attendanceType || '',
+        activity_name: activityName || ''
       })
     });
     let result = {};

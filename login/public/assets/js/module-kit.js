@@ -270,7 +270,7 @@ const ModuleKit = {
         const childIds = Object.keys(myStudents || {});
         return all.filter((r) => childIds.includes(r.studentId) || r.createdBy === uid);
       }
-      return !def.own || this.sees(def) ? all : all.filter((r) => (r.teacherId && r.teacherId === uid) || r.createdBy === uid);
+      return !def.own || this.sees(def) ? all : all.filter((r) => (r.teacherId && r.teacherId === uid) || (r.gtkId && r.gtkId === uid) || (r.employeeId && r.employeeId === uid) || r.createdBy === uid);
     };
     const [rows, refs] = await Promise.all([loadRows(), this.loadRefs(def)]);
     const state = { rows, q: '', status: '', editing: null };
@@ -593,6 +593,15 @@ const ModuleKit = {
           tf.disabled = false;
         }
       }
+      const ef = form.querySelector('#mk-f-employeeId');
+      if (ef) {
+        if (!isApprover && def.approverRoles) {
+          ef.value = row ? (row.employeeId || uid) : uid;
+          ef.disabled = true;
+        } else {
+          ef.disabled = false;
+        }
+      }
       const cf = form.querySelector('#mk-f-classId');
       const sfSub = form.querySelector('#mk-f-subjectId');
       if (isSchedule && cf && sfSub) {
@@ -723,7 +732,7 @@ const ModuleKit = {
       if (editBtn) {
         const row = state.rows.find((r) => r.id === editBtn.dataset.mkEdit);
         if (row && row[def.statusField || 'status'] === 'Disetujui (ACC)' && !this.isApprover(def) && def.approverRoles) {
-          alert('Perangkat ini sudah disetujui (ACC) oleh Kurikulum. Jika ingin melakukan revisi, silakan hubungi bagian Kurikulum untuk membuka status revisi.');
+          alert('Data/berkas ini sudah disetujui (ACC). Jika ingin melakukan revisi, silakan hubungi bagian peninjau/verifikator.');
           return;
         }
         openForm(row);
@@ -732,7 +741,7 @@ const ModuleKit = {
       if (!delBtn) return;
       const targetRow = state.rows.find((r) => r.id === delBtn.dataset.mkDel);
       if (targetRow && targetRow[def.statusField || 'status'] === 'Disetujui (ACC)' && !this.isApprover(def) && def.approverRoles) {
-        alert('Perangkat yang telah disetujui (ACC) tidak dapat dihapus. Silakan hubungi bagian Kurikulum.');
+        alert('Data/berkas yang telah disetujui (ACC) tidak dapat dihapus. Silakan hubungi bagian peninjau/verifikator.');
         return;
       }
       if (!confirm('Yakin ingin menghapus data ini?')) return;
@@ -815,6 +824,12 @@ const ModuleKit = {
         }
         if (!isApprover && def.fields.some((f) => f.key === 'reviewerFeedback')) {
           payload.reviewerFeedback = currentRow ? (currentRow.reviewerFeedback || '') : '';
+        }
+        if (!isApprover && def.fields.some((f) => f.key === 'employeeId')) {
+          payload.employeeId = currentRow ? (currentRow.employeeId || uid) : uid;
+          if (refs.employee && refs.employee[payload.employeeId]) {
+            payload.employeeIdName = refs.employee[payload.employeeId];
+          }
         }
         if (!isApprover && def.fields.some((f) => f.key === 'gtkId')) {
           payload.gtkId = currentRow ? (currentRow.gtkId || uid) : uid;
