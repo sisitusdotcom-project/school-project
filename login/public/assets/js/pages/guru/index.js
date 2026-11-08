@@ -206,7 +206,7 @@ ${myTravels.length > 5 ? `<div class="travel-all-wrap"><a href="#/gtk/official-t
 <div class="quick-nav-desc">Dokumentasi karya & sertifikat</div>
 </div>
 </a>
-<a href="#/personnel/evaluations" class="quick-nav-card">
+<a href="#/guru/kpi" class="quick-nav-card">
 <div class="quick-nav-icon"><i class="ph ph-chart-line-up"></i></div>
 <div class="quick-nav-info">
 <div class="quick-nav-title">Rapor Kinerja & KPI</div>
@@ -329,11 +329,38 @@ container.innerHTML = `
 <button class="btn-icon" data-close-modal="modal-rapor-print"><i class="ph ph-x"></i></button>
 </div>
 <div class="modal-body">
-<p class="text-muted soft-note">Pilih murid untuk mencetak lembar rapor resmi format F4 (Cover, Nilai Akademik, Ekstrakurikuler, Catatan Wali Kelas, dan Presensi).</p>
+<div class="rapor-modal-filters">
+<div class="form-group">
+<label class="small text-muted">Pilih Semester</label>
+<select id="rapor-modal-sem" class="form-control">
+<option value="1">Semester 1 (Ganjil)</option>
+<option value="2">Semester 2 (Genap)</option>
+</select>
+</div>
+<div class="form-group">
+<label class="small text-muted">Tahun Ajaran</label>
+<input type="text" id="rapor-modal-year" class="form-control" value="${settings?.currentAcademicYear || '2026/2027'}" readonly>
+</div>
+</div>
+<p class="text-muted soft-note">Pilih murid untuk mencetak lembar rapor resmi format F4 atau lihat arsip riwayat pembelajaran sejak kelas awal.</p>
 <div id="rapor-students-list" class="rapor-students-list"></div>
 </div>
 <div class="modal-footer">
 <button type="button" class="btn btn-outline" data-close-modal="modal-rapor-print">Tutup</button>
+</div>
+</div>
+</div>
+<div class="modal-overlay" id="modal-student-history">
+<div class="modal modal-lg">
+<div class="modal-header">
+<h3 class="modal-title" id="history-modal-title"><i class="ph ph-clock-counter-clockwise"></i> Riwayat Laporan Pembelajaran Siswa</h3>
+<button class="btn-icon" data-close-modal="modal-student-history"><i class="ph ph-x"></i></button>
+</div>
+<div class="modal-body">
+<div id="history-modal-content"></div>
+</div>
+<div class="modal-footer">
+<button type="button" class="btn btn-outline" data-close-modal="modal-student-history">Tutup</button>
 </div>
 </div>
 </div>
@@ -344,7 +371,7 @@ const classId = btn.dataset.printCls;
 const targetClass = classArr.find(c => c.id === classId);
 if (!targetClass) return;
 const classStudents = studentArr.filter(s => s.classId === classId).sort((a, b) => a.name.localeCompare(b.name));
-document.getElementById('rapor-modal-title').textContent = `Cetak Rapor Murid - Kelas ${targetClass.name}`;
+document.getElementById('rapor-modal-title').textContent = `Cetak Rapor Kelas ${targetClass.name}`;
 const listContainer = document.getElementById('rapor-students-list');
 if (!classStudents.length) {
 listContainer.innerHTML = '<div class="card text-center text-muted p-3">Belum ada data murid terdaftar di kelas ini.</div>';
@@ -352,24 +379,79 @@ listContainer.innerHTML = '<div class="card text-center text-muted p-3">Belum ad
 listContainer.innerHTML = '<div class="card text-center text-muted p-3"><i class="ph ph-spinner"></i> Memuat data murid & peringkat...</div>';
 document.getElementById('modal-rapor-print').classList.add('active');
 const year = settings?.currentAcademicYear || AppConfig.DEFAULT_SETTINGS.currentAcademicYear;
-const sem = settings?.currentSemester || AppConfig.DEFAULT_SETTINGS.currentSemester;
-const rankMap = await DB.getClassRankings(year, sem, classId);
+const semSelect = document.getElementById('rapor-modal-sem');
+let currentModalSem = parseInt(semSelect ? semSelect.value : settings?.currentSemester, 10) || settings?.currentSemester || 1;
+if (semSelect) semSelect.value = String(currentModalSem);
+const renderStudentPrintRows = async (chosenSem) => {
+const rankMap = await DB.getClassRankings(year, chosenSem, classId);
 listContainer.innerHTML = classStudents.map((s, idx) => {
 const rankInfo = rankMap[s.id];
 const rankBadge = (rankInfo && rankInfo.isTop10 && rankInfo.text) ? `<span class="badge badge-primary"><i class="ph ph-medal"></i> ${AppConfig.escapeHtml(rankInfo.text)}</span>` : '';
 return `
 <div class="rapor-student-row">
 <div class="rapor-student-info">
-<span class="badge badge-primary">${idx + 1}</span>
-<div>
-<strong>${AppConfig.escapeHtml(s.name)}</strong>
-<div class="text-muted small">${AppConfig.formatStudentIdentity(s)} · <span class="badge badge-success"><i class="ph ph-book-open"></i> Ummi: ${AppConfig.escapeHtml(s.ummiLevel || 'Pra-Jilid')}</span>${rankBadge ? ' · ' + rankBadge : ''}</div>
+<span class="badge badge-primary rapor-student-num">${idx + 1}</span>
+<div class="rapor-student-detail">
+<div class="rapor-student-name">${AppConfig.escapeHtml(s.name)}</div>
+<div class="rapor-student-meta">
+<span>${AppConfig.formatStudentIdentity(s)}</span>
+<span class="badge badge-success"><i class="ph ph-book-open"></i> Ummi: ${AppConfig.escapeHtml(s.ummiLevel || 'Pra-Jilid')}</span>
+${rankBadge}
 </div>
 </div>
-<a href="print.html?id=${s.id}" target="_blank" class="btn btn-primary btn-sm"><i class="ph ph-printer"></i> Cetak Rapor F4</a>
+</div>
+<div class="rapor-student-actions">
+<a href="print.html?id=${s.id}&sem=${chosenSem}&year=${encodeURIComponent(year)}" target="_blank" class="btn btn-primary btn-sm"><i class="ph ph-printer"></i> Cetak Rapor</a>
+<button type="button" class="btn btn-outline btn-sm btn-student-history" data-student-id="${s.id}" data-student-name="${AppConfig.escapeHtml(s.name)}" data-student-nis="${AppConfig.escapeHtml(s.nis || '-')}"><i class="ph ph-clock-counter-clockwise"></i> Riwayat</button>
+</div>
 </div>
 `;
 }).join('');
+listContainer.querySelectorAll('.btn-student-history').forEach(hBtn => {
+hBtn.onclick = async () => {
+const stId = hBtn.dataset.studentId;
+const stName = hBtn.dataset.studentName;
+const stNis = hBtn.dataset.studentNis;
+document.getElementById('history-modal-title').innerHTML = `<i class="ph ph-clock-counter-clockwise"></i> Riwayat Pembelajaran: ${AppConfig.escapeHtml(stName)} (${AppConfig.escapeHtml(stNis)})`;
+const cEl = document.getElementById('history-modal-content');
+cEl.innerHTML = '<div class="p-3 text-center text-muted"><i class="ph ph-spinner ph-spin"></i> Memuat seluruh rekaman riwayat pembelajaran...</div>';
+document.getElementById('modal-student-history').classList.add('active');
+const history = await DB.getStudentLearningHistory(stId);
+if (!history.length) {
+cEl.innerHTML = '<div class="card text-center text-muted p-3">Belum ada riwayat nilai atau rapor tercatat untuk murid ini.</div>';
+} else {
+cEl.innerHTML = `
+<p class="text-muted small mb-3">Arsip laporan hasil pembelajaran dan e-rapor murid dari kelas 1 sampai kelas aktif saat ini:</p>
+<div class="history-list">
+${history.map(h => `
+<div class="history-card-item">
+<div class="history-card-header">
+<div>
+<strong>Tahun Ajaran ${AppConfig.escapeHtml(h.year)} — Semester ${h.sem}</strong> ${h.isCurrent ? '<span class="badge badge-primary">Semester Berjalan</span>' : '<span class="badge badge-neutral">Arsip</span>'}
+<div class="history-card-meta">
+Rata-rata Nilai: <strong>${h.avgScore}</strong> (${h.gradeCount} Mapel) · Sakit: ${h.attendance.sakit || 0}, Izin: ${h.attendance.izin || 0}, Alpa: ${h.attendance.alpa || 0}
+</div>
+</div>
+<a href="print.html?id=${stId}&sem=${h.sem}&year=${encodeURIComponent(h.year)}" target="_blank" class="btn btn-outline btn-sm">
+<i class="ph ph-printer"></i> Cetak Rapor Sem ${h.sem}
+</a>
+</div>
+${h.note && h.note !== '-' ? `<p class="small text-muted mb-0"><strong>Catatan Wali Kelas:</strong> ${AppConfig.escapeHtml(h.note)}</p>` : ''}
+</div>
+`).join('')}
+</div>
+`;
+}
+};
+});
+};
+await renderStudentPrintRows(currentModalSem);
+if (semSelect) {
+semSelect.onchange = (e) => {
+currentModalSem = parseInt(e.target.value, 10) || 1;
+renderStudentPrintRows(currentModalSem);
+};
+}
 return;
 }
 document.getElementById('modal-rapor-print').classList.add('active');
@@ -430,7 +512,7 @@ return `
 <div class="card-header">
 <h3 class="card-title" style="font-size:15px">${AppConfig.escapeHtml(s.name)}</h3>
 <div style="display:flex; gap:6px;">
-<a href="print.html?id=${s.id}" target="_blank" class="btn btn-outline btn-sm">
+<a href="print.html?id=${s.id}&sem=${sem}&year=${encodeURIComponent(year)}" target="_blank" class="btn btn-outline btn-sm">
 <i class="ph ph-printer"></i> Cetak
 </a>
 <button type="button" class="btn btn-outline btn-sm btn-open-obs" data-obs-id="${s.id}" data-obs-name="${AppConfig.escapeHtml(s.name)}">
@@ -589,17 +671,24 @@ const classOpts = classArr.map(c => `<option value="${c.id}">${AppConfig.escapeH
 container.innerHTML = `
 <div class="card" style="margin-bottom:20px">
 <form id="filter-academic" class="inline-form" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
-<div class="form-group" style="margin-bottom:0;flex:1;min-width:200px">
+<div class="form-group filter-group-wide">
 <label>Pilih Kelas</label>
 <select id="ac-class" required>
 <option value="">Pilih Kelas</option>
 ${classOpts}
 </select>
 </div>
-<div class="form-group" style="margin-bottom:0;flex:1;min-width:200px">
+<div class="form-group filter-group-wide">
 <label>Mata Pelajaran</label>
 <select id="ac-subject" required disabled>
 <option value="">Pilih Mata Pelajaran</option>
+</select>
+</div>
+<div class="form-group filter-group-compact">
+<label>Semester</label>
+<select id="ac-semester" required>
+<option value="1" ${(settings?.currentSemester === 1 || !settings?.currentSemester) ? 'selected' : ''}>Semester 1 (Ganjil)</option>
+<option value="2" ${settings?.currentSemester === 2 ? 'selected' : ''}>Semester 2 (Genap)</option>
 </select>
 </div>
 <button type="submit" class="btn btn-primary"><i class="ph ph-magnifying-glass"></i> Tampilkan</button>
@@ -681,7 +770,8 @@ const isReadOnly = isWali && !isSubjectTeacher && Boolean(subjectTeacherUid);
 const subjectTeacherName = subjectTeacherUid && allUsers[subjectTeacherUid] ? allUsers[subjectTeacherUid].name : 'Guru Pengampu';
 const subObj = subArr.find(s => s.id === subjectId);
 const year = settings.currentAcademicYear;
-const sem = settings.currentSemester;
+const acSemSelect = document.getElementById('ac-semester');
+const sem = parseInt(acSemSelect ? acSemSelect.value : settings.currentSemester, 10) || settings.currentSemester || 1;
 const [students, rawChapters, finalization] = await Promise.all([
 DB.getStudentsByClass(classId),
 DB.getSubjectChapters(year, sem, classId, subjectId),
@@ -820,6 +910,7 @@ ${chInputs}
 </div>
 </div>
 <div class="grade-input-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(100px, 1fr)); gap:8px; margin-bottom:10px;">
+${sem === 1 ? `
 <div class="form-group" style="margin-bottom:0;">
 <label style="font-size:11px;">STS 1 (Ganjil)</label>
 <input type="number" class="ac-sts1" data-stu="${s.id}" value="${g.sts1 || ''}" placeholder="75-100" min="75" max="100" ${isReadOnly ? 'disabled' : ''}>
@@ -828,6 +919,11 @@ ${chInputs}
 <label style="font-size:11px;">SAS (Semester 1)</label>
 <input type="number" class="ac-sas" data-stu="${s.id}" value="${g.sas || ''}" placeholder="75-100" min="75" max="100" ${isReadOnly ? 'disabled' : ''}>
 </div>
+<div class="form-group mb-0">
+<label class="grade-final-label">Nilai Akhir Rapor Sem 1</label>
+<input type="number" class="ac-score" data-stu="${s.id}" value="${g.score || ''}" placeholder="75-100" min="75" max="100" ${isReadOnly ? 'disabled' : ''}>
+</div>
+` : `
 <div class="form-group" style="margin-bottom:0;">
 <label style="font-size:11px;">STS 2 (Genap)</label>
 <input type="number" class="ac-sts2" data-stu="${s.id}" value="${g.sts2 || ''}" placeholder="75-100" min="75" max="100" ${isReadOnly ? 'disabled' : ''}>
@@ -836,10 +932,11 @@ ${chInputs}
 <label style="font-size:11px;">SAT (Akhir Tahun)</label>
 <input type="number" class="ac-sat" data-stu="${s.id}" value="${g.sat || ''}" placeholder="75-100" min="75" max="100" ${isReadOnly ? 'disabled' : ''}>
 </div>
-<div class="form-group" style="margin-bottom:0;">
-<label style="font-size:11px; font-weight:700; color:var(--primary);">Nilai Akhir Rapor</label>
+<div class="form-group mb-0">
+<label class="grade-final-label">Nilai Akhir Rapor Sem 2</label>
 <input type="number" class="ac-score" data-stu="${s.id}" value="${g.score || ''}" placeholder="75-100" min="75" max="100" ${isReadOnly ? 'disabled' : ''}>
 </div>
+`}
 </div>
 <div class="form-group" style="margin-bottom:0;">
 <label style="font-size:11.5px; display:flex; justify-content:space-between; align-items:center;">
@@ -1009,7 +1106,8 @@ const sts1Val = Number(sts1Inp?.value);
 const sasVal = Number(sasInp?.value);
 const sts2Val = Number(sts2Inp?.value);
 const satVal = Number(satInp?.value);
-const validExams = [phAvg, sts1Val, sasVal, sts2Val, satVal].filter(v => Number.isFinite(v) && v >= 75);
+const examValues = sem === 1 ? [phAvg, sts1Val, sasVal] : [phAvg, sts2Val, satVal];
+const validExams = examValues.filter(v => Number.isFinite(v) && v >= 75);
 if (validExams.length && scoreInp && !scoreInp.disabled) {
 scoreInp.value = Math.round(validExams.reduce((a, b) => a + b, 0) / validExams.length);
 }
@@ -3347,5 +3445,270 @@ const btnPrint = document.getElementById('btn-print-slip');
 if (btnPrint) {
 btnPrint.onclick = () => window.print();
 }
+},
+async renderTeacherKpi(container) {
+Router.setTitle('Rapor Kinerja & KPI Saya', 'Evaluasi capaian kinerja dan monitoring KPI pendidik.');
+container.innerHTML = '<div class="loader loader-kpi"></div>';
+const user = Auth.userData || Auth.currentUser || {};
+const uid = (Auth.currentUser && Auth.currentUser.uid) || user.uid;
+const [evalData, settings, attHistory] = await Promise.all([
+DB.getMyEvaluation(uid, user.name),
+DB.getSettings(),
+DB.getTeacherAttendanceHistory(uid, 120)
+]);
+const { profile, evaluations } = evalData;
+const currYear = settings?.currentAcademicYear || AppConfig.DEFAULT_SETTINGS.currentAcademicYear;
+const empName = profile?.name || user.name || '-';
+const empNbm = profile?.nbm || user.nbm || '-';
+const empStatus = profile?.employmentStatus || user.employmentStatus || 'GTY';
+const empAmanah = profile?.structuralAmanah || (user.assignments || []).join(', ') || profile?.position || 'Guru';
+const liveKpi = AppConfig.calculateAttendanceGrade(attHistory, {
+academicYear: currYear,
+attendanceRules: settings.attendanceRules,
+isUmmi: AppConfig.isUserUmmi(user)
+});
+const activeOfficialEval = evaluations.find(e => (e.period || '').includes(currYear.replace('/', '-')) || (e.period || '').includes(currYear));
+const archiveEvals = evaluations.filter(e => e !== activeOfficialEval);
+container.innerHTML = `
+<div class="card mb-16">
+<div class="rapor-modal-filters">
+<div class="form-group mb-0">
+<label class="small text-muted"><i class="ph ph-calendar"></i> Periode Tampilan Kinerja & KPI</label>
+<select id="kpi-period-select" class="form-control">
+<option value="ACTIVE" selected>T.A ${AppConfig.escapeHtml(currYear)} — Berjalan (Monitoring KPI Real-Time)</option>
+${archiveEvals.map(e => `<option value="${e.id}">${AppConfig.escapeHtml(e.period || 'Tahun Ajaran')} — Arsip Resmi Penilaian PCM Sedati</option>`).join('')}
+</select>
+</div>
+</div>
+</div>
+<div id="kpi-content-wrap"></div>
+`;
+const contentWrap = document.getElementById('kpi-content-wrap');
+const renderActiveKpi = () => {
+let score = liveKpi.overallScore;
+let lAum = liveKpi.teachingAttendancePercent;
+let lCom = liveKpi.punctualityPercent;
+let lMuham = liveKpi.pembinaanPercent;
+let sourceLabel = '<span class="badge badge-success"><i class="ph ph-activity"></i> Data Berjalan Real-Time</span>';
+if (activeOfficialEval) {
+score = Number(activeOfficialEval.score) || score;
+lAum = activeOfficialEval.loyaltyAum || lAum;
+lCom = activeOfficialEval.loyaltyCommitment || lCom;
+lMuham = activeOfficialEval.loyaltyMuhammadiyah || lMuham;
+sourceLabel = '<span class="badge badge-primary"><i class="ph ph-seal-check"></i> Evaluasi Resmi Semester Berjalan</span>';
+}
+const meta = AppConfig.getAttendanceGradeMeta(score);
+let grade = meta.grade;
+let message = meta.keterangan;
+let gradeTone = meta.tone;
+let alertClass = `panel-callout--${gradeTone}`;
+let predText = activeOfficialEval?.predicate || (grade === 'A' ? 'Prioritas' : (grade === 'B' ? 'Prospek' : (grade === 'C' ? 'Lanjutan' : (grade === 'D' ? 'Pemula' : 'Perlu Pembinaan'))));
+let recText = activeOfficialEval?.statusRecommendation || (score >= 85 ? 'Naik' : 'Tetap');
+contentWrap.innerHTML = `
+<div class="kpi-hero-card">
+<div>
+<div class="kpi-card-header">
+<span class="badge badge-primary">Tahun Ajaran ${AppConfig.escapeHtml(currYear)}</span>
+${sourceLabel}
+</div>
+<h2 class="kpi-emp-name">${AppConfig.escapeHtml(empName)}</h2>
+<div class="text-muted small">
+NBM: <strong>${AppConfig.escapeHtml(empNbm)}</strong> · Status: <strong>${AppConfig.escapeHtml(empStatus)}</strong> · Amanah: <strong>${AppConfig.escapeHtml(empAmanah)}</strong>
+</div>
+</div>
+<div class="kpi-badge-wrap">
+<div class="kpi-score-badge">
+<span class="kpi-score-val text-${gradeTone}">${score}</span>
+<span class="kpi-score-lbl">Skor KPI</span>
+</div>
+<div>
+<div class="kpi-grade-badge-wrap"><span class="badge badge-${gradeTone} kpi-grade-badge-lg">Grade ${grade} · ${AppConfig.escapeHtml(predText)}</span></div>
+<div><span class="badge badge-${recText === 'Naik' ? 'success' : 'neutral'}"><i class="ph ph-arrow-up-right"></i> Proyeksi ${AppConfig.escapeHtml(recText)}</span></div>
+</div>
+</div>
+</div>
+<div class="${alertClass}">
+<i class="ph ph-${grade === 'A' || grade === 'B' ? 'sparkle' : 'warning-circle'}"></i> <strong>Amanah & Motivasi Disiplin:</strong> "${AppConfig.escapeHtml(message)}"
+</div>
+<div class="card section-block mb-16">
+<h3 class="card-title kpi-section-title"><i class="ph ph-chart-donut"></i> 3 Indikator Utama KPI Real-Time (Arahan Personalia)</h3>
+<div class="kpi-metric-item">
+<div class="kpi-metric-label">
+<span><strong>1. Kehadiran / Masuk Mengajar</strong> (Target: &ge;90%)</span>
+<strong>${lAum}%</strong>
+</div>
+<div class="progress-bar"><div class="progress-fill kpi-fill-success" data-progress="${Math.min(100, lAum)}"></div></div>
+</div>
+<div class="kpi-metric-item">
+<div class="kpi-metric-label">
+<span><strong>2. Ketepatan Waktu Datang & Pulang</strong> (Target: Jam Kerja Sekolah)</span>
+<strong>${lCom}%</strong>
+</div>
+<div class="progress-bar"><div class="progress-fill ${lCom >= 75 ? 'kpi-fill-success' : 'kpi-fill-warning'}" data-progress="${Math.min(100, lCom)}"></div></div>
+</div>
+<div class="kpi-metric-item">
+<div class="kpi-metric-label">
+<span><strong>3. Keaktifan Pembinaan Musada & Kajian PCM/PDM</strong> (Warga Muhammadiyah)</span>
+<strong>${lMuham}%</strong>
+</div>
+<div class="progress-bar"><div class="progress-fill kpi-fill-primary" data-progress="${Math.min(100, lMuham)}"></div></div>
+</div>
+</div>
+<div class="card panel-callout panel-callout--primary">
+<div class="kpi-card-notice">
+<i class="ph ph-shield-check kpi-shield-icon"></i>
+<div>
+<h4 class="kpi-notice-title">Ketentuan Penilaian Kinerja & Reset Tahunan</h4>
+<p class="text-muted small kpi-notice-desc">Sesuai ketentuan Waka Personalia, akumulasi kedisiplinan dan peringatan otomatis dievaluasi per tahun ajaran dan direset otomatis pada awal tahun ajaran baru. Pantau dan tingkatkan terus keaktifan Anda sebelum sidang komitmen pakta integritas PCM Sedati di akhir tahun.</p>
+</div>
+</div>
+</div>
+`;
+contentWrap.querySelectorAll('[data-progress]').forEach((el) => {
+el.style.width = `${el.getAttribute('data-progress')}%`;
+});
+};
+const renderArchiveKpi = (evalId) => {
+const archive = archiveEvals.find(e => e.id === evalId);
+if (!archive) return;
+const score = Number(archive.score) || 0;
+let grade = 'E';
+let message = 'Surat Peringatan';
+let gradeTone = 'danger';
+let alertClass = 'panel-callout--danger';
+if (score >= 91) {
+grade = 'A';
+message = 'Ayo Istiqomah dalam Kebaikan';
+gradeTone = 'success';
+alertClass = 'panel-callout--success';
+} else if (score >= 81) {
+grade = 'B';
+message = 'Ayo tingkatkan Nilaimu';
+gradeTone = 'primary';
+alertClass = 'panel-callout--primary';
+} else if (score >= 71) {
+grade = 'C';
+message = 'Peringatan Lisan';
+gradeTone = 'warning';
+alertClass = 'panel-callout--warning';
+} else if (score >= 51) {
+grade = 'D';
+message = 'Peringatan Tertulis';
+gradeTone = 'danger';
+alertClass = 'panel-callout--danger';
+}
+const lAum = archive.loyaltyAum || 95;
+const lCom = archive.loyaltyCommitment || 80;
+const lMuham = archive.loyaltyMuhammadiyah || archive.kpiKajianPcmPdm || 85;
+const cExem = archive.capacityExemplary || 90;
+const cTeam = archive.capacityTeamwork || 90;
+const cLead = archive.capacityLeadership || 90;
+const cDisc = archive.capacityDiscipline || 90;
+const cInno = archive.capacityInnovation || 90;
+const cResp = archive.capacityResponsibility || 90;
+const cInteg = archive.capacityIntegrity || 90;
+const cDev = archive.capacitySelfDev || 90;
+const capStruct = archive.capabilityStructural || 90;
+const capMain = archive.capabilityMainDuty || 90;
+contentWrap.innerHTML = `
+<div class="kpi-hero-card">
+<div>
+<div class="kpi-card-header">
+<span class="badge badge-primary">Periode ${AppConfig.escapeHtml(archive.period || '2024/2025')}</span>
+<span class="badge badge-neutral"><i class="ph ph-archive"></i> Arsip Penilaian PCM Sedati</span>
+</div>
+<h2 class="kpi-emp-name">${AppConfig.escapeHtml(empName)}</h2>
+<div class="text-muted small">
+NBM: <strong>${AppConfig.escapeHtml(empNbm)}</strong> · Status: <strong>${AppConfig.escapeHtml(empStatus)}</strong> · Amanah: <strong>${AppConfig.escapeHtml(empAmanah)}</strong>
+</div>
+</div>
+<div class="kpi-badge-wrap">
+<div class="kpi-score-badge">
+<span class="kpi-score-val text-${gradeTone}">${score}</span>
+<span class="kpi-score-lbl">Skor KPI</span>
+</div>
+<div>
+<div class="kpi-grade-badge-wrap"><span class="badge badge-${gradeTone} kpi-grade-badge-lg">Grade ${grade} · ${AppConfig.escapeHtml(archive.predicate || 'Prospek')}</span></div>
+<div><span class="badge badge-${archive.statusRecommendation === 'Naik' ? 'success' : 'neutral'}"><i class="ph ph-arrow-up-right"></i> Rekomendasi ${AppConfig.escapeHtml(archive.statusRecommendation || 'Tetap')}</span></div>
+</div>
+</div>
+</div>
+<div class="${alertClass}">
+<i class="ph ph-${grade === 'A' || grade === 'B' ? 'sparkle' : 'warning-circle'}"></i> <strong>Amanah & Catatan Personalia:</strong> "${AppConfig.escapeHtml(message)}"
+</div>
+<div class="card section-block mb-16">
+<h3 class="card-title kpi-section-title"><i class="ph ph-check-square-offset"></i> 3 Indikator Utama Evaluasi (Arahan Personalia)</h3>
+<div class="kpi-metric-item">
+<div class="kpi-metric-label">
+<span><strong>1. Kehadiran / Masuk Mengajar</strong> (Loyalitas thd AUM)</span>
+<strong>${lAum}%</strong>
+</div>
+<div class="progress-bar"><div class="progress-fill kpi-fill-success" data-progress="${Math.min(100, lAum)}"></div></div>
+</div>
+<div class="kpi-metric-item">
+<div class="kpi-metric-label">
+<span><strong>2. Ketepatan Waktu Datang & Pulang</strong> (Kepatuhan & Kedisiplinan Jam Kerja)</span>
+<strong>${lCom}%</strong>
+</div>
+<div class="progress-bar"><div class="progress-fill ${lCom >= 75 ? 'kpi-fill-success' : 'kpi-fill-warning'}" data-progress="${Math.min(100, lCom)}"></div></div>
+</div>
+<div class="kpi-metric-item">
+<div class="kpi-metric-label">
+<span><strong>3. Keaktifan Pembinaan Musada & Kajian PCM/PDM</strong> (Warga Muhammadiyah)</span>
+<strong>${lMuham}%</strong>
+</div>
+<div class="progress-bar"><div class="progress-fill kpi-fill-primary" data-progress="${Math.min(100, lMuham)}"></div></div>
+</div>
+</div>
+<div class="kpi-grid-2col">
+<div class="card section-block">
+<h4 class="card-title kpi-subcard-title"><i class="ph ph-users-three"></i> Rata-rata Kapasitas (${archive.avgCapacity || 90})</h4>
+<div class="table-responsive">
+<table class="table">
+<tbody>
+<tr><td>Keteladanan / Uswah Hasanah</td><td class="text-right"><strong>${cExem}</strong></td></tr>
+<tr><td>Teamwork / Kolektif Kolegial</td><td class="text-right"><strong>${cTeam}</strong></td></tr>
+<tr><td>Leadership</td><td class="text-right"><strong>${cLead}</strong></td></tr>
+<tr><td>Kedisiplinan</td><td class="text-right"><strong>${cDisc}</strong></td></tr>
+<tr><td>Inovasi & Kreasi</td><td class="text-right"><strong>${cInno}</strong></td></tr>
+<tr><td>Tanggung Jawab</td><td class="text-right"><strong>${cResp}</strong></td></tr>
+<tr><td>Kejujuran & Integritas</td><td class="text-right"><strong>${cInteg}</strong></td></tr>
+<tr><td>Pengembangan Diri</td><td class="text-right"><strong>${cDev}</strong></td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="card section-block">
+<h4 class="card-title kpi-subcard-title"><i class="ph ph-briefcase"></i> Kapabilitas & Komitmen PCM (${archive.avgCapability || 90})</h4>
+<div class="table-responsive">
+<table class="table">
+<tbody>
+<tr><td>Tugas Struktural (Amanah Waka / Staf)</td><td class="text-right"><strong>${capStruct}</strong></td></tr>
+<tr><td>Tugas Pokok GTK (Supervisi KBM / Adm)</td><td class="text-right"><strong>${capMain}</strong></td></tr>
+<tr><td>Wawancara Komitmen Akhir Tahun</td><td class="text-right"><span class="badge badge-success">${AppConfig.escapeHtml(archive.pcmCommitmentInterview || 'Memenuhi Pakta Integritas')}</span></td></tr>
+<tr><td>Tanggal Sidang / Penerbitan</td><td class="text-right">${AppConfig.escapeHtml(archive.date || '-')}</td></tr>
+</tbody>
+</table>
+</div>
+<p class="text-muted small kpi-archive-note"><em>${AppConfig.escapeHtml(archive.note || 'Arsip Resmi Penilaian Kinerja SDM Majelis Dikdasmen & PNF PCM Sedati')}</em></p>
+</div>
+</div>
+`;
+contentWrap.querySelectorAll('[data-progress]').forEach((el) => {
+el.style.width = `${el.getAttribute('data-progress')}%`;
+});
+};
+renderActiveKpi();
+const periodSelect = document.getElementById('kpi-period-select');
+if (periodSelect) {
+periodSelect.onchange = (e) => {
+const val = e.target.value;
+if (val === 'ACTIVE') {
+renderActiveKpi();
+} else {
+renderArchiveKpi(val);
 }
 };
+}
+}
+}

@@ -609,11 +609,12 @@ const NotificationService = {
     const headerCount = document.getElementById('notif-unread-count');
     if (headerCount) {
       if (unreadCount > 0) {
-        const actionText = actionCount > 0 ? ` (${actionCount} Perlu Aksi)` : '';
-        headerCount.textContent = `${unreadCount} Baru${actionText}`;
+        headerCount.textContent = `${unreadCount} Baru`;
+        headerCount.title = actionCount > 0 ? `${unreadCount} belum dibaca (${actionCount} perlu tindakan)` : `${unreadCount} belum dibaca`;
         headerCount.classList.add('active');
       } else {
         headerCount.textContent = '0';
+        headerCount.title = '';
         headerCount.classList.remove('active');
       }
     }

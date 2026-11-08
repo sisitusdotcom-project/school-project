@@ -131,7 +131,7 @@ const NAV_ITEMS = Object.freeze({
 { hash: '#/guru/academic', icon: 'ph-check-square', text: 'Input Nilai Mapel', group: 'Tugas Utama Guru' },
 { hash: '#/curriculum/syllabus', icon: 'ph-upload-simple', text: 'Upload Perangkat Ajar', group: 'Tugas Utama Guru' },
 { hash: '#/guru/portfolio', icon: 'ph-folder', text: 'Portofolio Guru', group: 'Tugas Utama Guru' },
-{ hash: '#/personnel/evaluations', icon: 'ph-chart-line-up', text: 'Rapor Kinerja & KPI', group: 'Tugas Utama Guru' },
+{ hash: '#/guru/kpi', icon: 'ph-chart-line-up', text: 'Rapor Kinerja & KPI Saya', group: 'Tugas Utama Guru' },
 { hash: '#/guru/observations', icon: 'ph-note-pencil', text: 'Riwayat Observasi', group: 'Tugas Utama Guru' },
 { hash: '#/gtk/official-travel', icon: 'ph-airplane-takeoff', text: 'Perjalanan Dinas', group: 'Tugas Utama Guru' },
 { hash: '#/gtk/salary-slip', icon: 'ph-receipt', text: 'Slip Gaji Pribadi', group: 'Tugas Utama Guru' }
@@ -160,7 +160,7 @@ const NAV_ITEMS = Object.freeze({
 { hash: '#/attendance', icon: 'ph-map-pin', text: 'Presensi Kehadiran' },
 { hash: '#/tendik/performance', icon: 'ph-clipboard-text', text: 'Laporan Kinerja', group: 'Tupoksi Tenaga Kependidikan' },
 { hash: '#/tendik/portfolio', icon: 'ph-folder', text: 'Portofolio', group: 'Tupoksi Tenaga Kependidikan' },
-{ hash: '#/personnel/evaluations', icon: 'ph-chart-line-up', text: 'Rapor Kinerja & KPI', group: 'Tupoksi Tenaga Kependidikan' },
+{ hash: '#/guru/kpi', icon: 'ph-chart-line-up', text: 'Rapor Kinerja & KPI Saya', group: 'Tupoksi Tenaga Kependidikan' },
 { hash: '#/gtk/official-travel', icon: 'ph-airplane-takeoff', text: 'Perjalanan Dinas', group: 'Tupoksi Tenaga Kependidikan' },
 { hash: '#/gtk/salary-slip', icon: 'ph-receipt', text: 'Slip Gaji Pribadi', group: 'Tupoksi Tenaga Kependidikan' }
 ],
@@ -214,7 +214,7 @@ const NAV_ITEMS = Object.freeze({
 { hash: '#/admin/assignments', icon: 'ph-clipboard-text', text: 'Distribusi Penugasan', group: 'Humas & Personalia: Administrasi SDM' },
 { hash: '#/personnel/data', icon: 'ph-folder-user', text: 'Data Kepegawaian', group: 'Humas & Personalia: Administrasi SDM' },
 { hash: '#/admin/attendance', icon: 'ph-clock', text: 'Pantau Disiplin Guru', group: 'Humas & Personalia: Kinerja & Portofolio' },
-{ hash: '#/personnel/evaluations', icon: 'ph-chart-line-up', text: 'Penilaian Kinerja SDM', group: 'Humas & Personalia: Kinerja & Portofolio' },
+{ hash: '#/personnel/evaluations', icon: 'ph-chart-line-up', text: 'Penilaian Kinerja SDM (Semua GTK)', group: 'Humas & Personalia: Kinerja & Portofolio' },
 { hash: '#/personnel/disciplinary', icon: 'ph-warning-octagon', text: 'Peringatan & Disiplin SDM', group: 'Humas & Personalia: Kinerja & Portofolio' },
 { hash: '#/guru/portfolio', icon: 'ph-folder-check', text: 'Verifikasi Portofolio Guru', group: 'Humas & Personalia: Kinerja & Portofolio' },
 { hash: '#/personnel/portfolio', icon: 'ph-folder-star', text: 'Portofolio & Kompetensi', group: 'Humas & Personalia: Kinerja & Portofolio' },
@@ -685,8 +685,19 @@ if (isPure) baseRole = 'Guru Ekstrakurikuler';
 else if (isPureUmmi) baseRole = 'Guru UMMI';
 return `${baseRole} · ${unitLabels}`;
 }
-function getRoleNav(role, assignments = []) {
-let baseNav = [...(NAV_ITEMS[role] || [])];
+function getRoleNav(role, assignments = [], user = null) {
+const isPraSd = Boolean(user && (user.isPraSd || user.status === 'Calon Siswa')) || (typeof Auth !== 'undefined' && Auth.userData && (Auth.userData.isPraSd || Auth.userData.status === 'Calon Siswa'));
+let baseNav = [];
+if (role === ROLES.ORTU && isPraSd) {
+baseNav = [
+{ hash: '#/dashboard', icon: 'ph-sparkle', text: 'Dashboard Pra SD' },
+{ hash: '#/parent/report-card', icon: 'ph-file-pdf', text: 'Rapor Digital (Preview)' },
+{ hash: '#/student-affairs/leaves', icon: 'ph-calendar-x', text: 'Permohonan Izin (Preview)' },
+{ hash: '#/finance/student-bills', icon: 'ph-receipt', text: 'Rincian Keuangan & SPP' }
+];
+} else {
+baseNav = [...(NAV_ITEMS[role] || [])];
+}
 const isEkstra = isUserEkstra(role, assignments);
 const isPure = isPureGuruEkstra(role, assignments);
 const isPureUmmi = isPureGuruUmmi(role, assignments);
@@ -1055,7 +1066,7 @@ if (evaluatedDays > 0) {
 teachingAttendancePercent = Math.max(0, Math.min(100, Math.round(((presentCount) / evaluatedDays) * 1000) / 10));
 }
 const teachingAttendanceMeta = getAttendanceGradeMeta(teachingAttendancePercent);
-let punctualityPercent = 100;
+let punctualityPercent = presentCount > 0 ? 100 : (evaluatedDays === 0 ? 100 : 0);
 if (presentCount > 0) {
 const inRate = (onTimeInCount / presentCount) * 100;
 const outRate = (onTimeOutCount / presentCount) * 100;
@@ -1114,6 +1125,7 @@ totalPembinaanDays,
 elapsedPembinaanDays,
 attendedPembinaanCount,
 overallScore,
+overallMeta,
 overallGrade: overallMeta.grade,
 overallKeterangan: overallMeta.keterangan,
 overallBadgeClass: overallMeta.badgeClass,

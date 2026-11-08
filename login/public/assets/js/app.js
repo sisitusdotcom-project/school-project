@@ -60,6 +60,8 @@ const App = {
         '#/gtk/official-travel',
         '#/curriculum/syllabus',
         '#/guru/portfolio',
+        '#/personnel/evaluations',
+        '#/guru/kpi',
         '#/guru/observations',
         '#/guru/student-attendance',
         '#/guru/classes',
@@ -84,11 +86,11 @@ const App = {
       if (kepsekPrefixes.some(p => path === p || path.startsWith(p + '/'))) return true;
     }
     if (role === AppConfig.ROLES.PERSONNEL || assignments.includes('WAKA_HUMAS_PERSONALIA') || assignments.includes('STAF_HUMAS_PERSONALIA')) {
-      const persAllowed = ['#/guru/portfolio', '#/tendik/portfolio', '#/gtk/official-travel', '#/humas/official-travel'];
+      const persAllowed = ['#/guru/kpi', '#/guru/portfolio', '#/tendik/portfolio', '#/gtk/official-travel', '#/humas/official-travel'];
       if (persAllowed.includes(path)) return true;
     }
     if (role === AppConfig.ROLES.TENDIK) {
-      const tendikAllowed = ['#/attendance', '#/tendik/performance', '#/tendik/portfolio'];
+      const tendikAllowed = ['#/attendance', '#/guru/kpi', '#/tendik/performance', '#/tendik/portfolio'];
       if (tendikAllowed.includes(path)) return true;
     }
     if (role === AppConfig.ROLES.KOMITE) {
@@ -289,6 +291,19 @@ const App = {
           '#/admin/extracurriculars': typeof AdminPages !== 'undefined' ? AdminPages.renderExtracurriculars : null,
           '#/admin/attendance': typeof AdminPages !== 'undefined' ? AdminPages.renderAttendance : null,
           '#/gtk/salary-slip': typeof GuruPages !== 'undefined' ? GuruPages.renderSalarySlip : null,
+          '#/personnel/evaluations': async (c) => {
+            const isEvaluator = Auth.currentRole === AppConfig.ROLES.ADMIN ||
+                                Auth.currentRole === AppConfig.ROLES.KEPSEK ||
+                                (Auth.currentAssignments || []).includes('WAKA_HUMAS_PERSONALIA') ||
+                                (Auth.currentAssignments || []).includes('STAF_HUMAS_PERSONALIA');
+            if (isEvaluator) {
+              const config = ModuleKit.defs['#/personnel/evaluations'];
+              await ModuleKit.render(c, '#/personnel/evaluations', config?.noun || 'Penilaian Kinerja SDM', config?.icon || 'ph-chart-line-up');
+            } else {
+              await GuruPages.renderTeacherKpi(c);
+            }
+          },
+          '#/guru/kpi': typeof GuruPages !== 'undefined' ? GuruPages.renderTeacherKpi : null,
           '#/attendance': typeof GuruPages !== 'undefined' ? GuruPages.renderTeacherAttendance : null,
           '#/guru/attendance': typeof GuruPages !== 'undefined' ? GuruPages.renderTeacherAttendance : null,
           '#/guru/student-attendance': typeof GuruPages !== 'undefined' ? GuruPages.renderStudentAttendance : null,

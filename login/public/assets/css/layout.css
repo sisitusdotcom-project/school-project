@@ -427,14 +427,15 @@
   background: var(--bg-body)
 }
 .page-header {
-  height: var(--shell-header-height);
-  padding: 10px var(--page-gutter);
+  min-height: var(--shell-header-height);
+  height: auto;
+  padding: 12px var(--page-gutter);
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   box-shadow: 0 4px 14px rgba(37, 99, 235, 0.16);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 18px;
+  gap: 16px;
 }
 .page-heading {
   min-width: 0;
@@ -443,28 +444,34 @@
 .page-breadcrumb {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   min-width: 0;
+  line-height: 1.25;
 }
 .page-breadcrumb > span {
   color: rgba(255, 255, 255, 0.82);
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 600;
 }
 .page-breadcrumb > i {
   color: rgba(255, 255, 255, 0.62);
-  font-size: 16px;
+  font-size: 14px;
 }
 .page-header h1 {
   margin: 0;
   color: #fff;
-  font-size: 18px;
-  letter-spacing: -.02em
+  font-size: 16.5px;
+  letter-spacing: -.02em;
+  font-weight: 700;
+  line-height: 1.25;
 }
 .page-header .text-muted {
-  max-width: 62ch;
+  max-width: 72ch;
   margin-top: 3px;
-  color: rgba(255, 255, 255, 0.8)
+  margin-bottom: 0;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 12px;
+  line-height: 1.35;
 }
 .page-user {
   display: flex;
@@ -489,6 +496,8 @@
   flex-direction: column;
   align-items: flex-end;
   line-height: 1.2;
+  max-width: 260px;
+  min-width: 0;
 }
 .page-user__greeting {
   color: rgba(255, 255, 255, 0.76);
@@ -496,7 +505,10 @@
 }
 .page-user__text strong {
   white-space: nowrap;
-  font-size: 14px;
+  font-size: 13.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 .page-user__text small {
   display: block;
@@ -504,6 +516,9 @@
   color: rgba(255, 255, 255, 0.72);
   font-size: 10px;
   line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 .page-user__avatar {
   width: 38px;
@@ -725,18 +740,22 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    font-size: 13.5px;
+    line-height: 1.2;
   }
   .page-breadcrumb {
     gap: 6px;
   }
-  .page-breadcrumb > span,
-  .page-header h1 {
-    font-size: 14px;
+  .page-breadcrumb > span {
+    font-size: 13px;
+    line-height: 1.2;
   }
   .page-header .text-muted {
     margin-top: 2px;
-    font-size: 12px;
+    margin-bottom: 0;
+    font-size: 11px;
     line-height: 1.25;
+    color: rgba(255, 255, 255, 0.82);
   }
   .page-user__text {
     display: none;

@@ -520,6 +520,15 @@ const DB = {
     }
     return this._readCollection('students', {});
   },
+  async getStudents() {
+    return this.getAllStudents();
+  },
+  async getPPDBRegistrations() {
+    return this._readCollection('spmb_registrations', {});
+  },
+  async getAttendanceRecords(dateStr) {
+    return this.getDailyStudentAttendanceByDate(dateStr);
+  },
   async getStudentReferenceIndex() {
     const students = this.toArray(await this.getAllStudents());
     return students.reduce((index, student) => {
@@ -534,8 +543,46 @@ const DB = {
   },
   async getStudentsByParent(parentUid) {
     if (!isDBReady()) return {};
-    const snap = await db.ref('students').orderByChild('parentId').equalTo(parentUid).once('value');
-    return snap.val() || {};
+    const user = (typeof Auth !== 'undefined' && (Auth.userData || Auth.currentUser)) || {};
+    if (user.isPraSd || user.status === 'Calon Siswa' || user.role === 'calon_siswa') {
+      return {
+        [parentUid]: {
+          id: parentUid,
+          name: user.name || user.nama_lengkap || user.nama_siswa || 'Calon Siswa',
+          nis: user.nis || '',
+          email: user.email || '',
+          registrationTrack: user.registrationTrack || user.track || 'Reguler',
+          isPraSd: true,
+          status: 'Calon Siswa',
+          ...(user.spmbData || {})
+        }
+      };
+    }
+    const snap = await db.ref('students').orderByChild('parentId').equalTo(parentUid).once('value').catch(() => null);
+    let res = snap ? (snap.val() || {}) : {};
+    if (!Object.keys(res).length) {
+      const userEmail = (user.email || '').toLowerCase();
+      const userCleanNis = userEmail.replace('@musada.sch.id', '').replace('siswa', '');
+      try {
+        const spmbSnap = await db.ref('spmb_registrations').once('value');
+        const spmbVal = spmbSnap.val() || {};
+        Object.entries(spmbVal).forEach(([id, reg]) => {
+          if (!reg) return;
+          const regEmail = (reg.email_orangtua || '').toLowerCase();
+          const regNis = String(reg.nis || '').padStart(4, '0');
+          if (reg.parentId === parentUid || (userEmail && regEmail === userEmail) || (userCleanNis && regNis === userCleanNis)) {
+            res[id] = {
+              id,
+              ...reg,
+              name: reg.nama_lengkap || reg.nama_siswa || 'Calon Siswa',
+              isPraSd: true,
+              status: reg.status || 'Calon Siswa'
+            };
+          }
+        });
+      } catch (_) {}
+    }
+    return res;
   },
   async getStudent(id) {
     return this._read(`students/${id}`, null);
@@ -782,22 +829,49 @@ const DB = {
     await ref.set(normalized);
     return ref.key;
   },
-  async getStudentAchievements() {
+  async getStudentAchievements(studentId = null) {
+    if (typeof Auth !== 'undefined' && Auth.currentUser && (Auth.currentRole === 'ortu' || Auth.userData?.role === 'ortu')) {
+      const sId = studentId || Auth.currentUser.uid;
+      try {
+        const snap = await db.ref(`students/${sId}/achievements`).once('value');
+        const val = snap.val() || {};
+        if (Object.keys(val).length) return val;
+      } catch (_) {}
+      try {
+        const snapUser = await db.ref(`users/${sId}/achievements`).once('value');
+        const valUser = snapUser.val() || {};
+        if (Object.keys(valUser).length) return valUser;
+      } catch (_) {}
+      return {};
+    }
     return this._readCollection('student_affairs/achievements', {});
   },
   async saveStudentAchievement(data, id = null) {
     if (!isDBReady()) return null;
     const normalized = {
       studentId: data.studentId || '',
+      studentName: data.studentName || data.studentIdName || '',
       title: data.title || 'Prestasi Baru',
       category: data.category || 'Umum',
+      rank: data.rank || 'Juara',
+      participationType: data.participationType || 'Juara',
+      level: data.level || 'Sekolah',
+      organizer: data.organizer || '',
+      certificateNo: data.certificateNo || '',
       description: data.description || '',
       date: data.date || (typeof AppConfig !== "undefined" && AppConfig.getLocalDateStr ? AppConfig.getLocalDateStr() : new Date().toISOString().slice(0, 10)),
+      year: data.year || new Date().getFullYear(),
       createdAt: data.createdAt || firebase.database.ServerValue.TIMESTAMP
     };
     const ref = id ? db.ref(`student_affairs/achievements/${id}`) : db.ref('student_affairs/achievements').push();
     await ref.set(normalized);
-    return ref.key;
+    const key = ref.key;
+    if (normalized.studentId) {
+      const syncPayload = { ...normalized, id: key };
+      await db.ref(`students/${normalized.studentId}/achievements/${key}`).set(syncPayload).catch(() => {});
+      await db.ref(`users/${normalized.studentId}/achievements/${key}`).set(syncPayload).catch(() => {});
+    }
+    return key;
   },
   async getStudentViolations() {
     return this._readCollection('student_affairs/violations', {});
@@ -866,6 +940,67 @@ const DB = {
       return rankings[studentId] || null;
     } catch (_) {
       return null;
+    }
+  },
+  async getStudentLearningHistory(studentId) {
+    if (!studentId) return [];
+    try {
+      const settings = await this.getSettings();
+      const currYear = settings?.currentAcademicYear || AppConfig.DEFAULT_SETTINGS.currentAcademicYear;
+      const currSem = parseInt(settings?.currentSemester || AppConfig.DEFAULT_SETTINGS.currentSemester, 10);
+      const startYearNum = parseInt(currYear.split('/')[0] || currYear.split('-')[0], 10) || 2026;
+      const years = [];
+      for (let i = 0; i < 6; i++) {
+        const yStart = startYearNum - i;
+        years.push(`${yStart}/${yStart + 1}`);
+      }
+      const periods = [];
+      years.forEach((y) => {
+        periods.push({ year: y, sem: 2 });
+        periods.push({ year: y, sem: 1 });
+      });
+      const results = await Promise.all(periods.map(async ({ year, sem }) => {
+        const [grades, att, note] = await Promise.all([
+          this.getAcademicGrades(year, sem, studentId),
+          this.getAttendance(year, sem, studentId),
+          this.getTeacherNote(year, sem, studentId)
+        ]);
+        const gradeList = Object.values(grades || {});
+        const hasGrades = gradeList.length > 0;
+        const isCurrent = (year === currYear && sem === currSem);
+        if (!hasGrades && !att && !note && !isCurrent) {
+          return null;
+        }
+        let totalScore = 0;
+        let scoredCount = 0;
+        gradeList.forEach((g) => {
+          const num = Number(g?.score);
+          if (!isNaN(num) && num > 0) {
+            totalScore += num;
+            scoredCount++;
+          }
+        });
+        const avgScore = scoredCount > 0 ? (totalScore / scoredCount).toFixed(1) : '-';
+        return {
+          year,
+          sem,
+          isCurrent,
+          hasGrades,
+          gradeCount: gradeList.length,
+          avgScore,
+          grades: grades || {},
+          attendance: att || { sakit: 0, izin: 0, alpa: 0 },
+          note: note?.note || '-'
+        };
+      }));
+      return results.filter(Boolean).sort((a, b) => {
+        const yA = parseInt(a.year.split('/')[0], 10) || 0;
+        const yB = parseInt(b.year.split('/')[0], 10) || 0;
+        if (yB !== yA) return yB - yA;
+        return b.sem - a.sem;
+      });
+    } catch (_) {
+      return [];
     }
   },
   async getSubjectChapters(year, sem, classId, subjectId) {
@@ -1087,6 +1222,29 @@ const DB = {
   },
   async getPersonnelDirectory() {
     return this._readCollection('personnel/directory', {});
+  },
+  async getPersonnelEvaluations() {
+    return this._readCollection('personnel/evaluations', {});
+  },
+  async getMyEmployeeProfile(uid, userName) {
+    const dir = await this.getPersonnelDirectory();
+    const list = this.toArray(dir);
+    const cleanUser = (userName || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    return list.find(d => (d.userId && d.userId === uid) || (d.id && d.id === uid) || (d.name && d.name.toLowerCase().replace(/[^a-z0-9]/g, '') === cleanUser)) || null;
+  },
+  async getMyEvaluation(uid, userName) {
+    const [evals, empProfile] = await Promise.all([
+      this.getPersonnelEvaluations(),
+      this.getMyEmployeeProfile(uid, userName)
+    ]);
+    const cleanUser = (userName || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const empId = empProfile ? empProfile.id : '';
+    const all = this.toArray(evals);
+    const matches = all.filter(r => (empId && r.employeeId === empId) || (r.employeeId === uid) || (r.userId && r.userId === uid) || (r.employeeIdName && cleanUser && r.employeeIdName.toLowerCase().replace(/[^a-z0-9]/g, '') === cleanUser));
+    return {
+      profile: empProfile,
+      evaluations: matches.sort((a, b) => (b.date || '').localeCompare(a.date || ''))
+    };
   },
   async getFacilityAssets() {
     return this._readCollection('facilities/assets', {});

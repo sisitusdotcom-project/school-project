@@ -49,10 +49,13 @@ const ModuleKit = {
       return out;
     },
     employee: async () => {
-      const users = await DB.getAllUsers();
+      const [users, dir] = await Promise.all([DB.getAllUsers(), DB.getPersonnelDirectory()]);
       const out = {};
+      Object.entries(dir || {}).forEach(([id, d]) => {
+        if (d) out[id] = { name: d.name || id, position: d.position || '', ...d };
+      });
       Object.entries(users || {}).forEach(([id, u]) => {
-        if (u && u.role !== 'ortu') out[id] = u;
+        if (u && u.role !== 'ortu' && !out[id]) out[id] = u;
       });
       return out;
     },
@@ -101,7 +104,8 @@ const ModuleKit = {
     return (Auth.currentAssignments || []).includes(unit);
   },
   sees(def) {
-    return this.isPrivileged(def) || this.isApprover(def) || (def.seeAllUnits || []).some((u) => this.hasUnit(u));
+    if (Auth.currentRole === AppConfig.ROLES.ADMIN || Auth.currentRole === AppConfig.ROLES.KEPSEK) return true;
+    return this.isApprover(def) || (def.seeAllUnits || []).some((u) => this.hasUnit(u));
   },
   isPrivileged() {
     return Auth.currentRole === AppConfig.ROLES.ADMIN || (Auth.currentAssignments || []).some((a) => a.startsWith('WAKA_') || a === 'TIM_IT');
@@ -270,7 +274,13 @@ const ModuleKit = {
         const childIds = Object.keys(myStudents || {});
         return all.filter((r) => childIds.includes(r.studentId) || r.createdBy === uid);
       }
-      return !def.own || this.sees(def) ? all : all.filter((r) => (r.teacherId && r.teacherId === uid) || (r.gtkId && r.gtkId === uid) || (r.employeeId && r.employeeId === uid) || r.createdBy === uid);
+      if (!def.own || this.sees(def)) return all;
+      const cleanUser = (Auth.userData?.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const dir = await DB.getPersonnelDirectory();
+      const dirList = DB.toArray(dir);
+      const myEmp = dirList.find(d => (d.userId && d.userId === uid) || (d.id && d.id === uid) || (d.name && d.name.toLowerCase().replace(/[^a-z0-9]/g, '') === cleanUser));
+      const myEmpId = myEmp ? myEmp.id : '';
+      return all.filter((r) => (r.teacherId && r.teacherId === uid) || (r.gtkId && r.gtkId === uid) || (r.employeeId && (r.employeeId === uid || (myEmpId && r.employeeId === myEmpId))) || r.createdBy === uid || (r.teacherIdName && cleanUser && r.teacherIdName.toLowerCase().replace(/[^a-z0-9]/g, '') === cleanUser) || (r.employeeIdName && cleanUser && r.employeeIdName.toLowerCase().replace(/[^a-z0-9]/g, '') === cleanUser));
     };
     const [rows, refs] = await Promise.all([loadRows(), this.loadRefs(def)]);
     const state = { rows, q: '', status: '', editing: null };
@@ -287,7 +297,17 @@ const ModuleKit = {
         <option value="">Semua ${this.esc(statusField.label)}</option>
         ${this.optionList(statusField).map((o) => `<option value="${this.esc(o.value)}">${this.esc(o.label)}</option>`).join('')}
       </select>` : '';
+    const isPraSdUser = Boolean(isOrtu && Auth.userData && (Auth.userData.isPraSd || Auth.userData.status === 'Calon Siswa'));
+    let praSdNotice = '';
+    if (isPraSdUser) {
+      if (def.node === 'student_affairs/leaves') {
+        praSdNotice = `<div class="panel-callout panel-callout--primary section-spacer"><div class="kpi-card-notice"><i class="ph ph-info font-bold"></i><div><h5 class="kpi-notice-title font-bold">Pengenalan Fitur Perizinan Online (Aktif Juli 2026)</h5><p class="kpi-notice-desc">Fitur pengajuan izin sakit dan keperluan keluarga online ini disiapkan untuk pelaporan absensi harian KBM siswa. Fitur ini akan otomatis aktif saat ananda resmi memulai pembelajaran di kelas.</p></div></div></div>`;
+      } else if (def.node === 'finance/student_bills') {
+        praSdNotice = `<div class="panel-callout panel-callout--primary section-spacer"><div class="kpi-card-notice"><i class="ph ph-info font-bold"></i><div><h5 class="kpi-notice-title font-bold">Informasi Keuangan &amp; SPP Calon Siswa (Pra SD)</h5><p class="kpi-notice-desc">Biaya pendaftaran formulir SPMB Ananda telah terverifikasi lunas di sistem. Penetapan rincian seragam dan daftar ulang dapat dipantau di Dashboard Pra SD, dan iuran SPP bulanan baru akan aktif per Juli 2026.</p></div></div></div>`;
+      }
+    }
     container.innerHTML = `
+      ${praSdNotice}
       ${summaryHtml ? `<section class="card-grid section-spacer">${summaryHtml}</section>` : ''}
       <section class="card section-block">
         <div class="card-header mk-header">
@@ -297,7 +317,7 @@ const ModuleKit = {
             ${statusFilter}
             <button type="button" class="btn btn-outline btn-sm" id="mk-export"><i class="ph ph-file-xls"></i> Unduh Excel</button>
             ${(def.allowImport && writable) ? '<button type="button" class="btn btn-outline btn-sm" id="mk-import"><i class="ph ph-file-arrow-up"></i> Impor Excel</button><input type="file" id="mk-import-file" accept=".xlsx,.xls,.csv" style="display:none;">' : ''}
-            ${canAdd ? '<button type="button" class="btn btn-primary btn-sm" id="mk-add"><i class="ph ph-plus"></i> Tambah</button>' : ''}
+            ${(canAdd && def.canAdd !== false && (!isPraSdUser || def.node !== 'student_affairs/leaves')) ? '<button type="button" class="btn btn-primary btn-sm" id="mk-add"><i class="ph ph-plus"></i> Tambah</button>' : ''}
           </div>
         </div>
         <div class="table-wrap">
@@ -349,6 +369,7 @@ const ModuleKit = {
         <tr>
           ${listFields.map((f) => `<td${f.type === 'money' ? ' class="text-right"' : ''}>${this.cell(def, f, row, refs)}</td>`).join('')}
           ${writable ? `<td class="action-cell text-right">
+            ${(def.node === 'student_affairs/achievements' || def.canPrintCertificate) ? `<a href="print.html?type=certificate&id=${row.id}" target="_blank" class="btn btn-sm btn-primary" title="Cetak Sertifikat Apresiasi Resmi"><i class="ph ph-printer"></i></a>` : ''}
             ${(!isOrtu || row.status === 'Diajukan') ? `<button type="button" class="btn btn-sm btn-outline" data-mk-edit="${row.id}" title="Ubah"><i class="ph ph-pencil-simple"></i></button>` : ''}
             ${(canDel && (!isOrtu || row.status === 'Diajukan')) ? `<button type="button" class="btn btn-sm btn-danger" data-mk-del="${row.id}" title="Hapus"><i class="ph ph-trash"></i></button>` : ''}
           </td>` : ''}
@@ -747,6 +768,10 @@ const ModuleKit = {
       if (!confirm('Yakin ingin menghapus data ini?')) return;
       try {
         await db.ref(`${def.node}/${delBtn.dataset.mkDel}`).remove();
+        if (def.node === 'student_affairs/achievements' && targetRow && targetRow.studentId) {
+          await db.ref(`students/${targetRow.studentId}/achievements/${delBtn.dataset.mkDel}`).remove().catch(() => {});
+          await db.ref(`users/${targetRow.studentId}/achievements/${delBtn.dataset.mkDel}`).remove().catch(() => {});
+        }
         this.audit('delete', def.node, delBtn.dataset.mkDel);
         state.rows = state.rows.filter((r) => r.id !== delBtn.dataset.mkDel);
         paint();
@@ -852,7 +877,16 @@ const ModuleKit = {
         } else {
           const ref = db.ref(def.node).push();
           recordId = ref.key;
+          if (def.node === 'student_affairs/achievements' && !payload.certificateNo && !derived.certificateNo) {
+            const yr = payload.year || (payload.date ? payload.date.slice(0, 4) : new Date().getFullYear());
+            derived.certificateNo = `0${String(recordId || '').slice(-4).toUpperCase()}/SERT-PRESTASI/SDM1/${yr}`;
+          }
           await ref.set({ ...payload, ...derived, createdAt: stamp, createdBy: uid, createdByName: (Auth.userData && Auth.userData.name) || '' });
+        }
+        if (def.node === 'student_affairs/achievements' && payload.studentId) {
+          const syncData = { ...payload, ...derived, id: recordId, updatedAt: stamp };
+          await db.ref(`students/${payload.studentId}/achievements/${recordId}`).set(syncData).catch(() => {});
+          await db.ref(`users/${payload.studentId}/achievements/${recordId}`).set(syncData).catch(() => {});
         }
         if (def.after) await def.after({ ...payload, ...derived }, ctx, recordId);
         this.audit(state.editing ? 'update' : 'create', def.node, recordId);

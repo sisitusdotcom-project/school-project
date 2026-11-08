@@ -150,32 +150,69 @@
         }
         .print-actions {
             position: fixed;
-            top: 20px;
-            right: 20px;
+            top: 16px;
+            right: 24px;
             display: flex;
-            gap: 10px;
-            z-index: 1000;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 6px 8px;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 0, 0, 0.12);
+            box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.16), 0 2px 6px -1px rgba(0, 0, 0, 0.08);
+            z-index: 9999;
         }
         .btn-action {
-            background-color: #2e7d32;
-            color: white;
-            border: none;
-            padding: 10px 18px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px 16px;
             font-size: 13px;
-            font-weight: bold;
-            border-radius: 20px;
+            font-weight: 600;
+            border-radius: 7px;
             cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border: none;
             font-family: inherit;
+            transition: all 0.18s ease;
+            line-height: 1.2;
         }
-        .btn-action:hover {
-            background-color: #1b5e20;
+        .btn-action.btn-print {
+            background: #10b981;
+            color: #ffffff;
+            box-shadow: 0 2px 6px rgba(16, 185, 129, 0.35);
         }
-        .btn-close {
-            background-color: #64748b;
+        .btn-action.btn-print:hover {
+            background: #059669;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.4);
         }
-        .btn-close:hover {
-            background-color: #475569;
+        .btn-action.btn-print:active {
+            transform: translateY(0);
+        }
+        .btn-action.btn-close {
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+        }
+        .btn-action.btn-close:hover {
+            background: #e2e8f0;
+            color: #0f172a;
+        }
+        @media (max-width: 640px) {
+            .print-actions {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+                justify-content: space-between;
+            }
+            .btn-action {
+                flex: 1;
+                padding: 8px 10px;
+                font-size: 12px;
+            }
         }
         @media print {
             * {
@@ -196,3 +233,74 @@
                 display: none;
             }
         }
+.signature-table-dual {
+    width: 100%;
+    margin-top: 15px;
+    margin-bottom: 0;
+    border-collapse: collapse;
+    page-break-inside: avoid;
+}
+.signature-table-dual td {
+    border: none;
+    text-align: center;
+    vertical-align: top;
+    padding: 0;
+    font-size: 9pt;
+}
+.signature-table-dual .sig-left {
+    width: 50%;
+    text-align: center;
+}
+.signature-table-dual .sig-right {
+    width: 50%;
+    text-align: center;
+}
+.signature-table-dual .sig-center {
+    width: 100%;
+    text-align: center;
+    padding-top: 16px;
+}
+.signature-nbm {
+    font-size: 8pt;
+}
+.catatan-wali-box {
+    min-height: 88px;
+    margin-bottom: 0;
+}
+.print-error-text {
+    text-align: center;
+    padding: 50px;
+    color: red;
+}
+.certificate-page{width:100%;max-width:1050px;min-height:680px;padding:16px;margin:20px auto;box-sizing:border-box;background:#ffffff;display:flex;flex-direction:column;}
+.certificate-outer-frame{border:4px double #1e3a8a;padding:6px;height:100%;flex:1;display:flex;flex-direction:column;box-sizing:border-box;}
+.certificate-inner-frame{border:1.5px solid #d97706;padding:24px 32px;height:100%;flex:1;display:flex;flex-direction:column;justify-content:space-between;text-align:center;background:radial-gradient(circle at center,#ffffff 60%,#fffbeb 100%);box-sizing:border-box;}
+.certificate-header{display:flex;align-items:center;justify-content:space-between;gap:16px;}
+.cert-logo-left,.cert-logo-right{width:56px;height:56px;object-fit:contain;flex-shrink:0;}
+.cert-header-text{flex:1;text-align:center;}
+.cert-org,.cert-pcm{font-size:10px;font-weight:700;margin:0 0 1px 0;color:#1e3a8a;text-transform:uppercase;}
+.cert-school-name{font-size:18px;font-weight:900;margin:2px 0;letter-spacing:0.8px;color:#0f172a;}
+.cert-school-address{font-size:8.5px;color:#475569;margin:0;}
+.cert-divider{height:3px;background:linear-gradient(90deg,#1e3a8a 0%,#d97706 50%,#1e3a8a 100%);margin:10px 0 14px 0;}
+.cert-title{font-size:22px;font-weight:900;color:#1e3a8a;letter-spacing:1.5px;margin:0 0 2px 0;text-transform:uppercase;}
+.cert-no{font-size:11px;color:#64748b;margin:0 0 10px 0;letter-spacing:0.5px;}
+.cert-lead{font-size:12px;color:#334155;margin:0 0 8px 0;font-style:italic;}
+.cert-student-name{font-size:24px;font-weight:900;color:#0f172a;margin:4px 0 2px 0;text-decoration:underline;text-underline-offset:4px;}
+.cert-student-meta{font-size:11.5px;color:#475569;margin:0 0 12px 0;}
+.cert-narrative{font-size:12.5px;color:#1e293b;line-height:1.6;max-width:820px;margin:0 auto 16px auto;}
+.cert-footer{display:flex;align-items:flex-end;justify-content:space-between;margin-top:auto;padding:0 20px;}
+.cert-sig{text-align:center;width:220px;}
+.cert-sig-title{font-size:10.5px;margin:0 0 2px 0;}
+.cert-sig-role{font-size:11px;font-weight:700;color:#0f172a;margin:0;}
+.cert-sig-space{height:48px;}
+.cert-sig-name{font-size:11.5px;font-weight:700;margin:0;color:#0f172a;text-decoration:underline;}
+.cert-sig-id{font-size:9.5px;color:#64748b;margin:1px 0 0 0;}
+.cert-seal{display:flex;align-items:center;justify-content:center;}
+.cert-seal-badge{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;width:68px;height:68px;border-radius:50%;border:2px dashed #d97706;background:#fffbeb;color:#b45309;}
+.cert-seal-badge i{font-size:24px;}
+.cert-seal-badge span{font-size:7px;font-weight:800;letter-spacing:0.5px;margin-top:2px;}
+@media print{
+@page{size:A4 landscape;margin:0;}
+body{background:#fff!important;margin:0!important;padding:0!important;}
+.certificate-page{width:100%!important;max-width:100%!important;height:100dvh!important;min-height:100dvh!important;margin:0!important;padding:10mm!important;}
+}

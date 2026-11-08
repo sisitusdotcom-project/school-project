@@ -155,7 +155,7 @@ const Auth = {
     const nav = document.getElementById('sidebar-nav');
     if (!nav) return;
     nav.innerHTML = '';
-    const links = AppConfig.getRoleNav(this.currentRole, this.userData?.assignments || this.currentAssignments || []);
+    const links = AppConfig.getRoleNav(this.currentRole, this.userData?.assignments || this.currentAssignments || [], this.userData);
     let currentGroup = null;
     links.forEach((link) => {
       if (link.group && link.group !== currentGroup) {

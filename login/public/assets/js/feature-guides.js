@@ -384,6 +384,30 @@ const FeatureGuides = {
       to: 'Waka Kesiswaan',
       usage: 'Catat siswa dengan keahlian menonjol di bidangnya agar diprioritaskan saat ada undangan kejuaraan.'
     },
+    '#/prasd/dashboard': {
+      func: 'Portal orientasi terpadu calon siswa baru (Pra SD): pengumuman sekolah, jadwal observasi ramah anak, rincian biaya pendaftaran, dan administrasi.',
+      from: 'Panitia SPMB & Waka Kesiswaan SD Musada',
+      to: 'Calon Siswa & Orang Tua / Wali Murid Baru',
+      usage: 'Pantau tahapan observasi ramah anak, cek kelengkapan berkas pendaftaran, dan manfaatkan tombol Konsultasi Kesiswaan untuk info lebih lanjut.'
+    },
+    '#/prasd/report-card': {
+      func: 'Pengenalan lembar rapor digital resmi Kurikulum Merdeka format F4, evaluasi karakter Islami, dan BTQ Ummi.',
+      from: 'Wali Kelas & Guru Pembimbing',
+      to: 'Orang Tua / Calon Siswa Baru (Pengenalan)',
+      usage: 'Kenali format capaian kompetensi dan penilaian pembelajaran yang akan digunakan saat ananda aktif belajar di kelas.'
+    },
+    '#/prasd/leaves': {
+      func: 'Pengenalan fitur pengajuan perizinan sakit dan keperluan keluarga online tanpa surat manual.',
+      from: 'Orang Tua / Wali Murid Mandiri',
+      to: 'Wali Kelas & Bagian Kesiswaan',
+      usage: 'Pelajari alur pengajuan izin online yang siap digunakan saat ananda telah resmi aktif belajar di kelas.'
+    },
+    '#/prasd/bills': {
+      func: 'Monitoring transparansi pembiayaan sekolah, status biaya formulir SPMB, dan administrasi masuk.',
+      from: 'Bendahara & Tim Keuangan Sekolah',
+      to: 'Calon Siswa & Orang Tua / Wali Murid',
+      usage: 'Cek status pelunasan formulir pendaftaran dan pantau informasi rincian seragam serta daftar ulang.'
+    },
     '#/ortu/dashboard': {
       func: 'Portal terpadu orang tua: pantau kehadiran anak setiap pagi, progres mengaji Ummi/Tahfidz, catatan guru, dan rapor.',
       from: 'Wali Kelas & Guru Al-Quran',
@@ -574,8 +598,17 @@ const FeatureGuides = {
   get(routePath) {
     if (!routePath) return null;
     const cleanPath = routePath.split('?')[0];
-    const effectivePath = (cleanPath === '#/dashboard' && window.Auth && window.Auth.currentRole === 'ortu') ? '#/ortu/dashboard' : cleanPath;
-    if (this.items[effectivePath]) return this.items[effectivePath];
+    const authRole = (typeof Auth !== 'undefined' && Auth.currentRole) || (window.Auth && window.Auth.currentRole);
+    const authUser = (typeof Auth !== 'undefined' && Auth.userData) || (window.Auth && window.Auth.userData);
+    const isPraSd = Boolean(authUser && (authUser.isPraSd || authUser.status === 'Calon Siswa'));
+    if (cleanPath === '#/dashboard') {
+      if (isPraSd) return this.items['#/prasd/dashboard'];
+      if (authRole === 'ortu') return this.items['#/ortu/dashboard'];
+    }
+    if (cleanPath === '#/parent/report-card' && isPraSd) return this.items['#/prasd/report-card'];
+    if (cleanPath === '#/student-affairs/leaves' && isPraSd) return this.items['#/prasd/leaves'];
+    if (cleanPath === '#/finance/student-bills' && isPraSd) return this.items['#/prasd/bills'];
+    if (this.items[cleanPath]) return this.items[cleanPath];
     const baseDynamic = cleanPath.split('/').slice(0, -1).join('/') + '/:id';
     if (this.items[baseDynamic]) return this.items[baseDynamic];
     if (window.ModuleKit && window.ModuleKit.defs && window.ModuleKit.defs[cleanPath]) {

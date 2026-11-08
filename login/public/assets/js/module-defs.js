@@ -277,21 +277,29 @@
     },
     '#/student-affairs/achievements': {
       node: 'student_affairs/achievements', noun: 'Prestasi Siswa', writeRoles: SA, dateField: 'date',
-      subtitle: 'Rekap lomba dan penghargaan siswa.',
-      derive: (p) => ({ year: year(p.date) }),
+      subtitle: 'Rekap lomba, penghargaan siswa, dan data partisipan.',
+      derive: (p) => {
+        const yr = year(p.date) || new Date().getFullYear();
+        const cert = p.certificateNo || (p.id ? `0${p.id.slice(-4).toUpperCase()}/SERT-PRESTASI/SDM1/${yr}` : '');
+        return { year: yr, certificateNo: cert };
+      },
       summary: [
-        { label: 'Total Prestasi', icon: 'ph-medal', tone: 'primary' },
-        { label: 'Tingkat Nasional+', icon: 'ph-trophy', tone: 'warning', where: { level: ['Nasional', 'Internasional'] } },
-        { label: 'Akademik', icon: 'ph-student', tone: 'success', where: { category: 'Akademik' } }
+        { label: 'Total Keikutsertaan', icon: 'ph-trophy', tone: 'primary' },
+        { label: 'Juara', icon: 'ph-medal', tone: 'success', where: { participationType: 'Juara' } },
+        { label: 'Partisipan Apresiasi', icon: 'ph-hand-heart', tone: 'info', where: { participationType: 'Partisipan / Kontingen' } },
+        { label: 'Tingkat Nasional+', icon: 'ph-star', tone: 'warning', where: { level: ['Nasional', 'Internasional'] } }
       ],
       fields: [
-        date('date', 'Tanggal', { required: true }),
+        date('date', 'Tanggal Lomba', { required: true }),
         ref('studentId', 'Siswa', 'student', { required: true }),
-        t('title', 'Nama Lomba / Penghargaan', { required: true }),
-        sel('category', 'Bidang', ['Akademik', 'Olahraga', 'Seni', 'Keagamaan', 'Lainnya'], { required: true }),
+        t('title', 'Nama Lomba / Event', { required: true }),
+        sel('participationType', 'Kategori Partisipasi', ['Juara', 'Partisipan / Kontingen'], { required: true, default: 'Juara' }),
+        sel('rank', 'Peringkat / Capaian', ['Juara 1', 'Juara 2', 'Juara 3', 'Juara Harapan 1', 'Juara Harapan 2', 'Juara Harapan 3', 'Partisipan / Kontingen'], { required: true, default: 'Juara 1' }),
+        sel('category', 'Bidang', ['Akademik', 'Olahraga', 'Seni & Budaya', 'Keagamaan / Ismuba', 'Robotik & Coding', 'Lainnya'], { required: true }),
         sel('level', 'Tingkat', ['Sekolah', 'Kecamatan', 'Kabupaten', 'Provinsi', 'Nasional', 'Internasional'], { required: true }),
-        t('rank', 'Peringkat / Juara'),
-        area('description', 'Keterangan')
+        t('certificateNo', 'Nomor Sertifikat Apresiasi Sekolah', { placeholder: 'Kosongkan untuk otomatis generate' }),
+        t('organizer', 'Penyelenggara Lomba'),
+        area('description', 'Keterangan Tambahan')
       ]
     },
     '#/student-affairs/scholarships': {
@@ -333,15 +341,17 @@
     '#/student-affairs/ppdb': {
       node: 'spmb_registrations', noun: 'Penerimaan Siswa Baru (SPMB / PPDB)', writeRoles: SA, dateField: 'timestamp', statusField: 'status',
       badges: { ...badges, Mendaftar: 'warning', Seleksi: 'primary', Diterima: 'success', Ditolak: 'danger' },
-      subtitle: 'Data pendaftar siswa baru online (SPMB) dan mutasi siswa.',
+      subtitle: 'Data pendaftar siswa baru online (SPMB), jalur reguler & inden.',
       summary: [
         { label: 'Total Pendaftar', icon: 'ph-users', tone: 'primary' },
-        { label: 'Diterima', icon: 'ph-check-circle', tone: 'success', where: { status: 'Diterima' } },
-        { label: 'Dalam Seleksi', icon: 'ph-hourglass', tone: 'warning', where: { status: ['Mendaftar', 'Seleksi'] } }
+        { label: 'Reguler', icon: 'ph-user-check', tone: 'success', where: { registrationTrack: 'Reguler' } },
+        { label: 'Jalur Inden', icon: 'ph-calendar-plus', tone: 'info', where: { registrationTrack: 'Inden (T.A Depan)' } },
+        { label: 'Diterima', icon: 'ph-check-circle', tone: 'success', where: { status: 'Diterima' } }
       ],
       fields: [
         t('nis', 'NIS (Nomor Induk Siswa)'),
         t('nama_lengkap', 'Nama Calon Siswa', { required: true }),
+        sel('registrationTrack', 'Jalur Pendaftaran', ['Reguler', 'Inden (T.A Depan)'], { required: true, default: 'Reguler' }),
         sel('jenis_kelamin', 'Jenis Kelamin', ['Laki-laki', 'Perempuan']),
         t('nik', 'NIK (16 Digit)'),
         t('nisn', 'NISN'),
@@ -356,7 +366,7 @@
     },
     '#/personnel/data': {
       node: 'personnel/directory', noun: 'Data Kepegawaian', writeRoles: PE, statusField: 'status', badges: { ...badges, Cuti: 'warning' },
-      subtitle: 'Direktori resmi SDM GTK SD Muhammadiyah 1 Sedati bersumber Dapodik.',
+      subtitle: 'Direktori resmi SDM GTK SD Muhammadiyah 1 Sedati bersumber Dapodik & Arsip Sekolah.',
       summary: [
         { label: 'Total Pegawai', icon: 'ph-folder-user', tone: 'primary' },
         { label: 'Aktif', icon: 'ph-check-circle', tone: 'success', where: { status: 'Aktif' } },
@@ -364,13 +374,23 @@
       ],
       fields: [
         t('name', 'Nama Lengkap', { required: true }),
+        t('nik', 'NIK (Nomor Induk Kependudukan)'),
         t('nbm', 'NBM (Nomor Baku Muhammadiyah)'),
         t('nuptk', 'NUPTK'),
-        t('position', 'Jabatan / Tugas', { required: true }),
-        sel('employmentStatus', 'Status Kepegawaian', ['PNS', 'GTY', 'GTT', 'Honorer', 'Tendik'], { required: true }),
+        t('structuralAmanah', 'Amanah Struktural (Kepsek / Waka / Staf)'),
+        t('position', 'Posisi / Tugas Mengajar', { required: true }),
+        sel('employmentStatus', 'Status Kepegawaian', ['GTP', 'GTTP', 'GTY', 'GTT', 'PNS', 'PTY', 'Honorer', 'Tendik', 'Magang'], { required: true }),
+        t('golongan', 'Golongan Kepegawaian (III/c, III/b, Magang, dll.)'),
+        num('functionalSalary', 'Gaji Fungsional (Rp)', { default: 0 }),
+        num('structuralSalary', 'Gaji Struktural (Rp)', { default: 0 }),
+        t('birthPlace', 'Tempat Lahir'),
+        date('birthDate', 'Tanggal Lahir'),
         t('phone', 'No. HP / WA'),
+        t('email', 'Email'),
         t('education', 'Pendidikan Terakhir'),
+        t('graduationYear', 'Tahun Lulus'),
         date('joinDate', 'TMT Pengangkatan / Bergabung'),
+        area('address', 'Alamat Domisili'),
         ref('userId', 'Akun Sistem (opsional)', 'user'),
         sel('status', 'Status', ['Aktif', 'Cuti', 'Nonaktif'], { required: true, default: 'Aktif' })
       ]
@@ -380,28 +400,27 @@
       approverRoles: [R.PERSONNEL, R.KEPSEK],
       approverUnits: ['WAKA_HUMAS_PERSONALIA', 'STAF_HUMAS_PERSONALIA'],
       seeAllUnits: ['WAKA_HUMAS_PERSONALIA', 'STAF_HUMAS_PERSONALIA'],
-      subtitle: 'Format Penilaian Kinerja SDM Majelis Dikdasmen & PNF PCM Sedati: Loyalitas, Kapasitas, Kapabilitas, Pembinaan & Kajian PCM/PDM, serta Wawancara Komitmen Pakta Integritas.',
+      subtitle: 'Instrumen evaluasi kinerja dan pembinaan SDM PCM Sedati.',
       derive: (p) => {
-        const l1 = Number(p.loyaltyCountry) || 0;
-        const l2 = Number(p.loyaltyMuhammadiyah) || 0;
-        const l3 = Number(p.loyaltyAum) || 0;
-        const l4 = Number(p.loyaltyCommitment) || 0;
+        const l1 = Number(p.loyaltyCountry) || 100;
+        const l2 = Number(p.loyaltyMuhammadiyah) || 85;
+        const l3 = Number(p.loyaltyAum) || 95;
+        const l4 = Number(p.loyaltyCommitment) || 80;
         const avgLoyalty = Math.round((l1 + l2 + l3 + l4) / 4);
-        const c1 = Number(p.capacityExemplary) || 0;
-        const c2 = Number(p.capacityTeamwork) || 0;
-        const c3 = Number(p.capacityLeadership) || 0;
-        const c4 = Number(p.capacityDiscipline) || 0;
-        const c5 = Number(p.capacityInnovation) || 0;
-        const c6 = Number(p.capacityResponsibility) || 0;
-        const c7 = Number(p.capacityIntegrity) || 0;
-        const c8 = Number(p.capacitySelfDev) || 0;
+        const c1 = Number(p.capacityExemplary) || 90;
+        const c2 = Number(p.capacityTeamwork) || 90;
+        const c3 = Number(p.capacityLeadership) || 90;
+        const c4 = Number(p.capacityDiscipline) || 90;
+        const c5 = Number(p.capacityInnovation) || 90;
+        const c6 = Number(p.capacityResponsibility) || 90;
+        const c7 = Number(p.capacityIntegrity) || 90;
+        const c8 = Number(p.capacitySelfDev) || 90;
         const avgCapacity = Math.round((c1 + c2 + c3 + c4 + c5 + c6 + c7 + c8) / 8);
-        const avgCapability = Number(p.capabilitySop) || 0;
-        const k1 = Number(p.kpiPembinaanMusada) || 85;
-        const k2 = Number(p.kpiKajianPcmPdm) || 85;
-        const avgKpi = Math.round((k1 + k2) / 2);
-        const avgTotal = Math.round((avgLoyalty + avgCapacity + avgCapability + avgKpi) / 4);
-        const isPass = (avgLoyalty >= 75) && (avgCapacity >= 75) && (avgCapability >= 75) && (avgKpi >= 75);
+        const cap1 = Number(p.capabilityStructural) || Number(p.capabilitySop) || 90;
+        const cap2 = Number(p.capabilityMainDuty) || 90;
+        const avgCapability = Math.round((cap1 + cap2) / 2);
+        const avgTotal = Math.round((avgLoyalty + avgCapacity + avgCapability) / 3);
+        const isPass = (avgLoyalty >= 75) && (avgCapacity >= 75) && (avgCapability >= 75);
         let pred = 'Pemula';
         if (!isPass) {
           pred = 'Perlu Pembinaan';
@@ -417,7 +436,6 @@
           avgLoyalty: avgLoyalty,
           avgCapacity: avgCapacity,
           avgCapability: avgCapability,
-          avgKpi: avgKpi,
           score: avgTotal,
           predicate: pred,
           statusRecommendation: recStatus
@@ -431,26 +449,24 @@
       fields: [
         date('date', 'Tanggal Penilaian', { required: true }),
         ref('employeeId', 'Pegawai SDM', 'employee', { required: true }),
-        t('period', 'Periode Penilaian (contoh: Semester Ganjil 2026/2027)', { required: true }),
-        num('loyaltyCountry', '1.1 Loyalitas thd Negara (1-100, Lulus >= 75)', { required: true }),
-        num('loyaltyMuhammadiyah', '1.2 Loyalitas thd Perserikatan (1-100, Lulus >= 75)', { required: true }),
-        num('loyaltyAum', '1.3 Loyalitas thd AUM (1-100, Lulus >= 75)', { required: true }),
-        num('loyaltyCommitment', '1.4 Kepatuhan & Komitmen (1-100, Lulus >= 75)', { required: true }),
+        t('period', 'Periode Penilaian (contoh: 2024/2025 atau Semester Ganjil 2026/2027)', { required: true }),
+        num('loyaltyCountry', '1.1 Loyalitas thd Negara (Maks Partisipasi Ortom/Masy) (1-100, Lulus >= 75)', { required: true, default: 100 }),
+        num('loyaltyMuhammadiyah', '1.2 Loyalitas thd Perserikatan (Dari Kehadiran Kajian/Pembinaan PCM) (1-100, Lulus >= 75)', { required: true, default: 85 }),
+        num('loyaltyAum', '1.3 Loyalitas thd AUM (Dari Kehadiran Mengajar di Sekolah) (1-100, Lulus >= 75)', { required: true, default: 95 }),
+        num('loyaltyCommitment', '1.4 Kepatuhan & Komitmen (Dari Ketepatan Waktu Datang & Pulang) (1-100, Lulus >= 75)', { required: true, default: 80 }),
         num('avgLoyalty', 'Rata-rata Loyalitas', { readonly: true }),
-        num('capacityExemplary', '2.1 Keteladanan / Uswah Hasanah (1-100, Lulus >= 75)', { required: true }),
-        num('capacityTeamwork', '2.2 Team Work / Kolektif Kolegial (1-100, Lulus >= 75)', { required: true }),
-        num('capacityLeadership', '2.3 Leadership (1-100, Lulus >= 75)', { required: true }),
-        num('capacityDiscipline', '2.4 Kedisiplinan (1-100, Lulus >= 75)', { required: true }),
-        num('capacityInnovation', '2.5 Inovasi & Kreasi (1-100, Lulus >= 75)', { required: true }),
-        num('capacityResponsibility', '2.6 Tanggung Jawab / Responsibility (1-100, Lulus >= 75)', { required: true }),
-        num('capacityIntegrity', '2.7 Kejujuran (1-100, Lulus >= 75)', { required: true }),
-        num('capacitySelfDev', '2.8 Pengembangan Diri (1-100, Lulus >= 75)', { required: true }),
+        num('capacityExemplary', '2.1 Keteladanan / Uswah Hasanah (1-100, Lulus >= 75)', { required: true, default: 90 }),
+        num('capacityTeamwork', '2.2 Team Work / Kolektif Kolegial (Penilaian Waka ke Komisi) (1-100, Lulus >= 75)', { required: true, default: 90 }),
+        num('capacityLeadership', '2.3 Leadership (Penilaian Waka ke Komisi) (1-100, Lulus >= 75)', { required: true, default: 90 }),
+        num('capacityDiscipline', '2.4 Kedisiplinan (1-100, Lulus >= 75)', { required: true, default: 90 }),
+        num('capacityInnovation', '2.5 Inovasi & Kreasi (1-100, Lulus >= 75)', { required: true, default: 90 }),
+        num('capacityResponsibility', '2.6 Tanggung Jawab / Responsibility (1-100, Lulus >= 75)', { required: true, default: 90 }),
+        num('capacityIntegrity', '2.7 Kejujuran (1-100, Lulus >= 75)', { required: true, default: 90 }),
+        num('capacitySelfDev', '2.8 Pengembangan Diri (1-100, Lulus >= 75)', { required: true, default: 90 }),
         num('avgCapacity', 'Rata-rata Kapasitas', { readonly: true }),
-        num('capabilitySop', '3.1 Pelaksanaan Jobdesk & SOP SDM (1-100, Lulus >= 75)', { required: true }),
+        num('capabilityStructural', '3.1 Tugas Struktural (Waka dinilai KS, Staf dinilai Waka) (1-100, Lulus >= 75)', { required: true, default: 90 }),
+        num('capabilityMainDuty', '3.2 Tugas Pokok GTK (Supervisi Mengajar / Tupoksi Administrasi) (1-100, Lulus >= 75)', { required: true, default: 90 }),
         num('avgCapability', 'Rata-rata Kapabilitas', { readonly: true }),
-        num('kpiPembinaanMusada', '4.1 Keaktifan Pembinaan Musada (1-100, Lulus >= 75)', { required: true, default: 85 }),
-        num('kpiKajianPcmPdm', '4.2 Keaktifan Kajian PCM / PDM (Warga Muhammadiyah) (1-100, Lulus >= 75)', { required: true, default: 85 }),
-        num('avgKpi', 'Rata-rata Pembinaan & Kajian PCM/PDM', { readonly: true }),
         sel('pcmCommitmentInterview', 'Wawancara Komitmen & Pakta Integritas PCM Sedati (Akhir Tahun)', ['Memenuhi Pakta Integritas', 'Komitmen Bersyarat', 'Perlu Pembinaan Khusus'], { required: true, default: 'Memenuhi Pakta Integritas' }),
         num('score', 'Rata-rata Total Nilai Kinerja', { readonly: true }),
         sel('predicate', 'Kategori Kinerja SDM', ['Prioritas', 'Prospek', 'Lanjutan', 'Pemula', 'Perlu Pembinaan'], { readonly: true }),
@@ -1155,12 +1171,13 @@
       ]
     },
     '#/student-affairs/alumni': {
-      node: 'student_affairs/alumni', noun: 'Penelusuran Alumni', writeRoles: SA, dateField: 'graduationYear',
-      subtitle: 'Tracer study data kelulusan siswa dan kelanjutan studi ke jenjang SMP/MTs.',
+      node: 'student_affairs/alumni', noun: 'Penelusuran Alumni', writeRoles: SA, dateField: 'graduationYear', canAdd: false,
+      subtitle: 'Tracer study data kelulusan siswa dan kelanjutan studi ke jenjang lanjutan.',
       summary: [
         { label: 'Total Alumni', icon: 'ph-graduation-cap', tone: 'primary' },
-        { label: 'Pesantren / MTs', icon: 'ph-mosque', tone: 'success', where: { schoolType: 'Pesantren / MTs' } },
-        { label: 'SMP', icon: 'ph-buildings', tone: 'warning', where: { schoolType: 'SMP' } }
+        { label: 'Pesantren / MTs', icon: 'ph-mosque', tone: 'success', where: { schoolType: ['Pesantren / Islamic Boarding', 'MTs Negeri / Swasta'] } },
+        { label: 'SMP', icon: 'ph-buildings', tone: 'info', where: { schoolType: 'SMP Negeri / Swasta' } },
+        { label: 'SMA / PT / Unggulan', icon: 'ph-buildings', tone: 'warning', where: { schoolType: ['SMA / SMK / MA', 'Perguruan Tinggi / Unggulan / Luar Negeri'] } }
       ],
       fields: [
         t('graduationYear', 'Tahun Lulus', { required: true }),
@@ -1168,9 +1185,11 @@
         sel('gender', 'Jenis Kelamin', ['Laki-laki', 'Perempuan'], { required: true }),
         t('nisn', 'NISN'),
         t('destinationSchool', 'Sekolah Lanjutan', { required: true }),
-        sel('schoolType', 'Jenis Sekolah Lanjutan', ['SMP', 'Pesantren / MTs', 'Luar Kota / Internasional'], { required: true }),
+        sel('schoolType', 'Jenjang / Jenis Lanjutan', ['Pesantren / Islamic Boarding', 'SMP Negeri / Swasta', 'MTs Negeri / Swasta', 'SMA / SMK / MA', 'Perguruan Tinggi / Unggulan / Luar Negeri'], { required: true }),
         sel('entryTrack', 'Jalur Masuk', ['Zonasi', 'Prestasi Akademik / Non-Akademik', 'Afirmasi / KETM', 'Tes Masuk Mandiri']),
-        t('phone', 'No. WhatsApp / HP'),
+        t('phone', 'No. WhatsApp / HP Terkini', { required: true }),
+        t('email', 'Email Alumni / Orang Tua'),
+        t('currentActivity', 'Aktivitas / Karier / Studi Terkini'),
         area('achievements', 'Prestasi Saat di SD / Sekolah Lanjutan'),
         area('note', 'Catatan / Alamat')
       ]
