@@ -172,6 +172,7 @@
       subtitle: 'Dokumen pencapaian dan rekam jejak tenaga kependidikan terverifikasi Personalia.',
       summary: [
         { label: 'Total Portofolio', icon: 'ph-folder-star', tone: 'primary' },
+        { label: 'Total Poin ACC', icon: 'ph-star', tone: 'info', sum: 'points' },
         { label: 'Menunggu ACC', icon: 'ph-hourglass', tone: 'warning', where: { status: 'Diajukan' } },
         { label: 'Disetujui (ACC)', icon: 'ph-check-circle', tone: 'success', where: { status: 'Disetujui (ACC)' } }
       ],
@@ -179,6 +180,7 @@
         ref('employeeId', 'Nama Tenaga Kependidikan', 'employee', { required: true }),
         date('date', 'Tanggal', { required: true }),
         t('title', 'Judul Portofolio / Dokumen', { required: true }),
+        num('points', 'Poin / Bobot Nilai (Diisi Humas/Personalia)', { default: 0 }),
         sel('status', 'Status Verifikasi & ACC', ['Diajukan', 'Disetujui (ACC)', 'Perlu Revisi', 'Ditolak'], { required: true, default: 'Diajukan' }),
         file('document', 'Dokumen Pendukung', 'tendik_portfolio', { required: true }),
         area('reviewerFeedback', 'Catatan Verifikator / ACC Personalia')
@@ -193,6 +195,7 @@
       subtitle: 'Pengunggahan berkas pelatihan, workshop, sertifikasi, serta telaah & verifikasi ACC oleh Personalia.',
       summary: [
         { label: 'Total Portofolio', icon: 'ph-folder-star', tone: 'primary' },
+        { label: 'Total Poin ACC', icon: 'ph-star', tone: 'info', sum: 'points' },
         { label: 'Menunggu ACC', icon: 'ph-hourglass', tone: 'warning', where: { status: 'Diajukan' } },
         { label: 'Disetujui (ACC)', icon: 'ph-check-circle', tone: 'success', where: { status: 'Disetujui (ACC)' } },
         { label: 'Perlu Revisi', icon: 'ph-warning-octagon', tone: 'danger', where: { status: 'Perlu Revisi' } }
@@ -204,6 +207,7 @@
         t('title', 'Nama Pelatihan / Judul Portofolio', { required: true }),
         t('organizer', 'Lembaga Penyelenggara / Penerbit'),
         num('hours', 'Jumlah Jam (JP)'),
+        num('points', 'Poin / Bobot Nilai (Diisi Humas/Personalia)', { default: 0 }),
         t('certificateNo', 'Nomor Sertifikat / Dokumen'),
         sel('status', 'Status Verifikasi & ACC', ['Diajukan', 'Disetujui (ACC)', 'Perlu Revisi', 'Ditolak'], { required: true, default: 'Diajukan' }),
         file('document', 'Dokumen / Berkas Sertifikat', 'guru_portfolio', { required: true }),
@@ -371,9 +375,12 @@
         sel('status', 'Status', ['Aktif', 'Cuti', 'Nonaktif'], { required: true, default: 'Aktif' })
       ]
     },
-    '#/personnel/evaluations': { wakaOnly: true,
+    '#/personnel/evaluations': { own: true,
       node: 'personnel/evaluations', noun: 'Penilaian Kinerja SDM', writeRoles: PE, dateField: 'date', statusField: 'statusRecommendation', badges: { 'Prioritas': 'success', 'Prospek': 'success', 'Lanjutan': 'info', 'Pemula': 'warning', 'Perlu Pembinaan': 'danger', 'Naik': 'success', 'Tetap': 'info' },
-      subtitle: 'Format Penilaian Kinerja SDM Majelis Dikdasmen & PNF PCM Sedati: Loyalitas, Kapasitas, dan Kapabilitas.',
+      approverRoles: [R.PERSONNEL, R.KEPSEK],
+      approverUnits: ['WAKA_HUMAS_PERSONALIA', 'STAF_HUMAS_PERSONALIA'],
+      seeAllUnits: ['WAKA_HUMAS_PERSONALIA', 'STAF_HUMAS_PERSONALIA'],
+      subtitle: 'Format Penilaian Kinerja SDM Majelis Dikdasmen & PNF PCM Sedati: Loyalitas, Kapasitas, Kapabilitas, Pembinaan & Kajian PCM/PDM, serta Wawancara Komitmen Pakta Integritas.',
       derive: (p) => {
         const l1 = Number(p.loyaltyCountry) || 0;
         const l2 = Number(p.loyaltyMuhammadiyah) || 0;
@@ -390,8 +397,11 @@
         const c8 = Number(p.capacitySelfDev) || 0;
         const avgCapacity = Math.round((c1 + c2 + c3 + c4 + c5 + c6 + c7 + c8) / 8);
         const avgCapability = Number(p.capabilitySop) || 0;
-        const avgTotal = Math.round((avgLoyalty + avgCapacity + avgCapability) / 3);
-        const isPass = (avgLoyalty >= 75) && (avgCapacity >= 75) && (avgCapability >= 75);
+        const k1 = Number(p.kpiPembinaanMusada) || 85;
+        const k2 = Number(p.kpiKajianPcmPdm) || 85;
+        const avgKpi = Math.round((k1 + k2) / 2);
+        const avgTotal = Math.round((avgLoyalty + avgCapacity + avgCapability + avgKpi) / 4);
+        const isPass = (avgLoyalty >= 75) && (avgCapacity >= 75) && (avgCapability >= 75) && (avgKpi >= 75);
         let pred = 'Pemula';
         if (!isPass) {
           pred = 'Perlu Pembinaan';
@@ -407,6 +417,7 @@
           avgLoyalty: avgLoyalty,
           avgCapacity: avgCapacity,
           avgCapability: avgCapability,
+          avgKpi: avgKpi,
           score: avgTotal,
           predicate: pred,
           statusRecommendation: recStatus
@@ -437,18 +448,52 @@
         num('avgCapacity', 'Rata-rata Kapasitas', { readonly: true }),
         num('capabilitySop', '3.1 Pelaksanaan Jobdesk & SOP SDM (1-100, Lulus >= 75)', { required: true }),
         num('avgCapability', 'Rata-rata Kapabilitas', { readonly: true }),
+        num('kpiPembinaanMusada', '4.1 Keaktifan Pembinaan Musada (1-100, Lulus >= 75)', { required: true, default: 85 }),
+        num('kpiKajianPcmPdm', '4.2 Keaktifan Kajian PCM / PDM (Warga Muhammadiyah) (1-100, Lulus >= 75)', { required: true, default: 85 }),
+        num('avgKpi', 'Rata-rata Pembinaan & Kajian PCM/PDM', { readonly: true }),
+        sel('pcmCommitmentInterview', 'Wawancara Komitmen & Pakta Integritas PCM Sedati (Akhir Tahun)', ['Memenuhi Pakta Integritas', 'Komitmen Bersyarat', 'Perlu Pembinaan Khusus'], { required: true, default: 'Memenuhi Pakta Integritas' }),
         num('score', 'Rata-rata Total Nilai Kinerja', { readonly: true }),
         sel('predicate', 'Kategori Kinerja SDM', ['Prioritas', 'Prospek', 'Lanjutan', 'Pemula', 'Perlu Pembinaan'], { readonly: true }),
         sel('statusRecommendation', 'Status Rekomendasi (Naik / Tetap)', ['Naik', 'Tetap'], { required: true, default: 'Tetap' }),
         area('note', 'Catatan Pembinaan & Evaluasi SDM')
       ]
     },
+    '#/personnel/disciplinary': {
+      own: true,
+      node: 'personnel/disciplinary', noun: 'Peringatan & Disiplin SDM', writeRoles: PE, dateField: 'date', statusField: 'warningLevel',
+      badges: { 'Teguran Lisan': 'info', 'Peringatan Tertulis': 'warning', 'SP 1 (Surat Peringatan 1)': 'danger', 'SP 2 (Surat Peringatan 2)': 'danger', 'SP 3 (Surat Peringatan 3)': 'danger', 'Selesai Pembinaan': 'success' },
+      approverRoles: [R.PERSONNEL, R.KEPSEK],
+      approverUnits: ['WAKA_HUMAS_PERSONALIA', 'STAF_HUMAS_PERSONALIA'],
+      seeAllUnits: ['WAKA_HUMAS_PERSONALIA', 'STAF_HUMAS_PERSONALIA'],
+      subtitle: 'Pencatatan sanksi disiplin dan surat peringatan berkala berdasarkan evaluasi absensi & kinerja GTK.',
+      summary: [
+        { label: 'Total Tindakan', icon: 'ph-gavel', tone: 'primary' },
+        { label: 'Teguran Lisan', icon: 'ph-chat-circle-dots', tone: 'info', where: { warningLevel: 'Teguran Lisan' } },
+        { label: 'Peringatan Tertulis', icon: 'ph-note-pencil', tone: 'warning', where: { warningLevel: 'Peringatan Tertulis' } },
+        { label: 'Surat Peringatan (SP)', icon: 'ph-warning-octagon', tone: 'danger', where: { warningLevel: ['SP 1 (Surat Peringatan 1)', 'SP 2 (Surat Peringatan 2)', 'SP 3 (Surat Peringatan 3)'] } }
+      ],
+      fields: [
+        date('date', 'Tanggal Surat / Tindakan', { required: true }),
+        ref('employeeId', 'Pegawai SDM', 'employee', { required: true }),
+        sel('basis', 'Dasar Peringatan', ['Hasil Nilai Absensi / Presensi', 'Hasil Evaluasi Kinerja (KPI)', 'Pelanggaran Disiplin Kerja', 'Kombinasi Absensi & Kinerja'], { required: true, default: 'Hasil Nilai Absensi / Presensi' }),
+        sel('warningLevel', 'Tingkat Peringatan', ['Teguran Lisan', 'Peringatan Tertulis', 'SP 1 (Surat Peringatan 1)', 'SP 2 (Surat Peringatan 2)', 'SP 3 (Surat Peringatan 3)', 'Selesai Pembinaan'], { required: true, default: 'Teguran Lisan' }),
+        t('academicYear', 'Tahun Ajaran (Reset Tiap Tahun)', { default: '2026/2027', required: true }),
+        t('letterNumber', 'Nomor Surat Peringatan (Opsional)'),
+        file('document', 'Berkas Surat Peringatan (PDF/Foto)', 'disciplinary_letters'),
+        area('reason', 'Uraian Pelanggaran / Alasan Pembinaan', { required: true }),
+        area('actionPlan', 'Komitmen Perbaikan / Hasil Pembinaan Personalia')
+      ]
+    },
     '#/personnel/portfolio': { own: true,
       node: 'personnel/portfolio', noun: 'Portofolio & Kompetensi', writeRoles: [R.PERSONNEL, R.GURU, R.TENDIK], dateField: 'date', statusField: 'status', badges,
+      approverRoles: [R.PERSONNEL, R.KEPSEK],
+      approverUnits: ['WAKA_HUMAS_PERSONALIA', 'STAF_HUMAS_PERSONALIA'],
+      seeAllUnits: ['WAKA_HUMAS_PERSONALIA', 'STAF_HUMAS_PERSONALIA'],
       subtitle: 'Riwayat pelatihan, workshop, sertifikasi kompetensi, dan rekam jejak portofolio SDM.',
       summary: [
         { label: 'Total Portofolio', icon: 'ph-folder-star', tone: 'primary' },
         { label: 'Total Jam (JP)', icon: 'ph-clock', tone: 'warning', sum: 'hours' },
+        { label: 'Total Poin ACC', icon: 'ph-star', tone: 'info', sum: 'points' },
         { label: 'Selesai', icon: 'ph-check-circle', tone: 'success', where: { status: 'Selesai' } }
       ],
       fields: [
@@ -458,6 +503,7 @@
         t('title', 'Nama Pelatihan / Judul Portofolio', { required: true }),
         t('organizer', 'Lembaga Penyelenggara / Penerbit'),
         num('hours', 'Jumlah Jam (JP)'),
+        num('points', 'Poin / Bobot Nilai', { default: 0 }),
         t('certificateNo', 'Nomor Sertifikat / SK'),
         sel('status', 'Status', ['Direncanakan', 'Sedang Berjalan', 'Selesai'], { required: true, default: 'Selesai' }),
         file('document', 'Berkas Sertifikat / Portofolio', 'personnel_portfolio', { accept: '.pdf,image/*' }),

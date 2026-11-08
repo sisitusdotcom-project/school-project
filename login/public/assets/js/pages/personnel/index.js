@@ -29,26 +29,7 @@ const PersonnelPages = {
       date: today
     });
     const settings = settingsData || {};
-    const scheduleDefs = AppConfig.SCHEDULE_DAY_DEFS || {
-      gtk: [
-        { key: 'senin', label: 'Senin', note: 'Batas Masuk 06.45 | Pulang 14.30', status: 'active', inStart: '06:00', inEnd: '06:45', outStart: '14:30', outEnd: '17:30' },
-        { key: 'selasa', label: 'Selasa', note: 'Batas Masuk 06.45 | Pulang 15.15', status: 'active', inStart: '06:00', inEnd: '06:45', outStart: '15:15', outEnd: '17:30' },
-        { key: 'rabu', label: 'Rabu', note: 'Batas Masuk 06.45 | Pulang 15.15', status: 'active', inStart: '06:00', inEnd: '06:45', outStart: '15:15', outEnd: '17:30' },
-        { key: 'kamis', label: 'Kamis', note: 'Batas Masuk 06.45 | Pulang 14.45', status: 'active', inStart: '06:00', inEnd: '06:45', outStart: '14:45', outEnd: '17:30' },
-        { key: 'jumat', label: 'Jumat', note: 'Batas Masuk 06.45 | Pulang 12.45', status: 'active', inStart: '06:00', inEnd: '06:45', outStart: '12:45', outEnd: '17:30' },
-        { key: 'sabtu', label: 'Sabtu', note: 'Absensi Custom (Kajian / Pelatihan)', status: 'custom', inStart: '07:00', inEnd: '08:00', outStart: '11:00', outEnd: '13:00', customActivity: 'Kajian Rutin GTK' },
-        { key: 'minggu', label: 'Minggu', note: 'Absensi Custom (Pelatihan / Kajian Ahad)', status: 'custom', inStart: '06:00', inEnd: '07:30', outStart: '11:00', outEnd: '13:00', customActivity: 'Pelatihan & Pembinaan GTK' }
-      ],
-      ummi: [
-        { key: 'senin', label: 'Senin', note: 'Batas Masuk 07.15 | Pulang 12.30', status: 'active', inStart: '06:00', inEnd: '07:15', outStart: '12:30', outEnd: '15:00' },
-        { key: 'selasa', label: 'Selasa', note: 'Batas Masuk 07.15 | Pulang 12.30', status: 'active', inStart: '06:00', inEnd: '07:15', outStart: '12:30', outEnd: '15:00' },
-        { key: 'rabu', label: 'Rabu', note: 'Batas Masuk 07.15 | Pulang 12.30', status: 'active', inStart: '06:00', inEnd: '07:15', outStart: '12:30', outEnd: '15:00' },
-        { key: 'kamis', label: 'Kamis', note: 'Batas Masuk 07.00 | Pulang 12.00', status: 'active', inStart: '06:00', inEnd: '07:00', outStart: '12:00', outEnd: '15:00' },
-        { key: 'jumat', label: 'Jumat', note: 'Libur (Tidak Ada Absen)', status: 'off', inStart: '06:00', inEnd: '07:00', outStart: '11:00', outEnd: '13:00' },
-        { key: 'sabtu', label: 'Sabtu', note: 'Absensi Custom (Kajian & Munaqosyah)', status: 'custom', inStart: '06:00', inEnd: '08:00', outStart: '10:00', outEnd: '13:00', customActivity: 'Kajian & Munaqosyah Ummi' },
-        { key: 'minggu', label: 'Minggu', note: 'Absensi Custom (Pelatihan Guru Ummi)', status: 'custom', inStart: '06:00', inEnd: '07:30', outStart: '11:00', outEnd: '13:00', customActivity: 'Pelatihan Guru Ummi' }
-      ]
-    };
+    const scheduleDefs = AppConfig.SCHEDULE_DAY_DEFS;
     const renderScheduleRows = (group) => {
       const defs = scheduleDefs[group] || [];
       const currentGroup = settings.attendanceRules?.schedules?.[group] || {};
@@ -149,6 +130,13 @@ const PersonnelPages = {
               <div class="quick-nav-info">
                 <div class="quick-nav-title">Penilaian Kinerja SDM</div>
                 <div class="quick-nav-desc">Rubrik 3 pilar Majelis Dikdasmen</div>
+              </div>
+            </a>
+            <a href="#/personnel/disciplinary" class="quick-nav-card">
+              <div class="quick-nav-icon"><i class="ph ph-warning-octagon"></i></div>
+              <div class="quick-nav-info">
+                <div class="quick-nav-title">Peringatan & Disiplin SDM</div>
+                <div class="quick-nav-desc">Pencatatan teguran lisan, tertulis & SP</div>
               </div>
             </a>
             <a href="#/personnel/portfolio" class="quick-nav-card">

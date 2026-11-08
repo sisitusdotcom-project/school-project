@@ -131,6 +131,7 @@ const NAV_ITEMS = Object.freeze({
 { hash: '#/guru/academic', icon: 'ph-check-square', text: 'Input Nilai Mapel', group: 'Tugas Utama Guru' },
 { hash: '#/curriculum/syllabus', icon: 'ph-upload-simple', text: 'Upload Perangkat Ajar', group: 'Tugas Utama Guru' },
 { hash: '#/guru/portfolio', icon: 'ph-folder', text: 'Portofolio Guru', group: 'Tugas Utama Guru' },
+{ hash: '#/personnel/evaluations', icon: 'ph-chart-line-up', text: 'Rapor Kinerja & KPI', group: 'Tugas Utama Guru' },
 { hash: '#/guru/observations', icon: 'ph-note-pencil', text: 'Riwayat Observasi', group: 'Tugas Utama Guru' },
 { hash: '#/gtk/official-travel', icon: 'ph-airplane-takeoff', text: 'Perjalanan Dinas', group: 'Tugas Utama Guru' },
 { hash: '#/gtk/salary-slip', icon: 'ph-receipt', text: 'Slip Gaji Pribadi', group: 'Tugas Utama Guru' }
@@ -159,6 +160,7 @@ const NAV_ITEMS = Object.freeze({
 { hash: '#/attendance', icon: 'ph-map-pin', text: 'Presensi Kehadiran' },
 { hash: '#/tendik/performance', icon: 'ph-clipboard-text', text: 'Laporan Kinerja', group: 'Tupoksi Tenaga Kependidikan' },
 { hash: '#/tendik/portfolio', icon: 'ph-folder', text: 'Portofolio', group: 'Tupoksi Tenaga Kependidikan' },
+{ hash: '#/personnel/evaluations', icon: 'ph-chart-line-up', text: 'Rapor Kinerja & KPI', group: 'Tupoksi Tenaga Kependidikan' },
 { hash: '#/gtk/official-travel', icon: 'ph-airplane-takeoff', text: 'Perjalanan Dinas', group: 'Tupoksi Tenaga Kependidikan' },
 { hash: '#/gtk/salary-slip', icon: 'ph-receipt', text: 'Slip Gaji Pribadi', group: 'Tupoksi Tenaga Kependidikan' }
 ],
@@ -213,6 +215,8 @@ const NAV_ITEMS = Object.freeze({
 { hash: '#/personnel/data', icon: 'ph-folder-user', text: 'Data Kepegawaian', group: 'Humas & Personalia: Administrasi SDM' },
 { hash: '#/admin/attendance', icon: 'ph-clock', text: 'Pantau Disiplin Guru', group: 'Humas & Personalia: Kinerja & Portofolio' },
 { hash: '#/personnel/evaluations', icon: 'ph-chart-line-up', text: 'Penilaian Kinerja SDM', group: 'Humas & Personalia: Kinerja & Portofolio' },
+{ hash: '#/personnel/disciplinary', icon: 'ph-warning-octagon', text: 'Peringatan & Disiplin SDM', group: 'Humas & Personalia: Kinerja & Portofolio' },
+{ hash: '#/guru/portfolio', icon: 'ph-folder-check', text: 'Verifikasi Portofolio Guru', group: 'Humas & Personalia: Kinerja & Portofolio' },
 { hash: '#/personnel/portfolio', icon: 'ph-folder-star', text: 'Portofolio & Kompetensi', group: 'Humas & Personalia: Kinerja & Portofolio' },
 { hash: '#/humas/official-travel', icon: 'ph-airplane-takeoff', text: 'Verifikasi Tugas Dinas', group: 'Humas & Personalia: Kinerja & Portofolio' },
 { hash: '#/personnel/publications', icon: 'ph-megaphone', text: 'Publikasi & Informasi', group: 'Humas & Personalia: Komunikasi Publik & Aduan' },
@@ -226,7 +230,9 @@ const NAV_ITEMS = Object.freeze({
 'STAF_HUMAS_PERSONALIA': [
 { hash: '#/personnel', icon: 'ph-briefcase', text: 'Dashboard Humas & Personalia', group: 'Humas & Personalia: Administrasi SDM' },
 { hash: '#/personnel/data', icon: 'ph-folder-user', text: 'Data Kepegawaian', group: 'Humas & Personalia: Administrasi SDM' },
+{ hash: '#/guru/portfolio', icon: 'ph-folder-check', text: 'Verifikasi Portofolio Guru', group: 'Humas & Personalia: Kinerja & Portofolio' },
 { hash: '#/personnel/portfolio', icon: 'ph-folder-star', text: 'Portofolio & Kompetensi', group: 'Humas & Personalia: Kinerja & Portofolio' },
+{ hash: '#/personnel/disciplinary', icon: 'ph-warning-octagon', text: 'Peringatan & Disiplin SDM', group: 'Humas & Personalia: Kinerja & Portofolio' },
 { hash: '#/humas/official-travel', icon: 'ph-airplane-takeoff', text: 'Verifikasi Tugas Dinas', group: 'Humas & Personalia: Kinerja & Portofolio' },
 { hash: '#/personnel/publications', icon: 'ph-megaphone', text: 'Publikasi & Informasi', group: 'Humas & Personalia: Komunikasi Publik & Aduan' },
 { hash: '#/personnel/complaints', icon: 'ph-chats', text: 'Layanan Pengaduan', group: 'Humas & Personalia: Komunikasi Publik & Aduan' },

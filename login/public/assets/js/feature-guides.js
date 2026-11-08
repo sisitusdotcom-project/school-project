@@ -37,10 +37,16 @@ const FeatureGuides = {
       usage: 'Pilih tanggal atau bulan untuk mengecek jam kedatangan, keterlambatan, dan status kehadiran staf.'
     },
     '#/personnel/evaluations': {
-      func: 'Penilaian Kinerja SDM Majelis Dikdasmen & PNF PCM Sedati dengan rubrik 3 pilar: Loyalitas (4 item), Kapasitas (8 item), dan Kapabilitas (Jobdesk/SOP).',
-      from: 'Kepala Sekolah & Asesor Penilai',
-      to: 'Guru yang Dinilai & Arsip Kepegawaian',
-      usage: 'Pilih nama guru yang dinilai, isi skor 1-4 pada setiap pilar instrumen, dan simpan untuk menerbitkan SKP.'
+      func: 'Penilaian Kinerja SDM Majelis Dikdasmen & PNF PCM Sedati: Loyalitas, Kapasitas, Kapabilitas, Pembinaan & Kajian PCM/PDM, serta Wawancara Komitmen Pakta Integritas.',
+      from: 'Kepala Sekolah & Waka Humas Personalia',
+      to: 'Guru/Pegawai yang Dinilai (own: true) & Arsip Kepegawaian',
+      usage: 'Personalia mengisi skor instrumen, guru dapat melihat nilai evaluasi mandiri untuk introspeksi dan peningkatan mutu.'
+    },
+    '#/personnel/disciplinary': {
+      func: 'Pencatatan sanksi disiplin dan surat peringatan (teguran lisan, tertulis, SP1, SP2, SP3) berdasarkan rekam absensi & kinerja.',
+      from: 'Waka Humas Personalia & Kepala Sekolah',
+      to: 'GTK yang Bersangkutan (own: true) & Arsip Disiplin',
+      usage: 'Pilih pegawai, tetapkan tingkat teguran/SP, cantumkan alasan pembinaan serta lampiran surat resmi.'
     },
     '#/personnel/portfolio': {
       func: 'Pelacakan keikutsertaan workshop, seminar, dan portofolio sertifikat pengembangan keprofesian berkelanjutan.',

@@ -206,6 +206,13 @@ ${myTravels.length > 5 ? `<div class="travel-all-wrap"><a href="#/gtk/official-t
 <div class="quick-nav-desc">Dokumentasi karya & sertifikat</div>
 </div>
 </a>
+<a href="#/personnel/evaluations" class="quick-nav-card">
+<div class="quick-nav-icon"><i class="ph ph-chart-line-up"></i></div>
+<div class="quick-nav-info">
+<div class="quick-nav-title">Rapor Kinerja & KPI</div>
+<div class="quick-nav-desc">Evaluasi kinerja, pembinaan & rekam jejak SDM</div>
+</div>
+</a>
 <a href="#/guru/student-attendance" class="quick-nav-card">
 <div class="quick-nav-icon"><i class="ph ph-users-three"></i></div>
 <div class="quick-nav-info">
@@ -2498,6 +2505,7 @@ DB.getTeacherAttendance(dateStr, uid),
 DB._readCollection ? DB._readCollection('personnel/directory', {}) : Promise.resolve({})
 ]);
 const dirList = DB.toArray(directoryData);
+const teacherName = AppConfig.formatUserName(Auth.userData || Auth.currentUser) || 'Ustadz / Ustadzah';
 const cleanUserName = (teacherName || '').toLowerCase().replace(/[^a-z0-9]/g, '');
 const empProfile = dirList.find(d => d.userId === uid || (d.name && d.name.toLowerCase().replace(/[^a-z0-9]/g, '') === cleanUserName)) || {};
 const classArr = DB.toArray(ummiClasses);
@@ -2508,7 +2516,6 @@ myClasses = classArr.filter(c => assigns.some(a => a.toLowerCase().includes(c.na
 }
 const rombelName = myClasses.map(c => c.name).join(', ') || 'Metode Ummi';
 const totalEnrolled = myClasses.reduce((sum, c) => sum + Object.keys(c.students || {}).length, 0);
-const teacherName = AppConfig.formatUserName(Auth.userData || Auth.currentUser) || 'Ustadz / Ustadzah';
 const assigns = Auth.currentAssignments || AppConfig.getRoleAssignments(Auth.userData || {});
 const isKoord = assigns.includes('KOORD_UMMI');
 const heroHtml = AppConfig.getDashboardHeroHtml({
