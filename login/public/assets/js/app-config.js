@@ -826,6 +826,70 @@ sD,
 eD
 };
 }
+function getAttendanceGradeMeta(score) {
+const s = Math.max(0, Math.min(100, Math.round(Number(score) || 0)));
+if (s >= 91) {
+return {
+score: s,
+grade: 'A',
+keterangan: 'Ayo Istiqomah dalam Kebaikan',
+badgeClass: 'att-grade-badge--a',
+progressBarClass: 'att-grade-progress-bar--a',
+tagClass: 'att-keterangan-tag--a',
+tone: 'success',
+isWarning: false
+};
+}
+if (s >= 81) {
+return {
+score: s,
+grade: 'B',
+keterangan: 'Ayo tingkatkan Nilaimu',
+badgeClass: 'att-grade-badge--b',
+progressBarClass: 'att-grade-progress-bar--b',
+tagClass: 'att-keterangan-tag--b',
+tone: 'primary',
+isWarning: false
+};
+}
+if (s >= 71) {
+return {
+score: s,
+grade: 'C',
+keterangan: 'Peringatan Lisan',
+badgeClass: 'att-grade-badge--c',
+progressBarClass: 'att-grade-progress-bar--c',
+tagClass: 'att-keterangan-tag--c',
+tone: 'warning',
+isWarning: true,
+warningLevel: 'Peringatan Lisan'
+};
+}
+if (s >= 51) {
+return {
+score: s,
+grade: 'D',
+keterangan: 'Peringatan Tertulis',
+badgeClass: 'att-grade-badge--d',
+progressBarClass: 'att-grade-progress-bar--d',
+tagClass: 'att-keterangan-tag--d',
+tone: 'danger',
+isWarning: true,
+warningLevel: 'Peringatan Tertulis'
+};
+}
+return {
+score: s,
+grade: 'E',
+keterangan: 'Surat Peringatan',
+badgeClass: 'att-grade-badge--e',
+progressBarClass: 'att-grade-progress-bar--e',
+tagClass: 'att-keterangan-tag--e',
+tone: 'danger',
+isWarning: true,
+warningLevel: 'Surat Peringatan'
+};
+}
 function calculateAttendanceGrade(records = [], options = {}) {
 const opts = options || {};
 const periodType = opts.periodType === 'calendar_month' ? 'calendar_month' : 'cutoff';
@@ -866,12 +930,17 @@ recordMap[r.date] = r;
 let totalEffectiveDays = 0;
 let elapsedEffectiveDays = 0;
 let presentCount = 0;
-let onTimeCount = 0;
+let onTimeInCount = 0;
+let onTimeOutCount = 0;
 let lateCount = 0;
+let earlyLeaveCount = 0;
 let alphaCount = 0;
 let personalPermitCount = 0;
 let officialDutyCount = 0;
 let totalPunctualityMin = 0;
+let totalPembinaanDays = 0;
+let elapsedPembinaanDays = 0;
+let attendedPembinaanCount = 0;
 const dailyBreakdown = [];
 const cur = new Date(sD.getFullYear(), sD.getMonth(), sD.getDate());
 while (cur <= eD) {
@@ -884,28 +953,14 @@ if (sched.isOff) {
 cur.setDate(cur.getDate() + 1);
 continue;
 }
-if (sched.isOptional) {
-if (rec && rec.time_in) {
-presentCount++;
-const normalizedIn = String(rec.time_in).replace('.', ':');
-const limitIn = (sched.inEnd || (isUmmi ? '07:15' : '08:00')).replace('.', ':');
-const [inH, inM] = normalizedIn.split(':').map(Number);
-const [limH, limM] = limitIn.split(':').map(Number);
-const diff = (limH * 60 + limM) - (inH * 60 + inM);
-if (diff >= 0) {
-const surplus = Math.min(diff, maxSurplusPerDay);
-totalPunctualityMin += surplus;
-onTimeCount++;
-} else {
-if (rec.appeal_status === 'approved' || rec.appeal_status === 'accepted' || sched.noLatePenalty) {
-onTimeCount++;
-} else {
-totalPunctualityMin += diff;
-lateCount++;
+if (sched.isCustom || sched.isOptional) {
+totalPembinaanDays++;
+if (!isFuture) elapsedPembinaanDays++;
+const isAttendedPem = Boolean(rec && (rec.time_in || rec.status === 'official_duty' || rec.leave_type === 'dinas' || rec.attendance_type === 'custom'));
+if (isAttendedPem) {
+attendedPembinaanCount++;
 }
-}
-dailyBreakdown.push({ date: curDateStr, status: 'present_optional', minutesDelta: diff, time_in: rec.time_in });
-}
+dailyBreakdown.push({ date: curDateStr, status: isAttendedPem ? 'present_custom' : 'absent_custom', activity: sched.customActivity || (sched.isOptional ? 'Pembinaan Rutin' : 'Kajian/Pelatihan') });
 cur.setDate(cur.getDate() + 1);
 continue;
 }
@@ -916,6 +971,8 @@ elapsedEffectiveDays++;
 if (rec && (rec.status === 'official_duty' || rec.leave_type === 'dinas')) {
 officialDutyCount++;
 presentCount++;
+onTimeInCount++;
+onTimeOutCount++;
 dailyBreakdown.push({ date: curDateStr, status: 'official_duty', minutesDelta: 0 });
 } else if (rec && rec.time_in) {
 presentCount++;
@@ -923,23 +980,43 @@ const normalizedIn = String(rec.time_in).replace('.', ':');
 const limitIn = (sched.inEnd || (isUmmi ? '07:15' : '06:45')).replace('.', ':');
 const [inH, inM] = normalizedIn.split(':').map(Number);
 const [limH, limM] = limitIn.split(':').map(Number);
-const diff = (limH * 60 + limM) - (inH * 60 + inM);
+const diffIn = (limH * 60 + limM) - (inH * 60 + inM);
 let delta = 0;
-if (diff >= 0) {
-delta = Math.min(diff, maxSurplusPerDay);
+if (diffIn >= 0) {
+delta = Math.min(diffIn, maxSurplusPerDay);
 totalPunctualityMin += delta;
-onTimeCount++;
+onTimeInCount++;
 } else {
-if (rec.appeal_status === 'approved' || rec.appeal_status === 'accepted') {
+if (rec.appeal_status === 'approved' || rec.appeal_status === 'accepted' || sched.noLatePenalty) {
 delta = 0;
-onTimeCount++;
+onTimeInCount++;
 } else {
-delta = diff;
+delta = diffIn;
 totalPunctualityMin += delta;
 lateCount++;
 }
 }
-dailyBreakdown.push({ date: curDateStr, status: 'present', minutesDelta: delta, time_in: rec.time_in });
+const limitOut = (sched.outStart || (isUmmi ? '12:30' : '14:30')).replace('.', ':');
+if (rec.time_out) {
+const normalizedOut = String(rec.time_out).replace('.', ':');
+const [outH, outM] = normalizedOut.split(':').map(Number);
+const [limOutH, limOutM] = limitOut.split(':').map(Number);
+const diffOut = (outH * 60 + outM) - (limOutH * 60 + limOutM);
+if (diffOut >= 0 || rec.appeal_status === 'approved' || rec.appeal_status === 'accepted') {
+onTimeOutCount++;
+} else {
+earlyLeaveCount++;
+onTimeOutCount += 0.5;
+}
+} else {
+if (isToday) {
+const curTime = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace('.', ':');
+if (curTime < limitOut) {
+onTimeOutCount++;
+}
+}
+}
+dailyBreakdown.push({ date: curDateStr, status: 'present', minutesDelta: delta, time_in: rec.time_in, time_out: rec.time_out });
 } else if (rec && (rec.leave_type === 'pribadi' || rec.status === 'permit')) {
 if (!isFuture) {
 personalPermitCount++;
@@ -967,59 +1044,46 @@ dailyBreakdown.push({ date: curDateStr, status: 'upcoming', minutesDelta: 0 });
 cur.setDate(cur.getDate() + 1);
 }
 const evaluatedDays = endDateStr <= todayStr ? totalEffectiveDays : Math.max(1, elapsedEffectiveDays);
-let attendancePercent = 100;
+let teachingAttendancePercent = 100;
 if (evaluatedDays > 0) {
-const calculatedPercent = ((presentCount) / evaluatedDays) * 100;
-attendancePercent = Math.max(0, Math.min(100, Math.round(calculatedPercent * 10) / 10));
+teachingAttendancePercent = Math.max(0, Math.min(100, Math.round(((presentCount) / evaluatedDays) * 1000) / 10));
 }
-let attendanceGrade = 'A';
-let attendanceGradeClass = 'att-grade-badge--a';
-let progressBarClass = 'att-grade-progress-bar--a';
-if (attendancePercent >= 95.0) {
-attendanceGrade = 'A';
-attendanceGradeClass = 'att-grade-badge--a';
-progressBarClass = 'att-grade-progress-bar--a';
-} else if (attendancePercent >= 85.0) {
-attendanceGrade = 'B';
-attendanceGradeClass = 'att-grade-badge--b';
-progressBarClass = 'att-grade-progress-bar--b';
-} else if (attendancePercent >= 75.0) {
-attendanceGrade = 'C';
-attendanceGradeClass = 'att-grade-badge--c';
-progressBarClass = 'att-grade-progress-bar--c';
-} else {
-attendanceGrade = 'D';
-attendanceGradeClass = 'att-grade-badge--d';
-progressBarClass = 'att-grade-progress-bar--d';
+const teachingAttendanceMeta = getAttendanceGradeMeta(teachingAttendancePercent);
+let punctualityPercent = 100;
+if (presentCount > 0) {
+const inRate = (onTimeInCount / presentCount) * 100;
+const outRate = (onTimeOutCount / presentCount) * 100;
+const calcPunct = (inRate * 0.5) + (outRate * 0.5);
+punctualityPercent = Math.max(0, Math.min(100, Math.round(calcPunct * 10) / 10));
 }
-let punctualityGrade = 'B';
-let punctualityGradeClass = 'att-grade-badge--b';
-if (totalPunctualityMin >= 100) {
-punctualityGrade = 'A';
-punctualityGradeClass = 'att-grade-badge--a';
-} else if (totalPunctualityMin >= 0) {
-punctualityGrade = 'B';
-punctualityGradeClass = 'att-grade-badge--b';
-} else if (totalPunctualityMin >= -30) {
-punctualityGrade = 'C';
-punctualityGradeClass = 'att-grade-badge--c';
-} else {
-punctualityGrade = 'D';
-punctualityGradeClass = 'att-grade-badge--d';
+const punctualityMeta = getAttendanceGradeMeta(punctualityPercent);
+let pembinaanPercent = 100;
+const evaluatedPembinaan = Math.max(0, elapsedPembinaanDays);
+if (evaluatedPembinaan > 0) {
+pembinaanPercent = Math.max(0, Math.min(100, Math.round((attendedPembinaanCount / evaluatedPembinaan) * 1000) / 10));
 }
+const pembinaanMeta = getAttendanceGradeMeta(pembinaanPercent);
+const overallScore = Math.max(0, Math.min(100, Math.round(((teachingAttendancePercent * 0.40) + (punctualityPercent * 0.40) + (pembinaanPercent * 0.20)) * 10) / 10));
+const overallMeta = getAttendanceGradeMeta(overallScore);
 const punctualitySign = totalPunctualityMin > 0 ? '+' : '';
 const punctualityLabel = `${punctualitySign}${totalPunctualityMin} mnt`;
 const avgPunctuality = presentCount > 0 ? Math.round((totalPunctualityMin / presentCount) * 10) / 10 : 0;
-const isPoorGrade = attendanceGrade === 'D' || attendanceGrade === 'C' || punctualityGrade === 'D' || attendancePercent < 80.0 || alphaCount >= 2;
+const isPoorGrade = overallMeta.isWarning || alphaCount >= 2;
 let warningTitle = '';
 let warningText = '';
 if (isPoorGrade) {
-if (attendanceGrade === 'D' || alphaCount >= 3) {
-warningTitle = 'Peringatan Disiplin Kehadiran (Tingkat Kritis)';
-warningText = `Grade kehadiran Anda saat ini berada di tingkat D (${attendancePercent}% hadir, ${alphaCount} hari tanpa keterangan/alpha, ${lateCount} kali terlambat). Kinerja presensi Anda memerlukan perhatian serius dan pembinaan Waka Personalia.`;
+if (overallMeta.grade === 'E') {
+warningTitle = 'Peringatan Disiplin Kritis (Surat Peringatan)';
+warningText = `Nilai evaluasi kedisiplinan Anda ${overallScore.toFixed(1)} (Grade E — Surat Peringatan). Rincian: Hadir Mengajar ${teachingAttendancePercent.toFixed(1)}%, Ketepatan Waktu ${punctualityPercent.toFixed(1)}%, Pembinaan Musada/PCM/PDM ${pembinaanPercent.toFixed(1)}%. Segera temui Waka Personalia.`;
+} else if (overallMeta.grade === 'D') {
+warningTitle = 'Peringatan Evaluasi Kehadiran (Peringatan Tertulis)';
+warningText = `Nilai evaluasi kedisiplinan Anda ${overallScore.toFixed(1)} (Grade D — Peringatan Tertulis). Rincian: Hadir Mengajar ${teachingAttendancePercent.toFixed(1)}%, Ketepatan Waktu ${punctualityPercent.toFixed(1)}%, Pembinaan Musada/PCM/PDM ${pembinaanPercent.toFixed(1)}%. Mohon tingkatkan disiplin kehadiran.`;
+} else if (overallMeta.grade === 'C') {
+warningTitle = 'Peringatan Evaluasi Kehadiran (Peringatan Lisan)';
+warningText = `Nilai evaluasi kedisiplinan Anda ${overallScore.toFixed(1)} (Grade C — Peringatan Lisan). Rincian: Hadir Mengajar ${teachingAttendancePercent.toFixed(1)}%, Ketepatan Waktu ${punctualityPercent.toFixed(1)}%, Pembinaan Musada/PCM/PDM ${pembinaanPercent.toFixed(1)}%. Mohon perbaiki ketepatan waktu dan kehadiran.`;
 } else {
-warningTitle = 'Peringatan Disiplin Kehadiran';
-warningText = `Grade kehadiran Anda berada di tingkat ${attendanceGrade} (${attendancePercent}% hadir, ${alphaCount} hari alpha, terlambat ${lateCount} kali / ${totalPunctualityMin} menit). Tingkatkan kehadiran dan ketepatan waktu Anda.`;
+warningTitle = 'Peringatan Evaluasi Kehadiran';
+warningText = `Terdapat ${alphaCount} catatan ketidakhadiran (alpha). Rincian: Hadir Mengajar ${teachingAttendancePercent.toFixed(1)}%, Ketepatan Waktu ${punctualityPercent.toFixed(1)}%, Pembinaan Musada/PCM/PDM ${pembinaanPercent.toFixed(1)}%.`;
 }
 }
 return {
@@ -1032,19 +1096,44 @@ totalEffectiveDays,
 elapsedEffectiveDays,
 evaluatedDays,
 presentCount,
-onTimeCount,
+onTimeCount: onTimeInCount,
+onTimeInCount,
+onTimeOutCount,
 lateCount,
+earlyLeaveCount,
 alphaCount,
 personalPermitCount,
 officialDutyCount,
-attendancePercent,
-attendanceGrade,
-attendanceGradeClass,
-progressBarClass,
+totalPembinaanDays,
+elapsedPembinaanDays,
+attendedPembinaanCount,
+overallScore,
+overallGrade: overallMeta.grade,
+overallKeterangan: overallMeta.keterangan,
+overallBadgeClass: overallMeta.badgeClass,
+overallProgressBarClass: overallMeta.progressBarClass,
+overallTagClass: overallMeta.tagClass,
+teachingAttendancePercent,
+teachingAttendanceGrade: teachingAttendanceMeta.grade,
+teachingAttendanceNote: teachingAttendanceMeta.keterangan,
+teachingAttendanceBadgeClass: teachingAttendanceMeta.badgeClass,
+teachingAttendanceTagClass: teachingAttendanceMeta.tagClass,
+punctualityPercent,
+punctualityGrade: punctualityMeta.grade,
+punctualityNote: punctualityMeta.keterangan,
+punctualityBadgeClass: punctualityMeta.badgeClass,
+punctualityTagClass: punctualityMeta.tagClass,
+pembinaanPercent,
+pembinaanGrade: pembinaanMeta.grade,
+pembinaanNote: pembinaanMeta.keterangan,
+pembinaanBadgeClass: pembinaanMeta.badgeClass,
+pembinaanTagClass: pembinaanMeta.tagClass,
+attendancePercent: overallScore,
+attendanceGrade: overallMeta.grade,
+attendanceGradeClass: overallMeta.badgeClass,
+progressBarClass: overallMeta.progressBarClass,
 totalPunctualityMin,
-punctualityGrade,
-punctualityGradeClass,
-punctualityLabel,
+punctualityLabel: `${punctualityPercent.toFixed(1)}%`,
 avgPunctuality,
 dailyBreakdown,
 academicYear,
@@ -1585,6 +1674,7 @@ PAYROLL_CUTOFF_START,
 PAYROLL_CUTOFF_END,
 getPayrollCutoffRange,
 calculateAttendanceGrade,
+getAttendanceGradeMeta,
 getAcademicYearDateRange,
 resolveSalarySlipData,
 ATTENDANCE_MOTIVATIONS,

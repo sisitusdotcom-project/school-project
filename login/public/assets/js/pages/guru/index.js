@@ -84,8 +84,12 @@ ${gradeResult.isPoorGrade ? `
 <section class="card-grid section-spacer">
 <div class="card stat-card">
 <div class="stat-icon stat-icon--success"><i class="ph ph-map-pin"></i></div>
-<div><p class="stat-value">${myAtt ? (myAtt.time_in ? '✓' : '—') : '—'}</p><p class="stat-label text-muted">Datang</p></div>
+<div><p class="stat-value">${myAtt ? (myAtt.time_in ? '✓' : '—') : '—'}</p><p class="stat-label text-muted">Presensi Datang</p></div>
 </div>
+<a href="#/attendance" class="card stat-card stat-card--interactive">
+<div class="stat-icon stat-icon--warning"><i class="ph ph-medal"></i></div>
+<div><p class="stat-value">${gradeResult.overallScore.toFixed(0)}% (${gradeResult.overallGrade})</p><p class="stat-label text-muted">${AppConfig.escapeHtml(gradeResult.overallKeterangan)}</p></div>
+</a>
 <div class="card stat-card">
 <div class="stat-icon stat-icon--primary"><i class="ph ph-users-three"></i></div>
 <div><p class="stat-value">${studentCount}</p><p class="stat-label text-muted">Siswa di kelas saya</p></div>
@@ -1894,7 +1898,7 @@ ${gradeResult.isPoorGrade ? `
 </div>` : ''}
 <div class="att-grade-card">
 <div class="att-grade-header">
-<div class="att-grade-head-title"><i class="ph ph-medal"></i><span>Evaluasi Kehadiran</span></div>
+<div class="att-grade-head-title"><i class="ph ph-medal"></i><span>Evaluasi Disiplin & Kehadiran GTK</span></div>
 <div class="att-grade-select-wrap">
 <select id="att-grade-period-select" class="att-grade-select" aria-label="Pilih Periode Evaluasi">
 <option value="cutoff"${currentPeriodMode === 'cutoff' ? ' selected' : ''}>Cutoff: ${curCutoffShort}</option>
@@ -1904,29 +1908,50 @@ ${gradeResult.isPoorGrade ? `
 </div>
 </div>
 <div class="att-grade-row">
-<div class="att-grade-badge ${gradeResult.attendanceGradeClass}"><span>${gradeResult.attendanceGrade}</span></div>
+<div class="att-grade-badge ${gradeResult.overallBadgeClass}"><span>${gradeResult.overallGrade}</span></div>
 <div class="att-grade-body">
-<div class="att-grade-title">Grade Kehadiran</div>
-<div class="att-grade-val">${gradeResult.attendancePercent.toFixed(1)}%</div>
-<div class="att-grade-meta">${gradeResult.totalEffectiveDays} hari efektif | Alpha: ${gradeResult.alphaCount} | Izin Pribadi: ${gradeResult.personalPermitCount}</div>
+<div class="att-grade-title">Nilai Akhir Evaluasi: <strong>${gradeResult.overallScore.toFixed(1)} / 100</strong></div>
+<div class="att-keterangan-tag ${gradeResult.overallTagClass}">${AppConfig.escapeHtml(gradeResult.overallKeterangan)}</div>
+<div class="att-grade-meta">${gradeResult.totalEffectiveDays} hari efektif mengajar | Alpha: ${gradeResult.alphaCount} | Izin Pribadi: ${gradeResult.personalPermitCount}</div>
 </div>
 </div>
 <div class="att-grade-progress">
-<div class="att-grade-progress-bar ${gradeResult.progressBarClass}" id="att-grade-progress-fill"></div>
+<div class="att-grade-progress-bar ${gradeResult.overallProgressBarClass}" id="att-grade-progress-fill"></div>
 </div>
 <div class="att-grade-divider"></div>
-<div class="att-grade-row">
-<div class="att-grade-badge ${gradeResult.punctualityGradeClass}"><span>${gradeResult.punctualityGrade}</span></div>
-<div class="att-grade-body">
-<div class="att-grade-title">Poin Ketepatan Hadir</div>
-<div class="att-grade-val">${gradeResult.punctualityLabel}</div>
-<div class="att-grade-meta">Rata-rata ${gradeResult.avgPunctuality >= 0 ? '+' : ''}${gradeResult.avgPunctuality} mnt/hari | Tepat Waktu: ${gradeResult.onTimeCount} | Terlambat: ${gradeResult.lateCount}</div>
+<div class="att-submetrics-grid">
+<div class="att-submetric-card">
+<span class="att-submetric-num">1. Kehadiran</span>
+<span class="att-submetric-label">Masuk Mengajar</span>
+<div class="att-submetric-val">
+<span>${gradeResult.teachingAttendancePercent.toFixed(1)}%</span>
+<span class="badge ${gradeResult.teachingAttendanceBadgeClass}">${gradeResult.teachingAttendanceGrade}</span>
+</div>
+<p class="att-submetric-note">${AppConfig.escapeHtml(gradeResult.teachingAttendanceNote)}</p>
+</div>
+<div class="att-submetric-card">
+<span class="att-submetric-num">2. Ketepatan Waktu</span>
+<span class="att-submetric-label">Datang & Pulang</span>
+<div class="att-submetric-val">
+<span>${gradeResult.punctualityPercent.toFixed(1)}%</span>
+<span class="badge ${gradeResult.punctualityBadgeClass}">${gradeResult.punctualityGrade}</span>
+</div>
+<p class="att-submetric-note">${AppConfig.escapeHtml(gradeResult.punctualityNote)}</p>
+</div>
+<div class="att-submetric-card">
+<span class="att-submetric-num">3. Pembinaan</span>
+<span class="att-submetric-label">Musada / PCM / PDM</span>
+<div class="att-submetric-val">
+<span>${gradeResult.pembinaanPercent.toFixed(1)}%</span>
+<span class="badge ${gradeResult.pembinaanBadgeClass}">${gradeResult.pembinaanGrade}</span>
+</div>
+<p class="att-submetric-note">${AppConfig.escapeHtml(gradeResult.pembinaanNote)}</p>
 </div>
 </div>
 </div>`;
 const progressFill = document.getElementById('att-grade-progress-fill');
 if (progressFill) {
-progressFill.style.width = `${gradeResult.attendancePercent}%`;
+progressFill.style.width = `${gradeResult.overallScore}%`;
 }
 const periodSelect = document.getElementById('att-grade-period-select');
 if (periodSelect) {
