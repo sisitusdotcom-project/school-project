@@ -329,6 +329,7 @@ const App = {
           '#/finance': typeof FinancePages !== 'undefined' ? FinancePages.renderDashboard : null,
           '#/curriculum': typeof CurriculumPages !== 'undefined' ? CurriculumPages.renderDashboard : null,
           '#/student-affairs': typeof StudentAffairsPages !== 'undefined' ? StudentAffairsPages.renderDashboard : null,
+          '#/student-affairs/attendance': typeof StudentAffairsPages !== 'undefined' ? StudentAffairsPages.renderAttendanceMonitoring : null,
           '#/personnel': typeof PersonnelPages !== 'undefined' ? PersonnelPages.renderDashboard : null,
           '#/facilities': typeof FacilitiesPages !== 'undefined' ? FacilitiesPages.renderDashboard : null,
           '#/it-admin/dashboard': typeof ITAdminPages !== 'undefined' ? ITAdminPages.renderDashboard : null

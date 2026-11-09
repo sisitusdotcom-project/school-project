@@ -473,4 +473,354 @@ doc.save(`Laporan_Rombel_Detail_Musada_${todayStr.replace(/\s+/g, '_')}.pdf`);
 });
 }
 }
+,
+  async renderAttendanceMonitoring(container) {
+    Router.setTitle('Pantau Kehadiran Siswa', 'Monitoring presensi harian seluruh rombel kelas, rekapitulasi kehadiran siswa, dan status ketidakhadiran.');
+    container.innerHTML = '<div class="card section-block"><div class="card-body"><div class="loading-state"><div class="loader loading-state__loader"></div><span>Memuat data kehadiran siswa...</span></div></div></div>';
+    const [settings, classesData, usersData, studentsData] = await Promise.all([
+      DB.getSettings().catch(() => ({})),
+      DB.getClasses().catch(() => ({})),
+      DB.getAllUsers().catch(() => ({})),
+      DB.getAllStudents().catch(() => ({}))
+    ]);
+    const classList = DB.toArray(classesData);
+    const userList = DB.toArray(usersData);
+    const studentList = DB.toArray(studentsData);
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    const todayStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+    let selectedDate = todayStr;
+    let selectedFase = '';
+    let selectedStatus = '';
+    let searchQuery = '';
+    const dateDisplay = (dStr) => {
+      if (!dStr) return '-';
+      const [y, m, d] = dStr.split('-');
+      const dt = new Date(Number(y), Number(m) - 1, Number(d));
+      return dt.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    };
+    const getTeacherName = (cls) => {
+      const match = userList.find((u) => u.id === cls.teacherId || (u.assignments && u.assignments.includes(`GURU_KELAS_${cls.id.replace('CLASS_', '')}`)));
+      return match ? match.name : '-';
+    };
+    const renderView = async () => {
+      const dailyAttData = await DB.getDailyStudentAttendanceByDate(selectedDate).catch(() => ({}));
+      let totalSchoolHadir = 0;
+      let totalSchoolSakit = 0;
+      let totalSchoolIzin = 0;
+      let totalSchoolAlpa = 0;
+      let totalMarkedClasses = 0;
+      const rombelData = classList.map((cls) => {
+        const clsStudents = studentList.filter((s) => s.classId === cls.id);
+        const attObj = dailyAttData[cls.id] || {};
+        const isMarked = Object.keys(attObj).length > 0;
+        if (isMarked) totalMarkedClasses++;
+        let h = 0, s = 0, i = 0, a = 0;
+        clsStudents.forEach((stu) => {
+          const st = attObj[stu.id] || attObj[stu.nis] || attObj[stu.nisn];
+          if (st === 'H') h++;
+          else if (st === 'S') s++;
+          else if (st === 'I') i++;
+          else if (st === 'A') a++;
+        });
+        if (isMarked) {
+          totalSchoolHadir += h;
+          totalSchoolSakit += s;
+          totalSchoolIzin += i;
+          totalSchoolAlpa += a;
+        }
+        const total = clsStudents.length;
+        const pct = isMarked && total > 0 ? Math.round((h / total) * 100) : 0;
+        return {
+          id: cls.id,
+          name: cls.name,
+          fase: cls.fase || (cls.name.startsWith('1') || cls.name.startsWith('2') ? 'Fase A' : (cls.name.startsWith('3') || cls.name.startsWith('4') ? 'Fase B' : 'Fase C')),
+          teacherName: getTeacherName(cls),
+          total,
+          h, s, i, a,
+          pct,
+          isMarked,
+          students: clsStudents,
+          attMap: attObj
+        };
+      });
+      const totalStudentsCount = studentList.length;
+      const schoolAttendancePct = totalStudentsCount > 0 ? Math.round((totalSchoolHadir / totalStudentsCount) * 100) : 0;
+      const filteredRombel = rombelData.filter((r) => {
+        if (selectedFase && r.fase !== selectedFase) return false;
+        if (selectedStatus === 'marked' && !r.isMarked) return false;
+        if (selectedStatus === 'unmarked' && r.isMarked) return false;
+        if (searchQuery) {
+          const q = searchQuery.toLowerCase();
+          return r.name.toLowerCase().includes(q) || r.teacherName.toLowerCase().includes(q);
+        }
+        return true;
+      });
+      container.innerHTML = `
+        <div class="panel-callout panel-callout--primary section-spacer">
+          <div class="kpi-card-notice">
+            <i class="ph ph-info font-bold"></i>
+            <div>
+              <h5 class="kpi-notice-title font-bold">Panduan Fitur: Pantau Kehadiran Siswa</h5>
+              <p class="kpi-notice-desc">Monitoring rekapitulasi presensi harian seluruh rombel murid (Hadir, Sakit, Izin, Alpa) yang diinput oleh wali kelas. Kesiswaan dapat mengevaluasi rombel yang belum mengisi absensi, mencetak laporan rekap, serta membuka detail siswa untuk konfirmasi langsung ke nomor WhatsApp wali murid.</p>
+            </div>
+          </div>
+        </div>
+        <section class="card-grid section-spacer">
+          <div class="card stat-card">
+            <div class="stat-icon stat-icon--primary"><i class="ph ph-users-three"></i></div>
+            <div>
+              <p class="stat-value">${totalStudentsCount}</p>
+              <p class="stat-label text-muted">Total Siswa Aktif</p>
+            </div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-icon stat-icon--success"><i class="ph ph-user-check"></i></div>
+            <div>
+              <p class="stat-value">${totalSchoolHadir} <span class="stat-meta">(${schoolAttendancePct}%)</span></p>
+              <p class="stat-label text-muted">Hadir (H)</p>
+            </div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-icon stat-icon--warning"><i class="ph ph-first-aid"></i></div>
+            <div>
+              <p class="stat-value">${totalSchoolSakit + totalSchoolIzin} <span class="stat-meta">(S:${totalSchoolSakit} I:${totalSchoolIzin})</span></p>
+              <p class="stat-label text-muted">Sakit &amp; Izin</p>
+            </div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-icon stat-icon--${totalSchoolAlpa > 0 ? 'danger' : 'info'}"><i class="ph ph-${totalSchoolAlpa > 0 ? 'user-minus' : 'calendar-check'}"></i></div>
+            <div>
+              <p class="stat-value">${totalSchoolAlpa} <span class="stat-meta">(${totalMarkedClasses}/${classList.length} Rombel)</span></p>
+              <p class="stat-label text-muted">Alpa &amp; Terabsen</p>
+            </div>
+          </div>
+        </section>
+        <section class="card section-block">
+          <div class="card-header mk-header">
+            <div>
+              <h3 class="card-title"><i class="ph ph-calendar-check"></i> Rekapitulasi Presensi per Rombel</h3>
+              <p class="text-muted small">${dateDisplay(selectedDate)}</p>
+            </div>
+            <div class="mk-toolbar">
+              <input type="date" id="att-date-picker" class="mk-filter" value="${selectedDate}" title="Pilih Tanggal Presensi">
+              <button type="button" class="btn btn-outline btn-sm" id="btn-att-today"><i class="ph ph-calendar"></i> Hari Ini</button>
+              <select id="filter-att-fase" class="mk-filter">
+                <option value="">Semua Fase</option>
+                <option value="Fase A"${selectedFase === 'Fase A' ? ' selected' : ''}>Fase A (Kelas 1-2)</option>
+                <option value="Fase B"${selectedFase === 'Fase B' ? ' selected' : ''}>Fase B (Kelas 3-4)</option>
+                <option value="Fase C"${selectedFase === 'Fase C' ? ' selected' : ''}>Fase C (Kelas 5-6)</option>
+              </select>
+              <select id="filter-att-status" class="mk-filter">
+                <option value="">Semua Status</option>
+                <option value="marked"${selectedStatus === 'marked' ? ' selected' : ''}>Sudah Diabsen (${totalMarkedClasses})</option>
+                <option value="unmarked"${selectedStatus === 'unmarked' ? ' selected' : ''}>Belum Diabsen (${classList.length - totalMarkedClasses})</option>
+              </select>
+              <input type="search" id="att-search-input" class="mk-filter mk-search-input" placeholder="Cari rombel/guru..." value="${AppConfig.escapeHtml(searchQuery)}">
+              <button type="button" class="btn btn-primary btn-sm" id="btn-print-student-att"><i class="ph ph-printer"></i> Cetak PDF</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th class="text-center table-col-sm">No</th>
+                  <th>Kelas / Rombel</th>
+                  <th class="text-center table-col-sm">Fase</th>
+                  <th>Wali Kelas</th>
+                  <th class="text-center table-col-sm">Murid</th>
+                  <th class="text-center table-col-sm">Hadir</th>
+                  <th class="text-center table-col-sm">Sakit</th>
+                  <th class="text-center table-col-sm">Izin</th>
+                  <th class="text-center table-col-sm">Alpa</th>
+                  <th class="text-center table-col-sm">% Hadir</th>
+                  <th class="text-center table-col-md">Status Presensi</th>
+                  <th class="text-right table-col-action">Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${filteredRombel.length === 0 ? '<tr><td colspan="12" class="text-center text-muted">Tidak ada data rombel yang cocok dengan filter.</td></tr>' : filteredRombel.map((r, idx) => `
+                  <tr>
+                    <td class="text-center">${idx + 1}</td>
+                    <td class="font-bold">${AppConfig.escapeHtml(r.name)}</td>
+                    <td class="text-center"><span class="badge badge-outline">${r.fase}</span></td>
+                    <td>${AppConfig.escapeHtml(r.teacherName)}</td>
+                    <td class="text-center font-bold">${r.total}</td>
+                    <td class="text-center font-bold text-success">${r.isMarked ? r.h : '-'}</td>
+                    <td class="text-center text-warning">${r.isMarked ? r.s : '-'}</td>
+                    <td class="text-center text-primary">${r.isMarked ? r.i : '-'}</td>
+                    <td class="text-center font-bold text-danger">${r.isMarked ? r.a : '-'}</td>
+                    <td class="text-center font-bold">${r.isMarked ? `${r.pct}%` : '-'}</td>
+                    <td class="text-center">${r.isMarked ? '<span class="badge badge-success"><i class="ph ph-check-circle"></i> Sudah Diabsen</span>' : '<span class="badge badge-warning"><i class="ph ph-clock"></i> Belum Diabsen</span>'}</td>
+                    <td class="text-right">
+                      <button type="button" class="btn btn-outline btn-sm btn-view-class-att" data-class-id="${r.id}"><i class="ph ph-list-magnifying-glass"></i> Detail Siswa</button>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </section>
+        <div class="modal-overlay" id="modal-student-att-detail">
+          <div class="modal modal-wide">
+            <div class="modal-header">
+              <div>
+                <h3 class="modal-title" id="modal-att-title">Detail Presensi Kelas</h3>
+                <p class="modal-subtitle text-muted" id="modal-att-subtitle">-</p>
+              </div>
+              <button type="button" class="btn-icon" data-close-modal="modal-student-att-detail"><i class="ph ph-x"></i></button>
+            </div>
+            <div class="modal-body" id="modal-att-body">
+              <div class="loading-state"><div class="loader loading-state__loader"></div><span>Memuat...</span></div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-outline btn-sm" data-close-modal="modal-student-att-detail">Tutup</button>
+            </div>
+          </div>
+        </div>
+      `;
+      document.getElementById('att-date-picker').addEventListener('change', (e) => {
+        selectedDate = e.target.value;
+        renderView();
+      });
+      document.getElementById('btn-att-today').addEventListener('click', () => {
+        selectedDate = todayStr;
+        renderView();
+      });
+      document.getElementById('filter-att-fase').addEventListener('change', (e) => {
+        selectedFase = e.target.value;
+        renderView();
+      });
+      document.getElementById('filter-att-status').addEventListener('change', (e) => {
+        selectedStatus = e.target.value;
+        renderView();
+      });
+      document.getElementById('att-search-input').addEventListener('input', (e) => {
+        searchQuery = e.target.value;
+        renderView();
+      });
+      container.querySelectorAll('.btn-view-class-att').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const clsId = btn.dataset.classId;
+          const targetRombel = rombelData.find((r) => r.id === clsId);
+          if (!targetRombel) return;
+          document.getElementById('modal-att-title').innerText = `Detail Presensi Siswa: ${targetRombel.name}`;
+          document.getElementById('modal-att-subtitle').innerText = `Tanggal: ${dateDisplay(selectedDate)} | Wali Kelas: ${targetRombel.teacherName} | Status: ${targetRombel.isMarked ? 'Sudah Diabsen' : 'Belum Diabsen'}`;
+          const students = targetRombel.students.sort((a, b) => a.name.localeCompare(b.name));
+          const attMap = targetRombel.attMap;
+          const modalBody = document.getElementById('modal-att-body');
+          modalBody.innerHTML = `
+            <div class="kpi-mini-summary section-spacer">
+              <span class="badge badge-outline font-bold">Total: ${targetRombel.total}</span>
+              <span class="badge badge-success font-bold">Hadir: ${targetRombel.h}</span>
+              <span class="badge badge-warning font-bold">Sakit: ${targetRombel.s}</span>
+              <span class="badge badge-primary font-bold">Izin: ${targetRombel.i}</span>
+              <span class="badge badge-danger font-bold">Alpa: ${targetRombel.a}</span>
+            </div>
+            <div class="table-wrap">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th class="text-center table-col-sm">No</th>
+                    <th class="table-col-sm">NIS</th>
+                    <th>Nama Murid</th>
+                    <th class="text-center table-col-sm">L/P</th>
+                    <th class="text-center table-col-md">Status Presensi</th>
+                    <th>Kontak Wali Murid</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${students.length === 0 ? '<tr><td colspan="6" class="text-center text-muted">Tidak ada siswa terdaftar di rombel ini.</td></tr>' : students.map((s, idx) => {
+                    const st = attMap[s.id] || attMap[s.nis] || attMap[s.nisn];
+                    let badgeHtml = '<span class="badge badge-outline text-muted">Belum Ditandai</span>';
+                    if (st === 'H') badgeHtml = '<span class="badge badge-success"><i class="ph ph-check"></i> Hadir</span>';
+                    else if (st === 'S') badgeHtml = '<span class="badge badge-warning"><i class="ph ph-first-aid"></i> Sakit</span>';
+                    else if (st === 'I') badgeHtml = '<span class="badge badge-primary"><i class="ph ph-info"></i> Izin</span>';
+                    else if (st === 'A') badgeHtml = '<span class="badge badge-danger font-bold"><i class="ph ph-x"></i> Alpa</span>';
+                    const rawPhone = s.parentPhone || s.parent_phone || s.phone || s.telepon || '';
+                    const cleanPhone = String(rawPhone).replace(/[^0-9]/g, '');
+                    const waNum = cleanPhone.startsWith('0') ? `62${cleanPhone.slice(1)}` : cleanPhone;
+                    const contactHtml = cleanPhone.length >= 8 ? `<a href="https://wa.me/${waNum}" target="_blank" class="btn btn-outline btn-sm"><i class="ph ph-whatsapp-logo text-success"></i> ${rawPhone}</a>` : '<span class="text-muted">-</span>';
+                    return `
+                      <tr>
+                        <td class="text-center">${idx + 1}</td>
+                        <td class="font-bold">${s.nis || '-'}</td>
+                        <td class="font-bold">${AppConfig.escapeHtml(s.name)}</td>
+                        <td class="text-center">${s.gender || '-'}</td>
+                        <td class="text-center">${badgeHtml}</td>
+                        <td>${contactHtml}</td>
+                      </tr>
+                    `;
+                  }).join('')}
+                </tbody>
+              </table>
+            </div>
+          `;
+          App.openModal('modal-student-att-detail');
+        });
+      });
+      document.getElementById('btn-print-student-att').addEventListener('click', () => {
+        if (typeof jspdf === 'undefined' && typeof window.jspdf === 'undefined') {
+          alert('Modul cetak PDF sedang dimuat, silakan coba sesaat lagi.');
+          return;
+        }
+        const { jsPDF } = window.jspdf || jspdf;
+        const doc = new jsPDF('p', 'pt', 'a4');
+        doc.setFontSize(13);
+        doc.setFont('helvetica', 'bold');
+        doc.text('SD MUHAMMADIYAH 1 SEDATI', 40, 45);
+        doc.setFontSize(11);
+        doc.text('REKAPITULASI PRESENSI HARIAN SISWA SELURUH ROMBEL', 40, 62);
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Tanggal Presensi: ${dateDisplay(selectedDate)} | Tahun Ajaran: ${settings.currentAcademicYear || '2026/2027'}`, 40, 78);
+        doc.text(`Total Siswa: ${totalStudentsCount} Murid | Hadir: ${totalSchoolHadir} (${schoolAttendancePct}%) | Sakit: ${totalSchoolSakit} | Izin: ${totalSchoolIzin} | Alpa: ${totalSchoolAlpa}`, 40, 92);
+        const headers = [['No', 'Kelas / Rombel', 'Fase', 'Wali Kelas', 'Jml', 'H', 'S', 'I', 'A', '% Hadir', 'Status']];
+        const rows = rombelData.map((r, idx) => [
+          idx + 1,
+          r.name,
+          r.fase,
+          r.teacherName,
+          r.total,
+          r.isMarked ? r.h : '-',
+          r.isMarked ? r.s : '-',
+          r.isMarked ? r.i : '-',
+          r.isMarked ? r.a : '-',
+          r.isMarked ? `${r.pct}%` : '-',
+          r.isMarked ? 'Sudah Diabsen' : 'Belum Diabsen'
+        ]);
+        rows.push([
+          '',
+          'TOTAL KESELURUHAN',
+          '-',
+          '-',
+          totalStudentsCount,
+          totalSchoolHadir,
+          totalSchoolSakit,
+          totalSchoolIzin,
+          totalSchoolAlpa,
+          `${schoolAttendancePct}%`,
+          `${totalMarkedClasses} / ${classList.length} Rombel`
+        ]);
+        doc.autoTable({
+          head: headers,
+          body: rows,
+          startY: 105,
+          theme: 'grid',
+          styles: { fontSize: 8, cellPadding: 3 },
+          headStyles: { fillColor: [30, 64, 175], textColor: [255, 255, 255] }
+        });
+        const finalY = doc.lastAutoTable.finalY + 30;
+        doc.setFontSize(9);
+        doc.text('Mengetahui,', 40, finalY);
+        doc.text('Kepala Sekolah', 40, finalY + 14);
+        doc.text('Waka Kesiswaan', 400, finalY + 14);
+        doc.setFont('helvetica', 'bold');
+        doc.text(settings.headmaster || 'Dhani Harsyahyadi, S.H.I', 40, finalY + 70);
+        doc.text('Ustadz Furqon, SH.', 400, finalY + 70);
+        doc.save(`Rekap_Presensi_Siswa_Musada_${selectedDate}.pdf`);
+      });
+    };
+    await renderView();
+  }
 };
