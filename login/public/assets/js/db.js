@@ -740,7 +740,14 @@ const DB = {
   },
   async deleteExtracurricular(id) {
     if (!isDBReady()) return;
-    await db.ref(`extracurriculars/${id}`).remove();
+    const snap = await db.ref(`extracurriculars/${id}/students`).once('value');
+    const stu = snap.val() || {};
+    const updates = {};
+    updates[`extracurriculars/${id}`] = null;
+    Object.keys(stu).forEach(sid => {
+      updates[`students/${sid}/extracurriculars/${id}`] = null;
+    });
+    await db.ref().update(updates);
   },
   async getFacilityAssets() {
     return this._readCollection('facilities/assets', {});

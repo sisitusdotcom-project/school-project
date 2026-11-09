@@ -179,18 +179,17 @@ window.AdminAssignmentsModule = {
               <div class="assignment-unit-group">
                 <div class="assignment-unit-title"><i class="ph ph-trophy"></i> Pembina Ekstrakurikuler</div>
                 <div class="assignment-checkbox-grid">
-                  <label><input type="checkbox" value="GURU_EKSTRA_HW"> Pembina HW</label>
+                  <label><input type="checkbox" value="GURU_EKSTRA_BADMINTON"> Ekskul Badminton</label>
+                  <label><input type="checkbox" value="GURU_EKSTRA_FUTSAL"> Ekskul Futsal</label>
+                  <label><input type="checkbox" value="GURU_EKSTRA_COOKING"> Ekskul Cooking</label>
+                  <label><input type="checkbox" value="GURU_EKSTRA_RENANG"> Ekskul Renang</label>
                   <label><input type="checkbox" value="GURU_EKSTRA_TS"> Pembina Tapak Suci</label>
-                  <label><input type="checkbox" value="GURU_EKSTRA_TAHFIDZ_CAMP"> Pembina Tahfidz Camp</label>
                   <label><input type="checkbox" value="GURU_EKSTRA_PANAHAN_PUTRA"> Ekskul Panahan Putra</label>
                   <label><input type="checkbox" value="GURU_EKSTRA_PANAHAN_PUTRI"> Ekskul Panahan Putri</label>
-                  <label><input type="checkbox" value="GURU_EKSTRA_BADMINTON"> Ekskul Badminton</label>
-                  <label><input type="checkbox" value="GURU_EKSTRA_RENANG"> Ekskul Renang</label>
-                  <label><input type="checkbox" value="GURU_EKSTRA_COOKING"> Ekskul Cooking</label>
-                  <label><input type="checkbox" value="GURU_EKSTRA_TARI"> Ekskul Tari</label>
-                  <label><input type="checkbox" value="GURU_EKSTRA_LUKIS"> Ekskul Lukis</label>
-                  <label><input type="checkbox" value="GURU_EKSTRA_SEMPOA"> Ekskul Sempoa</label>
-                  <label><input type="checkbox" value="GURU_EKSTRA_STORY_TELLING"> Ekskul Story Telling</label>
+                  <label><input type="checkbox" value="GURU_EKSTRA_TARI"> Ekskul Seni Tari</label>
+                  <label><input type="checkbox" value="GURU_EKSTRA_KONTEN_KREATOR"> Ekskul Konten Kreator</label>
+                  <label><input type="checkbox" value="GURU_EKSTRA_ROBOTIK"> Ekskul Robotika</label>
+                  <label><input type="checkbox" value="GURU_EKSTRA_CODING"> Ekskul Coding & Pemrograman</label>
                 </div>
               </div>
             </div>

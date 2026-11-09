@@ -1452,7 +1452,18 @@ const btn = document.getElementById('btn-save-eks-students');
 btn.disabled = true;
 btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Menyimpan...';
 const cleanStudents = Object.keys(selectedMap).length ? selectedMap : null;
-await db.ref(`extracurriculars/${ekskul.id}/students`).set(cleanStudents);
+const prevStudents = ekskul.students || {};
+const allAffected = new Set([...Object.keys(prevStudents), ...Object.keys(selectedMap)]);
+const updates = {};
+updates[`extracurriculars/${ekskul.id}/students`] = cleanStudents;
+allAffected.forEach(sid => {
+if (selectedMap[sid]) {
+updates[`students/${sid}/extracurriculars/${ekskul.id}`] = true;
+} else {
+updates[`students/${sid}/extracurriculars/${ekskul.id}`] = null;
+}
+});
+await db.ref().update(updates);
 btn.disabled = false;
 btn.innerHTML = '<i class="ph ph-floppy-disk"></i> Simpan Daftar Peserta';
 App.closeModal('modal-eks-students');

@@ -345,10 +345,38 @@ ${chaptersList ? `<div style="margin-top:8px;"><div style="font-size:11px; font-
 </tr>
 `;
 }).join('');
-const extraHtml = DB.toArray(stuExtra || {}).map(e => {
-const baseEx = exArr.find(x => x.id === e.extraId);
-return `<tr><td>${baseEx ? AppConfig.escapeHtml(baseEx.name) : 'Ekstrakurikuler'}</td><td>${AppConfig.escapeHtml(e.score || '-')}</td><td>${AppConfig.escapeHtml(e.desc || '-')}</td></tr>`;
-}).join('') || '<tr><td colspan="3" class="text-muted text-center">Belum ada data ekstrakurikuler.</td></tr>';
+const stuEksIds = new Set(Object.keys(student.extracurriculars || {}));
+(exArr || []).forEach(x => {
+if (x.students && x.students[student.id]) stuEksIds.add(x.id);
+});
+const assessedExtra = DB.toArray(stuExtra || {});
+const assessedMap = new Map();
+assessedExtra.forEach(e => {
+if (e.extraId) assessedMap.set(e.extraId, e);
+else if (e.id) assessedMap.set(e.id, e);
+});
+const combinedExtra = [];
+stuEksIds.forEach(eid => {
+const baseEx = exArr.find(x => x.id === eid) || { id: eid, name: eid };
+const ass = assessedMap.get(eid);
+combinedExtra.push({
+name: baseEx.name,
+score: ass?.score || '<span class="badge badge-success"><i class="ph ph-check-circle"></i> Terdaftar Aktif</span>',
+desc: ass?.desc || ass?.description || '<span class="text-muted">Proses pembinaan semester berjalan (nilai rapor diterbitkan di akhir semester)</span>'
+});
+});
+assessedExtra.forEach(e => {
+const eid = e.extraId || e.id;
+if (!stuEksIds.has(eid)) {
+const baseEx = exArr.find(x => x.id === eid);
+combinedExtra.push({
+name: baseEx ? baseEx.name : (e.name || 'Ekstrakurikuler'),
+score: e.score || '-',
+desc: e.desc || e.description || '-'
+});
+}
+});
+const extraHtml = combinedExtra.length ? combinedExtra.map(e => `<tr><td><strong>${AppConfig.escapeHtml(e.name)}</strong></td><td>${e.score}</td><td>${e.desc}</td></tr>`).join('') : '<tr><td colspan="3" class="text-muted text-center">Belum ada ekstrakurikuler yang diikuti pada semester ini.</td></tr>';
 const cocurrHtml = DB.toArray(cocurr || {}).map(c => `<div class="cocurr-item"><strong>${AppConfig.escapeHtml(c.title || 'Proyek')}</strong><br><span class="student-report-profile__meta text-muted">${AppConfig.escapeHtml(c.desc || '-')}</span></div>`).join('') || '<p class="text-muted">Belum ada catatan proyek.</p>';
 const att = attendance || {};
 const attHtml = `<table class="table"><tr><td class="table-col-lg">Sakit</td><td><strong>${att.sakit || 0}</strong> hari</td></tr><tr><td>Izin</td><td><strong>${att.izin || 0}</strong> hari</td></tr><tr><td>Tanpa Keterangan</td><td><strong>${att.alpa || 0}</strong> hari</td></tr></table>`;

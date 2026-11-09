@@ -160,6 +160,18 @@ async function generateReport(studentId, container) {
           </tr>
         `;
       });
+    } else if (student.extracurriculars && Object.keys(student.extracurriculars).length) {
+      Object.keys(student.extracurriculars).forEach((eid, i) => {
+        const masterEks = ekskuls.find(x => x.id === eid);
+        const eksName = masterEks ? masterEks.name : eid;
+        eksHtml += `
+          <tr>
+              <td class="text-center">${i + 1}</td>
+              <td>${eksName}</td>
+              <td>Aktif mengikuti kegiatan ekstrakurikuler ${eksName}.</td>
+          </tr>
+        `;
+      });
     } else {
       eksHtml = '<tr><td colspan="3" class="text-center text-muted">Belum ada data ekstrakurikuler</td></tr>';
     }

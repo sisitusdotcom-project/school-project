@@ -1314,12 +1314,13 @@ db.ref('student_affairs/achievements').orderByChild('studentId').equalTo(student
 const achList = [];
 snapAch.forEach(c => { achList.push({ id: c.key, ...c.val() }); });
 const eksList = eksArr.map(e => {
-const selected = stuEks && stuEks[e.id];
+const isEnrolled = (e.students && e.students[studentId]) || (stuEks && stuEks[e.id]);
+const selected = isEnrolled;
 return `
 <div style="border: 1px solid #ddd; padding: 12px; border-radius: 8px; margin-bottom: 8px;">
 <label style="display:flex; align-items:center; gap:8px; margin-bottom:8px; font-weight:bold; cursor:pointer">
 <input type="checkbox" class="chk-eks" data-id="${e.id}" ${selected ? 'checked' : ''}>
-${AppConfig.escapeHtml(e.name)}
+${AppConfig.escapeHtml(e.name)}${e.students && e.students[studentId] ? ' <span class="badge badge-success" style="font-size:10px;font-weight:600;">Terdaftar Resmi</span>' : ''}
 </label>
 <textarea id="desc-eks-${e.id}" rows="2" placeholder="Keterangan untuk ekstrakurikuler ini..." style="display: ${selected ? 'block' : 'none'}; width:100%">${selected ? (selected.description || '') : ''}</textarea>
 </div>
@@ -2760,7 +2761,11 @@ const eksArr = DB.toArray(ekskuls);
 let myEks = eksArr.filter(e => e.teacherId === uid);
 if (!myEks.length) {
 const assigns = Auth.currentAssignments || AppConfig.getRoleAssignments(Auth.userData || {});
-myEks = eksArr.filter(e => assigns.some(a => a.toLowerCase().includes(e.name.toLowerCase().replace(/[^a-z0-9]/g, ''))));
+myEks = eksArr.filter(e => {
+const cleanId = (e.id || '').replace('EKS_', '');
+const simpleName = (e.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+return assigns.some(a => a.includes(cleanId) || a.toLowerCase().includes(simpleName) || (cleanId === 'TS' && a.includes('TS')));
+});
 }
 const eksName = myEks.map(e => e.name).join(', ') || 'Ekstrakurikuler';
 const totalEnrolled = myEks.reduce((sum, e) => sum + Object.keys(e.students || {}).length, 0);
@@ -2880,8 +2885,9 @@ if (!coachEkskuls.length && isSpecialRole) coachEkskuls = eksArr;
 if (!coachEkskuls.length) {
 const userAssignments = AppConfig.getRoleAssignments(Auth.currentUser);
 const matched = eksArr.filter(e => {
-const simpleName = e.name.toLowerCase().replace(/[^a-z0-9]/g, '');
-return userAssignments.some(a => a.toLowerCase().includes(simpleName));
+const cleanId = (e.id || '').replace('EKS_', '');
+const simpleName = (e.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+return userAssignments.some(a => a.includes(cleanId) || a.toLowerCase().includes(simpleName) || (cleanId === 'TS' && a.includes('TS')));
 });
 if (matched.length) coachEkskuls = matched;
 }
@@ -3183,7 +3189,11 @@ const eksArr = DB.toArray(ekskuls);
 let myEks = eksArr.filter(e => e.teacherId === uid);
 if (!myEks.length) {
 const assigns = AppConfig.getRoleAssignments(Auth.currentUser);
-myEks = eksArr.filter(e => assigns.some(a => a.toLowerCase().includes(e.name.toLowerCase().replace(/[^a-z0-9]/g, ''))));
+myEks = eksArr.filter(e => {
+const cleanId = (e.id || '').replace('EKS_', '');
+const simpleName = (e.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+return assigns.some(a => a.includes(cleanId) || a.toLowerCase().includes(simpleName) || (cleanId === 'TS' && a.includes('TS')));
+});
 }
 if (!myEks.length) {
 container.innerHTML = `<div class="card"><p class="text-muted">Anda belum memiliki ekstrakurikuler binaan untuk dinilai.</p></div>`;
