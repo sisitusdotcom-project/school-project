@@ -468,6 +468,32 @@ const DB = {
     const exams = this.toArray(snap.val() || {});
     return exams.filter(e => e.scheduledDate === dateStr && (examinerId ? e.examinerId === examinerId : true) && (e.status === 'Dijadwalkan' || e.status === 'Lolos')).length;
   },
+  async getUmmiTasmiPlotting() {
+    return this._readCollection('ummi_tasmi_plotting', {});
+  },
+  async saveUmmiTasmiPlotting(id, data) {
+    if (!isDBReady()) return null;
+    let key = id;
+    if (key) {
+      await db.ref(`ummi_tasmi_plotting/${key}`).update({
+        ...data,
+        updatedAt: firebase.database.ServerValue.TIMESTAMP
+      });
+    } else {
+      const ref = db.ref('ummi_tasmi_plotting').push();
+      key = ref.key;
+      await ref.set({
+        ...data,
+        id: key,
+        createdAt: firebase.database.ServerValue.TIMESTAMP
+      });
+    }
+    return key;
+  },
+  async deleteUmmiTasmiPlotting(id) {
+    if (!isDBReady() || !id) return;
+    await db.ref(`ummi_tasmi_plotting/${id}`).remove();
+  },
   async updateStudentUmmiLevel(studentId, newLevel, ummiClassId) {
     if (!isDBReady() || !studentId || !newLevel) return;
     await db.ref(`students/${studentId}/ummiLevel`).set(newLevel);

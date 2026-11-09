@@ -8,7 +8,8 @@ const UMMI_LEVELS = [
   'Jilid 6',
   'Al-Quran',
   'Gharibul Qur\'an',
-  'Tajwid Dasar'
+  'Tajwid Dasar',
+  'Pasca'
 ];
 const UMMI_LEVEL_DESCS = {
   'Pra-Jilid': 'Pengenalan huruf hijaiyah dasar dan persiapan masuk jilid',
@@ -20,8 +21,28 @@ const UMMI_LEVEL_DESCS = {
   'Jilid 6': 'Pelancaran bacaan Al-Qur\'an dengan tartil dan persiapan langsung membaca Al-Qur\'an mushaf standar',
   'Al-Quran': 'Pelancaran tilawah mushaf Al-Qur\'an dengan tajwid dan fashahah',
   'Gharibul Qur\'an': 'Khusus membahas bacaan khusus (isymam, imalah, tashil, saktah)',
-  'Tajwid Dasar': 'Panduan teori dan hukum ilmu tajwid praktis'
+  'Tajwid Dasar': 'Panduan teori dan hukum ilmu tajwid praktis',
+  'Pasca': 'Tingkat pasca-munaqasyah bagi santri yang telah lulus seluruh tingkatan Ummi untuk muraja\'ah dan tahfidz lanjutan'
 };
+const UMMI_SESSIONS = Object.freeze({
+  '1': { id: '1', label: 'Sesi 1 (Kelas 1 - 2)', short: 'Sesi 1', badge: 'badge-info', grades: [1, 2], phase: 'Fase A' },
+  '2': { id: '2', label: 'Sesi 2 (Kelas 3 - 4)', short: 'Sesi 2', badge: 'badge-primary', grades: [3, 4], phase: 'Fase B' },
+  '3': { id: '3', label: 'Sesi 3 (Kelas 5 - 6)', short: 'Sesi 3', badge: 'badge-warning', grades: [5, 6], phase: 'Fase C' }
+});
+function getUmmiClassSession(cls) {
+  if (cls && (cls.session === '1' || cls.session === '2' || cls.session === '3' || cls.session === 1 || cls.session === 2 || cls.session === 3)) {
+    return String(cls.session);
+  }
+  const name = ((cls && cls.name) || '').toLowerCase();
+  if (name.includes('kelas 1') || name.includes('kelas 2') || name.startsWith('1 ') || name.startsWith('2 ')) return '1';
+  if (name.includes('kelas 3') || name.includes('kelas 4') || name.startsWith('3 ') || name.startsWith('4 ')) return '2';
+  if (name.includes('kelas 5') || name.includes('kelas 6') || name.startsWith('5 ') || name.startsWith('6 ')) return '3';
+  return '1';
+}
+function getSessionBadge(sessId) {
+  const s = UMMI_SESSIONS[sessId] || UMMI_SESSIONS['1'];
+  return `<span class="badge ${s.badge}"><i class="ph ph-clock"></i> ${s.label}</span>`;
+}
 const UMMI_GRADES = [
   { score: 100, predicate: 'A+', label: '100 = A+ (Benar semua, kualitas baca bagus sekali = Naik ke halaman berikutnya)', action: 'Naik ke halaman berikutnya' },
   { score: 95, predicate: 'A', label: '95 = A (Benar semua, kualitas baca biasa-biasa = Naik ke halaman berikutnya)', action: 'Naik ke halaman berikutnya' },
@@ -33,7 +54,7 @@ const UMMI_GRADES = [
 ];
 const UMMIPages = {
   async renderUmmiMapping(container) {
-    Router.setTitle('Pemetaan Rombel & Guru Ummi', 'Atur pembagian rombel berbasis kemampuan santri lintas kelas.');
+    Router.setTitle('Pemetaan Rombel & Guru Ummi', 'Atur pembagian rombel berbasis kemampuan santri lintas kelas dan pemetaan per sesi.');
     const [ummiClasses, users, allStudents, allClasses, roomsData] = await Promise.all([
       DB.getUmmiClasses(),
       DB.getAllUsers(),
@@ -44,33 +65,133 @@ const UMMIPages = {
     const roomArr = DB.toArray(roomsData);
     const classArr = DB.toArray(ummiClasses);
     const guruUmmi = DB.toArray(users).filter(u => AppConfig.isUserUmmi(u));
-    const rows = classArr.length ? classArr.map((c, idx) => {
-      const teacher = guruUmmi.find(g => g.id === c.teacherId);
-      const studentCount = Object.keys(c.students || {}).length;
-      return `
-        <tr>
-          <td class="text-center">${idx + 1}</td>
-          <td><strong>${AppConfig.escapeHtml(c.name)}</strong><br><small class="text-muted"><i class="ph ph-map-pin"></i> ${AppConfig.escapeHtml(c.room || 'Tempat belum diatur')} · ${AppConfig.escapeHtml(c.level || 'Jilid')}</small></td>
-          <td>${teacher ? AppConfig.escapeHtml(teacher.name) : '<span class="text-muted">Belum ditugaskan</span>'}</td>
-          <td><span class="badge badge-primary">${studentCount} Santri</span></td>
-          <td class="action-cell">
-            <button class="btn btn-primary btn-sm" data-map-students="${c.id}" title="Petakan Santri"><i class="ph ph-users-three"></i> Petakan Santri</button>
-            <button class="btn btn-outline btn-sm" data-edit-ummi="${c.id}" title="Edit Rombel"><i class="ph ph-pencil-simple"></i></button>
-            <button class="btn btn-danger btn-sm" data-del-ummi="${c.id}" title="Hapus"><i class="ph ph-trash"></i></button>
-          </td>
-        </tr>
-      `;
-    }).join('') : '<tr><td colspan="5" class="text-center text-muted">Belum ada Rombel Ummi. Silakan buat rombel baru.</td></tr>';
+    const studentArr = DB.toArray(allStudents);
+    const classArrAll = DB.toArray(allClasses);
+    let totalSantriMapped = 0;
+    const sessStats = { '1': { rombel: 0, santri: 0 }, '2': { rombel: 0, santri: 0 }, '3': { rombel: 0, santri: 0 } };
+    classArr.forEach(c => {
+      const sess = getUmmiClassSession(c);
+      const cnt = Object.keys(c.students || {}).length;
+      totalSantriMapped += cnt;
+      if (sessStats[sess]) {
+        sessStats[sess].rombel++;
+        sessStats[sess].santri += cnt;
+      }
+    });
+    let activeSession = 'all';
+    let searchQuery = '';
+    const renderTable = () => {
+      const filtered = classArr.filter(c => {
+        const sess = getUmmiClassSession(c);
+        if (activeSession !== 'all' && sess !== activeSession) return false;
+        if (searchQuery) {
+          const teacher = guruUmmi.find(g => g.id === c.teacherId);
+          const tName = teacher ? teacher.name.toLowerCase() : '';
+          const cName = (c.name || '').toLowerCase();
+          const rName = (c.room || '').toLowerCase();
+          const lName = (c.level || '').toLowerCase();
+          if (!cName.includes(searchQuery) && !tName.includes(searchQuery) && !rName.includes(searchQuery) && !lName.includes(searchQuery)) return false;
+        }
+        return true;
+      });
+      const tbody = container.querySelector('#ummi-mapping-tbody');
+      if (!tbody) return;
+      if (!filtered.length) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Tidak ada rombel ummi yang sesuai filter atau pencarian.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = filtered.map((c, idx) => {
+        const teacher = guruUmmi.find(g => g.id === c.teacherId);
+        const studentCount = Object.keys(c.students || {}).length;
+        const sess = getUmmiClassSession(c);
+        const lvlBadge = c.level === 'Pasca' ? '<span class="badge badge-success"><i class="ph ph-sparkle"></i> Pasca</span>' : `<span class="badge badge-primary">${AppConfig.escapeHtml(c.level || 'Jilid')}</span>`;
+        return `
+          <tr>
+            <td class="text-center">${idx + 1}</td>
+            <td><strong>${AppConfig.escapeHtml(c.name)}</strong><br><small class="text-muted"><i class="ph ph-map-pin"></i> ${AppConfig.escapeHtml(c.room || 'Tempat belum diatur')}</small></td>
+            <td>${getSessionBadge(sess)}</td>
+            <td>${lvlBadge}</td>
+            <td>${teacher ? AppConfig.escapeHtml(teacher.name) : '<span class="text-muted">Belum ditugaskan</span>'}</td>
+            <td><span class="badge badge-outline">${studentCount} Santri</span></td>
+            <td class="action-cell">
+              <button class="btn btn-primary btn-sm" data-map-students="${c.id}" title="Petakan Santri"><i class="ph ph-users-three"></i> Petakan Santri</button>
+              <button class="btn btn-outline btn-sm" data-edit-ummi="${c.id}" title="Edit Rombel"><i class="ph ph-pencil-simple"></i></button>
+              <button class="btn btn-danger btn-sm" data-del-ummi="${c.id}" title="Hapus"><i class="ph ph-trash"></i></button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+      tbody.querySelectorAll('[data-map-students]').forEach(btn => {
+        btn.onclick = () => {
+          const id = btn.dataset.mapStudents;
+          const cls = classArr.find(c => c.id === id);
+          if (!cls) return;
+          UMMIPages._openMappingStudentsModal(cls, studentArr, classArrAll, container);
+        };
+      });
+      tbody.querySelectorAll('[data-edit-ummi]').forEach(btn => {
+        btn.onclick = () => {
+          const id = btn.dataset.editUmmi;
+          const cls = classArr.find(c => c.id === id);
+          if (!cls) return;
+          document.getElementById('ummi-modal-title').innerText = 'Edit Rombel Ummi';
+          document.getElementById('ummi-id').value = cls.id;
+          document.getElementById('ummi-name').value = cls.name || '';
+          document.getElementById('ummi-session').value = getUmmiClassSession(cls);
+          document.getElementById('ummi-level').value = cls.level || 'Jilid 1';
+          document.getElementById('ummi-teacher').value = cls.teacherId || '';
+          document.getElementById('ummi-room').value = cls.room || '';
+          document.getElementById('ummi-desc').value = cls.desc || '';
+          App.openModal('modal-ummi');
+        };
+      });
+      tbody.querySelectorAll('[data-del-ummi]').forEach(btn => {
+        btn.onclick = async () => {
+          const id = btn.dataset.delUmmi;
+          const cls = classArr.find(c => c.id === id);
+          if (!confirm(`Hapus rombel Ummi "${cls ? cls.name : id}"? Data santri di rombel ini akan dibatalkan pemetaannya.`)) return;
+          await DB.deleteUmmiClass(id);
+          UMMIPages.renderUmmiMapping(container);
+        };
+      });
+    };
     const guruOptions = guruUmmi.map(g => `<option value="${g.id}">${AppConfig.escapeHtml(g.name)}</option>`).join('');
-    const levelOptions = UMMI_LEVELS.map(lvl => `<option value="${lvl}">${lvl}</option>`).join('');
+    const levelOptions = UMMI_LEVELS.map(lvl => `<option value="${lvl}">${lvl}${lvl === 'Pasca' ? ' (Tingkat Pasca Munaqosyah)' : ''}</option>`).join('');
     container.innerHTML = `
+      <div class="stat-grid section-spacer">
+        <div class="stat-card">
+          <div class="stat-number">${classArr.length} Rombel</div>
+          <div class="stat-label">Total Rombel (${totalSantriMapped} Santri Terpetakan)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">${sessStats['1'].rombel} Rombel</div>
+          <div class="stat-label">Sesi 1 · Kelas 1 & 2 (${sessStats['1'].santri} Santri)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">${sessStats['2'].rombel} Rombel</div>
+          <div class="stat-label">Sesi 2 · Kelas 3 & 4 (${sessStats['2'].santri} Santri)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">${sessStats['3'].rombel} Rombel</div>
+          <div class="stat-label">Sesi 3 · Kelas 5 & 6 (${sessStats['3'].santri} Santri)</div>
+        </div>
+      </div>
       <div class="card toolbar-panel">
         <div class="toolbar-row">
           <div>
-            <h3 class="card-title">Daftar Rombel Ummi & Pembagian Guru</h3>
-            <p class="text-muted">Rombel bersifat fleksibel lintas kelas formal berdasarkan hasil tes kemampuan membaca jilid Al-Qur\'an.</p>
+            <h3 class="card-title">Daftar Rombel Ummi & Pemetaan Guru Pengampu</h3>
+            <p class="text-muted">Rombel terbagi dalam 3 sesi jadwal (Fase A, B, C) berbasis kemampuan santri lintas kelas formal.</p>
           </div>
           <button class="btn btn-primary" id="btn-add-ummi"><i class="ph ph-plus"></i> Tambah Rombel Baru</button>
+        </div>
+        <div class="filter-pills" id="session-filter-pills">
+          <button class="filter-pill active" data-filter-session="all">Semua Sesi (${classArr.length})</button>
+          <button class="filter-pill" data-filter-session="1">Sesi 1 (Kelas 1-2) · ${sessStats['1'].rombel}</button>
+          <button class="filter-pill" data-filter-session="2">Sesi 2 (Kelas 3-4) · ${sessStats['2'].rombel}</button>
+          <button class="filter-pill" data-filter-session="3">Sesi 3 (Kelas 5-6) · ${sessStats['3'].rombel}</button>
+        </div>
+        <div class="card-search-row">
+          <input type="text" id="input-search-ummi" placeholder="Cari nama rombel, guru pengampu, tingkat jilid/pasca, atau ruang..." class="form-input">
         </div>
       </div>
       <div class="card">
@@ -78,14 +199,16 @@ const UMMIPages = {
           <table class="table">
             <thead>
               <tr>
-                <th>No</th>
+                <th class="text-center" style="width:48px">No</th>
                 <th>Nama Rombel & Tempat</th>
-                <th>Ustadz / Ustadzah Pengampu</th>
+                <th>Sesi Pembelajaran</th>
+                <th>Tingkat</th>
+                <th>Guru Pengampu</th>
                 <th>Jumlah Santri</th>
                 <th>Aksi</th>
               </tr>
             </thead>
-            <tbody>${rows}</tbody>
+            <tbody id="ummi-mapping-tbody"></tbody>
           </table>
         </div>
       </div>
@@ -99,8 +222,16 @@ const UMMIPages = {
             <div class="modal-body">
               <input type="hidden" id="ummi-id">
               <div class="form-group">
-                <label>Nama Rombel (Contoh: Kelompok Jilid 1A, Kelompok Al-Qur\'an Khadijah)</label>
+                <label>Nama Rombel (Contoh: Ummi Kelas 1 - Ustadzah Aidah, Kelompok Pasca Munaqosyah)</label>
                 <input type="text" id="ummi-name" required placeholder="Masukkan nama rombel...">
+              </div>
+              <div class="form-group">
+                <label>Sesi Pembelajaran</label>
+                <select id="ummi-session" required>
+                  <option value="1">Sesi 1 (Kelas 1 - 2 / Fase A)</option>
+                  <option value="2">Sesi 2 (Kelas 3 - 4 / Fase B)</option>
+                  <option value="3">Sesi 3 (Kelas 5 - 6 / Fase C)</option>
+                </select>
               </div>
               <div class="form-group">
                 <label>Tingkat / Jilid Utama</label>
@@ -122,6 +253,10 @@ const UMMIPages = {
                 <datalist id="rooms-list-options">
                   ${roomArr.map(r => `<option value="${AppConfig.escapeHtml(r.name || r.id)}"></option>`).join('')}
                 </datalist>
+              </div>
+              <div class="form-group">
+                <label>Keterangan / Jadwal Tambahan (Opsional)</label>
+                <input type="text" id="ummi-desc" placeholder="Contoh: Setiap Senin s.d. Kamis pukul 07.15 - 08.15">
               </div>
             </div>
             <div class="modal-footer">
@@ -163,72 +298,55 @@ const UMMIPages = {
         </div>
       </div>
     `;
+    container.querySelectorAll('[data-filter-session]').forEach(btn => {
+      btn.onclick = () => {
+        container.querySelectorAll('[data-filter-session]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeSession = btn.dataset.filterSession;
+        renderTable();
+      };
+    });
+    const searchInput = container.querySelector('#input-search-ummi');
+    if (searchInput) {
+      searchInput.oninput = (e) => {
+        searchQuery = e.target.value.toLowerCase().trim();
+        renderTable();
+      };
+    }
+    renderTable();
     document.getElementById('btn-add-ummi').onclick = () => {
       document.getElementById('ummi-modal-title').innerText = 'Tambah Rombel Ummi';
       document.getElementById('form-ummi').reset();
       document.getElementById('ummi-id').value = '';
       document.getElementById('ummi-room').value = '';
+      document.getElementById('ummi-session').value = activeSession !== 'all' ? activeSession : '1';
+      document.getElementById('ummi-level').value = 'Jilid 1';
       App.openModal('modal-ummi');
     };
-    container.querySelectorAll('[data-edit-ummi]').forEach(btn => {
-      btn.onclick = () => {
-        const id = btn.dataset.editUmmi;
-        const cls = classArr.find(c => c.id === id);
-        if (!cls) return;
-        document.getElementById('ummi-modal-title').innerText = 'Edit Rombel Ummi';
-        document.getElementById('ummi-id').value = cls.id;
-        document.getElementById('ummi-name').value = cls.name || '';
-        document.getElementById('ummi-level').value = cls.level || '';
-        document.getElementById('ummi-teacher').value = cls.teacherId || '';
-        document.getElementById('ummi-room').value = cls.room || '';
-        App.openModal('modal-ummi');
-      };
-    });
-    container.querySelectorAll('[data-del-ummi]').forEach(btn => {
-      btn.onclick = async () => {
-        const id = btn.dataset.delUmmi;
-        const cls = classArr.find(c => c.id === id);
-        if (!cls) return;
-        if (Object.keys(cls.students || {}).length > 0) {
-          alert('Tidak bisa menghapus rombel karena masih ada santri di dalamnya. Kosongkan santri terlebih dahulu.');
-          return;
-        }
-        if (!confirm(`Yakin ingin menghapus Rombel Ummi "${cls.name}"?`)) return;
-        await DB.deleteUmmiClass(id);
-        UMMIPages.renderUmmiMapping(container);
-      };
-    });
-    const studentArr = DB.toArray(allStudents);
-    const classArrAll = DB.toArray(allClasses);
-    container.querySelectorAll('[data-map-students]').forEach(btn => {
-      btn.onclick = () => {
-        const id = btn.dataset.mapStudents;
-        const cls = classArr.find(c => c.id === id);
-        if (!cls) return;
-        UMMIPages._openMappingStudentsModal(cls, studentArr, classArrAll, container);
-      };
-    });
     document.getElementById('form-ummi').onsubmit = async (e) => {
       e.preventDefault();
-      const id = document.getElementById('ummi-id').value;
-      const data = {
-        name: document.getElementById('ummi-name').value.trim(),
-        level: document.getElementById('ummi-level').value,
-        teacherId: document.getElementById('ummi-teacher').value,
-        room: document.getElementById('ummi-room').value.trim()
-      };
-      if (!data.name || !data.level || !data.teacherId) return;
+      const id = document.getElementById('ummi-id').value.trim();
+      const name = document.getElementById('ummi-name').value.trim();
+      const session = document.getElementById('ummi-session').value;
+      const level = document.getElementById('ummi-level').value;
+      const teacherId = document.getElementById('ummi-teacher').value;
+      const room = document.getElementById('ummi-room').value.trim();
+      const desc = document.getElementById('ummi-desc').value.trim();
       const btnSave = document.getElementById('btn-save-ummi');
       btnSave.disabled = true;
       btnSave.innerText = 'Menyimpan...';
       try {
-        if (id) {
-          const existing = classArr.find(c => c.id === id);
-          await DB.saveUmmiClass(id, { ...existing, ...data });
-        } else {
-          await DB.saveUmmiClass(null, { ...data, students: {} });
-        }
-        if (typeof NotificationService !== 'undefined' && data.teacherId) {
+        const data = {
+          name,
+          session,
+          level,
+          teacherId,
+          room,
+          desc,
+          updatedAt: Date.now()
+        };
+        await DB.saveUmmiClass(id || null, data);
+        if (typeof NotificationService !== 'undefined' && teacherId) {
           NotificationService.notifyUmmiMappingUpdated({
             className: data.name,
             room: data.room,
@@ -246,19 +364,37 @@ const UMMIPages = {
   },
   _openMappingStudentsModal(cls, studentArr, classArr, container) {
     document.getElementById('modal-map-cls-id').value = cls.id;
+    const sess = getUmmiClassSession(cls);
+    const sessObj = UMMI_SESSIONS[sess] || UMMI_SESSIONS['1'];
     document.getElementById('modal-map-stu-title').innerText = `Petakan Santri: ${cls.name}`;
-    document.getElementById('modal-map-stu-sub').innerText = `Tingkat ${cls.level || 'Ummi'} · Masukkan santri lintas kelas 1 s/d 6 sesuai kemampuan baca`;
+    document.getElementById('modal-map-stu-sub').innerText = `${sessObj.label} · Tingkat ${cls.level || 'Ummi'} · Masukkan santri sesuai kemampuan membaca Al-Qur'an`;
     const selectedMap = { ...(cls.students || {}) };
-    const classMap = classArr.reduce((acc, c) => { acc[c.id] = c.name; return acc; }, {});
+    const classMap = classArr.reduce((acc, c) => { acc[c.id] = c; return acc; }, {});
     const updateCount = () => {
       const cnt = Object.keys(selectedMap).length;
       document.getElementById('modal-map-count').innerText = `${cnt} Santri Terpilih`;
     };
+    const classFilterSelect = document.getElementById('modal-map-class-filter');
+    const targetGradeNums = sessObj.grades;
+    const sessionMatchingClassIds = classArr.filter(c => {
+      const g = Number(c.grade) || parseInt(c.name || '', 10) || 0;
+      return targetGradeNums.includes(g);
+    }).map(c => c.id);
+    let classOptionsHtml = '<option value="">— Semua Kelas Formal (1 s/d 6) —</option>';
+    classOptionsHtml += `<option value="__session__" selected>★ Santri Sesuai ${sessObj.label} (${targetGradeNums.map(n => `Kelas ${n}`).join(' & ')})</option>`;
+    classArr.forEach(c => {
+      classOptionsHtml += `<option value="${c.id}">${AppConfig.escapeHtml(c.name)}</option>`;
+    });
+    classFilterSelect.innerHTML = classOptionsHtml;
     const renderList = () => {
       const filterClass = document.getElementById('modal-map-class-filter').value;
       const searchVal = document.getElementById('modal-map-search').value.toLowerCase().trim();
       const filtered = studentArr.filter(s => {
-        if (filterClass && s.classId !== filterClass) return false;
+        if (filterClass === '__session__') {
+          if (!sessionMatchingClassIds.includes(s.classId)) return false;
+        } else if (filterClass && s.classId !== filterClass) {
+          return false;
+        }
         if (searchVal) {
           const matchName = (s.name || '').toLowerCase().includes(searchVal);
           const matchNis = (s.nis || '').includes(searchVal) || (s.nisn || '').includes(searchVal);
@@ -268,19 +404,22 @@ const UMMIPages = {
       });
       const listCont = document.getElementById('modal-map-students-list');
       if (!filtered.length) {
-        listCont.innerHTML = '<p class="text-muted" class="empty-state-text">Tidak ada santri yang cocok dengan filter.</p>';
+        listCont.innerHTML = '<p class="text-muted text-center empty-state-text">Tidak ada santri yang cocok dengan filter atau pencarian.</p>';
         return;
       }
       listCont.innerHTML = filtered.map(s => {
         const isChecked = !!selectedMap[s.id];
-        const className = classMap[s.classId] || s.classId || '-';
-        const curLvl = s.ummiLevel || cls.level || 'Jilid';
+        const formalCls = classMap[s.classId];
+        const className = formalCls ? formalCls.name : (s.classId || '-');
+        const curLvl = s.ummiLevel || (cls.students && cls.students[s.id] && cls.students[s.id].level) || cls.level || 'Jilid';
+        const idLabel = s.nis ? `NIS: ${s.nis}` : (s.nisn ? `NISN: ${s.nisn}` : '-');
+        const lvlBadge = curLvl === 'Pasca' ? '<span class="badge badge-success badge-sm"><i class="ph ph-sparkle"></i> Pasca</span>' : `<strong class="text-primary">${AppConfig.escapeHtml(curLvl)}</strong>`;
         return `
           <label class="eks-student-item">
             <input type="checkbox" data-student-id="${s.id}" ${isChecked ? 'checked' : ''}>
             <div class="eks-student-meta">
               <span class="eks-student-name">${AppConfig.escapeHtml(s.name)}</span>
-              <span class="eks-student-sub">${AppConfig.escapeHtml(className)} · ${idLabel} · <strong class="text-primary">${AppConfig.escapeHtml(curLvl)}</strong></span>
+              <span class="eks-student-sub">${AppConfig.escapeHtml(className)} · ${idLabel} · ${lvlBadge}</span>
             </div>
           </label>
         `;
@@ -301,7 +440,6 @@ const UMMIPages = {
         };
       });
     };
-    document.getElementById('modal-map-class-filter').value = '';
     document.getElementById('modal-map-search').value = '';
     document.getElementById('modal-map-class-filter').onchange = renderList;
     document.getElementById('modal-map-search').oninput = renderList;
@@ -328,18 +466,32 @@ const UMMIPages = {
       const btn = document.getElementById('btn-save-map-students');
       btn.disabled = true;
       btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Menyimpan...';
-      const cleanStudents = Object.keys(selectedMap).length ? selectedMap : null;
-      await db.ref(`ummi_classes/${cls.id}/students`).set(cleanStudents);
-      btn.disabled = false;
-      btn.innerHTML = '<i class="ph ph-floppy-disk"></i> Simpan Pemetaan Santri';
-      App.closeModal('modal-ummi-mapping-students');
-      UMMIPages.renderUmmiMapping(container);
+      try {
+        const cleanStudents = Object.keys(selectedMap).length ? selectedMap : null;
+        await db.ref(`ummi_classes/${cls.id}/students`).set(cleanStudents);
+        const enrolledIds = Object.keys(selectedMap);
+        await Promise.all(enrolledIds.map(sid => {
+          return db.ref(`students/${sid}`).update({
+            ummiClassId: cls.id,
+            ummiClassName: cls.name,
+            ummiSession: sess
+          });
+        }));
+        btn.disabled = false;
+        btn.innerHTML = '<i class="ph ph-floppy-disk"></i> Simpan Pemetaan Santri';
+        App.closeModal('modal-ummi-mapping-students');
+        UMMIPages.renderUmmiMapping(container);
+      } catch (err) {
+        alert(err.message || 'Terjadi kesalahan saat menyimpan pemetaan santri');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="ph ph-floppy-disk"></i> Simpan Pemetaan Santri';
+      }
     };
     updateCount();
     renderList();
-    document.getElementById('modal-ummi-mapping-students').classList.add('active');
+    App.openModal('modal-ummi-mapping-students');
   },
-  async renderUmmiClasses(container) {
+async renderUmmiClasses(container) {
     Router.setTitle('Rombel Ummi Saya', 'Daftar kelompok jilid dan santri binaan yang Anda ampu.');
     const uid = Auth.currentUser.uid;
     const [ummiClasses, allStudents, allClasses] = await Promise.all([
@@ -412,7 +564,7 @@ const UMMIPages = {
         <div class="card section-spacer">
           <div class="card-header ummi-rombel-header">
             <div class="ummi-rombel-info">
-              <h3 class="card-title">${idx + 1}. ${AppConfig.escapeHtml(cls.name)}</h3>
+              <h3 class="card-title">${idx + 1}. ${AppConfig.escapeHtml(cls.name)} ${getSessionBadge(getUmmiClassSession(cls))}</h3>
               <p class="text-muted ummi-rombel-meta"><i class="ph ph-map-pin"></i> <strong>Tempat:</strong> ${AppConfig.escapeHtml(cls.room || 'Tempat belum diatur')} · Tingkat: ${AppConfig.escapeHtml(cls.level || 'Jilid')} · Total ${studentsInRombel.length} Santri Binaan Lintas Kelas</p>
             </div>
             <div class="card-header-actions ummi-rombel-actions">
@@ -860,11 +1012,15 @@ const UMMIPages = {
   },
   async renderExams(container) {
     Router.setTitle('Antrean Ujian Jilid & Munaqosyah', 'Monitoring dan pengujian kelayakan kenaikan jilid santri.');
-    const [snapExams, users, settings] = await Promise.all([
+    const [snapExams, users, settings, allStudents, allClasses] = await Promise.all([
       DB.getUmmiExams(),
       DB.getAllUsers(),
-      DB.getSettings()
+      DB.getSettings(),
+      DB.getAllStudents(),
+      DB.getClasses()
     ]);
+    const studentMap = DB.toArray(allStudents).reduce((acc, s) => { acc[s.id] = s; return acc; }, {});
+    const classMap = DB.toArray(allClasses).reduce((acc, c) => { acc[c.id] = c; return acc; }, {});
     const examArr = DB.toArray(snapExams).sort((a, b) => (b.requestedAt || 0) - (a.requestedAt || 0));
     const guruUmmi = DB.toArray(users).filter(u => AppConfig.isUserUmmi(u));
     const pendingCount = examArr.filter(e => e.status === 'Menunggu ACC').length;
@@ -887,6 +1043,7 @@ const UMMIPages = {
           <tr>
             <td>${idx + 1}</td>
             <td><strong>${AppConfig.escapeHtml(e.studentName || '-')}</strong></td>
+            <td>${getSessionBadge((() => { const sObj = studentMap[e.studentId]; if (sObj) { const fCls = classMap[sObj.classId]; const g = fCls ? (Number(fCls.grade) || parseInt(fCls.name || '', 10) || 0) : 0; if (g === 1 || g === 2) return '1'; if (g === 3 || g === 4) return '2'; if (g === 5 || g === 6) return '3'; } return '1'; })())}</td>
             <td><span class="badge badge-outline">${AppConfig.escapeHtml(e.currentLevel || '-')}</span> <i class="ph ph-arrow-right"></i> <span class="badge badge-primary">${AppConfig.escapeHtml(e.targetLevel || '-')}</span></td>
             <td>${AppConfig.escapeHtml(e.requestedByName || '-')}<br><small class="text-muted">${AppConfig.escapeHtml(e.teacherNotes || '-')}</small></td>
             <td><span class="badge ${badgeCls}">${e.status}</span></td>
@@ -1188,37 +1345,441 @@ const UMMIPages = {
       }
     };
   },
-  async renderTahfidz(container) {
-    Router.setTitle('Setoran Tahfidz (Juz 30-1)', 'Pencatatan hafalan surat dan ayat Al-Quran santri.');
-    container.innerHTML = `
-      <div class="card section-block">
-        <div class="card-body">
-          <h3 class="card-title"><i class="ph ph-book-bookmark"></i> Setoran Tahfidz Al-Qur\'an</h3>
-          <p class="text-muted">Modul pencatatan setoran hafalan juz 30 hingga juz 1 sedang dalam tahap integrasi.</p>
-        </div>
-      </div>
-    `;
+    async renderTahfidz(container) {
+    if (typeof ModuleKit !== 'undefined') {
+      return ModuleKit.render(container, '#/guru/ummi/tahfidz');
+    }
   },
   async renderTasmi(container) {
-    Router.setTitle("Ujian Tasmi' (Penguji)", 'Pengujian kelulusan sekali duduk dan munaqosyah.');
-    container.innerHTML = `
-      <div class="card section-block">
-        <div class="card-body">
-          <h3 class="card-title"><i class="ph ph-headphones"></i> Lembar Penilaian Tasmi\'</h3>
-          <p class="text-muted">Modul penilaian ujian tasmi\' bil ghoib dan munaqosyah sedang disiapkan.</p>
-        </div>
-      </div>
-    `;
+    if (typeof ModuleKit !== 'undefined') {
+      return ModuleKit.render(container, '#/guru/ummi/tasmi');
+    }
   },
   async renderTasmiPlotting(container) {
-    Router.setTitle("Plotting Guru Tasmi'", 'Jadwal dan penugasan ustadz/ustadzah penguji tasmi.');
+    Router.setTitle("Plotting Penguji Tasmi' & Munaqosyah", "Jadwal dan penugasan ustadz/ustadzah penguji tasmi' bil ghoib dan munaqasyah santri.");
+    const [snapPlotting, allStudents, users, allClasses, roomsData] = await Promise.all([
+      DB.getUmmiTasmiPlotting(),
+      DB.getAllStudents(),
+      DB.getAllUsers(),
+      DB.getClasses(),
+      DB.getRooms()
+    ]);
+    const plottingArr = DB.toArray(snapPlotting).sort((a, b) => (b.date || 0) - (a.date || 0) || (b.createdAt || 0) - (a.createdAt || 0));
+    const studentArr = DB.toArray(allStudents);
+    const studentMap = studentArr.reduce((acc, s) => { acc[s.id] = s; return acc; }, {});
+    const guruUmmi = DB.toArray(users).filter(u => AppConfig.isUserUmmi(u));
+    const teacherMap = guruUmmi.reduce((acc, u) => { acc[u.id] = u.name; return acc; }, {});
+    const classMap = DB.toArray(allClasses).reduce((acc, c) => { acc[c.id] = c; return acc; }, {});
+    const roomArr = DB.toArray(roomsData);
+    let sessStats = { '1': 0, '2': 0, '3': 0 };
+    let scheduledCnt = 0;
+    let passedCnt = 0;
+    let repeatCnt = 0;
+    plottingArr.forEach(p => {
+      const s = p.session || '1';
+      if (sessStats[s] !== undefined) sessStats[s]++;
+      if (p.status === 'Terjadwal') scheduledCnt++;
+      else if ((p.status || '').startsWith('Lulus')) passedCnt++;
+      else if (p.status === 'Mengulang / Perbaikan') repeatCnt++;
+    });
+    let activeSession = 'all';
+    let activeStatus = 'all';
+    let searchQuery = '';
+    const renderTable = () => {
+      const filtered = plottingArr.filter(p => {
+        const sess = p.session || '1';
+        if (activeSession !== 'all' && sess !== activeSession) return false;
+        if (activeStatus !== 'all') {
+          if (activeStatus === 'Lulus' && !(p.status || '').startsWith('Lulus')) return false;
+          if (activeStatus !== 'Lulus' && p.status !== activeStatus) return false;
+        }
+        if (searchQuery) {
+          const sObj = studentMap[p.studentId];
+          const sName = (sObj ? sObj.name : (p.studentName || '')).toLowerCase();
+          const tName = (teacherMap[p.examinerId] || p.examinerName || '').toLowerCase();
+          const cat = (p.category || '').toLowerCase();
+          const room = (p.room || '').toLowerCase();
+          if (!sName.includes(searchQuery) && !tName.includes(searchQuery) && !cat.includes(searchQuery) && !room.includes(searchQuery)) return false;
+        }
+        return true;
+      });
+      const tbody = container.querySelector('#tasmi-plotting-tbody');
+      if (!tbody) return;
+      if (!filtered.length) {
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">Belum ada plotting jadwal penguji tasmi yang sesuai filter atau pencarian.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = filtered.map((p, idx) => {
+        const sObj = studentMap[p.studentId] || {};
+        const sName = sObj.name || p.studentName || '-';
+        const fCls = classMap[sObj.classId];
+        const className = fCls ? fCls.name : (sObj.classId || '-');
+        const idLabel = sObj.nis ? `NIS: ${sObj.nis}` : (sObj.nisn ? `NISN: ${sObj.nisn}` : '');
+        const sess = p.session || '1';
+        const examiner = teacherMap[p.examinerId] || p.examinerName || '<span class="text-muted">Belum Ditentukan</span>';
+        let statusBadge = '<span class="badge badge-warning">Terjadwal</span>';
+        if ((p.status || '').startsWith('Lulus')) {
+          statusBadge = `<span class="badge badge-success"><i class="ph ph-check"></i> ${AppConfig.escapeHtml(p.status)}${p.score ? ` (${p.score})` : ''}</span>`;
+        } else if (p.status === 'Mengulang / Perbaikan') {
+          statusBadge = `<span class="badge badge-danger"><i class="ph ph-arrow-counter-clockwise"></i> Mengulang${p.score ? ` (${p.score})` : ''}</span>`;
+        }
+        return `
+          <tr>
+            <td class="text-center">${idx + 1}</td>
+            <td><strong>${AppConfig.escapeHtml(sName)}</strong><br><small class="text-muted">${AppConfig.escapeHtml(className)}${idLabel ? ` · ${idLabel}` : ''}</small></td>
+            <td>${getSessionBadge(sess)}</td>
+            <td><strong class="text-primary">${AppConfig.escapeHtml(p.category || 'Tasmi')}</strong></td>
+            <td>${AppConfig.escapeHtml(examiner)}</td>
+            <td>${AppConfig.escapeHtml(p.date || '-')} · ${AppConfig.escapeHtml(p.time || '07.30')}<br><small class="text-muted"><i class="ph ph-map-pin"></i> ${AppConfig.escapeHtml(p.room || 'Masjid')}</small></td>
+            <td>${statusBadge}</td>
+            <td class="action-cell">
+              <button class="btn btn-primary btn-sm" data-result-tasmi="${p.id}" title="Input Hasil Ujian"><i class="ph ph-check-circle"></i> Hasil</button>
+              <button class="btn btn-outline btn-sm" data-edit-tasmi="${p.id}" title="Edit Plotting"><i class="ph ph-pencil-simple"></i></button>
+              <button class="btn btn-danger btn-sm" data-del-tasmi="${p.id}" title="Hapus"><i class="ph ph-trash"></i></button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+      tbody.querySelectorAll('[data-result-tasmi]').forEach(btn => {
+        btn.onclick = () => {
+          const id = btn.dataset.resultTasmi;
+          const p = plottingArr.find(x => x.id === id);
+          if (!p) return;
+          const sObj = studentMap[p.studentId] || {};
+          document.getElementById('res-tasmi-id').value = p.id;
+          document.getElementById('res-tasmi-stu-id').value = p.studentId || '';
+          document.getElementById('res-tasmi-stu-name').innerText = sObj.name || p.studentName || '-';
+          document.getElementById('res-tasmi-category').innerText = p.category || 'Tasmi';
+          document.getElementById('res-tasmi-examiner').innerText = teacherMap[p.examinerId] || p.examinerName || '-';
+          document.getElementById('res-tasmi-status').value = p.status || 'Lulus (Mumtaz - Istimewa)';
+          document.getElementById('res-tasmi-score').value = p.score || 95;
+          document.getElementById('res-tasmi-notes').value = p.notes || '';
+          document.getElementById('res-tasmi-promote').checked = p.category && p.category.toLowerCase().includes('munaqasyah');
+          App.openModal('modal-tasmi-result');
+        };
+      });
+      tbody.querySelectorAll('[data-edit-tasmi]').forEach(btn => {
+        btn.onclick = () => {
+          const id = btn.dataset.editTasmi;
+          const p = plottingArr.find(x => x.id === id);
+          if (!p) return;
+          document.getElementById('tasmi-modal-title').innerText = 'Edit Plotting Penguji Tasmi';
+          document.getElementById('tasmi-plot-id').value = p.id;
+          document.getElementById('tasmi-plot-student').value = p.studentId || '';
+          document.getElementById('tasmi-plot-session').value = p.session || '1';
+          document.getElementById('tasmi-plot-category').value = p.category || 'Tasmi\' Sekali Duduk Juz 30';
+          document.getElementById('tasmi-plot-examiner').value = p.examinerId || '';
+          document.getElementById('tasmi-plot-date').value = p.date || '';
+          document.getElementById('tasmi-plot-time').value = p.time || '07.30 - 08.30 WIB';
+          document.getElementById('tasmi-plot-room').value = p.room || 'Serambi Masjid';
+          document.getElementById('tasmi-plot-notes').value = p.prepNotes || '';
+          App.openModal('modal-tasmi-plot');
+        };
+      });
+      tbody.querySelectorAll('[data-del-tasmi]').forEach(btn => {
+        btn.onclick = async () => {
+          const id = btn.dataset.delTasmi;
+          const p = plottingArr.find(x => x.id === id);
+          const sObj = studentMap[p.studentId];
+          const sName = sObj ? sObj.name : (p ? p.studentName : id);
+          if (!confirm(`Hapus jadwal plotting tasmi santri "${sName}"?`)) return;
+          await DB.deleteUmmiTasmiPlotting(id);
+          UMMIPages.renderTasmiPlotting(container);
+        };
+      });
+    };
+    const studentOptions = studentArr.map(s => {
+      const fCls = classMap[s.classId];
+      const cName = fCls ? fCls.name : (s.classId || '-');
+      const idStr = s.nis ? `[NIS: ${s.nis}] ` : '';
+      return `<option value="${s.id}">${AppConfig.escapeHtml(idStr + s.name + ' (' + cName + ')')}</option>`;
+    }).join('');
+    const guruOptions = guruUmmi.map(g => `<option value="${g.id}">${AppConfig.escapeHtml(g.name)}</option>`).join('');
     container.innerHTML = `
-      <div class="card section-block">
-        <div class="card-body">
-          <h3 class="card-title"><i class="ph ph-microphone-stage"></i> Plotting Tim Penguji Tasmi\'</h3>
-          <p class="text-muted">Penjadwalan dan distribusi santri ke penguji tasmi\' berkala.</p>
+      <div class="stat-grid section-spacer">
+        <div class="stat-card">
+          <div class="stat-number">${plottingArr.length} Plotting</div>
+          <div class="stat-label">Total Ujian Tasmi & Munaqosyah</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">${sessStats['1']} Santri</div>
+          <div class="stat-label">Sesi 1 · Kelas 1 & 2</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">${sessStats['2']} Santri</div>
+          <div class="stat-label">Sesi 2 · Kelas 3 & 4</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">${sessStats['3']} Santri</div>
+          <div class="stat-label">Sesi 3 · Kelas 5 & 6</div>
+        </div>
+      </div>
+      <div class="card toolbar-panel">
+        <div class="toolbar-row">
+          <div>
+            <h3 class="card-title">Penjadwalan & Plotting Penguji Tasmi'</h3>
+            <p class="text-muted">Distribusi jadwal penguji tasmi' bil ghoib, munaqosyah kelulusan jilid, dan tingkat pasca.</p>
+          </div>
+          <button class="btn btn-primary" id="btn-add-tasmi-plot"><i class="ph ph-plus"></i> Buat Plotting Penguji Baru</button>
+        </div>
+        <div class="filter-pills" id="tasmi-session-filter-pills">
+          <button class="filter-pill active" data-filter-session="all">Semua Sesi (${plottingArr.length})</button>
+          <button class="filter-pill" data-filter-session="1">Sesi 1 (Kelas 1-2) · ${sessStats['1']}</button>
+          <button class="filter-pill" data-filter-session="2">Sesi 2 (Kelas 3-4) · ${sessStats['2']}</button>
+          <button class="filter-pill" data-filter-session="3">Sesi 3 (Kelas 5-6) · ${sessStats['3']}</button>
+        </div>
+        <div class="card-search-row">
+          <input type="text" id="input-search-tasmi" placeholder="Cari nama santri, guru penguji, kategori ujian, atau ruang..." class="form-input">
+        </div>
+      </div>
+      <div class="card">
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th class="text-center" style="width:48px">No</th>
+                <th>Santri & Kelas</th>
+                <th>Sesi</th>
+                <th>Kategori Ujian</th>
+                <th>Ustadz / Penguji</th>
+                <th>Jadwal & Ruang</th>
+                <th>Status & Nilai</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="tasmi-plotting-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-overlay" id="modal-tasmi-plot">
+        <div class="modal modal-lg">
+          <div class="modal-header">
+            <h3 class="modal-title" id="tasmi-modal-title">Buat Jadwal & Plotting Penguji Tasmi'</h3>
+            <button class="btn-icon" data-close-modal="modal-tasmi-plot"><i class="ph ph-x"></i></button>
+          </div>
+          <form id="form-tasmi-plot">
+            <div class="modal-body">
+              <input type="hidden" id="tasmi-plot-id">
+              <div class="form-group">
+                <label>Santri yang Diuji</label>
+                <select id="tasmi-plot-student" required class="form-input">
+                  <option value="">— Pilih Santri —</option>
+                  ${studentOptions}
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Sesi Jadwal Pembelajaran</label>
+                <select id="tasmi-plot-session" required class="form-input">
+                  <option value="1">Sesi 1 (Kelas 1 - 2 / Fase A)</option>
+                  <option value="2">Sesi 2 (Kelas 3 - 4 / Fase B)</option>
+                  <option value="3">Sesi 3 (Kelas 5 - 6 / Fase C)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Kategori Ujian / Munaqosyah</label>
+                <select id="tasmi-plot-category" required class="form-input">
+                  <option value="Tasmi' Sekali Duduk Juz 30">Tasmi' Sekali Duduk Juz 30</option>
+                  <option value="Tasmi' Sekali Duduk Juz 1">Tasmi' Sekali Duduk Juz 1</option>
+                  <option value="Tasmi' Sekali Duduk Juz 2">Tasmi' Sekali Duduk Juz 2</option>
+                  <option value="Munaqasyah Ummi Tartil">Munaqasyah Ummi Tartil (Kelulusan Jilid 1 - 6)</option>
+                  <option value="Munaqasyah Tahfidz">Munaqasyah Tahfidz</option>
+                  <option value="Ujian Pra-Munaqasyah">Ujian Pra-Munaqasyah</option>
+                  <option value="Ujian Lanjutan Pasca Ummi">Ujian Lanjutan Pasca Ummi</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Ustadz / Ustadzah Penguji</label>
+                <select id="tasmi-plot-examiner" required class="form-input">
+                  <option value="">— Pilih Penguji Ummi —</option>
+                  ${guruOptions}
+                </select>
+              </div>
+              <div class="form-row">
+                <div class="form-group" style="flex:1">
+                  <label>Tanggal Ujian</label>
+                  <input type="date" id="tasmi-plot-date" required class="form-input">
+                </div>
+                <div class="form-group" style="flex:1">
+                  <label>Waktu / Jam Ujian</label>
+                  <input type="text" id="tasmi-plot-time" required value="07.30 - 08.30 WIB" class="form-input">
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Ruang / Lokasi Ujian</label>
+                <input type="text" id="tasmi-plot-room" list="tasmi-rooms-list" value="Serambi Masjid" placeholder="Contoh: Serambi Masjid, Ruang Kelas..." class="form-input">
+                <datalist id="tasmi-rooms-list">
+                  ${roomArr.map(r => `<option value="${AppConfig.escapeHtml(r.name || r.id)}"></option>`).join('')}
+                </datalist>
+              </div>
+              <div class="form-group">
+                <label>Catatan Persiapan (Opsional)</label>
+                <input type="text" id="tasmi-plot-notes" placeholder="Contoh: Santri sudah hafal tuntas Juz 30 mutqin" class="form-input">
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-outline" data-close-modal="modal-tasmi-plot">Batal</button>
+              <button type="submit" class="btn btn-primary" id="btn-save-tasmi-plot">Simpan Plotting Penguji</button>
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="modal-overlay" id="modal-tasmi-result">
+        <div class="modal">
+          <div class="modal-header">
+            <h3 class="modal-title">Input Hasil Ujian Tasmi' / Munaqosyah</h3>
+            <button class="btn-icon" data-close-modal="modal-tasmi-result"><i class="ph ph-x"></i></button>
+          </div>
+          <form id="form-tasmi-result">
+            <div class="modal-body">
+              <input type="hidden" id="res-tasmi-id">
+              <input type="hidden" id="res-tasmi-stu-id">
+              <div class="form-group">
+                <label>Nama Santri</label>
+                <div id="res-tasmi-stu-name" class="font-bold text-lg text-primary"></div>
+              </div>
+              <div class="form-group">
+                <label>Kategori Ujian & Penguji</label>
+                <div class="text-sm text-muted"><span id="res-tasmi-category"></span> · Penguji: <span id="res-tasmi-examiner"></span></div>
+              </div>
+              <div class="form-group">
+                <label>Keputusan Kelulusan</label>
+                <select id="res-tasmi-status" required class="form-input">
+                  <option value="Lulus (Mumtaz - Istimewa)">Lulus (Mumtaz - Istimewa)</option>
+                  <option value="Lulus (Jayyid Jiddan - Sangat Baik)">Lulus (Jayyid Jiddan - Sangat Baik)</option>
+                  <option value="Lulus (Jayyid - Baik)">Lulus (Jayyid - Baik)</option>
+                  <option value="Mengulang / Perbaikan">Mengulang / Perbaikan</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Nilai Ujian (Skala 0 - 100)</label>
+                <input type="number" id="res-tasmi-score" min="0" max="100" required value="95" class="form-input">
+              </div>
+              <div class="form-group">
+                <label>Catatan & Evaluasi Penguji (Makhraj, Tajwid, Kelancaran)</label>
+                <textarea id="res-tasmi-notes" rows="3" required placeholder="Catatan evaluasi bacaan santri..." class="form-input"></textarea>
+              </div>
+              <div class="form-group">
+                <label class="checkbox-label" style="display:flex;align-items:center;gap:8px;cursor:pointer">
+                  <input type="checkbox" id="res-tasmi-promote">
+                  <span>Naikkan tingkat santri ke <strong>Pasca Ummi</strong> (untuk lulusan Munaqosyah / tuntas seluruh jilid)</span>
+                </label>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-outline" data-close-modal="modal-tasmi-result">Batal</button>
+              <button type="submit" class="btn btn-primary" id="btn-save-tasmi-result"><i class="ph ph-floppy-disk"></i> Simpan Hasil Ujian</button>
+            </div>
+          </form>
         </div>
       </div>
     `;
+    container.querySelectorAll('[data-filter-session]').forEach(btn => {
+      btn.onclick = () => {
+        container.querySelectorAll('[data-filter-session]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeSession = btn.dataset.filterSession;
+        renderTable();
+      };
+    });
+    const searchInput = container.querySelector('#input-search-tasmi');
+    if (searchInput) {
+      searchInput.oninput = (e) => {
+        searchQuery = e.target.value.toLowerCase().trim();
+        renderTable();
+      };
+    }
+    renderTable();
+    const selStudent = document.getElementById('tasmi-plot-student');
+    if (selStudent) {
+      selStudent.onchange = () => {
+        const sObj = studentMap[selStudent.value];
+        if (sObj) {
+          const fCls = classMap[sObj.classId];
+          const grade = fCls ? (Number(fCls.grade) || parseInt(fCls.name || '', 10) || 0) : 0;
+          if (grade === 1 || grade === 2) document.getElementById('tasmi-plot-session').value = '1';
+          else if (grade === 3 || grade === 4) document.getElementById('tasmi-plot-session').value = '2';
+          else if (grade === 5 || grade === 6) document.getElementById('tasmi-plot-session').value = '3';
+        }
+      };
+    }
+    document.getElementById('btn-add-tasmi-plot').onclick = () => {
+      document.getElementById('tasmi-modal-title').innerText = 'Buat Jadwal & Plotting Penguji Tasmi';
+      document.getElementById('form-tasmi-plot').reset();
+      document.getElementById('tasmi-plot-id').value = '';
+      document.getElementById('tasmi-plot-date').value = new Date().toISOString().split('T')[0];
+      document.getElementById('tasmi-plot-time').value = '07.30 - 08.30 WIB';
+      document.getElementById('tasmi-plot-session').value = activeSession !== 'all' ? activeSession : '1';
+      App.openModal('modal-tasmi-plot');
+    };
+    document.getElementById('form-tasmi-plot').onsubmit = async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('tasmi-plot-id').value.trim();
+      const studentId = document.getElementById('tasmi-plot-student').value;
+      const sObj = studentMap[studentId];
+      const session = document.getElementById('tasmi-plot-session').value;
+      const category = document.getElementById('tasmi-plot-category').value;
+      const examinerId = document.getElementById('tasmi-plot-examiner').value;
+      const date = document.getElementById('tasmi-plot-date').value;
+      const time = document.getElementById('tasmi-plot-time').value.trim();
+      const room = document.getElementById('tasmi-plot-room').value.trim();
+      const prepNotes = document.getElementById('tasmi-plot-notes').value.trim();
+      const btn = document.getElementById('btn-save-tasmi-plot');
+      btn.disabled = true;
+      btn.innerText = 'Menyimpan...';
+      try {
+        const data = {
+          studentId,
+          studentName: sObj ? sObj.name : '',
+          session,
+          category,
+          examinerId,
+          examinerName: teacherMap[examinerId] || '',
+          date,
+          time,
+          room,
+          prepNotes,
+          status: 'Terjadwal'
+        };
+        await DB.saveUmmiTasmiPlotting(id || null, data);
+        App.closeModal('modal-tasmi-plot');
+        UMMIPages.renderTasmiPlotting(container);
+      } catch (err) {
+        alert(err.message || 'Gagal menyimpan plotting penguji tasmi');
+      } finally {
+        btn.disabled = false;
+        btn.innerText = 'Simpan Plotting Penguji';
+      }
+    };
+    document.getElementById('form-tasmi-result').onsubmit = async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('res-tasmi-id').value;
+      const sid = document.getElementById('res-tasmi-stu-id').value;
+      const status = document.getElementById('res-tasmi-status').value;
+      const score = Number(document.getElementById('res-tasmi-score').value) || 0;
+      const notes = document.getElementById('res-tasmi-notes').value.trim();
+      const promote = document.getElementById('res-tasmi-promote').checked;
+      const btn = document.getElementById('btn-save-tasmi-result');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Menyimpan...';
+      try {
+        await DB.saveUmmiTasmiPlotting(id, {
+          status,
+          score,
+          notes,
+          evaluatedAt: Date.now()
+        });
+        if (promote && sid && status.startsWith('Lulus')) {
+          await DB.updateStudentUmmiLevel(sid, 'Pasca');
+        }
+        App.closeModal('modal-tasmi-result');
+        alert('Hasil ujian tasmi berhasil disimpan!');
+        UMMIPages.renderTasmiPlotting(container);
+      } catch (err) {
+        alert(err.message || 'Gagal menyimpan hasil ujian.');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="ph ph-floppy-disk"></i> Simpan Hasil Ujian';
+      }
+    };
   }
 };
