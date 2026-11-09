@@ -1293,6 +1293,34 @@
         file('receipt', 'Bukti Pembayaran / Struk', 'spp_receipts'),
         area('note', 'Catatan')
       ]
-    },
+    }
   });
+  const ALIASES = {
+    '#/personnel/employees': '#/personnel/data',
+    '#/personnel/warnings': '#/personnel/disciplinary',
+    '#/personnel/portfolios': '#/personnel/portfolio',
+    '#/personnel/competency': '#/personnel/training',
+    '#/humas/news': '#/personnel/publications',
+    '#/humas/complaints': '#/personnel/complaints',
+    '#/humas/documents': '#/personnel/documents',
+    '#/humas/partnerships': '#/personnel/partnerships',
+    '#/humas/events': '#/personnel/events',
+    '#/student-affairs/spmb': '#/student-affairs/ppdb',
+    '#/finance/cash-flow': '#/finance/transactions',
+    '#/finance/bku': '#/finance/cashbook',
+    '#/finance/proposal-approvals': '#/finance/proposals',
+    '#/finance/receipt-archive': '#/finance/archives',
+    '#/finance/lpj': '#/finance/reports',
+    '#/finance/public-transparency': '#/finance/transparency',
+    '#/facilities/needs': '#/facilities/planning',
+    '#/facilities/procurement': '#/facilities/rkas',
+    '#/curriculum/question-bank': '#/curriculum/questions',
+    '#/curriculum/grades-summary': '#/curriculum/grades',
+    '#/curriculum/grading-system': '#/curriculum/evaluations'
+  };
+  const aliasDefs = {};
+  Object.entries(ALIASES).forEach(([alias, target]) => {
+    if (ModuleKit.defs[target]) aliasDefs[alias] = ModuleKit.defs[target];
+  });
+  ModuleKit.register(aliasDefs);
 })();

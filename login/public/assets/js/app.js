@@ -282,12 +282,14 @@ const App = {
         }
         const renderers = {
           '#/panduan': typeof FeatureGuides !== 'undefined' ? FeatureGuides.renderGuidePage : null,
-          '#/admin/assignments': window.AdminAssignmentsModule?.render,
+          '#/admin/assignments': (c) => window.AdminAssignmentsModule?.render ? window.AdminAssignmentsModule.render(c) : null,
           '#/admin/users': typeof AdminPages !== 'undefined' ? AdminPages.renderUsers : null,
           '#/admin/classes': typeof AdminPages !== 'undefined' ? AdminPages.renderClasses : null,
           '#/admin/students/:id': typeof AdminPages !== 'undefined' ? AdminPages.renderStudents : null,
           '#/admin/subjects': typeof AdminPages !== 'undefined' ? AdminPages.renderSubjects : null,
           '#/admin/characters': typeof AdminPages !== 'undefined' ? AdminPages.renderCharacters : null,
+          '#/student-affairs/characters': typeof AdminPages !== 'undefined' ? AdminPages.renderCharacters : null,
+          '#/curriculum/attendance': typeof AdminPages !== 'undefined' ? AdminPages.renderAttendance : null,
           '#/admin/extracurriculars': typeof AdminPages !== 'undefined' ? AdminPages.renderExtracurriculars : null,
           '#/admin/attendance': typeof AdminPages !== 'undefined' ? AdminPages.renderAttendance : null,
           '#/gtk/salary-slip': typeof GuruPages !== 'undefined' ? GuruPages.renderSalarySlip : null,

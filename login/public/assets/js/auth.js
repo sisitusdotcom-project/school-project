@@ -158,12 +158,16 @@ const Auth = {
     const links = AppConfig.getRoleNav(this.currentRole, this.userData?.assignments || this.currentAssignments || [], this.userData);
     let currentGroup = null;
     links.forEach((link) => {
-      if (link.group && link.group !== currentGroup) {
-        const groupTitle = document.createElement('div');
-        groupTitle.className = 'nav-section-title';
-        groupTitle.innerText = link.group;
-        nav.appendChild(groupTitle);
-        currentGroup = link.group;
+      if (link.group) {
+        if (link.group !== currentGroup) {
+          const groupTitle = document.createElement('div');
+          groupTitle.className = 'nav-section-title';
+          groupTitle.innerText = link.group;
+          nav.appendChild(groupTitle);
+          currentGroup = link.group;
+        }
+      } else {
+        currentGroup = null;
       }
       const item = document.createElement('a');
       item.href = link.hash;
