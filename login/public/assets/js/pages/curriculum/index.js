@@ -5,6 +5,24 @@ const CurriculumPages = {
     const dateStr = AppConfig.getLocalDateStr ? AppConfig.getLocalDateStr(today) : today.toISOString().slice(0, 10);
     const user = Auth.userData || Auth.currentUser || {};
     const uid = user.uid || Auth.currentUser?.uid;
+    const assignments = typeof App !== 'undefined' && App.getAssignments ? App.getAssignments() : (Auth.currentAssignments || []);
+    const canManageSettings = Auth.currentRole === AppConfig.ROLES.ADMIN ||
+      assignments.includes('WAKA_KURIKULUM') ||
+      assignments.includes('TIM_IT') ||
+      assignments.includes('WAKA_HUMAS_PERSONALIA');
+    const quickNavHtml = App.renderQuickNav([
+      { href: '#/admin/classes', icon: 'ph-chalkboard', title: 'Pembagian Rombel', desc: 'Daftar kelas & penugasan wali' },
+      { href: '#/admin/classes?action=promo', icon: 'ph-arrow-fat-lines-up', title: 'Kenaikan & Promosi Rombel', desc: 'Proses kenaikan kelas & kelulusan alumni' },
+      { href: '#/admin/subjects', icon: 'ph-book-open', title: 'Pemetaan Mapel & Guru', desc: 'Distribusi guru pengampu' },
+      { href: '#/curriculum/schedules', icon: 'ph-calendar-blank', title: 'Jadwal Pelajaran', desc: 'Jadwal KBM & kalender akademik' },
+      { href: '#/curriculum/syllabus', icon: 'ph-upload-simple', title: 'Perangkat & Modul Ajar', desc: 'Verifikasi Prota, Prosem & RPP' },
+      { href: '#/curriculum/monitoring', icon: 'ph-eye', title: 'Pemantauan KBM', desc: 'Kendali keterlaksanaan jam ajar' },
+      { href: '#/curriculum/questions', icon: 'ph-question', title: 'Bank Soal Asesmen', desc: 'Kumpulan kisi-kisi & naskah STS/SAS' },
+      { href: '#/curriculum/journals', icon: 'ph-notebook', title: 'Jurnal Pembelajaran', desc: 'Catatan harian materi kelas' },
+      { href: '#/curriculum/grades', icon: 'ph-chart-bar', title: 'Rekapitulasi Nilai', desc: 'Rekap capaian akademik murid' },
+      { href: '#/curriculum/evaluations', icon: 'ph-sliders', title: 'Sistem Penilaian', desc: 'Bobot formatif, sumatif & TP' },
+      { href: '#/curriculum/supervision', icon: 'ph-clipboard-text', title: 'Supervisi Guru', desc: 'Observasi pedagogik mengajar' }
+    ]);
     const [settings, subjects, classes, myAtt] = await Promise.all([
       DB.getSettings(),
       DB.getSubjects(),
@@ -45,86 +63,11 @@ const CurriculumPages = {
         </div>
         <div class="card-body">
           <div class="quick-nav-grid">
-            <a href="#/admin/classes" class="quick-nav-card">
-              <div class="quick-nav-icon"><i class="ph ph-chalkboard"></i></div>
-              <div class="quick-nav-info">
-                <div class="quick-nav-title">Pembagian Rombel</div>
-                <div class="quick-nav-desc">Daftar kelas & penugasan wali</div>
-              </div>
-            </a>
-            <a href="#/admin/classes?action=promo" class="quick-nav-card">
-              <div class="quick-nav-icon"><i class="ph ph-arrow-fat-lines-up"></i></div>
-              <div class="quick-nav-info">
-                <div class="quick-nav-title">Kenaikan & Promosi Rombel</div>
-                <div class="quick-nav-desc">Proses kenaikan kelas & kelulusan alumni</div>
-              </div>
-            </a>
-            <a href="#/admin/subjects" class="quick-nav-card">
-              <div class="quick-nav-icon"><i class="ph ph-book-open"></i></div>
-              <div class="quick-nav-info">
-                <div class="quick-nav-title">Pemetaan Mapel & Guru</div>
-                <div class="quick-nav-desc">Distribusi guru pengampu</div>
-              </div>
-            </a>
-            <a href="#/curriculum/schedules" class="quick-nav-card">
-              <div class="quick-nav-icon"><i class="ph ph-calendar-blank"></i></div>
-              <div class="quick-nav-info">
-                <div class="quick-nav-title">Jadwal Pelajaran</div>
-                <div class="quick-nav-desc">Jadwal KBM & kalender akademik</div>
-              </div>
-            </a>
-            <a href="#/curriculum/syllabus" class="quick-nav-card">
-              <div class="quick-nav-icon"><i class="ph ph-upload-simple"></i></div>
-              <div class="quick-nav-info">
-                <div class="quick-nav-title">Perangkat & Modul Ajar</div>
-                <div class="quick-nav-desc">Verifikasi Prota, Prosem & RPP</div>
-              </div>
-            </a>
-            <a href="#/curriculum/monitoring" class="quick-nav-card">
-              <div class="quick-nav-icon"><i class="ph ph-eye"></i></div>
-              <div class="quick-nav-info">
-                <div class="quick-nav-title">Pemantauan KBM</div>
-                <div class="quick-nav-desc">Kendali keterlaksanaan jam ajar</div>
-              </div>
-            </a>
-            <a href="#/curriculum/questions" class="quick-nav-card">
-              <div class="quick-nav-icon"><i class="ph ph-question"></i></div>
-              <div class="quick-nav-info">
-                <div class="quick-nav-title">Bank Soal Asesmen</div>
-                <div class="quick-nav-desc">Kumpulan kisi-kisi & naskah STS/SAS</div>
-              </div>
-            </a>
-            <a href="#/curriculum/journals" class="quick-nav-card">
-              <div class="quick-nav-icon"><i class="ph ph-notebook"></i></div>
-              <div class="quick-nav-info">
-                <div class="quick-nav-title">Jurnal Pembelajaran</div>
-                <div class="quick-nav-desc">Catatan harian materi kelas</div>
-              </div>
-            </a>
-            <a href="#/curriculum/grades" class="quick-nav-card">
-              <div class="quick-nav-icon"><i class="ph ph-chart-bar"></i></div>
-              <div class="quick-nav-info">
-                <div class="quick-nav-title">Rekapitulasi Nilai</div>
-                <div class="quick-nav-desc">Rekap capaian akademik murid</div>
-              </div>
-            </a>
-            <a href="#/curriculum/evaluations" class="quick-nav-card">
-              <div class="quick-nav-icon"><i class="ph ph-sliders"></i></div>
-              <div class="quick-nav-info">
-                <div class="quick-nav-title">Sistem Penilaian</div>
-                <div class="quick-nav-desc">Bobot formatif, sumatif & TP</div>
-              </div>
-            </a>
-            <a href="#/curriculum/supervision" class="quick-nav-card">
-              <div class="quick-nav-icon"><i class="ph ph-clipboard-text"></i></div>
-              <div class="quick-nav-info">
-                <div class="quick-nav-title">Supervisi Guru</div>
-                <div class="quick-nav-desc">Observasi pedagogik mengajar</div>
-              </div>
-            </a>
+            ${quickNavHtml}
           </div>
         </div>
       </section>
+      ${canManageSettings ? `
       <section class="card section-spacer">
         <div class="card-header">
           <h3 class="card-title"><i class="ph ph-gear"></i> Konfigurasi Kalender Akademik Aktif (Pusat Mandat SSOT)</h3>
@@ -146,6 +89,7 @@ const CurriculumPages = {
           </form>
         </div>
       </section>
+      ` : ''}
     `;
     const formAcademic = document.getElementById('form-academic-settings');
     if (formAcademic) {

@@ -469,18 +469,21 @@ const DB = {
     return exams.filter(e => e.scheduledDate === dateStr && (examinerId ? e.examinerId === examinerId : true) && (e.status === 'Dijadwalkan' || e.status === 'Lolos')).length;
   },
   async getUmmiTasmiPlotting() {
-    return this._readCollection('ummi_tasmi_plotting', {});
+    return this._readCollection('ummi_tasmi_schedules', {});
+  },
+  async getUmmiTasmiSchedules() {
+    return this.getUmmiTasmiPlotting();
   },
   async saveUmmiTasmiPlotting(id, data) {
     if (!isDBReady()) return null;
     let key = id;
     if (key) {
-      await db.ref(`ummi_tasmi_plotting/${key}`).update({
+      await db.ref(`ummi_tasmi_schedules/${key}`).update({
         ...data,
         updatedAt: firebase.database.ServerValue.TIMESTAMP
       });
     } else {
-      const ref = db.ref('ummi_tasmi_plotting').push();
+      const ref = db.ref('ummi_tasmi_schedules').push();
       key = ref.key;
       await ref.set({
         ...data,
@@ -490,9 +493,15 @@ const DB = {
     }
     return key;
   },
+  async saveUmmiTasmiSchedule(id, data) {
+    return this.saveUmmiTasmiPlotting(id, data);
+  },
   async deleteUmmiTasmiPlotting(id) {
     if (!isDBReady() || !id) return;
-    await db.ref(`ummi_tasmi_plotting/${id}`).remove();
+    await db.ref(`ummi_tasmi_schedules/${id}`).remove();
+  },
+  async deleteUmmiTasmiSchedule(id) {
+    return this.deleteUmmiTasmiPlotting(id);
   },
   async updateStudentUmmiLevel(studentId, newLevel, ummiClassId) {
     if (!isDBReady() || !studentId || !newLevel) return;

@@ -16,7 +16,7 @@ const Auth = {
           }
           this.userData = userData;
           this.currentRole = userData.role;
-          this.currentAssignments = AppConfig.normalizeAssignments(userData.assignments || userData.unitRoles || []);
+          this.currentAssignments = AppConfig.getRoleAssignments(userData);
           this.updateProfileUI();
           if (typeof NotificationService !== 'undefined') NotificationService.init(user.uid);
           if (userData.role === AppConfig.ROLES.ADMIN) DB.backfillUnitFlags().catch((err) => console.error(err));
@@ -155,7 +155,10 @@ const Auth = {
     const nav = document.getElementById('sidebar-nav');
     if (!nav) return;
     nav.innerHTML = '';
-    const links = AppConfig.getRoleNav(this.currentRole, this.userData?.assignments || this.currentAssignments || [], this.userData);
+    const assignments = (this.currentAssignments && this.currentAssignments.length)
+      ? this.currentAssignments
+      : AppConfig.getRoleAssignments(this.userData || {});
+    const links = AppConfig.getRoleNav(this.currentRole, assignments, this.userData);
     let currentGroup = null;
     links.forEach((link) => {
       if (link.group) {

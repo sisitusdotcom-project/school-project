@@ -1,7 +1,8 @@
 const PersonnelPages = {
   async renderDashboard(container) {
     const role = Auth.currentRole || AppConfig.ROLES.ADMIN;
-    const assignments = Auth.currentAssignments || [];
+    const assignments = typeof App !== 'undefined' && App.getAssignments ? App.getAssignments() : (Auth.currentAssignments || []);
+    const canViewAttendance = typeof App !== 'undefined' && App.isRouteAllowed('#/admin/attendance', role);
     Router.setTitle('Humas & Personalia', 'Pusat komando administrasi kepegawaian, disiplin kerja, dan kemitraan sekolah.');
     const isAdmin = role === AppConfig.ROLES.ADMIN;
     const isWaka = isAdmin || assignments.includes('WAKA_HUMAS_PERSONALIA');
@@ -93,10 +94,17 @@ const PersonnelPages = {
           <div class="stat-icon stat-icon--warning"><i class="ph ph-briefcase"></i></div>
           <div><p class="stat-value">${tendikCount}</p><p class="stat-label text-muted">Tenaga Kependidikan</p></div>
         </div>
-        <a href="#/admin/attendance" class="card stat-card" style="text-decoration:none; color:inherit;">
+        ${canViewAttendance ? `
+        <a href="#/admin/attendance" class="card stat-card stat-card--interactive">
           <div class="stat-icon stat-icon--danger"><i class="ph ph-calendar-check"></i></div>
           <div><p class="stat-value">${hadirToday} / ${totalGtk}</p><p class="stat-label text-muted">Presensi Masuk Hari Ini (Lihat Detail)</p></div>
         </a>
+        ` : `
+        <div class="card stat-card">
+          <div class="stat-icon stat-icon--danger"><i class="ph ph-calendar-check"></i></div>
+          <div><p class="stat-value">${hadirToday} / ${totalGtk}</p><p class="stat-label text-muted">Presensi Masuk Hari Ini</p></div>
+        </div>
+        `}
       </section>
       <section class="card section-spacer">
         <div class="card-header">
@@ -104,104 +112,22 @@ const PersonnelPages = {
         </div>
         <div class="card-body">
           <div class="quick-nav-grid">
-            <a href="#/personnel/data" class="quick-nav-card">
-              <div class="quick-nav-icon"><i class="ph ph-folder-user"></i></div>
-              <div class="quick-nav-info">
-                <div class="quick-nav-title">Data Kepegawaian</div>
-                <div class="quick-nav-desc">Buku induk & berkas GTK</div>
-              </div>
-            </a>
-            <a href="#/admin/assignments" class="quick-nav-card">
-              <div class="quick-nav-icon"><i class="ph ph-tree-structure"></i></div>
-              <div class="quick-nav-info">
-                <div class="quick-nav-title">Distribusi Penugasan</div>
-                <div class="quick-nav-desc">Plotting Waka, Tim & Wali Kelas</div>
-              </div>
-            </a>
-            <a href="#/admin/attendance" class="quick-nav-card">
-              <div class="quick-nav-icon"><i class="ph ph-clock-user"></i></div>
-              <div class="quick-nav-info">
-                <div class="quick-nav-title">Pantau Disiplin GTK</div>
-                <div class="quick-nav-desc">Monitoring presensi GPS realtime</div>
-              </div>
-            </a>
-            <a href="#/personnel/evaluations" class="quick-nav-card">
-              <div class="quick-nav-icon"><i class="ph ph-chart-line-up"></i></div>
-              <div class="quick-nav-info">
-                <div class="quick-nav-title">Penilaian Kinerja SDM</div>
-                <div class="quick-nav-desc">Rubrik 3 pilar Majelis Dikdasmen</div>
-              </div>
-            </a>
-            <a href="#/personnel/disciplinary" class="quick-nav-card">
-              <div class="quick-nav-icon"><i class="ph ph-warning-octagon"></i></div>
-              <div class="quick-nav-info">
-                <div class="quick-nav-title">Peringatan & Disiplin SDM</div>
-                <div class="quick-nav-desc">Pencatatan teguran lisan, tertulis & SP</div>
-              </div>
-            </a>
-            <a href="#/personnel/portfolio" class="quick-nav-card">
-              <div class="quick-nav-icon"><i class="ph ph-folder-star"></i></div>
-              <div class="quick-nav-info">
-                <div class="quick-nav-title">Portofolio & Kompetensi</div>
-                <div class="quick-nav-desc">Rekam jejak pelatihan, diklat & sertifikasi</div>
-              </div>
-            </a>
-            <a href="#/guru/portfolio" class="quick-nav-card">
-              <div class="quick-nav-icon"><i class="ph ph-folder-check"></i></div>
-              <div class="quick-nav-info">
-                <div class="quick-nav-title">Verifikasi Portofolio Guru</div>
-                <div class="quick-nav-desc">Telaah berkas & persetujuan (ACC)</div>
-              </div>
-            </a>
-            <a href="#/humas/official-travel" class="quick-nav-card">
-              <div class="quick-nav-icon"><i class="ph ph-airplane-takeoff"></i></div>
-              <div class="quick-nav-info">
-                <div class="quick-nav-title">Verifikasi Perjalanan Dinas</div>
-                <div class="quick-nav-desc">Validasi surat tugas & penetapan vakasi</div>
-              </div>
-            </a>
-            <a href="#/gtk/salary-slip" class="quick-nav-card">
-              <div class="quick-nav-icon"><i class="ph ph-receipt"></i></div>
-              <div class="quick-nav-info">
-                <div class="quick-nav-title">Slip Gaji Pribadi</div>
-                <div class="quick-nav-desc">Rincian honorarium & gaji staf personalia</div>
-              </div>
-            </a>
-            <a href="#/personnel/complaints" class="quick-nav-card">
-              <div class="quick-nav-icon"><i class="ph ph-chat-teardrop-dots"></i></div>
-              <div class="quick-nav-info">
-                <div class="quick-nav-title">Layanan Pengaduan</div>
-                <div class="quick-nav-desc">Aspirasi & masukan wali murid</div>
-              </div>
-            </a>
-            <a href="#/personnel/events" class="quick-nav-card">
-              <div class="quick-nav-icon"><i class="ph ph-calendar-plus"></i></div>
-              <div class="quick-nav-info">
-                <div class="quick-nav-title">Manajemen Acara</div>
-                <div class="quick-nav-desc">Kepanitiaan agenda besar sekolah</div>
-              </div>
-            </a>
-            <a href="#/komite/activities" class="quick-nav-card">
-              <div class="quick-nav-icon"><i class="ph ph-users-three"></i></div>
-              <div class="quick-nav-info">
-                <div class="quick-nav-title">Kegiatan Paguyuban</div>
-                <div class="quick-nav-desc">Agenda & kemitraan paguyuban wali murid</div>
-              </div>
-            </a>
-            <a href="#/komite/finance-paguyuban" class="quick-nav-card">
-              <div class="quick-nav-icon"><i class="ph ph-wallet"></i></div>
-              <div class="quick-nav-info">
-                <div class="quick-nav-title">Keuangan Paguyuban</div>
-                <div class="quick-nav-desc">Transparansi kas paguyuban & komite</div>
-              </div>
-            </a>
-            <a href="#/personnel/partnerships" class="quick-nav-card">
-              <div class="quick-nav-icon"><i class="ph ph-handshake"></i></div>
-              <div class="quick-nav-info">
-                <div class="quick-nav-title">Kemitraan & MoU</div>
-                <div class="quick-nav-desc">Kerja sama instansi eksternal</div>
-              </div>
-            </a>
+            ${App.renderQuickNav([
+              { href: '#/personnel/data', icon: 'ph-folder-user', title: 'Data Kepegawaian', desc: 'Buku induk & berkas GTK' },
+              { href: '#/admin/assignments', icon: 'ph-tree-structure', title: 'Distribusi Penugasan', desc: 'Plotting Waka, Tim & Wali Kelas' },
+              { href: '#/admin/attendance', icon: 'ph-clock-user', title: 'Pantau Disiplin GTK', desc: 'Monitoring presensi GPS realtime' },
+              { href: '#/personnel/evaluations', icon: 'ph-chart-line-up', title: 'Penilaian Kinerja SDM', desc: 'Rubrik 3 pilar Majelis Dikdasmen' },
+              { href: '#/personnel/disciplinary', icon: 'ph-warning-octagon', title: 'Peringatan & Disiplin SDM', desc: 'Pencatatan teguran lisan, tertulis & SP' },
+              { href: '#/personnel/portfolio', icon: 'ph-folder-star', title: 'Portofolio & Kompetensi', desc: 'Rekam jejak pelatihan, diklat & sertifikasi' },
+              { href: '#/guru/portfolio', icon: 'ph-folder-check', title: 'Verifikasi Portofolio Guru', desc: 'Telaah berkas & persetujuan (ACC)' },
+              { href: '#/humas/official-travel', icon: 'ph-airplane-takeoff', title: 'Verifikasi Perjalanan Dinas', desc: 'Validasi surat tugas & penetapan vakasi' },
+              { href: '#/gtk/salary-slip', icon: 'ph-receipt', title: 'Slip Gaji Pribadi', desc: 'Rincian honorarium & gaji staf personalia' },
+              { href: '#/personnel/complaints', icon: 'ph-chat-teardrop-dots', title: 'Layanan Pengaduan', desc: 'Aspirasi & masukan wali murid' },
+              { href: '#/personnel/events', icon: 'ph-calendar-plus', title: 'Manajemen Acara', desc: 'Kepanitiaan agenda besar sekolah' },
+              { href: '#/komite/activities', icon: 'ph-users-three', title: 'Kegiatan Paguyuban', desc: 'Agenda & kemitraan paguyuban wali murid' },
+              { href: '#/komite/finance-paguyuban', icon: 'ph-wallet', title: 'Keuangan Paguyuban', desc: 'Transparansi kas paguyuban & komite' },
+              { href: '#/personnel/partnerships', icon: 'ph-handshake', title: 'Kemitraan & MoU', desc: 'Kerja sama instansi eksternal' }
+            ])}
           </div>
         </div>
       </section>

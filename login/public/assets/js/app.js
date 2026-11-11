@@ -1,7 +1,26 @@
 const App = {
+  getAssignments() {
+    return (Auth.currentAssignments && Auth.currentAssignments.length)
+      ? Auth.currentAssignments
+      : AppConfig.getRoleAssignments(Auth.userData || {});
+  },
+  renderQuickNav(items = []) {
+    const role = Auth.currentRole;
+    return (items || [])
+      .filter((item) => this.isRouteAllowed(Router.normalizeHash(item.href), role))
+      .map((item) => `
+        <a href="${item.href}" class="quick-nav-card">
+          <div class="quick-nav-icon"><i class="ph ${item.icon}"></i></div>
+          <div class="quick-nav-info">
+            <div class="quick-nav-title">${item.title}</div>
+            <div class="quick-nav-desc">${item.desc}</div>
+          </div>
+        </a>
+      `).join('');
+  },
   getDashboardRenderer() {
     const role = Auth.currentRole || Auth.userData?.role;
-    const assignments = Auth.currentAssignments || AppConfig.getRoleAssignments(Auth.userData || {});
+    const assignments = this.getAssignments();
     if (AppConfig.isPureGuruEkstra(role, assignments)) {
       return GuruPages.renderEkstraDashboard;
     }
@@ -51,7 +70,7 @@ const App = {
     if (path.startsWith('#/guru/classes/')) path = '#/guru/classes';
     if (path === '#/personnel/training') path = '#/personnel/portfolio';
     if (path === '#/personnel/welfare') path = '#/finance/welfare';
-    const assignments = Auth.currentAssignments || [];
+    const assignments = this.getAssignments();
     if (role === AppConfig.ROLES.GURU || role === AppConfig.ROLES.GURU_EKSKUL || role === AppConfig.ROLES.GURU_UMMI) {
       const guruAllowed = [
         '#/attendance',
@@ -85,9 +104,22 @@ const App = {
       const kepsekPrefixes = ['#/dashboard', '#/attendance', '#/admin/attendance', '#/kepsek/', '#/curriculum', '#/student-affairs', '#/finance', '#/personnel', '#/facilities', '#/komite', '#/guru/portfolio', '#/tendik/portfolio', '#/gtk/official-travel'];
       if (kepsekPrefixes.some(p => path === p || path.startsWith(p + '/'))) return true;
     }
+    if (role === AppConfig.ROLES.CURRICULUM || assignments.includes('WAKA_KURIKULUM') || assignments.includes('STAF_KURIKULUM')) {
+      if (path === '#/curriculum' || path.startsWith('#/curriculum/')) return true;
+    }
+    if (role === AppConfig.ROLES.STUDENT_AFFAIRS || assignments.includes('WAKA_KESISWAAN') || assignments.includes('STAF_KESISWAAN')) {
+      if (path === '#/student-affairs' || path.startsWith('#/student-affairs/')) return true;
+    }
     if (role === AppConfig.ROLES.PERSONNEL || assignments.includes('WAKA_HUMAS_PERSONALIA') || assignments.includes('STAF_HUMAS_PERSONALIA')) {
       const persAllowed = ['#/guru/kpi', '#/guru/portfolio', '#/tendik/portfolio', '#/gtk/official-travel', '#/humas/official-travel'];
       if (persAllowed.includes(path)) return true;
+      if (path === '#/personnel' || path.startsWith('#/personnel/') || path.startsWith('#/humas/')) return true;
+    }
+    if (role === AppConfig.ROLES.FINANCE || assignments.includes('WAKA_KEUANGAN') || assignments.includes('STAF_KEUANGAN')) {
+      if (path === '#/finance' || path.startsWith('#/finance/')) return true;
+    }
+    if (role === AppConfig.ROLES.FACILITIES || assignments.includes('WAKA_SARPRAS') || assignments.includes('STAF_SARPRAS')) {
+      if (path === '#/facilities' || path.startsWith('#/facilities/') || path.startsWith('#/sarpras/')) return true;
     }
     if (role === AppConfig.ROLES.TENDIK) {
       const tendikAllowed = ['#/attendance', '#/guru/kpi', '#/tendik/performance', '#/tendik/portfolio'];
@@ -97,7 +129,7 @@ const App = {
       const komiteAllowed = ['#/dashboard', '#/komite/activities', '#/komite/finance-paguyuban', '#/panduan'];
       if (komiteAllowed.includes(path)) return true;
     }
-    const navItems = AppConfig.getRoleNav(role, assignments);
+    const navItems = AppConfig.getRoleNav(role, assignments, Auth.userData);
     return navItems.some(nav => nav.hash === path);
   },
   init() {
@@ -294,10 +326,11 @@ const App = {
           '#/admin/attendance': typeof AdminPages !== 'undefined' ? AdminPages.renderAttendance : null,
           '#/gtk/salary-slip': typeof GuruPages !== 'undefined' ? GuruPages.renderSalarySlip : null,
           '#/personnel/evaluations': async (c) => {
+            const assigns = this.getAssignments();
             const isEvaluator = Auth.currentRole === AppConfig.ROLES.ADMIN ||
                                 Auth.currentRole === AppConfig.ROLES.KEPSEK ||
-                                (Auth.currentAssignments || []).includes('WAKA_HUMAS_PERSONALIA') ||
-                                (Auth.currentAssignments || []).includes('STAF_HUMAS_PERSONALIA');
+                                assigns.includes('WAKA_HUMAS_PERSONALIA') ||
+                                assigns.includes('STAF_HUMAS_PERSONALIA');
             if (isEvaluator) {
               const config = ModuleKit.defs['#/personnel/evaluations'];
               await ModuleKit.render(c, '#/personnel/evaluations', config?.noun || 'Penilaian Kinerja SDM', config?.icon || 'ph-chart-line-up');

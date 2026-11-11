@@ -314,34 +314,12 @@ const FinancePages = {
           </div>
           <div class="card-body">
             <div class="quick-nav-grid">
-              <a href="#/finance/salaries" class="quick-nav-card">
-                <div class="quick-nav-icon"><i class="ph ph-money"></i></div>
-                <div class="quick-nav-info">
-                  <div class="quick-nav-title">Penghitungan Gaji GTK</div>
-                  <div class="quick-nav-desc">Slip gaji pokok & tunjangan</div>
-                </div>
-              </a>
-              <a href="#/admin/attendance" class="quick-nav-card">
-                <div class="quick-nav-icon"><i class="ph ph-clock"></i></div>
-                <div class="quick-nav-info">
-                  <div class="quick-nav-title">Presensi Penggajian (29-28)</div>
-                  <div class="quick-nav-desc">Kalkulasi disiplin kehadiran</div>
-                </div>
-              </a>
-              <a href="#/finance/welfare" class="quick-nav-card">
-                <div class="quick-nav-icon"><i class="ph ph-heart"></i></div>
-                <div class="quick-nav-info">
-                  <div class="quick-nav-title">Kesejahteraan Pegawai</div>
-                  <div class="quick-nav-desc">Santunan sakit, duka & persalinan</div>
-                </div>
-              </a>
-              <a href="#/finance/proposals" class="quick-nav-card">
-                <div class="quick-nav-icon"><i class="ph ph-file-text"></i></div>
-                <div class="quick-nav-info">
-                  <div class="quick-nav-title">Persetujuan Proposal</div>
-                  <div class="quick-nav-desc">Evaluasi pengajuan dana unit</div>
-                </div>
-              </a>
+              ${App.renderQuickNav([
+                { href: '#/finance/salaries', icon: 'ph-money', title: 'Penghitungan Gaji GTK', desc: 'Slip gaji pokok & tunjangan' },
+                { href: '#/admin/attendance', icon: 'ph-clock', title: 'Presensi Penggajian (29-28)', desc: 'Kalkulasi disiplin kehadiran' },
+                { href: '#/finance/welfare', icon: 'ph-heart', title: 'Kesejahteraan Pegawai', desc: 'Santunan sakit, duka & persalinan' },
+                { href: '#/finance/proposals', icon: 'ph-file-text', title: 'Persetujuan Proposal', desc: 'Evaluasi pengajuan dana unit' }
+              ])}
             </div>
           </div>
         </div>

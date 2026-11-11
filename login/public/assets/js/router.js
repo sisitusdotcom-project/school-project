@@ -27,8 +27,12 @@ const Router = {
     const container = document.getElementById('views-container');
     if (!container) return;
     if (typeof App !== 'undefined' && !App.isRouteAllowed(hash, Auth.currentRole)) {
+      document.querySelectorAll('.btn-nav').forEach((el) => {
+        el.classList.remove('active');
+      });
       Router.setTitle('Akses ditolak', 'Halaman ini tidak termasuk dalam ranah akun Anda.');
       container.innerHTML = '<div class="card"><div class="card-body"><h2 class="card-title">Akses ditolak</h2><p class="text-muted">Silakan gunakan menu yang tersedia untuk peran Anda.</p></div></div>';
+      this.closeMobileSidebar();
       return;
     }
     document.querySelectorAll('.btn-nav').forEach((el) => {
@@ -60,6 +64,9 @@ const Router = {
     } else {
       container.innerHTML = '<div class="card"><div class="card-body"><h2 class="card-title">404</h2><p class="text-muted">Halaman tidak ditemukan.</p></div></div>';
     }
+    this.closeMobileSidebar();
+  },
+  closeMobileSidebar() {
     const sidebar = document.getElementById('sidebar');
     const backdrop = document.getElementById('sidebar-backdrop');
     if (sidebar) sidebar.classList.remove('active');
