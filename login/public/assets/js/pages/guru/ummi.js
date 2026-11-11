@@ -158,24 +158,24 @@ const UMMIPages = {
     const guruOptions = guruUmmi.map(g => `<option value="${g.id}">${AppConfig.escapeHtml(g.name)}</option>`).join('');
     const levelOptions = UMMI_LEVELS.map(lvl => `<option value="${lvl}">${lvl}${lvl === 'Pasca' ? ' (Tingkat Pasca Munaqosyah)' : ''}</option>`).join('');
     container.innerHTML = `
-      <div class="stat-grid section-spacer">
-        <div class="stat-card">
-          <div class="stat-number">${classArr.length} Rombel</div>
-          <div class="stat-label">Total Rombel (${totalSantriMapped} Santri Terpetakan)</div>
+      <section class="card-grid section-spacer">
+        <div class="card stat-card">
+          <div class="stat-icon stat-icon--primary"><i class="ph ph-books"></i></div>
+          <div><p class="stat-value">${classArr.length}</p><p class="stat-label text-muted">Total Rombel (${totalSantriMapped} Santri)</p></div>
         </div>
-        <div class="stat-card">
-          <div class="stat-number">${sessStats['1'].rombel} Rombel</div>
-          <div class="stat-label">Sesi 1 · Kelas 1 & 2 (${sessStats['1'].santri} Santri)</div>
+        <div class="card stat-card">
+          <div class="stat-icon stat-icon--primary"><i class="ph ph-student"></i></div>
+          <div><p class="stat-value">${sessStats['1'].rombel}</p><p class="stat-label text-muted">Sesi 1 · Kls 1-2 (${sessStats['1'].santri} Santri)</p></div>
         </div>
-        <div class="stat-card">
-          <div class="stat-number">${sessStats['2'].rombel} Rombel</div>
-          <div class="stat-label">Sesi 2 · Kelas 3 & 4 (${sessStats['2'].santri} Santri)</div>
+        <div class="card stat-card">
+          <div class="stat-icon stat-icon--warning"><i class="ph ph-users-three"></i></div>
+          <div><p class="stat-value">${sessStats['2'].rombel}</p><p class="stat-label text-muted">Sesi 2 · Kls 3-4 (${sessStats['2'].santri} Santri)</p></div>
         </div>
-        <div class="stat-card">
-          <div class="stat-number">${sessStats['3'].rombel} Rombel</div>
-          <div class="stat-label">Sesi 3 · Kelas 5 & 6 (${sessStats['3'].santri} Santri)</div>
+        <div class="card stat-card">
+          <div class="stat-icon stat-icon--success"><i class="ph ph-graduation-cap"></i></div>
+          <div><p class="stat-value">${sessStats['3'].rombel}</p><p class="stat-label text-muted">Sesi 3 · Kls 5-6 (${sessStats['3'].santri} Santri)</p></div>
         </div>
-      </div>
+      </section>
       <div class="card toolbar-panel">
         <div class="toolbar-row">
           <div>
@@ -185,13 +185,14 @@ const UMMIPages = {
           <button class="btn btn-primary" id="btn-add-ummi"><i class="ph ph-plus"></i> Tambah Rombel Baru</button>
         </div>
         <div class="filter-pills" id="session-filter-pills">
-          <button class="filter-pill active" data-filter-session="all">Semua Sesi (${classArr.length})</button>
-          <button class="filter-pill" data-filter-session="1">Sesi 1 (Kelas 1-2) · ${sessStats['1'].rombel}</button>
-          <button class="filter-pill" data-filter-session="2">Sesi 2 (Kelas 3-4) · ${sessStats['2'].rombel}</button>
-          <button class="filter-pill" data-filter-session="3">Sesi 3 (Kelas 5-6) · ${sessStats['3'].rombel}</button>
+          <button type="button" class="filter-pill active" data-filter-session="all"><i class="ph ph-stack"></i> Semua Sesi (${classArr.length})</button>
+          <button type="button" class="filter-pill" data-filter-session="1"><i class="ph ph-sun-dim"></i> Sesi 1 (Kelas 1-2) · ${sessStats['1'].rombel}</button>
+          <button type="button" class="filter-pill" data-filter-session="2"><i class="ph ph-sun"></i> Sesi 2 (Kelas 3-4) · ${sessStats['2'].rombel}</button>
+          <button type="button" class="filter-pill" data-filter-session="3"><i class="ph ph-sun-horizon"></i> Sesi 3 (Kelas 5-6) · ${sessStats['3'].rombel}</button>
         </div>
-        <div class="card-search-row">
-          <input type="text" id="input-search-ummi" placeholder="Cari nama rombel, guru pengampu, tingkat jilid/pasca, atau ruang..." class="form-input">
+        <div class="search-box">
+          <i class="ph ph-magnifying-glass"></i>
+          <input type="text" id="input-search-ummi" placeholder="Cari nama rombel, guru pengampu, tingkat jilid/pasca, atau ruang...">
         </div>
       </div>
       <div class="card">
@@ -199,7 +200,7 @@ const UMMIPages = {
           <table class="table">
             <thead>
               <tr>
-                <th class="text-center" style="width:48px">No</th>
+                <th class="text-center th-w45">No</th>
                 <th>Nama Rombel & Tempat</th>
                 <th>Sesi Pembelajaran</th>
                 <th>Tingkat</th>
@@ -1028,11 +1029,22 @@ async renderUmmiClasses(container) {
     const passedCount = examArr.filter(e => e.status === 'Lolos').length;
     const rejectedCount = examArr.filter(e => e.status === 'Ditolak').length;
     let activeFilter = 'all';
+    let examSearchQuery = '';
     const renderTable = (filter) => {
-      activeFilter = filter;
+      if (filter !== undefined) activeFilter = filter;
       const filtered = examArr.filter(e => {
-        if (filter === 'all') return true;
-        return e.status === filter;
+        if (activeFilter !== 'all' && e.status !== activeFilter) return false;
+        if (examSearchQuery) {
+          const sName = (e.studentName || '').toLowerCase();
+          const rName = (e.requestedByName || '').toLowerCase();
+          const exName = (e.examinerName || '').toLowerCase();
+          const cur = (e.currentLevel || '').toLowerCase();
+          const tgt = (e.targetLevel || '').toLowerCase();
+          if (!sName.includes(examSearchQuery) && !rName.includes(examSearchQuery) && !exName.includes(examSearchQuery) && !cur.includes(examSearchQuery) && !tgt.includes(examSearchQuery)) {
+            return false;
+          }
+        }
+        return true;
       });
       const rows = filtered.length ? filtered.map((e, idx) => {
         let badgeCls = 'badge-warning';
@@ -1121,12 +1133,16 @@ async renderUmmiClasses(container) {
         </div>
       </section>
       <div class="card toolbar-panel">
-        <div class="btn-group-wrap">
-          <button class="btn btn-outline btn-sm active" data-filter="all">Semua (${examArr.length})</button>
-          <button class="btn btn-outline btn-sm" data-filter="Menunggu ACC">Menunggu ACC (${pendingCount})</button>
-          <button class="btn btn-outline btn-sm" data-filter="Dijadwalkan">Dijadwalkan (${scheduledCount})</button>
-          <button class="btn btn-outline btn-sm" data-filter="Lolos">Lolos (${passedCount})</button>
-          <button class="btn btn-outline btn-sm" data-filter="Ditolak">Ditolak (${rejectedCount})</button>
+        <div class="filter-pills" id="exam-status-filter-pills">
+          <button type="button" class="filter-pill active" data-filter="all"><i class="ph ph-stack"></i> Semua (${examArr.length})</button>
+          <button type="button" class="filter-pill" data-filter="Menunggu ACC"><i class="ph ph-hourglass-high"></i> Menunggu ACC (${pendingCount})</button>
+          <button type="button" class="filter-pill" data-filter="Dijadwalkan"><i class="ph ph-calendar"></i> Dijadwalkan (${scheduledCount})</button>
+          <button type="button" class="filter-pill" data-filter="Lolos"><i class="ph ph-check-circle"></i> Lolos (${passedCount})</button>
+          <button type="button" class="filter-pill" data-filter="Ditolak"><i class="ph ph-x-circle"></i> Ditolak (${rejectedCount})</button>
+        </div>
+        <div class="search-box">
+          <i class="ph ph-magnifying-glass"></i>
+          <input type="text" id="input-search-exam" placeholder="Cari nama santri, guru pengaju, penguji, atau tingkat...">
         </div>
       </div>
       <div class="card">
@@ -1228,13 +1244,20 @@ async renderUmmiClasses(container) {
         </div>
       </div>
     `;
-    container.querySelectorAll('[data-filter]').forEach(btn => {
+    container.querySelectorAll('#exam-status-filter-pills [data-filter]').forEach(btn => {
       btn.onclick = () => {
-        container.querySelectorAll('[data-filter]').forEach(b => b.classList.remove('active'));
+        container.querySelectorAll('#exam-status-filter-pills [data-filter]').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         renderTable(btn.dataset.filter);
       };
     });
+    const searchExamInp = container.querySelector('#input-search-exam');
+    if (searchExamInp) {
+      searchExamInp.oninput = (e) => {
+        examSearchQuery = e.target.value.toLowerCase().trim();
+        renderTable();
+      };
+    }
     renderTable('all');
   },
   _openAccModal(target, guruUmmi, container) {
@@ -1496,24 +1519,24 @@ async renderUmmiClasses(container) {
     }).join('');
     const guruOptions = guruUmmi.map(g => `<option value="${g.id}">${AppConfig.escapeHtml(g.name)}</option>`).join('');
     container.innerHTML = `
-      <div class="stat-grid section-spacer">
-        <div class="stat-card">
-          <div class="stat-number">${plottingArr.length} Plotting</div>
-          <div class="stat-label">Total Ujian Tasmi & Munaqosyah</div>
+      <section class="card-grid section-spacer">
+        <div class="card stat-card">
+          <div class="stat-icon stat-icon--primary"><i class="ph ph-headphones"></i></div>
+          <div><p class="stat-value">${plottingArr.length}</p><p class="stat-label text-muted">Total Plotting Ujian</p></div>
         </div>
-        <div class="stat-card">
-          <div class="stat-number">${sessStats['1']} Santri</div>
-          <div class="stat-label">Sesi 1 · Kelas 1 & 2</div>
+        <div class="card stat-card">
+          <div class="stat-icon stat-icon--primary"><i class="ph ph-student"></i></div>
+          <div><p class="stat-value">${sessStats['1']}</p><p class="stat-label text-muted">Sesi 1 · Kls 1-2</p></div>
         </div>
-        <div class="stat-card">
-          <div class="stat-number">${sessStats['2']} Santri</div>
-          <div class="stat-label">Sesi 2 · Kelas 3 & 4</div>
+        <div class="card stat-card">
+          <div class="stat-icon stat-icon--warning"><i class="ph ph-users-three"></i></div>
+          <div><p class="stat-value">${sessStats['2']}</p><p class="stat-label text-muted">Sesi 2 · Kls 3-4</p></div>
         </div>
-        <div class="stat-card">
-          <div class="stat-number">${sessStats['3']} Santri</div>
-          <div class="stat-label">Sesi 3 · Kelas 5 & 6</div>
+        <div class="card stat-card">
+          <div class="stat-icon stat-icon--success"><i class="ph ph-graduation-cap"></i></div>
+          <div><p class="stat-value">${sessStats['3']}</p><p class="stat-label text-muted">Sesi 3 · Kls 5-6</p></div>
         </div>
-      </div>
+      </section>
       <div class="card toolbar-panel">
         <div class="toolbar-row">
           <div>
@@ -1523,13 +1546,14 @@ async renderUmmiClasses(container) {
           <button class="btn btn-primary" id="btn-add-tasmi-plot"><i class="ph ph-plus"></i> Buat Plotting Penguji Baru</button>
         </div>
         <div class="filter-pills" id="tasmi-session-filter-pills">
-          <button class="filter-pill active" data-filter-session="all">Semua Sesi (${plottingArr.length})</button>
-          <button class="filter-pill" data-filter-session="1">Sesi 1 (Kelas 1-2) · ${sessStats['1']}</button>
-          <button class="filter-pill" data-filter-session="2">Sesi 2 (Kelas 3-4) · ${sessStats['2']}</button>
-          <button class="filter-pill" data-filter-session="3">Sesi 3 (Kelas 5-6) · ${sessStats['3']}</button>
+          <button type="button" class="filter-pill active" data-filter-session="all"><i class="ph ph-stack"></i> Semua Sesi (${plottingArr.length})</button>
+          <button type="button" class="filter-pill" data-filter-session="1"><i class="ph ph-sun-dim"></i> Sesi 1 (Kelas 1-2) · ${sessStats['1']}</button>
+          <button type="button" class="filter-pill" data-filter-session="2"><i class="ph ph-sun"></i> Sesi 2 (Kelas 3-4) · ${sessStats['2']}</button>
+          <button type="button" class="filter-pill" data-filter-session="3"><i class="ph ph-sun-horizon"></i> Sesi 3 (Kelas 5-6) · ${sessStats['3']}</button>
         </div>
-        <div class="card-search-row">
-          <input type="text" id="input-search-tasmi" placeholder="Cari nama santri, guru penguji, kategori ujian, atau ruang..." class="form-input">
+        <div class="search-box">
+          <i class="ph ph-magnifying-glass"></i>
+          <input type="text" id="input-search-tasmi" placeholder="Cari nama santri, guru penguji, kategori ujian, atau ruang...">
         </div>
       </div>
       <div class="card">
@@ -1537,7 +1561,7 @@ async renderUmmiClasses(container) {
           <table class="table">
             <thead>
               <tr>
-                <th class="text-center" style="width:48px">No</th>
+                <th class="text-center th-w45">No</th>
                 <th>Santri & Kelas</th>
                 <th>Sesi</th>
                 <th>Kategori Ujian</th>
@@ -1595,11 +1619,11 @@ async renderUmmiClasses(container) {
                 </select>
               </div>
               <div class="form-row">
-                <div class="form-group" style="flex:1">
+                <div class="form-group flex-1">
                   <label>Tanggal Ujian</label>
                   <input type="date" id="tasmi-plot-date" required class="form-input">
                 </div>
-                <div class="form-group" style="flex:1">
+                <div class="form-group flex-1">
                   <label>Waktu / Jam Ujian</label>
                   <input type="text" id="tasmi-plot-time" required value="07.30 - 08.30 WIB" class="form-input">
                 </div>
@@ -1659,7 +1683,7 @@ async renderUmmiClasses(container) {
                 <textarea id="res-tasmi-notes" rows="3" required placeholder="Catatan evaluasi bacaan santri..." class="form-input"></textarea>
               </div>
               <div class="form-group">
-                <label class="checkbox-label" style="display:flex;align-items:center;gap:8px;cursor:pointer">
+                <label class="checkbox-label checkbox-label-inline">
                   <input type="checkbox" id="res-tasmi-promote">
                   <span>Naikkan tingkat santri ke <strong>Pasca Ummi</strong> (untuk lulusan Munaqosyah / tuntas seluruh jilid)</span>
                 </label>
