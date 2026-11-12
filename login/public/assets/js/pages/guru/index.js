@@ -2424,9 +2424,9 @@ btnCheckout.onclick = () => handlePresensi('out');
         const isSaved = Object.keys(attData).length > 0;
         const isPast = selectedDate < todayStr;
         const statusBadge = isSaved
-          ? `<span class="badge badge-success"><i class="ph ph-check-circle"></i> Sudah Diabsen (${isPast ? 'Mode Edit / Revisi' : 'Tercatat'})</span>`
+          ? '<span class="badge badge-success"><i class="ph ph-check-circle"></i> Sudah Diabsen</span>'
           : '<span class="badge badge-warning"><i class="ph ph-clock"></i> Belum Diabsen</span>';
-        const pastBadge = isPast ? '<span class="badge badge-info"><i class="ph ph-clock-counter-clockwise"></i> Tanggal Berlalu</span>' : '';
+        const pastBadge = isPast ? '<span class="badge badge-info"><i class="ph ph-clock-counter-clockwise"></i> Berlalu</span>' : '';
         const rows = studentArr.map((s, idx) => {
           const leave = activeLeaves[s.id];
           let defaultVal = 'H';
@@ -2490,9 +2490,11 @@ btnCheckout.onclick = () => handlePresensi('out');
 <button type="button" id="btn-att-today" class="btn btn-outline btn-xs att-btn-today"><i class="ph ph-calendar"></i> Hari Ini</button>
 </div>
 <div class="att-badge-box">
+<div class="att-status-pills">
 ${statusBadge}
 ${pastBadge}
-<button type="button" id="btn-toggle-leave-recap" class="btn btn-outline btn-xs att-btn-leave"><i class="ph ph-first-aid"></i> Izin (${(monthlyLeaves || []).length})</button>
+</div>
+<button type="button" id="btn-toggle-leave-recap" class="btn btn-outline btn-xs att-btn-leave"><i class="ph ph-first-aid"></i> <span class="att-leave-txt">Akumulasi </span>Izin (${(monthlyLeaves || []).length})</button>
 </div>
 </div>
 </div>
@@ -2537,7 +2539,12 @@ ${pastBadge}
         const recapSection = document.getElementById('section-leave-recap');
         if (toggleRecapBtn && recapSection) {
           toggleRecapBtn.onclick = () => {
-            recapSection.classList.toggle('hidden');
+            const isHidden = recapSection.classList.toggle('hidden');
+            if (isHidden) {
+              toggleRecapBtn.classList.remove('active');
+            } else {
+              toggleRecapBtn.classList.add('active');
+            }
           };
         }
         const stuList = document.getElementById('student-list-container');
@@ -2659,10 +2666,10 @@ ${pastBadge}
 <div class="att-control-row">
 <div class="att-date-box">
 <input type="month" id="att-selected-month" class="att-date-picker" value="${selectedMonth}" title="Pilih Bulan">
-<span class="badge badge-outline font-bold small">${totalEffectiveDays} Hari</span>
+<button type="button" id="btn-att-current-month" class="btn btn-outline btn-xs att-btn-today"><i class="ph ph-calendar"></i> Bulan Ini</button>
 </div>
 <div class="att-badge-box">
-<button type="button" id="btn-print-recap-pdf" class="btn btn-primary btn-xs att-btn-print"><i class="ph ph-printer"></i> Cetak PDF</button>
+<span class="badge badge-outline font-bold small"><i class="ph ph-calendar-check"></i> ${totalEffectiveDays} Hari Efektif</span>
 </div>
 </div>
 </div>
@@ -2700,6 +2707,13 @@ ${pastBadge}
         if (monthInput) {
           monthInput.onchange = (e) => {
             selectedMonth = e.target.value;
+            render();
+          };
+        }
+        const currMonthBtn = document.getElementById('btn-att-current-month');
+        if (currMonthBtn) {
+          currMonthBtn.onclick = () => {
+            selectedMonth = todayStr.slice(0, 7);
             render();
           };
         }
