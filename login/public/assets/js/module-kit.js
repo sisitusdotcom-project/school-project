@@ -284,17 +284,32 @@ const ModuleKit = {
           (Auth.currentAssignments || []).some((a) => a === 'WAKA_KESISWAAN' || a === 'STAF_KESISWAAN');
         if (!isKesiswaanOrAdmin) {
           const classes = await DB.getClasses();
-          const myClasses = Object.values(classes || {}).filter((c) => c.teacherId === uid || (Auth.currentAssignments || []).includes(`GURU_KELAS_${c.id.replace('CLASS_', '')}`));
-          if (myClasses.length) {
-            const myClassIds = new Set(myClasses.map((c) => c.id));
-            const allStudents = await DB.getAllStudents();
-            const myStudentIds = new Set(
-              Object.values(allStudents || {})
-                .filter((s) => myClassIds.has(s.classId))
-                .map((s) => s.id)
-            );
-            return all.filter((r) => myStudentIds.has(r.studentId));
-          }
+          const classList = DB.toArray(classes);
+          const myAssignments = Auth.currentAssignments || (Auth.userData && Auth.userData.assignments) || [];
+          const myClasses = classList.filter((c) => {
+            if (!c) return false;
+            if (c.teacherId && c.teacherId === uid) return true;
+            const cleanId = String(c.id || '').replace(/^CLASS_/i, '').toUpperCase();
+            const cName = String(c.name || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+            return myAssignments.some((a) => {
+              if (!a.startsWith('GURU_KELAS_')) return false;
+              const unit = a.replace('GURU_KELAS_', '').toUpperCase();
+              const cleanUnit = unit.replace(/[^A-Z0-9]/g, '');
+              if (unit === cleanId || cleanId.includes(unit) || unit.includes(cleanId)) return true;
+              if (cleanUnit && cName && (cName.includes(cleanUnit) || cleanUnit.includes(cName))) return true;
+              return false;
+            });
+          });
+          if (!myClasses.length) return [];
+          const myClassIds = new Set(myClasses.map((c) => c.id));
+          const allStudents = await DB.getAllStudents();
+          const studentList = DB.toArray(allStudents);
+          const myStudentIds = new Set(
+            studentList
+              .filter((s) => s && myClassIds.has(s.classId))
+              .map((s) => s.id)
+          );
+          return all.filter((r) => r && myStudentIds.has(r.studentId));
         }
       }
       if (!def.own || this.sees(def)) return all;

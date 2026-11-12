@@ -2477,7 +2477,7 @@ btnCheckout.onclick = () => handlePresensi('out');
         }).join('') || '<tr><td colspan="7" class="text-muted">Belum ada pengajuan izin siswa pada bulan ini.</td></tr>';
         container.innerHTML = `
 <div class="att-nav-bar">
-<a href="#/guru/student-attendance" class="btn btn-outline btn-sm att-back-btn"><i class="ph ph-arrow-left"></i> Kembali</a>
+<a href="#/guru/student-attendance" class="att-back-btn"><i class="ph ph-arrow-left"></i> Kembali</a>
 <div class="att-segmented-tabs">
 <button type="button" class="att-segment-btn active" data-tab-btn="daily"><i class="ph ph-calendar-check"></i> Presensi Harian</button>
 <button type="button" class="att-segment-btn" data-tab-btn="monthly"><i class="ph ph-chart-bar"></i> Rekap Bulanan</button>
@@ -2649,7 +2649,7 @@ ${pastBadge}
 </tr>`).join('');
         container.innerHTML = `
 <div class="att-nav-bar">
-<a href="#/guru/student-attendance" class="btn btn-outline btn-sm att-back-btn"><i class="ph ph-arrow-left"></i> Kembali</a>
+<a href="#/guru/student-attendance" class="att-back-btn"><i class="ph ph-arrow-left"></i> Kembali</a>
 <div class="att-segmented-tabs">
 <button type="button" class="att-segment-btn" data-tab-btn="daily"><i class="ph ph-calendar-check"></i> Presensi Harian</button>
 <button type="button" class="att-segment-btn active" data-tab-btn="monthly"><i class="ph ph-chart-bar"></i> Rekap Bulanan</button>
@@ -2659,7 +2659,7 @@ ${pastBadge}
 <div class="att-control-row">
 <div class="att-date-box">
 <input type="month" id="att-selected-month" class="att-date-picker" value="${selectedMonth}" title="Pilih Bulan">
-<span class="badge badge-outline font-bold small">${totalEffectiveDays} Hari Terabsen</span>
+<span class="badge badge-outline font-bold small">${totalEffectiveDays} Hari</span>
 </div>
 <div class="att-badge-box">
 <button type="button" id="btn-print-recap-pdf" class="btn btn-primary btn-xs att-btn-print"><i class="ph ph-printer"></i> Cetak PDF</button>
@@ -2740,7 +2740,7 @@ ${pastBadge}
             doc.setFont('helvetica', 'bold');
             doc.text(Auth.userData?.name || 'Wali Kelas', 40, finalY + 70);
             doc.text('Ustadz Furqon, SH.', 400, finalY + 70);
-            doc.save(`Rekap_Presensi_${cls.name.replace(/\s+/g, '_')}_${selectedMonth}.pdf`);
+            doc.save(`Rekap_Presensi_${String(cls?.name || 'Kelas').replace(/\s+/g, '_')}_${selectedMonth}.pdf`);
           };
         }
       }

@@ -27,7 +27,7 @@ const rombelSummary = classList.map((cls) => {
 const clsStudents = studentList.filter((s) => s.classId === cls.id);
 const lCount = clsStudents.filter((s) => s.gender === 'L').length;
 const pCount = clsStudents.filter((s) => s.gender === 'P').length;
-const teacher = userList.find((u) => u.id === cls.teacherId || (u.assignments && u.assignments.includes(`GURU_KELAS_${cls.id.replace('CLASS_', '')}`)));
+const teacher = userList.find((u) => u.id === cls.teacherId || (u.assignments && u.assignments.includes(`GURU_KELAS_${String(cls.id || '').replace('CLASS_', '')}`)));
 const teacherName = teacher ? teacher.name : '-';
 const fase = AppConfig.getClassPhase(cls);
 const total = clsStudents.length;
@@ -508,7 +508,7 @@ doc.save(`Laporan_Rombel_Detail_Musada_${todayStr.replace(/\s+/g, '_')}.pdf`);
       return dt.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
     };
     const getTeacherName = (cls) => {
-      const match = userList.find((u) => u.id === cls.teacherId || (u.assignments && u.assignments.includes(`GURU_KELAS_${cls.id.replace('CLASS_', '')}`)));
+      const match = userList.find((u) => u.id === cls.teacherId || (u.assignments && u.assignments.includes(`GURU_KELAS_${String(cls.id || '').replace('CLASS_', '')}`)));
       return match ? match.name : '-';
     };
     const renderView = async () => {
