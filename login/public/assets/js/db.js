@@ -43,6 +43,8 @@ const DB = {
   async _canManageClass(classId) {
     if (!classId || typeof Auth === 'undefined' || !Auth.currentUser) return true;
     if (this._currentUserIsAdmin()) return true;
+    const isKesiswaan = (Auth.currentAssignments || []).some((a) => a === 'WAKA_KESISWAAN' || a === 'STAF_KESISWAAN') || Auth.currentRole === AppConfig.ROLES.STUDENT_AFFAIRS;
+    if (isKesiswaan) return true;
     const classes = await this.getClasses();
     const cls = classes[classId] || null;
     return !!(cls && (cls.teacherId === Auth.currentUser.uid || (cls.subjectTeachers && Object.values(cls.subjectTeachers).includes(Auth.currentUser.uid))));
@@ -186,10 +188,10 @@ const DB = {
     const students = await this.getStudentsByClass(classId);
     const stuIds = new Set(Object.keys(students || {}));
     const leaves = [];
-    Object.values(val).forEach((l) => {
+    Object.entries(val).forEach(([id, l]) => {
       if (l && stuIds.has(l.studentId)) {
         if (!monthStr || (l.startDate && l.startDate.startsWith(monthStr))) {
-          leaves.push(l);
+          leaves.push({ id, ...l });
         }
       }
     });
@@ -281,6 +283,67 @@ const DB = {
     const normalized = this._serializeStudentAttendance(data);
     if (!Object.keys(normalized).length) return;
     await db.ref(`student_attendance_daily/${dateStr}/${classId}`).update(normalized);
+  },
+  async getMonthlyStudentAttendance(monthStr, classId = null) {
+    if (!isDBReady() || !monthStr) return {};
+    const snap = await db.ref('student_attendance_daily')
+      .orderByKey()
+      .startAt(`${monthStr}-01`)
+      .endAt(`${monthStr}-31`)
+      .once('value');
+    const val = snap.val() || {};
+    if (!classId) return val;
+    const result = {};
+    Object.entries(val).forEach(([date, classMap]) => {
+      if (classMap && classMap[classId]) {
+        result[date] = classMap[classId];
+      }
+    });
+    return result;
+  },
+  async syncLeaveToAttendance(leaveData) {
+    if (!isDBReady() || !leaveData || !leaveData.studentId || !leaveData.startDate) return;
+    const student = await this.getStudent(leaveData.studentId);
+    const classId = student?.classId || leaveData.classId;
+    if (!classId) return;
+    const status = leaveData.status;
+    let targetAtt = null;
+    if (status === 'Ditolak') {
+      targetAtt = 'A';
+    } else if (status === 'Disetujui') {
+      targetAtt = (leaveData.type === 'Sakit') ? 'S' : 'I';
+    }
+    if (!targetAtt) return;
+    const start = new Date(leaveData.startDate);
+    const end = leaveData.endDate ? new Date(leaveData.endDate) : new Date(leaveData.startDate);
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) return;
+    const updates = {};
+    const cur = new Date(start);
+    while (cur <= end) {
+      const dStr = cur.toISOString().slice(0, 10);
+      updates[`student_attendance_daily/${dStr}/${classId}/${leaveData.studentId}`] = targetAtt;
+      cur.setDate(cur.getDate() + 1);
+    }
+    if (Object.keys(updates).length > 0) {
+      await db.ref().update(updates);
+    }
+  },
+  async reviewStudentLeave(leaveId, newStatus, reviewerNote = '') {
+    if (!isDBReady() || !leaveId || !newStatus) return;
+    const snap = await db.ref(`student_affairs/leaves/${leaveId}`).once('value');
+    const current = snap.val();
+    if (!current) throw new Error('Data perizinan tidak ditemukan.');
+    const reviewer = (Auth.userData && Auth.userData.name) || Auth.currentUser?.uid || 'Petugas';
+    const updates = {
+      status: newStatus,
+      reviewedBy: reviewer,
+      reviewedAt: new Date().toISOString(),
+      updatedAt: firebase.database.ServerValue.TIMESTAMP,
+      updatedBy: Auth.currentUser ? Auth.currentUser.uid : ''
+    };
+    if (reviewerNote) updates.reviewerNote = reviewerNote;
+    await db.ref(`student_affairs/leaves/${leaveId}`).update(updates);
+    await this.syncLeaveToAttendance({ ...current, ...updates, id: leaveId });
   },
   async getCharacters() {
     if (!isDBReady()) return {};

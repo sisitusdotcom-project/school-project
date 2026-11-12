@@ -101,6 +101,9 @@ const ModuleKit = {
     return Object.prototype.hasOwnProperty.call(this.defs, path);
   },
   hasUnit(unit) {
+    if (unit === 'WALI_KELAS') {
+      return (Auth.currentAssignments || []).some((a) => a.startsWith('GURU_KELAS_') || a === 'WALI_KELAS') || !!(Auth.userData && Auth.userData.isWaliKelas);
+    }
     return (Auth.currentAssignments || []).includes(unit);
   },
   sees(def) {
@@ -274,6 +277,26 @@ const ModuleKit = {
         const childIds = Object.keys(myStudents || {});
         return all.filter((r) => childIds.includes(r.studentId) || r.createdBy === uid);
       }
+      if (def.node === 'student_affairs/leaves') {
+        const isKesiswaanOrAdmin = Auth.currentRole === AppConfig.ROLES.ADMIN ||
+          Auth.currentRole === AppConfig.ROLES.KEPSEK ||
+          Auth.currentRole === AppConfig.ROLES.STUDENT_AFFAIRS ||
+          (Auth.currentAssignments || []).some((a) => a === 'WAKA_KESISWAAN' || a === 'STAF_KESISWAAN');
+        if (!isKesiswaanOrAdmin) {
+          const classes = await DB.getClasses();
+          const myClasses = Object.values(classes || {}).filter((c) => c.teacherId === uid || (Auth.currentAssignments || []).includes(`GURU_KELAS_${c.id.replace('CLASS_', '')}`));
+          if (myClasses.length) {
+            const myClassIds = new Set(myClasses.map((c) => c.id));
+            const allStudents = await DB.getAllStudents();
+            const myStudentIds = new Set(
+              Object.values(allStudents || {})
+                .filter((s) => myClassIds.has(s.classId))
+                .map((s) => s.id)
+            );
+            return all.filter((r) => myStudentIds.has(r.studentId));
+          }
+        }
+      }
       if (!def.own || this.sees(def)) return all;
       const cleanUser = (Auth.userData?.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
       const dir = await DB.getPersonnelDirectory();
@@ -370,6 +393,10 @@ const ModuleKit = {
           ${listFields.map((f) => `<td${f.type === 'money' ? ' class="text-right"' : ''}>${this.cell(def, f, row, refs)}</td>`).join('')}
           ${writable ? `<td class="action-cell text-right">
             ${(def.node === 'student_affairs/achievements' || def.canPrintCertificate) ? `<a href="print.html?type=certificate&id=${row.id}" target="_blank" class="btn btn-sm btn-primary" title="Cetak Sertifikat Apresiasi Resmi"><i class="ph ph-printer"></i></a>` : ''}
+            ${(def.node === 'student_affairs/leaves' && this.isApprover(def) && row.status === 'Diajukan') ? `
+              <button type="button" class="btn btn-sm btn-success" data-leave-approve="${row.id}" title="Setujui Perizinan"><i class="ph ph-check"></i></button>
+              <button type="button" class="btn btn-sm btn-danger" data-leave-reject="${row.id}" title="Tolak Perizinan (Otomatis Alpa)"><i class="ph ph-x"></i></button>
+            ` : ''}
             ${(!isOrtu || row.status === 'Diajukan') ? `<button type="button" class="btn btn-sm btn-outline" data-mk-edit="${row.id}" title="Ubah"><i class="ph ph-pencil-simple"></i></button>` : ''}
             ${(canDel && (!isOrtu || row.status === 'Diajukan')) ? `<button type="button" class="btn btn-sm btn-danger" data-mk-del="${row.id}" title="Hapus"><i class="ph ph-trash"></i></button>` : ''}
           </td>` : ''}
@@ -748,6 +775,37 @@ const ModuleKit = {
     container.querySelector('#mk-close').addEventListener('click', closeForm);
     container.querySelector('#mk-cancel').addEventListener('click', closeForm);
     body.addEventListener('click', async (e) => {
+      const approveBtn = e.target.closest('[data-leave-approve]');
+      if (approveBtn) {
+        const id = approveBtn.dataset.leaveApprove;
+        approveBtn.disabled = true;
+        try {
+          await DB.reviewStudentLeave(id, 'Disetujui');
+          const target = state.rows.find((r) => r.id === id);
+          if (target) target.status = 'Disetujui';
+          paint();
+        } catch (err) {
+          alert('Gagal menyetujui perizinan: ' + err.message);
+          approveBtn.disabled = false;
+        }
+        return;
+      }
+      const rejectBtn = e.target.closest('[data-leave-reject]');
+      if (rejectBtn) {
+        const id = rejectBtn.dataset.leaveReject;
+        if (!confirm('Yakin menolak perizinan siswa ini? Penolakan otomatis menandai kehadiran siswa sebagai Tidak Hadir / Alpa (A).')) return;
+        rejectBtn.disabled = true;
+        try {
+          await DB.reviewStudentLeave(id, 'Ditolak');
+          const target = state.rows.find((r) => r.id === id);
+          if (target) target.status = 'Ditolak';
+          paint();
+        } catch (err) {
+          alert('Gagal menolak perizinan: ' + err.message);
+          rejectBtn.disabled = false;
+        }
+        return;
+      }
       const editBtn = e.target.closest('[data-mk-edit]');
       const delBtn = e.target.closest('[data-mk-del]');
       if (editBtn) {
@@ -887,6 +945,9 @@ const ModuleKit = {
           const syncData = { ...payload, ...derived, id: recordId, updatedAt: stamp };
           await db.ref(`students/${payload.studentId}/achievements/${recordId}`).set(syncData).catch(() => {});
           await db.ref(`users/${payload.studentId}/achievements/${recordId}`).set(syncData).catch(() => {});
+        }
+        if (def.node === 'student_affairs/leaves') {
+          await DB.syncLeaveToAttendance({ ...payload, ...derived, id: recordId });
         }
         if (def.after) await def.after({ ...payload, ...derived }, ctx, recordId);
         this.audit(state.editing ? 'update' : 'create', def.node, recordId);

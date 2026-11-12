@@ -101,13 +101,14 @@ const App = {
       if (guruAllowed.includes(path)) return true;
     }
     if (role === AppConfig.ROLES.KEPSEK) {
-      const kepsekPrefixes = ['#/dashboard', '#/attendance', '#/admin/attendance', '#/kepsek/', '#/curriculum', '#/student-affairs', '#/finance', '#/personnel', '#/facilities', '#/komite', '#/guru/portfolio', '#/tendik/portfolio', '#/gtk/official-travel'];
+      const kepsekPrefixes = ['#/dashboard', '#/attendance', '#/admin/attendance', '#/kepsek/', '#/curriculum', '#/student-affairs', '#/finance', '#/personnel', '#/facilities', '#/komite', '#/guru/portfolio', '#/tendik/portfolio', '#/gtk/official-travel', '#/guru/student-attendance'];
       if (kepsekPrefixes.some(p => path === p || path.startsWith(p + '/'))) return true;
     }
     if (role === AppConfig.ROLES.CURRICULUM || assignments.includes('WAKA_KURIKULUM') || assignments.includes('STAF_KURIKULUM')) {
       if (path === '#/curriculum' || path.startsWith('#/curriculum/')) return true;
     }
     if (role === AppConfig.ROLES.STUDENT_AFFAIRS || assignments.includes('WAKA_KESISWAAN') || assignments.includes('STAF_KESISWAAN')) {
+      if (path === '#/guru/student-attendance') return true;
       if (path === '#/student-affairs' || path.startsWith('#/student-affairs/')) return true;
     }
     if (role === AppConfig.ROLES.PERSONNEL || assignments.includes('WAKA_HUMAS_PERSONALIA') || assignments.includes('STAF_HUMAS_PERSONALIA')) {

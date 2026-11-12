@@ -3,6 +3,18 @@ const Auth = {
   currentRole: null,
   currentAssignments: [],
   userData: null,
+  hasRole(role) {
+    if (!role) return false;
+    return this.currentRole === role || (this.userData && this.userData.role === role);
+  },
+  hasUnit(unit) {
+    if (!unit) return false;
+    const assignments = this.currentAssignments || (this.userData && this.userData.assignments) || [];
+    if (unit === 'WALI_KELAS') {
+      return assignments.some((a) => a.startsWith('GURU_KELAS_') || a === 'WALI_KELAS');
+    }
+    return assignments.includes(unit);
+  },
   init() {
     if (!auth) return;
     auth.onAuthStateChanged(async (user) => {

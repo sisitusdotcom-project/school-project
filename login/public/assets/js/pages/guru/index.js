@@ -2339,64 +2339,115 @@ btn.innerHTML = type === 'in' ? '<i class="ph ph-sign-in"></i> Presensi Datang' 
 btnCheckin.onclick = () => handlePresensi('in');
 btnCheckout.onclick = () => handlePresensi('out');
 },
-async renderStudentAttendance(container) {
-Router.setTitle('Absensi Siswa', 'Pilih kelas untuk mengabsen siswa hari ini.');
-const classes = await DB.getClasses();
-const classArr = DB.toArray(classes).filter(c => c.teacherId === Auth.currentUser.uid);
-if (!classArr.length) {
-container.innerHTML = `<div class="card"><p class="text-muted">Anda belum ditugaskan sebagai wali kelas.</p></div>`;
-return;
-}
-const cards = classArr.map(c => `
+  async renderStudentAttendance(container) {
+    Router.setTitle('Absensi Siswa', 'Pilih kelas untuk mengabsen siswa hari ini.');
+    const classes = await DB.getClasses();
+    const userRole = Auth.currentRole || (Auth.userData && Auth.userData.role);
+    const userAssignments = Auth.currentAssignments || (Auth.userData && Auth.userData.assignments) || [];
+    const canSeeAll = userRole === 'ADMIN' || userRole === 'KEPSEK' || userRole === 'STUDENT_AFFAIRS' || userAssignments.includes('WAKA_KESISWAAN') || userAssignments.includes('STAF_KESISWAAN');
+    const myUid = Auth.currentUser ? Auth.currentUser.uid : '';
+    const classArr = DB.toArray(classes).filter(c => {
+      if (canSeeAll) return true;
+      if (c.teacherId && c.teacherId === myUid) return true;
+      const cleanId = (c.id || '').replace(/^CLASS_/i, '').toUpperCase();
+      const cName = (c.name || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+      return userAssignments.some(a => {
+        if (!a.startsWith('GURU_KELAS_')) return false;
+        const unit = a.replace('GURU_KELAS_', '').toUpperCase();
+        const cleanUnit = unit.replace(/[^A-Z0-9]/g, '');
+        if (unit === cleanId || cleanId.includes(unit) || unit.includes(cleanId)) return true;
+        if (cleanUnit && cName && (cName.includes(cleanUnit) || cleanUnit.includes(cName))) return true;
+        return false;
+      });
+    });
+    if (!classArr.length) {
+      container.innerHTML = '<div class="card"><p class="text-muted">Anda belum ditugaskan sebagai wali kelas.</p></div>';
+      return;
+    }
+    const cards = classArr.map(c => `
 <a href="#/guru/student-attendance/${c.id}" class="card class-card attendance-class-card">
 <div>
 <h3 class="card-title attendance-class-title">${AppConfig.escapeHtml(c.name)}</h3>
-<p class="text-muted attendance-class-subtitle">Input Absensi Kelas</p>
+<p class="text-muted attendance-class-subtitle">Input & Rekap Absensi Kelas</p>
 </div>
 <i class="ph ph-caret-right attendance-class-caret"></i>
 </a>
 `).join('');
-container.innerHTML = `<div class="card-grid">${cards}</div>`;
-},
-async renderStudentAttendanceInput(container, classId) {
-const classes = await DB.getClasses();
-const cls = classes[classId];
-if (!cls) {
-container.innerHTML = '<div class="card"><p class="error-text">Kelas tidak ditemukan.</p></div>';
-return;
-}
-const today = new Date();
-const dateStr = AppConfig.getLocalDateStr ? AppConfig.getLocalDateStr(today) : today.toISOString().slice(0, 10);
-const dateDisplay = today.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-Router.setTitle(`Absensi ${AppConfig.escapeHtml(cls.name)}`, dateDisplay);
-const studentData = await DB.getStudentsByClass(classId);
-const studentArr = DB.toArray(studentData).sort((a, b) => a.name.localeCompare(b.name));
-if (!studentArr.length) {
-container.innerHTML = `<div class="card"><p class="text-muted">Belum ada siswa di kelas ini.</p></div>`;
-return;
-}
-const currentMonth = dateStr.slice(0, 7);
-const [attData, monthlyLeaves] = await Promise.all([
-DB.getDailyStudentAttendance(dateStr, classId),
-DB.getClassMonthlyLeaves(classId, currentMonth)
-]);
-const todayLeaves = {};
-(monthlyLeaves || []).forEach((l) => {
-if (l.startDate <= dateStr && (!l.endDate || l.endDate >= dateStr) && l.status !== 'Ditolak') {
-todayLeaves[l.studentId] = l;
-}
-});
-const rows = studentArr.map((s, idx) => {
-const hasOrtuLeave = todayLeaves[s.id];
-const defaultVal = hasOrtuLeave ? (hasOrtuLeave.type === 'Sakit' ? 'S' : 'I') : 'H';
-const currentAtt = attData[s.id] || defaultVal;
-const leaveBadge = hasOrtuLeave
-? `<span class="badge badge-success" style="font-size:11px; margin-left:6px;"><i class="ph ph-envelope-simple"></i> Izin Ortu (${AppConfig.escapeHtml(hasOrtuLeave.type)})</span>`
-: '';
-return `
+    container.innerHTML = `<div class="card-grid">${cards}</div>`;
+  },
+  async renderStudentAttendanceInput(container, classId) {
+    const classes = await DB.getClasses();
+    const cls = classes[classId];
+    if (!cls) {
+      container.innerHTML = '<div class="card"><p class="error-text">Kelas tidak ditemukan.</p></div>';
+      return;
+    }
+    const studentData = await DB.getStudentsByClass(classId);
+    const studentArr = DB.toArray(studentData).sort((a, b) => a.name.localeCompare(b.name));
+    if (!studentArr.length) {
+      container.innerHTML = '<div class="card"><p class="text-muted">Belum ada siswa di kelas ini.</p></div>';
+      return;
+    }
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    const todayStr = AppConfig.getLocalDateStr ? AppConfig.getLocalDateStr(now) : `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+    const urlParams = new URLSearchParams(window.location.hash.includes('?') ? window.location.hash.split('?')[1] : '');
+    let selectedDate = urlParams.get('date') || todayStr;
+    let activeTab = urlParams.get('tab') || 'daily';
+    let selectedMonth = urlParams.get('month') || selectedDate.slice(0, 7);
+    const dateDisplay = (dStr) => {
+      if (!dStr) return '-';
+      const [y, m, d] = dStr.split('-');
+      const dt = new Date(Number(y), Number(m) - 1, Number(d));
+      return dt.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    };
+    const monthDisplay = (mStr) => {
+      if (!mStr) return '-';
+      const [y, m] = mStr.split('-');
+      const dt = new Date(Number(y), Number(m) - 1, 1);
+      return dt.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+    };
+    const render = async () => {
+      Router.setTitle(`Absensi ${AppConfig.escapeHtml(cls.name)}`, activeTab === 'daily' ? dateDisplay(selectedDate) : `Rekap Bulan ${monthDisplay(selectedMonth)}`);
+      if (activeTab === 'daily') {
+        const currentMonth = selectedDate.slice(0, 7);
+        const [attData, monthlyLeaves] = await Promise.all([
+          DB.getDailyStudentAttendance(selectedDate, classId),
+          DB.getClassMonthlyLeaves(classId, currentMonth)
+        ]);
+        const activeLeaves = {};
+        (monthlyLeaves || []).forEach((l) => {
+          if (l.startDate <= selectedDate && (!l.endDate || l.endDate >= selectedDate)) {
+            activeLeaves[l.studentId] = l;
+          }
+        });
+        const isSaved = Object.keys(attData).length > 0;
+        const isPast = selectedDate < todayStr;
+        const statusBadge = isSaved
+          ? `<span class="badge badge-success"><i class="ph ph-check-circle"></i> Sudah Diabsen (${isPast ? 'Mode Edit / Revisi' : 'Tercatat'})</span>`
+          : '<span class="badge badge-warning"><i class="ph ph-clock"></i> Belum Diabsen</span>';
+        const pastBadge = isPast ? '<span class="badge badge-info"><i class="ph ph-clock-counter-clockwise"></i> Tanggal Berlalu</span>' : '';
+        const rows = studentArr.map((s, idx) => {
+          const leave = activeLeaves[s.id];
+          let defaultVal = 'H';
+          let leaveBadgeHtml = '';
+          if (leave) {
+            if (leave.status === 'Disetujui') {
+              defaultVal = leave.type === 'Sakit' ? 'S' : 'I';
+              leaveBadgeHtml = `<span class="badge badge-success student-att-leave-badge"><i class="ph ph-check"></i> Izin Disetujui (${AppConfig.escapeHtml(leave.type)})</span>`;
+            } else if (leave.status === 'Ditolak') {
+              defaultVal = 'A';
+              leaveBadgeHtml = `<span class="badge badge-danger student-att-leave-badge"><i class="ph ph-x"></i> Izin Ditolak (Alpa)</span>`;
+            } else {
+              defaultVal = leave.type === 'Sakit' ? 'S' : 'I';
+              leaveBadgeHtml = `<span class="badge badge-warning student-att-leave-badge"><i class="ph ph-clock"></i> Izin Diajukan (${AppConfig.escapeHtml(leave.type)})</span><span class="student-att-leave-action-group"><button type="button" class="btn btn-xs btn-success btn-quick-approve-leave" data-leave-id="${leave.id}"><i class="ph ph-check"></i> Setujui</button><button type="button" class="btn btn-xs btn-danger btn-quick-reject-leave" data-leave-id="${leave.id}"><i class="ph ph-x"></i> Tolak</button></span>`;
+            }
+          }
+          const currentAtt = attData[s.id] || defaultVal;
+          return `
 <div class="card student-att-row">
 <div class="student-att-col">
-<p class="student-att-name">${idx + 1}. ${AppConfig.escapeHtml(s.name)}${leaveBadge}</p>
+<p class="student-att-name">${idx + 1}. ${AppConfig.escapeHtml(s.name)}${leaveBadgeHtml}</p>
 </div>
 <div class="att-toggle-group" data-stu="${s.id}">
 <button type="button" class="att-btn ${currentAtt === 'H' ? 'active-h' : ''}" data-val="H">H</button>
@@ -2404,107 +2455,304 @@ return `
 <button type="button" class="att-btn ${currentAtt === 'I' ? 'active-i' : ''}" data-val="I">I</button>
 <button type="button" class="att-btn ${currentAtt === 'A' ? 'active-a' : ''}" data-val="A">A</button>
 </div>
-</div>
-`;
-}).join('');
-const sakitTotal = (monthlyLeaves || []).filter((l) => l.type === 'Sakit').length;
-const izinTotal = (monthlyLeaves || []).filter((l) => l.type !== 'Sakit').length;
-const leaveRows = (monthlyLeaves || []).map((l) => {
-const st = studentArr.find((x) => x.id === l.studentId);
-const proofBtn = l.document
-? `<button type="button" class="btn btn-xs btn-outline mk-preview-btn" data-preview-url="${AppConfig.escapeHtml(l.document)}" data-preview-title="Surat Izin ${st ? st.name : ''}"><i class="ph ph-file-text"></i> Bukti</button>`
-: '-';
-return `<tr>
+</div>`;
+        }).join('');
+        const leaveRows = (monthlyLeaves || []).map((l) => {
+          const st = studentArr.find((x) => x.id === l.studentId);
+          const proofBtn = l.document
+            ? `<button type="button" class="btn btn-xs btn-outline mk-preview-btn" data-preview-url="${AppConfig.escapeHtml(l.document)}" data-preview-title="Surat Izin ${st ? AppConfig.escapeHtml(st.name) : ''}"><i class="ph ph-file-text"></i> Bukti</button>`
+            : '-';
+          const actionBtns = l.status === 'Diajukan'
+            ? `<div class="student-att-leave-action-group"><button type="button" class="btn btn-xs btn-success btn-quick-approve-leave" data-leave-id="${l.id}"><i class="ph ph-check"></i></button><button type="button" class="btn btn-xs btn-danger btn-quick-reject-leave" data-leave-id="${l.id}"><i class="ph ph-x"></i></button></div>`
+            : '-';
+          return `<tr>
 <td><strong>${st ? AppConfig.escapeHtml(st.name) : l.studentId}</strong></td>
 <td>${l.startDate} s/d ${l.endDate || l.startDate}</td>
 <td><span class="badge ${l.type === 'Sakit' ? 'badge-danger' : 'badge-warning'}">${AppConfig.escapeHtml(l.type || 'Izin')}</span></td>
 <td>${AppConfig.escapeHtml(l.reason || '-')}</td>
 <td>${proofBtn}</td>
-<td><span class="badge ${l.status === 'Disetujui' ? 'badge-success' : 'badge-warning'}">${AppConfig.escapeHtml(l.status || 'Diajukan')}</span></td>
+<td><span class="badge ${l.status === 'Disetujui' ? 'badge-success' : (l.status === 'Ditolak' ? 'badge-danger' : 'badge-warning')}">${AppConfig.escapeHtml(l.status || 'Diajukan')}</span></td>
+<td class="text-right">${actionBtns}</td>
 </tr>`;
-}).join('') || '<tr><td colspan="6" class="text-muted">Belum ada pengajuan izin siswa pada bulan ini.</td></tr>';
-container.innerHTML = `
-<div class="attendance-back-bar" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-<a href="#/guru/student-attendance" class="btn btn-outline"><i class="ph ph-arrow-left"></i> Kembali</a>
-<button type="button" id="btn-toggle-leave-recap" class="btn btn-outline btn-sm"><i class="ph ph-calendar"></i> Akumulasi Izin Bulan Ini (${(monthlyLeaves || []).length})</button>
+        }).join('') || '<tr><td colspan="7" class="text-muted">Belum ada pengajuan izin siswa pada bulan ini.</td></tr>';
+        container.innerHTML = `
+<div class="att-nav-bar">
+<a href="#/guru/student-attendance" class="btn btn-outline btn-sm att-back-btn"><i class="ph ph-arrow-left"></i> Kembali</a>
+<div class="att-segmented-tabs">
+<button type="button" class="att-segment-btn active" data-tab-btn="daily"><i class="ph ph-calendar-check"></i> Presensi Harian</button>
+<button type="button" class="att-segment-btn" data-tab-btn="monthly"><i class="ph ph-chart-bar"></i> Rekap Bulanan</button>
 </div>
-<section id="section-leave-recap" class="card section-block" style="display:none; margin-top:12px;">
+</div>
+<div class="card att-control-card">
+<div class="att-control-row">
+<div class="att-date-box">
+<input type="date" id="att-selected-date" class="att-date-picker" value="${selectedDate}" title="Pilih Tanggal Presensi">
+<button type="button" id="btn-att-today" class="btn btn-outline btn-xs att-btn-today"><i class="ph ph-calendar"></i> Hari Ini</button>
+</div>
+<div class="att-badge-box">
+${statusBadge}
+${pastBadge}
+<button type="button" id="btn-toggle-leave-recap" class="btn btn-outline btn-xs att-btn-leave"><i class="ph ph-first-aid"></i> Izin (${(monthlyLeaves || []).length})</button>
+</div>
+</div>
+</div>
+<section id="section-leave-recap" class="card section-block recap-leave-section hidden">
 <div class="card-header mk-header">
 <h3 class="card-title"><i class="ph ph-first-aid"></i> Akumulasi Perizinan Siswa (Bulan ${currentMonth})</h3>
 </div>
 <div class="card-body">
-<div class="card-grid section-spacer" style="margin-bottom:12px;">
-<div class="card stat-card"><div class="stat-icon stat-icon--primary"><i class="ph ph-calendar-x"></i></div><div><p class="stat-value">${(monthlyLeaves || []).length}</p><p class="stat-label text-muted">Total Izin/Sakit</p></div></div>
-<div class="card stat-card"><div class="stat-icon stat-icon--danger"><i class="ph ph-first-aid"></i></div><div><p class="stat-value">${sakitTotal}</p><p class="stat-label text-muted">Sakit</p></div></div>
-<div class="card stat-card"><div class="stat-icon stat-icon--warning"><i class="ph ph-clock"></i></div><div><p class="stat-value">${izinTotal}</p><p class="stat-label text-muted">Izin Keperluan</p></div></div>
-</div>
-<div class="table-wrap">
+<div class="table-wrap recap-leave-table-wrap">
 <table class="table">
-<thead><tr><th>Nama Siswa</th><th>Rentang Tanggal</th><th>Jenis</th><th>Keterangan</th><th>Bukti Surat</th><th>Status</th></tr></thead>
+<thead><tr><th>Nama Siswa</th><th>Rentang Tanggal</th><th>Jenis</th><th>Keterangan</th><th>Bukti</th><th>Status</th><th class="text-right">Aksi</th></tr></thead>
 <tbody>${leaveRows}</tbody>
 </table>
 </div>
 </div>
 </section>
-<div class="card attendance-info-banner" style="margin-top:12px;">
-<p>Siswa yang telah diajukan izin oleh wali murid otomatis terdeteksi. Ketuk inisial untuk mengubah status manual jika diperlukan: <strong>H</strong> (Hadir), <strong>S</strong> (Sakit), <strong>I</strong> (Izin), <strong>A</strong> (Alpa).</p>
+<div class="att-hint-banner">
+<i class="ph ph-info"></i>
+<span>Status: <strong>H</strong>adir, <strong>S</strong>akit, <strong>I</strong>zin, <strong>A</strong>lpa. Disimpan otomatis saat menekan Simpan Absensi.</span>
 </div>
-<div id="student-list-container">
-${rows}
-</div>
+<div id="student-list-container">${rows}</div>
 <div class="attendance-save-wrapper">
 <button id="btn-save-att" class="btn btn-primary btn-save-attendance">
-<i class="ph ph-floppy-disk"></i> Simpan Absensi
+<i class="ph ph-floppy-disk"></i> Simpan Absensi (${selectedDate})
 </button>
+</div>`;
+        const dateInput = document.getElementById('att-selected-date');
+        if (dateInput) {
+          dateInput.onchange = (e) => {
+            selectedDate = e.target.value;
+            render();
+          };
+        }
+        const todayBtn = document.getElementById('btn-att-today');
+        if (todayBtn) {
+          todayBtn.onclick = () => {
+            selectedDate = todayStr;
+            render();
+          };
+        }
+        const toggleRecapBtn = document.getElementById('btn-toggle-leave-recap');
+        const recapSection = document.getElementById('section-leave-recap');
+        if (toggleRecapBtn && recapSection) {
+          toggleRecapBtn.onclick = () => {
+            recapSection.classList.toggle('hidden');
+          };
+        }
+        const stuList = document.getElementById('student-list-container');
+        if (stuList) {
+          stuList.onclick = (e) => {
+            if (e.target.classList.contains('att-btn')) {
+              const group = e.target.closest('.att-toggle-group');
+              group.querySelectorAll('.att-btn').forEach(b => {
+                b.classList.remove('active-h', 'active-s', 'active-i', 'active-a');
+              });
+              const val = e.target.dataset.val;
+              e.target.classList.add(`active-${val.toLowerCase()}`);
+            }
+          };
+        }
+        container.querySelectorAll('.btn-quick-approve-leave').forEach((btn) => {
+          btn.onclick = async () => {
+            const lId = btn.dataset.leaveId;
+            btn.disabled = true;
+            try {
+              await DB.reviewStudentLeave(lId, 'Disetujui', 'Disetujui oleh Wali Kelas / Kesiswaan');
+              await render();
+            } catch (err) {
+              alert('Gagal menyetujui izin: ' + err.message);
+              btn.disabled = false;
+            }
+          };
+        });
+        container.querySelectorAll('.btn-quick-reject-leave').forEach((btn) => {
+          btn.onclick = async () => {
+            const lId = btn.dataset.leaveId;
+            if (!confirm('Tolak perizinan ini? Penolakan akan otomatis mengubah absensi siswa menjadi Alpa (A).')) return;
+            btn.disabled = true;
+            try {
+              await DB.reviewStudentLeave(lId, 'Ditolak', 'Ditolak oleh Wali Kelas / Kesiswaan');
+              await render();
+            } catch (err) {
+              alert('Gagal menolak izin: ' + err.message);
+              btn.disabled = false;
+            }
+          };
+        });
+        const saveBtn = document.getElementById('btn-save-att');
+        if (saveBtn) {
+          saveBtn.onclick = async () => {
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Menyimpan...';
+            const payload = {};
+            document.querySelectorAll('.att-toggle-group').forEach(group => {
+              const stuId = group.dataset.stu;
+              const activeBtn = group.querySelector('.att-btn[class*="active-"]');
+              if (activeBtn) payload[stuId] = activeBtn.dataset.val;
+            });
+            try {
+              await DB.saveDailyStudentAttendance(selectedDate, classId, payload);
+              saveBtn.innerHTML = '<i class="ph ph-check"></i> Berhasil Disimpan';
+              saveBtn.classList.add('saved');
+              setTimeout(() => {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = `<i class="ph ph-floppy-disk"></i> Simpan Absensi (${selectedDate})`;
+                saveBtn.classList.remove('saved');
+                render();
+              }, 1500);
+            } catch (err) {
+              alert('Gagal menyimpan absensi: ' + err.message);
+              saveBtn.disabled = false;
+              saveBtn.innerHTML = `<i class="ph ph-floppy-disk"></i> Simpan Absensi (${selectedDate})`;
+            }
+          };
+        }
+      } else {
+        const [monthlyAttMap, monthlyLeaves, settings] = await Promise.all([
+          DB.getMonthlyStudentAttendance(selectedMonth, classId),
+          DB.getClassMonthlyLeaves(classId, selectedMonth),
+          DB.getSettings().catch(() => ({}))
+        ]);
+        const recordedDates = Object.keys(monthlyAttMap).sort();
+        const totalEffectiveDays = recordedDates.length;
+        let totalH = 0, totalS = 0, totalI = 0, totalA = 0;
+        const studentStats = studentArr.map((s) => {
+          let h = 0, sCount = 0, iCount = 0, a = 0;
+          recordedDates.forEach((d) => {
+            const dayAtt = monthlyAttMap[d] || {};
+            const st = dayAtt[s.id];
+            if (st === 'H') h++;
+            else if (st === 'S') sCount++;
+            else if (st === 'I') iCount++;
+            else if (st === 'A') a++;
+          });
+          totalH += h;
+          totalS += sCount;
+          totalI += iCount;
+          totalA += a;
+          const pct = totalEffectiveDays > 0 ? Math.round((h / totalEffectiveDays) * 100) : 0;
+          return { ...s, h, sCount, iCount, a, pct };
+        });
+        const totalAllAtt = totalH + totalS + totalI + totalA;
+        const classAvgPct = totalAllAtt > 0 ? Math.round((totalH / totalAllAtt) * 100) : 0;
+        const statRows = studentStats.map((st, idx) => `
+<tr>
+<td class="text-center">${idx + 1}</td>
+<td class="font-bold">${st.nis || '-'}</td>
+<td class="font-bold">${AppConfig.escapeHtml(st.name)}</td>
+<td class="text-center font-bold text-success">${st.h}</td>
+<td class="text-center text-warning">${st.sCount}</td>
+<td class="text-center text-primary">${st.iCount}</td>
+<td class="text-center font-bold text-danger">${st.a}</td>
+<td class="text-center font-bold">${st.pct}%</td>
+</tr>`).join('');
+        container.innerHTML = `
+<div class="att-nav-bar">
+<a href="#/guru/student-attendance" class="btn btn-outline btn-sm att-back-btn"><i class="ph ph-arrow-left"></i> Kembali</a>
+<div class="att-segmented-tabs">
+<button type="button" class="att-segment-btn" data-tab-btn="daily"><i class="ph ph-calendar-check"></i> Presensi Harian</button>
+<button type="button" class="att-segment-btn active" data-tab-btn="monthly"><i class="ph ph-chart-bar"></i> Rekap Bulanan</button>
 </div>
-`;
-const toggleRecapBtn = document.getElementById('btn-toggle-leave-recap');
-const recapSection = document.getElementById('section-leave-recap');
-if (toggleRecapBtn && recapSection) {
-toggleRecapBtn.onclick = () => {
-recapSection.style.display = recapSection.style.display === 'none' ? 'block' : 'none';
-};
-}
-document.getElementById('student-list-container').addEventListener('click', (e) => {
-if (e.target.classList.contains('att-btn')) {
-const group = e.target.closest('.att-toggle-group');
-group.querySelectorAll('.att-btn').forEach(b => {
-b.classList.remove('active-h', 'active-s', 'active-i', 'active-a');
-});
-const val = e.target.dataset.val;
-e.target.classList.add(`active-${val.toLowerCase()}`);
-}
-});
-document.getElementById('btn-save-att').onclick = async (e) => {
-const btn = e.target;
-btn.disabled = true;
-btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Menyimpan...';
-const payload = {};
-document.querySelectorAll('.att-toggle-group').forEach(group => {
-const stuId = group.dataset.stu;
-const activeBtn = group.querySelector('.att-btn[class*="active-"]');
-if (activeBtn) {
-payload[stuId] = activeBtn.dataset.val;
-}
-});
-try {
-await DB.saveDailyStudentAttendance(dateStr, classId, payload);
-btn.innerHTML = '<i class="ph ph-check"></i> Berhasil Disimpan';
-btn.style.background = '#10B981';
-btn.style.borderColor = '#10B981';
-setTimeout(() => {
-btn.disabled = false;
-btn.innerHTML = '<i class="ph ph-floppy-disk"></i> Simpan Absensi';
-btn.style.background = '';
-btn.style.borderColor = '';
-}, 2000);
-} catch (err) {
-alert('Gagal menyimpan absensi.');
-btn.disabled = false;
-btn.innerHTML = '<i class="ph ph-floppy-disk"></i> Simpan Absensi';
-}
-};
-},
+</div>
+<div class="card att-control-card">
+<div class="att-control-row">
+<div class="att-date-box">
+<input type="month" id="att-selected-month" class="att-date-picker" value="${selectedMonth}" title="Pilih Bulan">
+<span class="badge badge-outline font-bold small">${totalEffectiveDays} Hari Terabsen</span>
+</div>
+<div class="att-badge-box">
+<button type="button" id="btn-print-recap-pdf" class="btn btn-primary btn-xs att-btn-print"><i class="ph ph-printer"></i> Cetak PDF</button>
+</div>
+</div>
+</div>
+<div class="attendance-recap-summary">
+<div class="card stat-card"><div class="stat-icon stat-icon--primary"><i class="ph ph-users-three"></i></div><div><p class="stat-value">${studentArr.length}</p><p class="stat-label text-muted">Total Siswa</p></div></div>
+<div class="card stat-card"><div class="stat-icon stat-icon--success"><i class="ph ph-check-circle"></i></div><div><p class="stat-value">${totalH}</p><p class="stat-label text-muted">Total Hadir (H)</p></div></div>
+<div class="card stat-card"><div class="stat-icon stat-icon--warning"><i class="ph ph-first-aid"></i></div><div><p class="stat-value">${totalS}</p><p class="stat-label text-muted">Sakit (S)</p></div></div>
+<div class="card stat-card"><div class="stat-icon stat-icon--primary"><i class="ph ph-clock"></i></div><div><p class="stat-value">${totalI}</p><p class="stat-label text-muted">Izin (I)</p></div></div>
+<div class="card stat-card"><div class="stat-icon stat-icon--danger"><i class="ph ph-user-minus"></i></div><div><p class="stat-value">${totalA}</p><p class="stat-label text-muted">Alpa (A)</p></div></div>
+<div class="card stat-card"><div class="stat-icon stat-icon--primary"><i class="ph ph-percent"></i></div><div><p class="stat-value">${classAvgPct}%</p><p class="stat-label text-muted">Rata-rata Kelas</p></div></div>
+</div>
+<section class="card section-block">
+<div class="card-header mk-header">
+<h3 class="card-title"><i class="ph ph-table"></i> Rekapitulasi Presensi Kelas: ${AppConfig.escapeHtml(cls.name)} (${monthDisplay(selectedMonth)})</h3>
+</div>
+<div class="table-wrap">
+<table class="table">
+<thead>
+<tr>
+<th class="text-center table-col-sm">No</th>
+<th>NIS</th>
+<th>Nama Siswa</th>
+<th class="text-center table-col-sm">H</th>
+<th class="text-center table-col-sm">S</th>
+<th class="text-center table-col-sm">I</th>
+<th class="text-center table-col-sm">A</th>
+<th class="text-center table-col-sm">% Hadir</th>
+</tr>
+</thead>
+<tbody>${statRows}</tbody>
+</table>
+</div>
+</section>`;
+        const monthInput = document.getElementById('att-selected-month');
+        if (monthInput) {
+          monthInput.onchange = (e) => {
+            selectedMonth = e.target.value;
+            render();
+          };
+        }
+        const printBtn = document.getElementById('btn-print-recap-pdf');
+        if (printBtn) {
+          printBtn.onclick = () => {
+            if (typeof jspdf === 'undefined' && typeof window.jspdf === 'undefined') {
+              alert('Modul cetak PDF sedang dimuat, silakan coba sesaat lagi.');
+              return;
+            }
+            const { jsPDF } = window.jspdf || jspdf;
+            const doc = new jsPDF('p', 'pt', 'a4');
+            doc.setFontSize(13);
+            doc.setFont('helvetica', 'bold');
+            doc.text('SD MUHAMMADIYAH 1 SEDATI', 40, 45);
+            doc.setFontSize(11);
+            doc.text(`REKAPITULASI PRESENSI BULANAN KELAS ${cls.name.toUpperCase()}`, 40, 62);
+            doc.setFontSize(9);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Periode: ${monthDisplay(selectedMonth)} | Hari Efektif Terabsen: ${totalEffectiveDays} Hari`, 40, 78);
+            doc.text(`Total Murid: ${studentArr.length} | Hadir: ${totalH} | Sakit: ${totalS} | Izin: ${totalI} | Alpa: ${totalA} | Rata-rata: ${classAvgPct}%`, 40, 92);
+            const headers = [['No', 'NIS', 'Nama Siswa', 'H', 'S', 'I', 'A', '% Hadir']];
+            const pdfRows = studentStats.map((st, idx) => [idx + 1, st.nis || '-', st.name, st.h, st.sCount, st.iCount, st.a, `${st.pct}%`]);
+            pdfRows.push(['', '', 'TOTAL REKAPITULASI', totalH, totalS, totalI, totalA, `${classAvgPct}%`]);
+            doc.autoTable({
+              head: headers,
+              body: pdfRows,
+              startY: 105,
+              theme: 'grid',
+              styles: { fontSize: 8, cellPadding: 3 },
+              headStyles: { fillColor: [30, 64, 175], textColor: [255, 255, 255] }
+            });
+            const finalY = doc.lastAutoTable.finalY + 30;
+            doc.setFontSize(9);
+            doc.text('Mengetahui,', 40, finalY);
+            doc.text('Wali Kelas', 40, finalY + 14);
+            doc.text('Waka Kesiswaan', 400, finalY + 14);
+            doc.setFont('helvetica', 'bold');
+            doc.text(Auth.userData?.name || 'Wali Kelas', 40, finalY + 70);
+            doc.text('Ustadz Furqon, SH.', 400, finalY + 70);
+            doc.save(`Rekap_Presensi_${cls.name.replace(/\s+/g, '_')}_${selectedMonth}.pdf`);
+          };
+        }
+      }
+      container.querySelectorAll('[data-tab-btn]').forEach((btn) => {
+        btn.onclick = () => {
+          activeTab = btn.dataset.tabBtn;
+          render();
+        };
+      });
+    };
+    await render();
+  },
 async renderTendikDashboard(container) {
 Router.setTitle('Beranda Tenaga Kependidikan', 'Selamat datang di Dasbor Digital Tenaga Kependidikan SD Muhammadiyah 1 Sedati.');
 const today = new Date();

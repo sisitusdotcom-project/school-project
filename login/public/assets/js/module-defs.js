@@ -1196,9 +1196,9 @@
     },
     '#/student-affairs/leaves': {
       node: 'student_affairs/leaves', noun: 'Perizinan Siswa', writeRoles: [R.ORTU, R.STUDENT_AFFAIRS], dateField: 'startDate', statusField: 'status', badges: { Disetujui: 'success', Diajukan: 'warning', Ditolak: 'danger' },
-      approverRoles: [R.STUDENT_AFFAIRS, R.GURU],
+      approverRoles: [R.STUDENT_AFFAIRS],
       approverUnits: ['WALI_KELAS', 'WAKA_KESISWAAN', 'STAF_KESISWAAN', 'WAKA_KURIKULUM'],
-      seeAllUnits: ['WALI_KELAS', 'WAKA_KESISWAAN', 'STAF_KESISWAAN', 'WAKA_KURIKULUM'],
+      seeAllUnits: ['WAKA_KESISWAAN', 'STAF_KESISWAAN', 'WAKA_KURIKULUM'],
       subtitle: 'Pengajuan izin sakit/keperluan oleh wali murid dan verifikasi wali kelas & kesiswaan.',
       summary: [
         { label: 'Total Pengajuan', icon: 'ph-calendar-x', tone: 'primary' },
