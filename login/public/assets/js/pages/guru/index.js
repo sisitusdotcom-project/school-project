@@ -2670,6 +2670,7 @@ ${pastBadge}
 </div>
 <div class="att-badge-box">
 <span class="badge badge-outline font-bold small"><i class="ph ph-calendar-check"></i> ${totalEffectiveDays} Hari Efektif</span>
+<button type="button" id="btn-print-recap-pdf" class="btn btn-primary btn-xs att-btn-print"><i class="ph ph-printer"></i> Cetak PDF</button>
 </div>
 </div>
 </div>
