@@ -1636,6 +1636,140 @@ function getStudentClassRank(studentId, classStudents = {}, allGrades = {}) {
 const rankings = calculateClassRankings(classStudents, allGrades);
 return rankings[studentId] || null;
 }
+function canManageAnnouncements(user = null) {
+const u = user || (typeof Auth !== 'undefined' ? (Auth.userData || Auth.currentUser) : null) || {};
+const role = u.role || (typeof Auth !== 'undefined' ? Auth.currentRole : '');
+if ([ROLES.KEPSEK, ROLES.ADMIN, ROLES.IT_ADMIN, ROLES.PERSONNEL].includes(role)) return true;
+const assigns = (typeof Auth !== 'undefined' && Auth.currentAssignments) || getRoleAssignments(u) || [];
+return assigns.some(a => ['WAKA_HUMAS_PERSONALIA', 'STAF_HUMAS_PERSONALIA', 'WAKA_KURIKULUM', 'WAKA_KESISWAAN', 'WAKA_SARPRAS', 'KEPALA_SEKOLAH', 'ADMIN'].includes(a));
+}
+function isAnnouncementVisible(item, user = null) {
+if (!item) return false;
+const u = user || (typeof Auth !== 'undefined' ? (Auth.userData || Auth.currentUser) : null) || {};
+const role = u.role || (typeof Auth !== 'undefined' ? Auth.currentRole : '');
+if ([ROLES.ADMIN, ROLES.KEPSEK, ROLES.IT_ADMIN, ROLES.PERSONNEL].includes(role)) return true;
+const aud = (item.audience || 'Semua').trim();
+if (aud === 'Semua') return true;
+if (role === ROLES.ORTU) return aud === 'Orang Tua';
+if ([ROLES.GURU, ROLES.GURU_UMMI, ROLES.GURU_EKSKUL].includes(role)) {
+return aud === 'GTK' || aud === 'Guru';
+}
+if (role === ROLES.TENDIK) {
+return aud === 'GTK' || aud === 'Tendik';
+}
+return aud === 'GTK';
+}
+function showAddAnnouncementModal(options = {}) {
+const oldModal = document.getElementById('modal-bulletin-composer');
+if (oldModal && oldModal.parentNode) oldModal.parentNode.removeChild(oldModal);
+const todayStr = getLocalDateStr(new Date());
+const modal = document.createElement('div');
+modal.id = 'modal-bulletin-composer';
+modal.className = 'modal-overlay active';
+modal.innerHTML = `<div class="modal bulletin-modal"><div class="modal-header"><h3 class="modal-title"><i class="ph ph-megaphone"></i> Buat Informasi / Pengumuman</h3><button type="button" class="modal-close" id="btn-close-bulletin-modal"><i class="ph ph-x"></i></button></div><form id="form-bulletin-composer"><div class="modal-body"><div class="form-group"><label>Judul Informasi / Edaran <span class="text-danger">*</span></label><input type="text" id="bulletin-inp-title" class="form-control" required placeholder="Contoh: Edaran Libur Awal Ramadhan 1448 H"></div><div class="form-group"><label>Sasaran Pembaca <span class="text-danger">*</span></label><select id="bulletin-sel-audience" class="form-control" required><option value="Semua">Semua Warga Sekolah (GTK & Orang Tua)</option><option value="GTK">Khusus GTK (Semua Guru & Tendik)</option><option value="Guru">Khusus Guru (Kelas, Mapel, Ummi, Ekskul)</option><option value="Tendik">Khusus Tendik (Administrasi & Tata Usaha)</option><option value="Orang Tua">Khusus Orang Tua / Wali Murid</option></select></div><div class="form-group"><label>Tanggal Edaran <span class="text-danger">*</span></label><input type="date" id="bulletin-inp-date" class="form-control" required value="${todayStr}"></div><div class="form-group"><label>Isi Informasi / Pengumuman <span class="text-danger">*</span></label><textarea id="bulletin-inp-desc" class="form-control" rows="4" required placeholder="Tuliskan isi pengumuman atau instruksi sekolah secara jelas..."></textarea></div></div><div class="modal-footer"><button type="button" class="btn btn-outline" id="btn-cancel-bulletin-modal">Batal</button><button type="submit" class="btn btn-primary" id="btn-submit-bulletin"><i class="ph ph-paper-plane-tilt"></i> Publikasikan</button></div></form></div>`;
+document.body.appendChild(modal);
+const closeModal = () => {
+if (modal && modal.parentNode) modal.parentNode.removeChild(modal);
+};
+modal.querySelector('#btn-close-bulletin-modal').onclick = closeModal;
+modal.querySelector('#btn-cancel-bulletin-modal').onclick = closeModal;
+modal.onclick = (e) => {
+if (e.target === modal) closeModal();
+};
+const form = modal.querySelector('#form-bulletin-composer');
+form.onsubmit = async (e) => {
+e.preventDefault();
+const submitBtn = modal.querySelector('#btn-submit-bulletin');
+submitBtn.disabled = true;
+submitBtn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Menyimpan...';
+const title = modal.querySelector('#bulletin-inp-title').value.trim();
+const audience = modal.querySelector('#bulletin-sel-audience').value;
+const dateVal = modal.querySelector('#bulletin-inp-date').value || todayStr;
+const desc = modal.querySelector('#bulletin-inp-desc').value.trim();
+const u = (typeof Auth !== 'undefined' ? (Auth.userData || Auth.currentUser) : null) || {};
+const authorName = formatUserName(u) || u.name || u.displayName || 'Staf Humas';
+const payload = {
+title,
+audience,
+date: dateVal,
+description: desc,
+author: authorName,
+authorRole: u.role || 'GTK',
+createdAt: Date.now()
+};
+try {
+if (typeof DB !== 'undefined' && DB.savePersonnelAnnouncement) {
+await DB.savePersonnelAnnouncement(payload);
+} else if (typeof db !== 'undefined') {
+await db.ref('personnel/announcements').push().set(payload);
+}
+closeModal();
+if (typeof options.onSaved === 'function') options.onSaved();
+} catch (err) {
+submitBtn.disabled = false;
+submitBtn.innerHTML = '<i class="ph ph-paper-plane-tilt"></i> Publikasikan';
+alert('Gagal mempublikasikan pengumuman: ' + (err.message || err));
+}
+};
+}
+async function renderBulletinBoard(container, options = {}) {
+if (!container) return;
+const user = options.user || (typeof Auth !== 'undefined' ? (Auth.userData || Auth.currentUser) : null) || {};
+let rawData = {};
+try {
+rawData = (typeof DB !== 'undefined' && DB.getPersonnelAnnouncements) ? await DB.getPersonnelAnnouncements() : {};
+} catch (_) {}
+if (!rawData || !Object.keys(rawData).length) {
+try {
+if (typeof db !== 'undefined') {
+const snap = await db.ref('personnel/announcements').once('value');
+rawData = snap.val() || {};
+}
+} catch (_) {}
+}
+const list = Object.entries(rawData || {}).map(([id, val]) => ({ id, ...(typeof val === 'object' ? val : {}) }));
+const filtered = list.filter(item => isAnnouncementVisible(item, user)).sort((a, b) => {
+const dDiff = String(b.date || '').localeCompare(String(a.date || ''));
+if (dDiff !== 0) return dDiff;
+return (b.createdAt || 0) - (a.createdAt || 0);
+});
+const canManage = canManageAnnouncements(user);
+const badgeMap = {
+'Semua': 'badge-primary',
+'GTK': 'badge-info',
+'Guru': 'badge-success',
+'Tendik': 'badge-warning',
+'Orang Tua': 'badge-secondary'
+};
+container.innerHTML = `<div class="card panel-callout bulletin-board"><div class="bulletin-header"><div class="bulletin-header-left"><h3 class="card-title info-banner"><i class="ph ph-megaphone"></i> Papan Informasi</h3><span class="bulletin-count-badge">${filtered.length} Informasi</span></div>${canManage ? `<button type="button" class="btn btn-primary btn-sm btn-bulletin-add" id="btn-add-bulletin-action"><i class="ph ph-plus-circle"></i> Tambah Info</button>` : ''}</div><div class="bulletin-list">${filtered.length ? filtered.map(item => `<article class="bulletin-card" data-id="${item.id}"><div class="bulletin-card-head"><div class="bulletin-card-meta"><span class="badge ${badgeMap[item.audience] || 'badge-primary'}">${escapeHtml(item.audience || 'Semua')}</span><span class="bulletin-date"><i class="ph ph-calendar-blank"></i> ${escapeHtml(item.date || '-')}</span>${item.author ? `<span class="bulletin-author"><i class="ph ph-user"></i> ${escapeHtml(item.author)}</span>` : ''}</div>${canManage ? `<button type="button" class="btn-bulletin-del" data-id="${item.id}" title="Hapus Informasi"><i class="ph ph-trash"></i></button>` : ''}</div><h4 class="bulletin-title">${escapeHtml(item.title || 'Informasi Sekolah')}</h4><p class="bulletin-desc">${escapeHtml(item.description || '-')}</p></article>`).join('') : `<div class="bulletin-empty"><i class="ph ph-broadcast"></i><p class="bulletin-empty-text">${canManage ? 'Belum ada pengumuman aktif. Ketuk "Tambah Info" untuk menyiarkan informasi baru ke warga sekolah.' : 'Belum ada pengumuman baru untuk Anda saat ini.'}</p></div>`}</div></div>`;
+if (canManage) {
+const addBtn = container.querySelector('#btn-add-bulletin-action');
+if (addBtn) {
+addBtn.onclick = () => {
+showAddAnnouncementModal({
+onSaved: () => renderBulletinBoard(container, options)
+});
+};
+}
+container.querySelectorAll('.btn-bulletin-del').forEach(btn => {
+btn.onclick = async () => {
+const id = btn.dataset.id;
+if (!id) return;
+if (!confirm('Hapus informasi ini dari Papan Informasi sekolah?')) return;
+try {
+if (typeof DB !== 'undefined' && DB.deletePersonnelAnnouncement) {
+await DB.deletePersonnelAnnouncement(id);
+} else if (typeof db !== 'undefined') {
+await db.ref(`personnel/announcements/${id}`).remove();
+}
+renderBulletinBoard(container, options);
+} catch (err) {
+alert('Gagal menghapus informasi: ' + (err.message || err));
+}
+};
+});
+}
+}
 window.AppConfig = Object.freeze({
 calculateClassRankings,
 getStudentClassRank,
@@ -1700,6 +1834,10 @@ getDailyAttendanceMotivation,
 getRandomAttendanceMotivation,
 showAttendanceSuccessModal,
 getDashboardHeroHtml,
+canManageAnnouncements,
+isAnnouncementVisible,
+showAddAnnouncementModal,
+renderBulletinBoard,
 attendanceGeofence: SCHOOL_GEOFENCE,
 SCHOOL_GEOFENCE,
 ORIGINAL_SCHOOL_GEOFENCE

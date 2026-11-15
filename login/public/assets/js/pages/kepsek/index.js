@@ -157,7 +157,9 @@ const KepsekPages = {
           </table>
         </div>
       </section>
+      <div id="kepsek-bulletin-container" class="section-spacer"></div>
     `;
+    AppConfig.renderBulletinBoard(container.querySelector('#kepsek-bulletin-container'), { user });
     const labels = charArr.map(c => c.name);
     const values = charArr.map(c => {
       const d = charAverages[c.id];

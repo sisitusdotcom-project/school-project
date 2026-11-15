@@ -244,11 +244,9 @@ ${myTravels.length > 5 ? `<div class="travel-all-wrap"><a href="#/gtk/official-t
 </div>
 </div>
 </section>
-<div class="card panel-callout">
-<h3 class="card-title info-banner"><i class="ph ph-megaphone"></i> Papan Informasi</h3>
-<p class="text-muted soft-note">Validasi lokasi dilakukan oleh server secara aman. Browser tidak menyimpan koordinat sekolah untuk keperluan validasi presensi.</p>
-</div>
+<div id="guru-bulletin-container" class="section-spacer"></div>
 `;
+AppConfig.renderBulletinBoard(container.querySelector('#guru-bulletin-container'), { user });
 const btnToggle = container.querySelector('#btn-toggle-guru-sched');
 const schedWrap = container.querySelector('#guru-sched-week-wrap');
 if (btnToggle && schedWrap) {
@@ -3099,7 +3097,9 @@ ${heroHtml}
 </div>
 </div>
 </section>
+<div id="tendik-bulletin-container" class="section-spacer"></div>
 `;
+AppConfig.renderBulletinBoard(container.querySelector('#tendik-bulletin-container'), { user });
 },
 async renderUmmiDashboard(container) {
 Router.setTitle('Beranda Guru UMMI', "Selamat datang di Dasbor Pembelajaran Al-Qur'an & Metode Ummi.");
@@ -3254,7 +3254,9 @@ ${isKoord ? `
 </div>
 </section>
 ` : ''}
+<div id="ummi-bulletin-container" class="section-spacer"></div>
 `;
+AppConfig.renderBulletinBoard(container.querySelector('#ummi-bulletin-container'), { user });
 },
 async renderEkstraDashboard(container) {
 Router.setTitle('Beranda Pembina Ekstrakurikuler', 'Selamat datang di Dasbor Digital Ekstrakurikuler.');
@@ -3376,7 +3378,9 @@ ${heroHtml}
 <h3 class="card-title info-banner"><i class="ph ph-info"></i> Ketentuan Presensi & Data Peserta</h3>
 <p class="text-muted soft-note">Daftar peserta ekstrakurikuler dikelola secara terpusat oleh Waka Kesiswaan. Pembina cukup melakukan absensi per pertemuan saat kegiatan ekskul berlangsung.</p>
 </div>
+<div id="ekstra-bulletin-container" class="section-spacer"></div>
 `;
+AppConfig.renderBulletinBoard(container.querySelector('#ekstra-bulletin-container'), { user });
 },
 async renderEkstraAttendance(container) {
 Router.setTitle('Presensi Pertemuan Ekskul', 'Pencatatan kehadiran peserta dan jurnal materi per pertemuan ekstrakurikuler.');

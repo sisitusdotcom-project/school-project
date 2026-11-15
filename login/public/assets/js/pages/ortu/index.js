@@ -49,7 +49,7 @@ let switcherHtml = '';
 if (studentArr.length > 1) {
 switcherHtml = `<div class="ortu-child-switcher"><button type="button" class="btn btn-sm btn-outline ortu-child-btn active" data-child-filter="all"><i class="ph ph-users"></i> Semua Anak (${studentArr.length})</button>${studentArr.map(s => `<button type="button" class="btn btn-sm btn-outline ortu-child-btn" data-child-filter="${s.id}"><i class="ph ph-user"></i> ${AppConfig.escapeHtml(s.name)}</button>`).join('')}</div>`;
 }
-let html = switcherHtml;
+let html = switcherHtml + '<div id="ortu-bulletin-container" class="section-spacer"></div>';
 for (const student of studentArr) {
 const stuAchDirect = DB.toArray(stuAchievementsMap[student.id] || student.achievements || {});
 const stuAchievements = stuAchDirect.concat(
@@ -548,6 +548,7 @@ ${achieveListHtml}
 `;
 }
 container.innerHTML = html;
+AppConfig.renderBulletinBoard(container.querySelector('#ortu-bulletin-container'), { user: Auth.userData || Auth.currentUser });
 if (studentArr.length > 1) {
 container.querySelectorAll('[data-child-filter]').forEach(btn => {
 btn.addEventListener('click', (e) => {

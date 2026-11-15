@@ -926,13 +926,21 @@ const DB = {
     if (!isDBReady()) return null;
     const normalized = {
       title: data.title || 'Pengumuman baru',
+      audience: data.audience || 'Semua',
       description: data.description || '',
+      author: data.author || '',
+      authorRole: data.authorRole || '',
       date: data.date || (typeof AppConfig !== "undefined" && AppConfig.getLocalDateStr ? AppConfig.getLocalDateStr() : new Date().toISOString().slice(0, 10)),
       createdAt: data.createdAt || firebase.database.ServerValue.TIMESTAMP
     };
     const ref = id ? db.ref(`personnel/announcements/${id}`) : db.ref('personnel/announcements').push();
     await ref.set(normalized);
     return ref.key;
+  },
+  async deletePersonnelAnnouncement(id) {
+    if (!isDBReady() || !id) return false;
+    await db.ref(`personnel/announcements/${id}`).remove();
+    return true;
   },
   async getStudentAchievements(studentId = null) {
     if (typeof Auth !== 'undefined' && Auth.currentUser && (Auth.currentRole === 'ortu' || Auth.userData?.role === 'ortu')) {

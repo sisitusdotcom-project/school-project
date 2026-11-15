@@ -611,7 +611,7 @@
       fields: [
         date('date', 'Tanggal', { required: true }),
         t('title', 'Judul', { required: true }),
-        sel('audience', 'Sasaran', ['Semua', 'Guru', 'Tendik', 'Orang Tua'], { required: true }),
+        sel('audience', 'Sasaran', ['Semua', 'GTK', 'Guru', 'Tendik', 'Orang Tua'], { required: true }),
         area('description', 'Isi Informasi', { required: true })
       ]
     },
