@@ -133,6 +133,100 @@ const App = {
     const navItems = AppConfig.getRoleNav(role, assignments, Auth.userData);
     return navItems.some(nav => nav.hash === path);
   },
+  initPWAUpdate() {
+    if (!('serviceWorker' in navigator)) return;
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (refreshing) return;
+      refreshing = true;
+      window.location.reload();
+    });
+    navigator.serviceWorker.register('/sw.js', { scope: '/' }).then((reg) => {
+      if (reg.waiting) {
+        this.showUpdateBanner(reg);
+        return;
+      }
+      reg.addEventListener('updatefound', () => {
+        const newWorker = reg.installing;
+        if (!newWorker) return;
+        newWorker.addEventListener('statechange', () => {
+          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            this.showUpdateBanner(reg);
+          }
+        });
+      });
+      setInterval(() => {
+        reg.update().catch(() => {});
+      }, 15 * 60 * 1000);
+    }).catch(() => {});
+  },
+  showUpdateBanner(reg) {
+    if (document.getElementById('pwa-update-banner')) return;
+    const banner = document.createElement('div');
+    banner.id = 'pwa-update-banner';
+    banner.className = 'pwa-update-banner';
+    banner.innerHTML = `
+      <div class="pwa-update-content">
+        <div class="pwa-update-icon"><i class="ph ph-sparkle"></i></div>
+        <div class="pwa-update-text">
+          <strong>Pembaruan Aplikasi Tersedia</strong>
+          <span>Versi baru sistem Musada siap dipasang.</span>
+        </div>
+      </div>
+      <div class="pwa-update-actions">
+        <button type="button" class="btn btn-primary btn-sm" id="btn-pwa-apply-update"><i class="ph ph-arrows-clockwise"></i> Perbarui</button>
+        <button type="button" class="btn-icon btn-sm" id="btn-pwa-dismiss-update" aria-label="Tutup"><i class="ph ph-x"></i></button>
+      </div>`;
+    document.body.appendChild(banner);
+    const applyBtn = banner.querySelector('#btn-pwa-apply-update');
+    if (applyBtn) {
+      applyBtn.addEventListener('click', async () => {
+        applyBtn.disabled = true;
+        applyBtn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Memperbarui...';
+        try {
+          if ('caches' in window) {
+            const keys = await caches.keys();
+            await Promise.all(keys.map((k) => caches.delete(k)));
+          }
+          if (reg && reg.waiting) {
+            reg.waiting.postMessage({ action: 'skipWaiting' });
+          } else if (navigator.serviceWorker.controller) {
+            navigator.serviceWorker.controller.postMessage({ action: 'skipWaiting' });
+          }
+          setTimeout(() => {
+            window.location.reload();
+          }, 300);
+        } catch (err) {
+          window.location.reload();
+        }
+      });
+    }
+    const dismissBtn = banner.querySelector('#btn-pwa-dismiss-update');
+    if (dismissBtn) {
+      dismissBtn.addEventListener('click', () => banner.remove());
+    }
+  },
+  async checkForUpdates() {
+    if (!('serviceWorker' in navigator)) {
+      alert('Peramban ini tidak mendukung PWA.');
+      return;
+    }
+    try {
+      const reg = await navigator.serviceWorker.getRegistration('/');
+      if (!reg) {
+        window.location.reload();
+        return;
+      }
+      await reg.update();
+      if (reg.waiting || reg.installing) {
+        this.showUpdateBanner(reg);
+      } else {
+        alert('Aplikasi sudah menggunakan versi terbaru.');
+      }
+    } catch (err) {
+      window.location.reload();
+    }
+  },
   init() {
     const menuButton = document.getElementById('btn-menu-toggle');
     const closeButton = document.getElementById('btn-menu-close');
@@ -279,6 +373,13 @@ const App = {
           btn.disabled = false;
           btn.innerHTML = 'Simpan Profil';
         }
+      });
+    }
+    this.initPWAUpdate();
+    const btnCheckUpdate = document.getElementById('btn-check-app-update');
+    if (btnCheckUpdate) {
+      btnCheckUpdate.addEventListener('click', () => {
+        this.checkForUpdates();
       });
     }
     Router.init();

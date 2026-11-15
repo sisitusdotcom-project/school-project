@@ -38,11 +38,50 @@ window.addEventListener('beforeinstallprompt', function (e) {
   e.preventDefault();
   deferredPWAPrompt = e;
 });
+function showPublicUpdateBanner(reg) {
+  if (document.getElementById('pwa-update-banner')) return;
+  var banner = document.createElement('div');
+  banner.id = 'pwa-update-banner';
+  banner.className = 'pwa-update-banner';
+  banner.innerHTML = '<div class="pwa-update-content"><div class="pwa-update-icon"><i class="ph ph-sparkle"></i></div><div class="pwa-update-text"><strong>Pembaruan Aplikasi Tersedia</strong><span>Versi baru sistem Musada siap dipasang.</span></div></div><div class="pwa-update-actions"><button type="button" class="btn btn-primary btn-sm" id="btn-pwa-apply-update"><i class="ph ph-arrows-clockwise"></i> Perbarui</button><button type="button" class="btn-icon btn-sm" id="btn-pwa-dismiss-update" aria-label="Tutup"><i class="ph ph-x"></i></button></div>';
+  document.body.appendChild(banner);
+  var applyBtn = banner.querySelector('#btn-pwa-apply-update');
+  if (applyBtn) {
+    applyBtn.addEventListener('click', function() {
+      applyBtn.disabled = true;
+      applyBtn.innerHTML = 'Memperbarui...';
+      if ('caches' in window) {
+        caches.keys().then(function(keys) {
+          return Promise.all(keys.map(function(k) { return caches.delete(k); }));
+        }).then(function() {
+          if (reg && reg.waiting) reg.waiting.postMessage({ action: 'skipWaiting' });
+          setTimeout(function() { window.location.reload(); }, 300);
+        }).catch(function() {
+          window.location.reload();
+        });
+      } else {
+        window.location.reload();
+      }
+    });
+  }
+  var dismissBtn = banner.querySelector('#btn-pwa-dismiss-update');
+  if (dismissBtn) {
+    dismissBtn.addEventListener('click', function() { banner.remove(); });
+  }
+}
 function initPWAInstall() {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').catch(function(err) {
-      console.log('Service Worker registration failed: ', err);
-    });
+    navigator.serviceWorker.register('/sw.js', { scope: '/' }).then(function(reg) {
+      reg.addEventListener('updatefound', function() {
+        var newWorker = reg.installing;
+        if (!newWorker) return;
+        newWorker.addEventListener('statechange', function() {
+          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            showPublicUpdateBanner(reg);
+          }
+        });
+      });
+    }).catch(function(err) {});
   }
   var installContainer = document.getElementById('pwa-install-container');
   var installBtn = document.getElementById('pwa-install-btn');
