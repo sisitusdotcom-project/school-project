@@ -341,6 +341,11 @@
       ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')",
       ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')"
     },
+    "system_feedback": {
+      ".read": "auth != null",
+      ".write": "auth != null",
+      ".indexOn": ["userId", "status", "createdAt"]
+    },
     "audit_logs": {
       ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')",
       ".write": "auth != null"

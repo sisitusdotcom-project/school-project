@@ -738,6 +738,7 @@ return NAV_ITEMS[unit] || [];
 const merged = [...baseNav, ...unitNav];
 const unique = merged.filter((item, index, arr) => arr.findIndex((entry) => entry.hash === item.hash) === index);
 unique.push({ hash: '#/panduan', icon: 'ph-book-open', text: 'Panduan Aplikasi', group: 'Bantuan' });
+unique.push({ hash: '#/help/report-issue', icon: 'ph-lifebuoy', text: 'Lapor Kendala', group: 'Bantuan' });
 return unique;
 }
 function getRoleBadgeClass(role) {

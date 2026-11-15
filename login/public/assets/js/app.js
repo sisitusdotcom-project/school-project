@@ -59,7 +59,7 @@ const App = {
     if (!role) return false;
     let path = rawPath || '#/dashboard';
     if (path === '#/guru/attendance') path = '#/attendance';
-    if (path === '#/panduan') return true;
+    if (path === '#/panduan' || path === '#/help/report-issue') return true;
     if (path === '#/dashboard' || path === '#/ortu/dashboard') return !!this.getDashboardRenderer();
     if (role === AppConfig.ROLES.ADMIN) return true;
     if (path === '#/attendance' && role !== AppConfig.ROLES.ORTU && role !== AppConfig.ROLES.KOMITE) return true;
@@ -397,7 +397,7 @@ const App = {
         allRoutes.add(item.hash);
       });
     });
-    ['#/admin/students/:id', '#/guru/assess/:id', '#/guru/observe/:id', '#/guru/student-attendance/:id', '#/panduan'].forEach(r => allRoutes.add(r));
+    ['#/admin/students/:id', '#/guru/assess/:id', '#/guru/observe/:id', '#/guru/student-attendance/:id', '#/panduan', '#/help/report-issue'].forEach(r => allRoutes.add(r));
     allRoutes.forEach(path => {
       if (path === '#/dashboard') return;
       Router.add(path, async (container, routeParams) => {
@@ -416,6 +416,7 @@ const App = {
         }
         const renderers = {
           '#/panduan': typeof FeatureGuides !== 'undefined' ? FeatureGuides.renderGuidePage : null,
+          '#/help/report-issue': typeof TechSupportModule !== 'undefined' ? TechSupportModule.renderPage : null,
           '#/admin/assignments': (c) => window.AdminAssignmentsModule?.render ? window.AdminAssignmentsModule.render(c) : null,
           '#/admin/users': typeof AdminPages !== 'undefined' ? AdminPages.renderUsers : null,
           '#/admin/classes': typeof AdminPages !== 'undefined' ? AdminPages.renderClasses : null,
