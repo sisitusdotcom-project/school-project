@@ -276,7 +276,7 @@
       ]
     },
     '#/student-affairs/achievements': {
-      node: 'student_affairs/achievements', noun: 'Prestasi Siswa', writeRoles: SA, dateField: 'date',
+      node: 'student_affairs/achievements', noun: 'Prestasi Siswa', writeRoles: SA, allowImport: true, dateField: 'date',
       subtitle: 'Rekap lomba, penghargaan siswa, dan data partisipan.',
       derive: (p) => {
         const yr = year(p.date) || new Date().getFullYear();
@@ -365,7 +365,7 @@
       ]
     },
     '#/personnel/data': {
-      node: 'personnel/directory', noun: 'Data Kepegawaian', writeRoles: PE, statusField: 'status', badges: { ...badges, Cuti: 'warning' },
+      node: 'personnel/directory', noun: 'Data Kepegawaian', writeRoles: PE, allowImport: true, statusField: 'status', badges: { ...badges, Cuti: 'warning' },
       subtitle: 'Direktori resmi SDM GTK SD Muhammadiyah 1 Sedati bersumber Dapodik & Arsip Sekolah.',
       summary: [
         { label: 'Total Pegawai', icon: 'ph-folder-user', tone: 'primary' },
@@ -669,7 +669,7 @@
       ]
     },
     '#/facilities/inventory': {
-      node: 'facilities/assets', noun: 'Buku Inventaris', writeRoles: FA, dateField: 'acquiredDate', statusField: 'status', badges: { ...badges, Dipinjam: 'warning', Dihapus: 'danger' },
+      node: 'facilities/assets', noun: 'Buku Inventaris', writeRoles: FA, allowImport: true, dateField: 'acquiredDate', statusField: 'status', badges: { ...badges, Dipinjam: 'warning', Dihapus: 'danger' },
       subtitle: 'Register aset sekolah beserta lokasi dan kondisi.',
       summary: [
         { label: 'Jenis Aset', icon: 'ph-archive-box', tone: 'primary' },
@@ -784,7 +784,7 @@
       ]
     },
     '#/facilities/electronics': {
-      node: 'facilities/electronics', noun: 'Pemeliharaan Elektronik & IT', writeRoles: FA, dateField: 'nextService', statusField: 'status', badges: { ...badges, 'Perlu Servis': 'warning' },
+      node: 'facilities/electronics', noun: 'Pemeliharaan Elektronik & IT', writeRoles: FA, allowImport: true, dateField: 'nextService', statusField: 'status', badges: { ...badges, 'Perlu Servis': 'warning' },
       subtitle: 'Daftar perangkat elektronik dan jadwal servis.',
       summary: [
         { label: 'Total Perangkat', icon: 'ph-desktop', tone: 'primary' },
@@ -1275,7 +1275,7 @@
       ]
     },
     '#/finance/student-bills': {
-      node: 'finance/student_bills', noun: 'Tagihan & SPP Siswa', writeRoles: FI, dateField: 'paymentDate', statusField: 'status', badges: { Lunas: 'success', 'Bebas Beasiswa': 'primary', 'Belum Lunas': 'danger' },
+      node: 'finance/student_bills', noun: 'Tagihan & SPP Siswa', writeRoles: FI, allowImport: true, dateField: 'paymentDate', statusField: 'status', badges: { Lunas: 'success', 'Bebas Beasiswa': 'primary', 'Belum Lunas': 'danger' },
       subtitle: 'Monitoring iuran bulanan SPP dan status pelunasan pembayaran siswa.',
       summary: [
         { label: 'Total Tagihan', icon: 'ph-receipt', tone: 'primary' },

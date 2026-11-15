@@ -2645,6 +2645,7 @@ padding: 14px;
 .salary-slip-total-row td{font-size:11.5px;}
 .salary-slip-sig-box strong{font-size:11px;}
 }
+.mk-print-sheet{display:none;}
 @media print{
 @page{size:A4 portrait;margin:10mm 12mm;}
 *,*:before,*:after{box-sizing:border-box !important;-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;}
@@ -2653,7 +2654,7 @@ html,body{background:#fff !important;color:#000 !important;margin:0 !important;p
 .main-content{margin:0 !important;padding:0 !important;min-height:auto !important;height:auto !important;width:100% !important;max-width:100% !important;overflow:visible !important;background:#fff !important;}
 #main-content{margin:0 !important;padding:0 !important;width:100% !important;}
 .page-body,#page-container{margin:0 !important;padding:0 !important;width:100% !important;overflow:visible !important;}
-.mobile-header,#sidebar,.sidebar,.sidebar-backdrop,.page-header,.page-actions,.feature-guide-card,.feature-guide-toggle,.salary-slip-actions,.salary-slip-notice,#login-view,#app-loading,.modal-overlay,.fullscreen-overlay,.notification-panel,.hero-panel,#dashboard-hero,.dashboard-hero{display:none !important;}
+.mobile-header,#sidebar,.sidebar,.sidebar-backdrop,.page-header,.page-actions,.feature-guide-card,.feature-guide-toggle,.salary-slip-actions,.salary-slip-notice,#login-view,#app-loading,.modal-overlay,.fullscreen-overlay,.notification-panel,.hero-panel,#dashboard-hero,.dashboard-hero,.mk-screen-view,.academic-excel-bar{display:none !important;}
 .salary-slip-sheet{display:block !important;position:relative !important;width:100% !important;max-width:100% !important;margin:0 !important;padding:12px 16px !important;border:1px solid #111827 !important;border-radius:4px !important;box-shadow:none !important;background:#fff !important;page-break-inside:avoid !important;}
 .salary-slip-brand{display:flex !important;align-items:center !important;justify-content:space-between !important;gap:14px !important;border-bottom:3px double #000 !important;padding-bottom:10px !important;margin-bottom:12px !important;}
 .salary-slip-logo{width:56px !important;height:56px !important;object-fit:contain !important;flex-shrink:0 !important;}
@@ -2678,6 +2679,14 @@ html,body{background:#fff !important;color:#000 !important;margin:0 !important;p
 .salary-slip-signatures{display:flex !important;justify-content:space-between !important;margin-top:20px !important;padding-top:10px !important;font-size:11.5px !important;page-break-inside:avoid !important;}
 .salary-slip-sig-box{min-width:160px !important;text-align:center !important;}
 .salary-slip-sig-space{height:55px !important;}
+.mk-print-sheet{display:block !important;position:relative !important;width:100% !important;max-width:100% !important;margin:0 !important;padding:0 !important;border:none !important;box-shadow:none !important;background:#fff !important;page-break-inside:auto !important;}
+.mk-print-table{width:100% !important;border-collapse:collapse !important;margin-bottom:14px !important;font-size:9pt !important;}
+.mk-print-table thead{display:table-header-group !important;}
+.mk-print-table tr{page-break-inside:avoid !important;}
+.mk-print-table th{background:#f3f4f6 !important;border:1px solid #111827 !important;padding:6px 6px !important;font-weight:700 !important;color:#000 !important;font-size:9pt !important;}
+.mk-print-table td{border:1px solid #4b5563 !important;padding:5px 6px !important;color:#000 !important;font-size:8.5pt !important;word-break:break-word !important;}
+.mk-col-no{width:34px !important;text-align:center !important;}
+.mk-print-empty{text-align:center !important;padding:12px !important;color:#4b5563 !important;}
 }
 .modal-attendance-overlay{background:rgba(15,23,42,0.6);backdrop-filter:blur(4px);z-index:99999;}
 .modal-attendance-success{max-width:480px;width:90%;border-radius:18px;background:#ffffff;box-shadow:0 20px 40px -10px rgba(0,0,0,0.22);padding:0;overflow:hidden;border:1px solid #E2E8F0;animation:modalScaleUp 0.22s cubic-bezier(0.16,1,0.3,1);}
@@ -3142,4 +3151,13 @@ body{background:#fff !important;color:#000 !important;}
 }
 @media(max-width:360px){
 .att-leave-txt{display:none;}
+}
+.academic-excel-bar{margin-bottom:14px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;background:var(--bg-card,#fff);border:1px solid var(--border-color,#e2e8f0);border-radius:var(--radius-md,8px);}
+.academic-excel-info{display:flex;align-items:center;flex-wrap:wrap;gap:8px;}
+.academic-excel-title{font-size:13.5px;color:var(--text-main,#111827);}
+.academic-excel-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+@media (max-width:768px){
+.academic-excel-bar{flex-direction:column;align-items:stretch;}
+.academic-excel-actions{justify-content:flex-end;width:100%;}
+.academic-excel-actions .btn{flex:1;}
 }

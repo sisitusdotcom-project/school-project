@@ -250,8 +250,7 @@ return `
 <td class="user-cell">
 <strong>${AppConfig.escapeHtml(u.name)}</strong><br>
 <small class="text-muted">
-Email: ${u.email || '-'}<br>
-<span class="user-id-subtext">Default: ${u.id.toLowerCase().replace(/[^a-z0-9]/g, '')}@musada.sch.id</span>
+<span class="user-id-subtext">Email Login: ${AppConfig.escapeHtml(u.email || (u.id.toLowerCase().replace(/[^a-z0-9]/g, '') + '@musada.sch.id'))}</span>
 </small>
 ${teachingHtml}
 </td>
@@ -278,10 +277,15 @@ container.querySelectorAll('[data-edit-usr]').forEach(btn => {
 btn.onclick = () => {
 const u = userArr.find(x => x.id === btn.dataset.editUsr);
 if (!u) return;
+const defaultEmail = `${u.id.toLowerCase().replace(/[^a-z0-9]/g, '')}@musada.sch.id`;
 document.getElementById('usr-modal-title').innerText = 'Edit pengguna';
 document.getElementById('usr-id').value = u.id;
 document.getElementById('usr-name').value = u.name;
-document.getElementById('usr-email').value = u.email || '';
+const emailEl = document.getElementById('usr-email');
+emailEl.value = u.email || defaultEmail;
+emailEl.setAttribute('readonly', 'true');
+const hintEl = document.getElementById('usr-email-hint');
+if (hintEl) hintEl.classList.remove('hidden');
 document.getElementById('usr-password').value = '';
 document.getElementById('usr-password').placeholder = '(Kosongkan jika tidak diubah)';
 document.getElementById('usr-role').value = u.role;
@@ -333,7 +337,7 @@ ${Object.entries(AppConfig.PRIMARY_ROLES).map(([val, label]) => `<option value="
 <div class="modal-body">
 <input type="hidden" id="usr-id">
 <div class="form-group"><label>Nama Lengkap</label><input id="usr-name" required></div>
-<div class="form-group"><label>Email (opsional)</label><input type="email" id="usr-email"></div>
+<div class="form-group"><label>Email Login</label><input type="email" id="usr-email" placeholder="Otomatis jika dikosongkan"><small id="usr-email-hint" class="text-muted hidden">Email login terikat dengan akun autentikasi Firebase dan bersifat permanen.</small></div>
 <div class="form-group"><label>Password</label><input type="password" id="usr-password" required minlength="6"></div>
 <div class="form-group"><label>Peran utama</label><select id="usr-role" required>
 ${Object.entries(AppConfig.PRIMARY_ROLES).map(([val, label]) => `<option value="${val}">${label}</option>`).join('')}
@@ -406,7 +410,11 @@ document.getElementById('btn-add-usr').onclick = () => {
 document.getElementById('usr-modal-title').innerText = 'Tambah pengguna';
 document.getElementById('usr-id').value = '';
 document.getElementById('usr-name').value = '';
-document.getElementById('usr-email').value = '';
+const emailEl = document.getElementById('usr-email');
+emailEl.value = '';
+emailEl.removeAttribute('readonly');
+const hintEl = document.getElementById('usr-email-hint');
+if (hintEl) hintEl.classList.add('hidden');
 document.getElementById('usr-password').value = '';
 document.getElementById('usr-password').placeholder = '';
 document.getElementById('usr-role').value = 'guru';
@@ -426,19 +434,18 @@ const pwd = document.getElementById('usr-password').value;
 const assignments = Array.from(document.querySelectorAll('#usr-assignments-group input[type="checkbox"]:checked')).map((cb) => cb.value);
 const name = document.getElementById('usr-name').value.trim();
 let email = document.getElementById('usr-email').value.trim();
+try {
+if (!id) {
 if (!email) {
 email = `${name.toLowerCase().replace(/[^a-z0-9]/g, '')}@musada.sch.id`;
 }
+if (!pwd || pwd.length < 6) throw new Error('Password minimal 6 karakter.');
 const data = {
 name,
 email,
 role: document.getElementById('usr-role').value,
 assignments: assignments
 };
-if (pwd) data.password = pwd;
-try {
-if (!id) {
-if (!pwd || pwd.length < 6) throw new Error('Password minimal 6 karakter.');
 const secApp = firebase.initializeApp(firebaseConfig, 'SecAuth_' + Date.now());
 let newUid = null;
 try {
@@ -452,6 +459,16 @@ if (newUid) {
 await DB.createUserInDB(newUid, data);
 }
 } else {
+const existingUser = userArr.find(x => x.id === id);
+const defaultEmail = existingUser ? `${existingUser.id.toLowerCase().replace(/[^a-z0-9]/g, '')}@musada.sch.id` : '';
+const safeEmail = (existingUser && existingUser.email) ? existingUser.email : (email || defaultEmail);
+const data = {
+name,
+email: safeEmail,
+role: document.getElementById('usr-role').value,
+assignments: assignments
+};
+if (pwd) data.password = pwd;
 await DB.saveUser(id, data);
 }
 App.closeModal('modal-usr');

@@ -71,7 +71,7 @@ Sistem mengadopsi arsitektur dua tingkat untuk memisahkan secara tegas antara **
 
 ### 3. Tim Khusus & Koordinator Program
 * **Koordinator Ummi (`KOORD_UMMI`):** Aprilia An'umillah, S.Pd.
-* **Tim IT & Sistem (`TIM_IT`):** Ahmad Tsalis Novariyanto, S.Tr.T. | Divia Arianti, S.Pd., Gr. | Vindy Aprillia, S.Pd. | Administrator Sistem
+* **Tim IT & Sistem (`TIM_IT`):** Ahmad Tsalis Novariyanto, S.Tr.T. | Divia Arianti, S.Pd., Gr. | Vindy Aprilia, S.Pd. | Administrator Sistem
 * **Tim English Lab (`TIM_B_INGGRIS`):** Tim Guru Bahasa Inggris
 * **Tim Ummi (`TIM_UMMI`):** 14 Guru Pembelajar Al-Qur'an Metode Ummi
 * **Pembina Ekstrakurikuler (`GURU_EKSTRA_...`):** 14 Guru Pembina Cabang Ekskul

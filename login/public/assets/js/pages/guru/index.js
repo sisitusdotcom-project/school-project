@@ -961,9 +961,22 @@ bottomActionHtml = `
 <button id="btn-save-academic" class="btn btn-primary" style="width:100%; padding:12px; font-size:14px;"><i class="ph ph-floppy-disk"></i> Simpan Semua Nilai & Capaian Rapor</button>
 `;
 }
+const academicExcelBarHtml = `
+<div class="card section-block academic-excel-bar">
+<div class="academic-excel-info">
+<strong class="academic-excel-title"><i class="ph ph-file-xls text-success"></i> Kelola Nilai via Excel:</strong>
+<span class="text-muted text-sm">Unduh format template kelas ini, isi nilai di Excel, lalu impor kembali secara instan.</span>
+</div>
+<div class="academic-excel-actions">
+<button type="button" class="btn btn-outline btn-sm" id="btn-export-academic-xls"><i class="ph ph-file-arrow-down"></i> Unduh Format Excel</button>
+${!isReadOnly ? `<button type="button" class="btn btn-primary btn-sm" id="btn-import-academic-xls"><i class="ph ph-file-arrow-up"></i> Impor Nilai Excel</button><input type="file" id="inp-import-academic-file" accept=".xlsx,.xls,.csv" class="hidden">` : ''}
+</div>
+</div>
+`;
 acContainer.innerHTML = `
 ${finalizationCard}
 ${chManageHtml}
+${academicExcelBarHtml}
 <div style="margin-bottom:16px;">
 ${studentCardsHtml}
 </div>
@@ -1210,6 +1223,239 @@ alert('Gagal menyimpan nilai.');
 btn.disabled = false;
 btn.innerHTML = '<i class="ph ph-floppy-disk"></i> Simpan Semua Nilai & Capaian Rapor';
 }
+};
+}
+const btnExportXls = document.getElementById('btn-export-academic-xls');
+if (btnExportXls) {
+btnExportXls.onclick = () => {
+if (!window.XLSX) {
+alert('Library Excel belum dimuat.');
+return;
+}
+const exportRows = studentArr.map((s, idx) => {
+const g = grades[s.id] || {};
+const existingStudentChapters = g.chapters || [];
+const card = acContainer.querySelector(`.stu-grade-card[data-stu="${s.id}"]`);
+const rowObj = {
+ID_SISWA: s.id,
+NO: idx + 1,
+NISN: s.nisn || '-',
+NAMA_SISWA: s.name
+};
+currentChapters.forEach(ch => {
+const colKey = `BAB_${ch.chapterNo} (${ch.title || 'Materi'})`;
+const cardVal = card?.querySelector(`.ac-ch-score[data-chno="${ch.chapterNo}"]`)?.value;
+const found = existingStudentChapters.find(sc => sc.chapterNo === ch.chapterNo);
+const scVal = cardVal !== undefined && cardVal !== '' ? Number(cardVal) : (found && found.score ? Number(found.score) : '');
+rowObj[colKey] = scVal;
+});
+const phVal = card?.querySelector('.ac-ph-avg')?.value || g.ph || '';
+rowObj['RATA_PH'] = phVal !== '' ? Number(phVal) : '';
+if (sem === 1) {
+const sts1Val = card?.querySelector('.ac-sts1')?.value || g.sts1 || '';
+const sasVal = card?.querySelector('.ac-sas')?.value || g.sas || '';
+rowObj['STS_1'] = sts1Val !== '' ? Number(sts1Val) : '';
+rowObj['SAS_1'] = sasVal !== '' ? Number(sasVal) : '';
+} else {
+const sts2Val = card?.querySelector('.ac-sts2')?.value || g.sts2 || '';
+const satVal = card?.querySelector('.ac-sat')?.value || g.sat || '';
+rowObj['STS_2'] = sts2Val !== '' ? Number(sts2Val) : '';
+rowObj['SAT_2'] = satVal !== '' ? Number(satVal) : '';
+}
+const naVal = card?.querySelector('.ac-score')?.value || g.score || '';
+rowObj['NILAI_AKHIR'] = naVal !== '' ? Number(naVal) : '';
+const cpVal = card?.querySelector('.ac-comp-text')?.value || g.competency || g.descPositive || '';
+rowObj['CAPAIAN_KOMPETENSI'] = cpVal;
+return rowObj;
+});
+const ws = XLSX.utils.json_to_sheet(exportRows);
+const colWidths = [
+{ wch: 14 },
+{ wch: 6 },
+{ wch: 14 },
+{ wch: 28 },
+...currentChapters.map(() => ({ wch: 14 })),
+{ wch: 10 },
+{ wch: 10 },
+{ wch: 10 },
+{ wch: 14 },
+{ wch: 45 }
+];
+ws['!cols'] = colWidths;
+const wb = XLSX.utils.book_new();
+XLSX.utils.book_append_sheet(wb, ws, 'Nilai_Siswa');
+const safeCls = (cls?.name || 'Kelas').replace(/[^A-Za-z0-9]+/g, '_');
+const safeSub = (subObj?.name || 'Mapel').replace(/[^A-Za-z0-9]+/g, '_');
+const fileName = `Format_Nilai_${safeCls}_${safeSub}_Sem${sem}_TA${String(year).replace(/[^A-Za-z0-9]+/g, '_')}.xlsx`;
+XLSX.writeFile(wb, fileName);
+};
+}
+const btnImportXls = document.getElementById('btn-import-academic-xls');
+const inpImportFile = document.getElementById('inp-import-academic-file');
+if (btnImportXls && inpImportFile) {
+btnImportXls.onclick = () => {
+inpImportFile.click();
+};
+inpImportFile.onchange = (e) => {
+const file = e.target.files?.[0];
+if (!file) return;
+inpImportFile.value = '';
+if (!window.XLSX) {
+alert('Library Excel belum dimuat.');
+return;
+}
+const reader = new FileReader();
+reader.onload = (evt) => {
+try {
+const data = new Uint8Array(evt.target.result);
+const workbook = XLSX.read(data, { type: 'array' });
+const firstSheetName = workbook.SheetNames[0];
+const worksheet = workbook.Sheets[firstSheetName];
+const rows = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+if (!rows.length) {
+alert('File Excel kosong atau format tidak sesuai.');
+return;
+}
+let successCount = 0;
+let skippedCount = 0;
+const invalidScores = [];
+rows.forEach((row) => {
+const rawId = String(row.ID_SISWA || row.id_siswa || row.ID || row.id || '').trim();
+const rawNisn = String(row.NISN || row.nisn || '').trim();
+const rawName = String(row.NAMA_SISWA || row.nama_siswa || row.NAMA || row.Nama || '').trim().toLowerCase();
+const student = studentArr.find((s) => (rawId && s.id === rawId) || (rawNisn && s.nisn && String(s.nisn).trim() === rawNisn) || (rawName && s.name.toLowerCase() === rawName));
+if (!student) {
+skippedCount++;
+return;
+}
+const card = acContainer.querySelector(`.stu-grade-card[data-stu="${student.id}"]`);
+if (!card) return;
+currentChapters.forEach((ch) => {
+const chScoreInp = card.querySelector(`.ac-ch-score[data-chno="${ch.chapterNo}"]`);
+if (!chScoreInp) return;
+const matchingKey = Object.keys(row).find((k) => {
+const upper = k.toUpperCase().replace(/\s+/g, '_');
+return upper.startsWith(`BAB_${ch.chapterNo}`) || upper.startsWith(`BAB${ch.chapterNo}`);
+});
+if (matchingKey && row[matchingKey] !== '') {
+const val = parseInt(row[matchingKey], 10);
+if (!Number.isNaN(val)) {
+if (val < 75 || val > 100) {
+invalidScores.push(`${student.name} (Bab ${ch.chapterNo}: ${val})`);
+} else {
+chScoreInp.value = val;
+}
+}
+}
+});
+const stsKey = Object.keys(row).find((k) => {
+const upper = k.toUpperCase().replace(/\s+/g, '_');
+return upper.startsWith('STS') || upper === 'PTS';
+});
+const stsVal = stsKey && row[stsKey] !== '' ? parseInt(row[stsKey], 10) : NaN;
+if (!Number.isNaN(stsVal)) {
+if (stsVal < 75 || stsVal > 100) {
+invalidScores.push(`${student.name} (STS: ${stsVal})`);
+} else {
+const inp = sem === 1 ? card.querySelector('.ac-sts1') : card.querySelector('.ac-sts2');
+if (inp) inp.value = stsVal;
+}
+}
+const sasKey = Object.keys(row).find((k) => {
+const upper = k.toUpperCase().replace(/\s+/g, '_');
+return upper.startsWith('SAS') || upper.startsWith('SAT') || upper === 'PAS' || upper === 'PAT';
+});
+const sasVal = sasKey && row[sasKey] !== '' ? parseInt(row[sasKey], 10) : NaN;
+if (!Number.isNaN(sasVal)) {
+if (sasVal < 75 || sasVal > 100) {
+invalidScores.push(`${student.name} (SAS/SAT: ${sasVal})`);
+} else {
+const inp = sem === 1 ? card.querySelector('.ac-sas') : card.querySelector('.ac-sat');
+if (inp) inp.value = sasVal;
+}
+}
+const naKey = Object.keys(row).find((k) => {
+const upper = k.toUpperCase().replace(/\s+/g, '_');
+return upper === 'NILAI_AKHIR' || upper === 'NA' || upper === 'SCORE';
+});
+const naVal = naKey && row[naKey] !== '' ? parseInt(row[naKey], 10) : NaN;
+if (!Number.isNaN(naVal)) {
+if (naVal < 75 || naVal > 100) {
+invalidScores.push(`${student.name} (Nilai Akhir: ${naVal})`);
+} else {
+const inp = card.querySelector('.ac-score');
+if (inp) inp.value = naVal;
+}
+}
+const cpKey = Object.keys(row).find((k) => {
+const upper = k.toUpperCase().replace(/\s+/g, '_');
+return upper.includes('CAPAIAN') || upper.includes('KOMPETENSI') || upper.includes('DESKRIPSI');
+});
+if (cpKey && String(row[cpKey]).trim()) {
+const compInp = card.querySelector('.ac-comp-text');
+if (compInp) compInp.value = String(row[cpKey]).trim();
+}
+const chScoreInputs = card.querySelectorAll('.ac-ch-score');
+const sts1Inp = card.querySelector('.ac-sts1');
+const sasInp = card.querySelector('.ac-sas');
+const sts2Inp = card.querySelector('.ac-sts2');
+const satInp = card.querySelector('.ac-sat');
+const phAvgInp = card.querySelector('.ac-ph-avg');
+const scoreInp = card.querySelector('.ac-score');
+const compText = card.querySelector('.ac-comp-text');
+const bestBadge = card.querySelector('.ac-best-badge');
+const chScores = [];
+chScoreInputs.forEach((inp) => {
+const chNo = Number(inp.getAttribute('data-chno'));
+const v = Number(inp.value);
+if (inp.value && Number.isFinite(v) && v >= 75) {
+chScores.push({ chapterNo: chNo, score: v });
+}
+});
+let phAvg = null;
+let bestCh = null;
+if (chScores.length) {
+phAvg = Math.round(chScores.reduce((acc, c) => acc + c.score, 0) / chScores.length);
+chScores.sort((a, b) => b.score - a.score);
+const foundCh = currentChapters.find((c) => c.chapterNo === chScores[0].chapterNo);
+bestCh = {
+chapterNo: chScores[0].chapterNo,
+score: chScores[0].score,
+title: foundCh?.title || `Bab ${chScores[0].chapterNo}`,
+cp: foundCh?.cp || ''
+};
+}
+if (phAvgInp) phAvgInp.value = phAvg || '';
+if (bestBadge) {
+bestBadge.innerHTML = bestCh ? `<i class="ph ph-trend-up"></i> Terbaik: ${AppConfig.escapeHtml(bestCh.title)} (${bestCh.score})` : '<i class="ph ph-trend-up"></i> Belum diisi';
+}
+const s1Val = Number(sts1Inp?.value);
+const saVal = Number(sasInp?.value);
+const s2Val = Number(sts2Inp?.value);
+const stVal = Number(satInp?.value);
+const examValues = sem === 1 ? [phAvg, s1Val, saVal] : [phAvg, s2Val, stVal];
+const validExams = examValues.filter((v) => Number.isFinite(v) && v >= 75);
+if (validExams.length && scoreInp && !scoreInp.disabled && !Number.isFinite(naVal)) {
+scoreInp.value = Math.round(validExams.reduce((a, b) => a + b, 0) / validExams.length);
+}
+if (bestCh && compText && !compText.disabled && (!compText.value.trim() || compText.value.startsWith('Menunjukkan penguasaan')) && !(cpKey && String(row[cpKey]).trim())) {
+compText.value = bestCh.cp ? `Menunjukkan penguasaan materi yang sangat baik dalam ${bestCh.cp}.` : `Menunjukkan penguasaan materi yang sangat baik pada ${bestCh.title}.`;
+}
+successCount++;
+});
+let msg = `Berhasil mengimpor nilai untuk ${successCount} siswa dari file Excel.`;
+if (skippedCount > 0) msg += `\n(${skippedCount} baris diabaikan karena identitas siswa tidak cocok).`;
+if (invalidScores.length > 0) msg += `\n\nPerhatian: Ada ${invalidScores.length} nilai di luar rentang 75-100 yang diabaikan:\n- ${invalidScores.slice(0, 5).join('\n- ')}${invalidScores.length > 5 ? '\n...dan lainnya' : ''}`;
+msg += '\n\nNilai telah terisi pada form. Simpan sekarang ke database?';
+if (confirm(msg)) {
+const btnSave = document.getElementById('btn-save-academic');
+if (btnSave) btnSave.click();
+}
+} catch (err) {
+alert('Gagal memproses berkas Excel: ' + (err.message || 'Format tidak valid.'));
+}
+};
+reader.readAsArrayBuffer(file);
 };
 }
 };

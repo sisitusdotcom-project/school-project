@@ -238,6 +238,22 @@ const ModuleKit = {
   matchWhere(row, where) {
     return Object.entries(where || {}).every(([key, val]) => (Array.isArray(val) ? val.includes(row[key]) : row[key] === val));
   },
+  sampleVal(field, refs) {
+    if (field.ref && refs[field.ref]) {
+      const first = Object.values(refs[field.ref])[0];
+      if (first) return first;
+    }
+    if (field.options && field.options.length) {
+      return typeof field.options[0] === 'string' ? field.options[0] : field.options[0].value;
+    }
+    if (field.type === 'money' || field.type === 'number') return 50000;
+    if (field.type === 'time') return '07:30';
+    if (field.type === 'date') return this.today();
+    if (field.type === 'email') return 'contoh@musada.sch.id';
+    if (field.type === 'phone') return '081234567890';
+    if (field.key === 'day') return 'Senin';
+    return `Contoh ${field.label}`;
+  },
   summaryValue(item, rows) {
     const scoped = rows.filter((row) => this.matchWhere(row, item.where));
     if (item.sum) {
@@ -345,43 +361,47 @@ const ModuleKit = {
       }
     }
     container.innerHTML = `
-      ${praSdNotice}
-      ${summaryHtml ? `<section class="card-grid section-spacer">${summaryHtml}</section>` : ''}
-      <section class="card section-block">
-        <div class="card-header mk-header">
-          <h3 class="card-title"><i class="ph ${icon}"></i> ${this.esc(def.noun || title)}</h3>
-          <div class="mk-toolbar">
-            <input type="search" id="mk-search" class="mk-filter" placeholder="Cari data...">
-            ${statusFilter}
-            <button type="button" class="btn btn-outline btn-sm" id="mk-export"><i class="ph ph-file-xls"></i> Unduh Excel</button>
-            ${(def.allowImport && writable) ? '<button type="button" class="btn btn-outline btn-sm" id="mk-import"><i class="ph ph-file-arrow-up"></i> Impor Excel</button><input type="file" id="mk-import-file" accept=".xlsx,.xls,.csv" style="display:none;">' : ''}
-            ${(canAdd && def.canAdd !== false && (!isPraSdUser || def.node !== 'student_affairs/leaves')) ? '<button type="button" class="btn btn-primary btn-sm" id="mk-add"><i class="ph ph-plus"></i> Tambah</button>' : ''}
-          </div>
-        </div>
-        <div class="table-wrap">
-          <table class="table">
-            <thead><tr>${listFields.map((f) => `<th${f.type === 'money' ? ' class="text-right"' : ''}>${this.esc(f.label)}</th>`).join('')}${writable ? '<th class="text-right">Aksi</th>' : ''}</tr></thead>
-            <tbody id="mk-body"></tbody>
-          </table>
-        </div>
-        <div class="card-body mk-count text-muted" id="mk-count"></div>
-      </section>
-      ${writable ? `
-      <div class="modal-overlay" id="mk-modal">
-        <div class="modal modal-wide">
-          <div class="modal-header">
-            <h3 class="modal-title" id="mk-modal-title"></h3>
-            <button type="button" class="btn-icon" id="mk-close"><i class="ph ph-x"></i></button>
-          </div>
-          <form id="mk-form">
-            <div class="modal-body mk-form-grid">${def.fields.map((f) => this.fieldHtml(f, refs)).join('')}</div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-outline" id="mk-cancel">Batal</button>
-              <button type="submit" class="btn btn-primary" id="mk-save">Simpan</button>
+      <div class="mk-screen-view">
+        ${praSdNotice}
+        ${summaryHtml ? `<section class="card-grid section-spacer">${summaryHtml}</section>` : ''}
+        <section class="card section-block">
+          <div class="card-header mk-header">
+            <h3 class="card-title"><i class="ph ${icon}"></i> ${this.esc(def.noun || title)}</h3>
+            <div class="mk-toolbar">
+              <input type="search" id="mk-search" class="mk-filter" placeholder="Cari data...">
+              ${statusFilter}
+              <button type="button" class="btn btn-outline btn-sm" id="mk-pdf"><i class="ph ph-printer"></i> Cetak PDF</button>
+              <button type="button" class="btn btn-outline btn-sm" id="mk-export"><i class="ph ph-file-xls"></i> Unduh Excel</button>
+              ${(def.allowImport && writable) ? '<button type="button" class="btn btn-outline btn-sm" id="mk-import"><i class="ph ph-file-arrow-up"></i> Impor Excel</button><input type="file" id="mk-import-file" accept=".xlsx,.xls,.csv" class="hidden">' : ''}
+              ${(canAdd && def.canAdd !== false && (!isPraSdUser || def.node !== 'student_affairs/leaves')) ? '<button type="button" class="btn btn-primary btn-sm" id="mk-add"><i class="ph ph-plus"></i> Tambah</button>' : ''}
             </div>
-          </form>
-        </div>
-      </div>` : ''}`;
+          </div>
+          <div class="table-wrap">
+            <table class="table">
+              <thead><tr>${listFields.map((f) => `<th${f.type === 'money' ? ' class="text-right"' : ''}>${this.esc(f.label)}</th>`).join('')}${writable ? '<th class="text-right">Aksi</th>' : ''}</tr></thead>
+              <tbody id="mk-body"></tbody>
+            </table>
+          </div>
+          <div class="card-body mk-count text-muted" id="mk-count"></div>
+        </section>
+        ${writable ? `
+        <div class="modal-overlay" id="mk-modal">
+          <div class="modal modal-wide">
+            <div class="modal-header">
+              <h3 class="modal-title" id="mk-modal-title"></h3>
+              <button type="button" class="btn-icon" id="mk-close"><i class="ph ph-x"></i></button>
+            </div>
+            <form id="mk-form">
+              <div class="modal-body mk-form-grid">${def.fields.map((f) => this.fieldHtml(f, refs)).join('')}</div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-outline" id="mk-cancel">Batal</button>
+                <button type="submit" class="btn btn-primary" id="mk-save">Simpan</button>
+              </div>
+            </form>
+          </div>
+        </div>` : ''}
+      </div>
+      <div id="mk-print-sheet" class="salary-slip-sheet mk-print-sheet"></div>`;
     const body = container.querySelector('#mk-body');
     const countEl = container.querySelector('#mk-count');
     const filtered = () => {
@@ -433,24 +453,101 @@ const ModuleKit = {
         paint();
       });
     }
+    const pdfBtn = container.querySelector('#mk-pdf');
+    if (pdfBtn) {
+      pdfBtn.addEventListener('click', () => {
+        const printSheet = container.querySelector('#mk-print-sheet');
+        if (!printSheet) return;
+        const list = filtered();
+        const isLandscape = listFields.length > 5;
+        let pageStyle = document.getElementById('mk-print-page-style');
+        if (!pageStyle) {
+          pageStyle = document.createElement('style');
+          pageStyle.id = 'mk-print-page-style';
+          document.head.appendChild(pageStyle);
+        }
+        pageStyle.textContent = isLandscape
+          ? '@media print { @page { size: A4 landscape !important; margin: 8mm 10mm !important; } }'
+          : '@media print { @page { size: A4 portrait !important; margin: 10mm 12mm !important; } }';
+        const stampDate = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+        const docTitle = `LAPORAN DATA ${(def.noun || title).toUpperCase()}`;
+        const filterDesc = state.status ? `Status: ${state.status}` : 'Semua Status';
+        const kepsekName = 'Dhani Harsyahyadi, S.H.I.';
+        const unitLabel = (def.units && def.units[0]) ? (AppConfig.UNIT_LABELS[def.units[0]] || 'Penanggung Jawab') : 'Koordinator Unit';
+        const unitLeaderName = (def.role === 'finance' || def.units?.includes('WAKA_KEUANGAN')) ? 'Ainaini Ratna Noeri, M.Pd.' : ((def.role === 'curriculum' || def.units?.includes('WAKA_KURIKULUM')) ? 'Nur Fadhilah, S.Pd.' : 'Koordinator Unit Terkait');
+        printSheet.innerHTML = `
+          <div class="salary-slip-brand">
+            <img src="assets/img/majlis-dikdaspnf.webp" alt="Logo Majelis Dikdasmen PNF" class="salary-slip-logo salary-slip-logo-dikdas">
+            <div class="salary-slip-brand-text">
+              <div class="salary-slip-org">MAJELIS PENDIDIKAN DASAR MENENGAH DAN PENDIDIKAN NONFORMAL</div>
+              <div class="salary-slip-pcm">PIMPINAN CABANG MUHAMMADIYAH SEDATI</div>
+              <h2 class="salary-slip-title">SD MUHAMMADIYAH 1 SEDATI</h2>
+              <p class="salary-slip-meta">Jl. H. Syukur No. 65, Sedati Gede, Kec. Sedati, Sidoarjo 61253 | Telp/WA: 0859-6439-9398</p>
+              <p class="salary-slip-meta">Website: musada.sch.id | Email: sdmusada16@gmail.com</p>
+            </div>
+            <img src="assets/img/logo.webp" alt="Logo SD Muhammadiyah 1 Sedati" class="salary-slip-logo salary-slip-logo-school">
+          </div>
+          <div class="salary-slip-doc-header">
+            <h3 class="salary-slip-doc-title">${this.esc(docTitle)}</h3>
+            <p class="salary-slip-doc-sub">Dicetak: <strong>${stampDate}</strong> | Filter: <strong>${this.esc(filterDesc)}</strong> | Total: <strong>${list.length} Rekod Data</strong></p>
+          </div>
+          <table class="salary-slip-table mk-print-table">
+            <thead>
+              <tr>
+                <th class="mk-col-no">No</th>
+                ${listFields.map((f) => `<th${f.type === 'money' ? ' class="text-right"' : ''}>${this.esc(f.label)}</th>`).join('')}
+              </tr>
+            </thead>
+            <tbody>
+              ${list.length ? list.map((row, idx) => `
+                <tr>
+                  <td class="mk-col-no">${idx + 1}</td>
+                  ${listFields.map((f) => `<td${f.type === 'money' ? ' class="text-right"' : ''}>${this.esc(this.plain(def, f, row, refs))}</td>`).join('')}
+                </tr>
+              `).join('') : `<tr><td colspan="${listFields.length + 1}" class="mk-print-empty text-muted">Tidak ada rekod data.</td></tr>`}
+            </tbody>
+          </table>
+          <div class="salary-slip-signatures">
+            <div class="salary-slip-sig-box">
+              <span>Mengetahui,</span><br>
+              <strong>Kepala Sekolah</strong>
+              <div class="salary-slip-sig-space"></div>
+              <strong>${this.esc(kepsekName)}</strong><br>
+              <small class="text-muted">SD Muhammadiyah 1 Sedati</small>
+            </div>
+            <div class="salary-slip-sig-box">
+              <span>Sedati, ${stampDate}</span><br>
+              <strong>${this.esc(unitLabel)}</strong>
+              <div class="salary-slip-sig-space"></div>
+              <strong>${this.esc(unitLeaderName)}</strong><br>
+              <small class="text-muted">SD Muhammadiyah 1 Sedati</small>
+            </div>
+          </div>
+        `;
+        window.print();
+      });
+    }
     container.querySelector('#mk-export').addEventListener('click', () => {
       if (!window.XLSX) {
         alert('Library Excel belum dimuat.');
         return;
       }
-      let data = filtered().map((row, index) => {
-        const out = { No: index + 1 };
-        def.fields.forEach((f) => {
-          out[f.label] = this.plain(def, f, row, refs);
+      const rowsData = filtered();
+      let data = [];
+      if (rowsData.length > 0) {
+        data = rowsData.map((row, index) => {
+          const out = { 'ID': row.id, 'No': index + 1 };
+          def.fields.forEach((f) => {
+            out[f.label] = this.plain(def, f, row, refs);
+          });
+          return out;
         });
-        return out;
-      });
-      if (!data.length && def.node === 'curriculum/schedules') {
-        data = [
-          { No: 1, Hari: 'Senin', Mulai: '07:30', Selesai: '08:45', Kelas: '1 ABU BAKAR ASH SHIDDIQ', 'Mata Pelajaran': 'Matematika', Guru: 'Nur Fadhilah' },
-          { No: 2, Hari: 'Senin', Mulai: '08:45', Selesai: '10:00', Kelas: '1 ABU BAKAR ASH SHIDDIQ', 'Mata Pelajaran': 'Bahasa Indonesia', Guru: 'Nur Fadhilah' },
-          { No: 3, Hari: 'Selasa', Mulai: '07:30', Selesai: '08:45', Kelas: '1 ABU BAKAR ASH SHIDDIQ', 'Mata Pelajaran': 'Baca Tulis Qur\'an (BTQ)', Guru: 'Vindy Aprillia' }
-        ];
+      } else {
+        const templateRow = { 'ID': '', 'No': 1 };
+        def.fields.forEach((f) => {
+          templateRow[f.label] = this.sampleVal(f, refs);
+        });
+        data = [templateRow];
       }
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(data), 'Data');
@@ -477,29 +574,25 @@ const ModuleKit = {
             importFile.value = '';
             return;
           }
-          const [allClasses, allSubjects, allUsers] = await Promise.all([
-            DB.getClasses(),
-            DB.getSubjects(),
-            DB.getAllUsers()
-          ]);
-          const classByName = {};
-          Object.entries(allClasses || {}).forEach(([id, c]) => {
-            classByName[String(c.name || '').trim().toLowerCase()] = id;
-            classByName[id.toLowerCase()] = id;
+          const reverseRefs = {};
+          (def.fields || []).forEach((f) => {
+            if (f.ref && refs[f.ref]) {
+              reverseRefs[f.key] = {};
+              Object.entries(refs[f.ref]).forEach(([id, label]) => {
+                const clean = String(label).trim().toLowerCase();
+                reverseRefs[f.key][clean] = id;
+                reverseRefs[f.key][id.toLowerCase()] = id;
+              });
+            }
           });
-          const subByName = {};
-          Object.entries(allSubjects || {}).forEach(([id, s]) => {
-            subByName[String(s.name || '').trim().toLowerCase()] = id;
-            subByName[id.toLowerCase()] = id;
-          });
-          const userByName = {};
-          Object.entries(allUsers || {}).forEach(([id, u]) => {
-            userByName[String(u.name || u.displayName || '').trim().toLowerCase()] = id;
-            userByName[id.toLowerCase()] = id;
-          });
-          const validDays = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
-          const dayMap = {};
-          validDays.forEach(d => { dayMap[d.toLowerCase()] = d; });
+          const findCol = (r, ...names) => {
+            for (const name of names) {
+              const target = String(name || '').trim().toLowerCase();
+              const foundKey = Object.keys(r).find((k) => k.trim().toLowerCase() === target);
+              if (foundKey && r[foundKey] !== undefined && r[foundKey] !== '') return r[foundKey];
+            }
+            return '';
+          };
           const formatTimeVal = (val) => {
             if (typeof val === 'number') {
               const totalMinutes = Math.round(val * 24 * 60);
@@ -513,63 +606,97 @@ const ModuleKit = {
             return s;
           };
           const updates = {};
-          let validCount = 0;
+          let insertCount = 0;
+          let updateCount = 0;
           let skippedCount = 0;
+          const isSchedule = def.node === 'curriculum/schedules';
+          const dayMap = { senin: 'Senin', selasa: 'Selasa', rabu: 'Rabu', kamis: 'Kamis', jumat: 'Jumat', sabtu: 'Sabtu', minggu: 'Minggu' };
           rawRows.forEach((r) => {
-            const getCol = (...keys) => {
-              for (const k of keys) {
-                const found = Object.keys(r).find(rk => rk.trim().toLowerCase() === k.toLowerCase());
-                if (found && r[found] !== undefined && r[found] !== '') return r[found];
-              }
-              return '';
-            };
-            const rawDay = String(getCol('Hari', 'Day')).trim().toLowerCase();
-            const day = dayMap[rawDay];
-            const startTime = formatTimeVal(getCol('Mulai', 'Jam Mulai', 'Start', 'StartTime'));
-            const endTime = formatTimeVal(getCol('Selesai', 'Jam Selesai', 'End', 'EndTime'));
-            const rawCls = String(getCol('Kelas', 'Nama Kelas', 'Class', 'ClassId')).trim().toLowerCase();
-            const classId = classByName[rawCls];
-            const rawSub = String(getCol('Mata Pelajaran', 'Mapel', 'Subject', 'SubjectId')).trim().toLowerCase();
-            const subjectId = subByName[rawSub];
-            const rawTeacher = String(getCol('Guru', 'Nama Guru', 'Teacher', 'TeacherId')).trim().toLowerCase();
-            let teacherId = userByName[rawTeacher];
-            if (!teacherId && classId && subjectId && allClasses[classId]?.subjectTeachers?.[subjectId]) {
-              teacherId = allClasses[classId].subjectTeachers[subjectId];
-            }
-            if (!day || !startTime || !endTime || !classId || !subjectId) {
+            const rowId = String(findCol(r, 'ID', 'id')).trim();
+            if (rowId.toLowerCase().includes('kosongkan') || rowId.toLowerCase().includes('contoh')) {
               skippedCount++;
               return;
             }
-            const newKey = db.ref(def.node).push().key;
-            updates[`${def.node}/${newKey}`] = {
-              day,
-              startTime,
-              endTime,
-              classId,
-              subjectId,
-              teacherId: teacherId || '',
-              createdAt: new Date().toISOString()
-            };
-            validCount++;
+            if (isSchedule) {
+              const rawDay = String(findCol(r, 'Hari', 'Day')).trim().toLowerCase();
+              const day = dayMap[rawDay];
+              const startTime = formatTimeVal(findCol(r, 'Mulai', 'Jam Mulai', 'Start', 'StartTime'));
+              const endTime = formatTimeVal(findCol(r, 'Selesai', 'Jam Selesai', 'End', 'EndTime'));
+              const rawCls = String(findCol(r, 'Kelas', 'Nama Kelas', 'Class')).trim().toLowerCase();
+              const classId = reverseRefs.classId ? reverseRefs.classId[rawCls] : '';
+              const rawSub = String(findCol(r, 'Mata Pelajaran', 'Mapel', 'Subject')).trim().toLowerCase();
+              const subjectId = reverseRefs.subjectId ? reverseRefs.subjectId[rawSub] : '';
+              const rawTeacher = String(findCol(r, 'Guru', 'Nama Guru', 'Teacher')).trim().toLowerCase();
+              const teacherId = reverseRefs.teacherId ? (reverseRefs.teacherId[rawTeacher] || '') : '';
+              if (!day || !startTime || !endTime || !classId || !subjectId) {
+                skippedCount++;
+                return;
+              }
+              const isUpdate = rowId && state.rows.some((x) => x.id === rowId);
+              const targetKey = isUpdate ? rowId : db.ref(def.node).push().key;
+              updates[`${def.node}/${targetKey}`] = {
+                day,
+                startTime,
+                endTime,
+                classId,
+                subjectId,
+                teacherId: teacherId || '',
+                createdAt: isUpdate ? (state.rows.find((x) => x.id === rowId)?.createdAt || new Date().toISOString()) : new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+              };
+              if (isUpdate) updateCount++; else insertCount++;
+            } else {
+              const payload = {};
+              let hasAnyVal = false;
+              (def.fields || []).forEach((f) => {
+                let val = findCol(r, f.label, f.key);
+                if (val !== '') {
+                  hasAnyVal = true;
+                  if (f.ref && reverseRefs[f.key]) {
+                    const clean = String(val).trim().toLowerCase();
+                    val = reverseRefs[f.key][clean] || val;
+                  } else if (f.type === 'money' || f.type === 'number') {
+                    val = Number(String(val).replace(/[^0-9.-]/g, '')) || 0;
+                  } else if (f.type === 'time') {
+                    val = formatTimeVal(val);
+                  }
+                  payload[f.key] = val;
+                } else if (f.default !== undefined) {
+                  payload[f.key] = f.default;
+                }
+              });
+              if (!hasAnyVal) {
+                skippedCount++;
+                return;
+              }
+              const isUpdate = rowId && state.rows.some((x) => x.id === rowId);
+              const targetKey = isUpdate ? rowId : db.ref(def.node).push().key;
+              updates[`${def.node}/${targetKey}`] = {
+                ...payload,
+                updatedAt: new Date().toISOString()
+              };
+              if (!isUpdate) updates[`${def.node}/${targetKey}`].createdAt = new Date().toISOString();
+              if (isUpdate) updateCount++; else insertCount++;
+            }
           });
-          if (!validCount) {
-            alert(`Tidak ada data jadwal valid untuk diimpor (${skippedCount} baris tidak sesuai). Pastikan nama kolom: Hari, Mulai, Selesai, Kelas, Mata Pelajaran, Guru.`);
+          const totalValid = insertCount + updateCount;
+          if (!totalValid) {
+            alert(`Tidak ada data valid untuk diimpor (${skippedCount} baris diabaikan/kosong). Periksa format kolom Excel.`);
             importFile.value = '';
             return;
           }
-          if (!confirm(`Ditemukan ${validCount} jadwal pelajaran valid (${skippedCount} baris dilewati). Lanjutkan impor ke database?`)) {
+          if (!confirm(`Ditemukan ${totalValid} data valid (${insertCount} data baru, ${updateCount} perbaruan/edit, ${skippedCount} baris diabaikan). Lanjutkan menyimpan ke database?`)) {
             importFile.value = '';
             return;
           }
           await db.ref().update(updates);
-          alert(`Sukses mengimpor ${validCount} jadwal pelajaran!`);
+          alert(`Sukses mengimpor ${totalValid} data!`);
           importFile.value = '';
-          const freshRows = await ModuleKit.fetchRows(def.node);
-          state.rows = freshRows;
+          state.rows = await ModuleKit.fetchRows(def.node);
           paint();
         } catch (err) {
           console.error(err);
-          alert('Gagal membaca file Excel: ' + (err?.message || err));
+          alert('Gagal memproses berkas Excel: ' + (err?.message || err));
           importFile.value = '';
         }
       });
@@ -1157,23 +1284,26 @@ const ModuleKit = {
     Router.setTitle(title, def.subtitle || '');
     const state = { month: this.today().slice(0, 7), rows: [], opening: 0 };
     container.innerHTML = `
-      <section class="card-grid section-spacer" id="cb-summary"></section>
-      <section class="card section-block">
-        <div class="card-header mk-header">
-          <h3 class="card-title"><i class="ph ph-book-open"></i> Buku Kas Umum</h3>
-          <div class="mk-toolbar">
-            <input type="month" id="cb-month" class="mk-filter" value="${state.month}">
-            <button type="button" class="btn btn-outline btn-sm" id="cb-xls"><i class="ph ph-file-xls"></i> Excel</button>
-            <button type="button" class="btn btn-outline btn-sm" id="cb-pdf"><i class="ph ph-file-pdf"></i> PDF</button>
+      <div class="mk-screen-view">
+        <section class="card-grid section-spacer" id="cb-summary"></section>
+        <section class="card section-block">
+          <div class="card-header mk-header">
+            <h3 class="card-title"><i class="ph ph-book-open"></i> Buku Kas Umum</h3>
+            <div class="mk-toolbar">
+              <input type="month" id="cb-month" class="mk-filter" value="${state.month}">
+              <button type="button" class="btn btn-outline btn-sm" id="cb-xls"><i class="ph ph-file-xls"></i> Excel</button>
+              <button type="button" class="btn btn-outline btn-sm" id="cb-pdf"><i class="ph ph-printer"></i> Cetak PDF</button>
+            </div>
           </div>
-        </div>
-        <div class="table-wrap">
-          <table class="table">
-            <thead><tr><th>Tanggal</th><th>No. Bukti</th><th>Uraian</th><th class="text-right">Penerimaan</th><th class="text-right">Pengeluaran</th><th class="text-right">Saldo</th></tr></thead>
-            <tbody id="cb-body"></tbody>
-          </table>
-        </div>
-      </section>`;
+          <div class="table-wrap">
+            <table class="table">
+              <thead><tr><th>Tanggal</th><th>No. Bukti</th><th>Uraian</th><th class="text-right">Penerimaan</th><th class="text-right">Pengeluaran</th><th class="text-right">Saldo</th></tr></thead>
+              <tbody id="cb-body"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+      <div id="cb-print-sheet" class="salary-slip-sheet mk-print-sheet"></div>`;
     const load = async () => {
       const bounds = this.monthBounds(state.month);
       const all = isDBReady()
@@ -1243,19 +1373,92 @@ const ModuleKit = {
       XLSX.writeFile(wb, `BKU_${state.month}.xlsx`);
     });
     container.querySelector('#cb-pdf').addEventListener('click', () => {
-      if (!window.jspdf || !window.jspdf.jsPDF) {
-        alert('Library PDF belum dimuat.');
-        return;
+      const printSheet = container.querySelector('#cb-print-sheet');
+      if (!printSheet) return;
+      let pageStyle = document.getElementById('mk-print-page-style');
+      if (!pageStyle) {
+        pageStyle = document.createElement('style');
+        pageStyle.id = 'mk-print-page-style';
+        document.head.appendChild(pageStyle);
       }
-      const { out, closing } = lines();
-      const doc = new window.jspdf.jsPDF();
-      doc.setFontSize(14);
-      doc.text(`Buku Kas Umum - ${state.month}`, 14, 15);
-      const body = [['', '', 'Saldo Awal', '', '', this.money(state.opening)]]
-        .concat(out.map((l) => [l.date, l.ref, l.desc, l.debit ? this.money(l.debit) : '-', l.credit ? this.money(l.credit) : '-', this.money(l.balance)]))
-        .concat([['', '', 'Saldo Akhir', '', '', this.money(closing)]]);
-      doc.autoTable({ head: [['Tanggal', 'No. Bukti', 'Uraian', 'Penerimaan', 'Pengeluaran', 'Saldo']], body, startY: 22, theme: 'grid', styles: { fontSize: 8 } });
-      doc.save(`BKU_${state.month}.pdf`);
+      pageStyle.textContent = '@media print { @page { size: A4 landscape !important; margin: 8mm 10mm !important; } }';
+      const { out, income, expense, closing } = lines();
+      const stampDate = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+      printSheet.innerHTML = `
+        <div class="salary-slip-brand">
+          <img src="assets/img/majlis-dikdaspnf.webp" alt="Logo Majelis Dikdasmen PNF" class="salary-slip-logo salary-slip-logo-dikdas">
+          <div class="salary-slip-brand-text">
+            <div class="salary-slip-org">MAJELIS PENDIDIKAN DASAR MENENGAH DAN PENDIDIKAN NONFORMAL</div>
+            <div class="salary-slip-pcm">PIMPINAN CABANG MUHAMMADIYAH SEDATI</div>
+            <h2 class="salary-slip-title">SD MUHAMMADIYAH 1 SEDATI</h2>
+            <p class="salary-slip-meta">Jl. H. Syukur No. 65, Sedati Gede, Kec. Sedati, Sidoarjo 61253 | Telp/WA: 0859-6439-9398</p>
+            <p class="salary-slip-meta">Website: musada.sch.id | Email: sdmusada16@gmail.com</p>
+          </div>
+          <img src="assets/img/logo.webp" alt="Logo SD Muhammadiyah 1 Sedati" class="salary-slip-logo salary-slip-logo-school">
+        </div>
+        <div class="salary-slip-doc-header">
+          <h3 class="salary-slip-doc-title">BUKU KAS UMUM (BKU)</h3>
+          <p class="salary-slip-doc-sub">Periode Bulan: <strong>${this.esc(state.month)}</strong> | Dicetak: <strong>${stampDate}</strong></p>
+        </div>
+        <table class="salary-slip-table mk-print-table">
+          <thead>
+            <tr>
+              <th class="mk-col-no">No</th>
+              <th>Tanggal</th>
+              <th>No. Bukti</th>
+              <th>Uraian Transaksi</th>
+              <th class="text-right">Penerimaan</th>
+              <th class="text-right">Pengeluaran</th>
+              <th class="text-right">Saldo</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="mk-col-no">-</td>
+              <td>-</td>
+              <td>-</td>
+              <td><strong>Saldo Awal</strong></td>
+              <td class="text-right">-</td>
+              <td class="text-right">-</td>
+              <td class="text-right"><strong>${this.money(state.opening)}</strong></td>
+            </tr>
+            ${out.map((l, idx) => `
+              <tr>
+                <td class="mk-col-no">${idx + 1}</td>
+                <td>${this.esc(l.date)}</td>
+                <td>${this.esc(l.ref)}</td>
+                <td>${this.esc(l.desc)}</td>
+                <td class="text-right">${l.debit ? this.money(l.debit) : '-'}</td>
+                <td class="text-right">${l.credit ? this.money(l.credit) : '-'}</td>
+                <td class="text-right">${this.money(l.balance)}</td>
+              </tr>
+            `).join('')}
+            <tr class="salary-slip-total-row">
+              <td colspan="4" class="text-right"><strong>Total Saldo Akhir</strong></td>
+              <td class="text-right"><strong>${this.money(income)}</strong></td>
+              <td class="text-right"><strong>${this.money(expense)}</strong></td>
+              <td class="text-right"><strong>${this.money(closing)}</strong></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="salary-slip-signatures">
+          <div class="salary-slip-sig-box">
+            <span>Mengetahui,</span><br>
+            <strong>Kepala Sekolah</strong>
+            <div class="salary-slip-sig-space"></div>
+            <strong>Dhani Harsyahyadi, S.H.I.</strong><br>
+            <small class="text-muted">SD Muhammadiyah 1 Sedati</small>
+          </div>
+          <div class="salary-slip-sig-box">
+            <span>Sedati, ${stampDate}</span><br>
+            <strong>Waka Keuangan</strong>
+            <div class="salary-slip-sig-space"></div>
+            <strong>Ainaini Ratna Noeri, M.Pd.</strong><br>
+            <small class="text-muted">SD Muhammadiyah 1 Sedati</small>
+          </div>
+        </div>
+      `;
+      window.print();
     });
     await load();
   },
