@@ -32,9 +32,9 @@ const uid = user.uid || Auth.currentUser?.uid;
 const dirList = DB.toArray(directoryData);
 const cleanUserName = (user.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
 const empProfile = dirList.find(d => d.userId === uid || (d.name && d.name.toLowerCase().replace(/[^a-z0-9]/g, '') === cleanUserName)) || {};
-let teacherPosition = empProfile.position || user.position || user.jabatan || '';
+let teacherPosition = empProfile.position || empProfile.jabatan || user.position || user.jabatan || '';
 if (!teacherPosition) {
-teacherPosition = classArr.length > 0 ? `Guru Kelas ${classArr.map(c => c.name).join(', ')}` : 'Guru Mata Pelajaran';
+teacherPosition = classArr.length === 1 ? `Guru Kelas ${classArr[0].name}` : (classArr.length > 1 ? 'Guru Kelas' : 'Guru Mata Pelajaran');
 }
 const myTravels = DB.toArray(travelData).filter(t => (t.gtkId && t.gtkId === uid) || (t.teacherId && t.teacherId === uid) || (t.createdBy && t.createdBy === uid)).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
 const gradeResult = AppConfig.calculateAttendanceGrade(DB.toArray(myAttHist), { attendanceRules: settingsData?.attendanceRules });
@@ -55,13 +55,13 @@ const teacherScheds = mySchedules || [];
 const todayScheds = teacherScheds.filter(s => s.day === todayDayName).sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''));
 const tomorrowScheds = teacherScheds.filter(s => s.day === tomorrowDayName).sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''));
 const renderSchedItems = (items) => {
-if (!items.length) return '<p class="text-muted" style="margin:0; font-size:13px;">Tidak ada jadwal mengajar tatap muka.</p>';
+if (!items.length) return '<p class="guru-sched-empty">Tidak ada jadwal mengajar tatap muka.</p>';
 return items.map(s => {
 const cls = allClasses[s.classId];
 const sub = allSubjects[s.subjectId];
 const clsName = cls ? cls.name : s.classId;
 const subName = sub ? sub.name : s.subjectId;
-return `<div style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; margin-bottom:6px; background:var(--bg-card,#fff); border:1px solid var(--border-color,#e2e8f0); border-radius:6px;"><div><strong style="color:var(--text-main); font-size:13px;">${AppConfig.escapeHtml(subName)}</strong><div class="text-muted" style="font-size:12px;">Kelas: ${AppConfig.escapeHtml(clsName)}</div></div><span class="badge badge-primary" style="font-size:11px;">${s.startTime || '-'} - ${s.endTime || '-'}</span></div>`;
+return `<div class="guru-sched-item"><div><strong class="guru-sched-sub">${AppConfig.escapeHtml(subName)}</strong><div class="guru-sched-cls">Kelas: ${AppConfig.escapeHtml(clsName)}</div></div><span class="badge badge-primary guru-sched-badge">${s.startTime || '-'} - ${s.endTime || '-'}</span></div>`;
 }).join('');
 };
 const fullWeekSchedRows = teacherScheds.length ? [...teacherScheds].sort((a, b) => {
@@ -100,30 +100,30 @@ ${gradeResult.isPoorGrade ? `
 </div>
 </section>
 <section class="card section-spacer">
-<div class="card-header">
-<h3 class="card-title"><i class="ph ph-calendar-check"></i> Jadwal Mengajar Guru</h3>
+<div class="card-header guru-card-header">
+<h3 class="card-title"><i class="ph ph-calendar-check"></i> Jadwal Mengajar</h3>
 <div class="card-actions">
-<button type="button" class="btn btn-outline btn-sm" id="btn-toggle-guru-sched"><i class="ph ph-calendar"></i> Jadwal 1 Pekan</button>
+<button type="button" class="btn btn-outline btn-xs" id="btn-toggle-guru-sched"><i class="ph ph-calendar"></i> Jadwal 1 Pekan</button>
 </div>
 </div>
 <div class="card-body">
-<div class="card-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
-<div style="background:var(--bg-subtle,#f8fafc); border:1px solid var(--border-color,#e2e8f0); border-radius:10px; padding:16px;">
-<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-<strong style="color:var(--text-main); font-size:14px;"><i class="ph ph-clock"></i> Mengajar Hari Ini (${todayDayName})</strong>
+<div class="guru-sched-grid">
+<div class="guru-sched-box">
+<div class="guru-sched-head">
+<strong class="guru-sched-title"><i class="ph ph-clock"></i> Mengajar Hari Ini (${todayDayName})</strong>
 <span class="badge ${todayScheds.length ? 'badge-primary' : 'badge-neutral'}">${todayScheds.length} Sesi</span>
 </div>
 ${renderSchedItems(todayScheds)}
 </div>
-<div style="background:var(--bg-subtle,#f8fafc); border:1px solid var(--border-color,#e2e8f0); border-radius:10px; padding:16px;">
-<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-<strong style="color:var(--text-main); font-size:14px;"><i class="ph ph-arrow-right"></i> Persiapan Mengajar Besok (${tomorrowDayName})</strong>
+<div class="guru-sched-box">
+<div class="guru-sched-head">
+<strong class="guru-sched-title"><i class="ph ph-arrow-right"></i> Mengajar Besok (${tomorrowDayName})</strong>
 <span class="badge ${tomorrowScheds.length ? 'badge-success' : 'badge-neutral'}">${tomorrowScheds.length} Sesi</span>
 </div>
 ${renderSchedItems(tomorrowScheds)}
 </div>
 </div>
-<div id="guru-sched-week-wrap" style="display:none; margin-top:16px;">
+<div id="guru-sched-week-wrap" class="guru-sched-week hidden">
 <div class="table-responsive">
 <table class="table">
 <thead><tr><th>Hari</th><th>Jam</th><th>Kelas</th><th>Mata Pelajaran</th></tr></thead>
@@ -134,10 +134,10 @@ ${renderSchedItems(tomorrowScheds)}
 </div>
 </section>
 <section class="card section-spacer">
-<div class="card-header">
-<h3 class="card-title"><i class="ph ph-airplane-takeoff"></i> Riwayat Perjalanan Dinas Saya</h3>
+<div class="card-header guru-card-header">
+<h3 class="card-title"><i class="ph ph-airplane-takeoff"></i> Perjalanan Dinas</h3>
 <div class="card-actions">
-<a href="#/gtk/official-travel" class="btn btn-outline btn-sm"><i class="ph ph-plus-circle"></i> Ajukan Dinas</a>
+<a href="#/gtk/official-travel" class="btn btn-outline btn-xs"><i class="ph ph-plus-circle"></i> Ajukan Dinas</a>
 </div>
 </div>
 <div class="card-body">
@@ -164,16 +164,16 @@ ${myTravels.length > 5 ? `<div class="travel-all-wrap"><a href="#/gtk/official-t
 ` : `
 <div class="travel-empty-box">
 <i class="ph ph-airplane-landing travel-empty-icon"></i>
-<p class="travel-empty-text">Belum ada riwayat tugas / perjalanan dinas yang tercatat.</p>
+<p class="travel-empty-text">Belum ada riwayat tugas dinas yang tercatat.</p>
 <div class="travel-empty-btn-wrap">
-<a href="#/gtk/official-travel" class="btn btn-sm btn-primary"><i class="ph ph-plus-circle"></i> Buat Pengajuan Tugas Dinas</a>
+<a href="#/gtk/official-travel" class="btn btn-xs btn-primary"><i class="ph ph-plus-circle"></i> Buat Pengajuan</a>
 </div>
 </div>
 `}
 </div>
 </section>
 <section class="card section-spacer">
-<div class="card-header">
+<div class="card-header guru-card-header">
 <h3 class="card-title"><i class="ph ph-lightning"></i> Aksi Cepat Guru</h3>
 </div>
 <div class="card-body">
@@ -3116,22 +3116,22 @@ const dirList = DB.toArray(directoryData);
 const teacherName = AppConfig.formatUserName(Auth.userData || Auth.currentUser) || 'Ustadz / Ustadzah';
 const cleanUserName = (teacherName || '').toLowerCase().replace(/[^a-z0-9]/g, '');
 const empProfile = dirList.find(d => d.userId === uid || (d.name && d.name.toLowerCase().replace(/[^a-z0-9]/g, '') === cleanUserName)) || {};
+const user = Auth.userData || Auth.currentUser || {};
+const assigns = Auth.currentAssignments || AppConfig.getRoleAssignments(user);
 const classArr = DB.toArray(ummiClasses);
 let myClasses = classArr.filter(c => c.teacherId === uid);
 if (!myClasses.length) {
-const assigns = Auth.currentAssignments || AppConfig.getRoleAssignments(Auth.userData || {});
 myClasses = classArr.filter(c => assigns.some(a => a.toLowerCase().includes(c.name.toLowerCase().replace(/[^a-z0-9]/g, ''))));
 }
-const rombelName = myClasses.map(c => c.name).join(', ') || 'Metode Ummi';
 const totalEnrolled = myClasses.reduce((sum, c) => sum + Object.keys(c.students || {}).length, 0);
-const assigns = Auth.currentAssignments || AppConfig.getRoleAssignments(Auth.userData || {});
 const isKoord = assigns.includes('KOORD_UMMI');
+const position = empProfile.position || empProfile.jabatan || user.position || user.jabatan || (isKoord ? 'Koordinator BTQ Ummi' : 'Guru BTQ Ummi');
 const heroHtml = AppConfig.getDashboardHeroHtml({
-user: Auth.userData || Auth.currentUser,
+user,
 empProfile,
 attendanceRecord: myAtt,
 name: teacherName,
-position: `Guru BTQ Ummi · Pengampu ${rombelName}`,
+position,
 date: today
 });
 container.innerHTML = `
@@ -3276,15 +3276,16 @@ const simpleName = (e.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
 return assigns.some(a => a.includes(cleanId) || a.toLowerCase().includes(simpleName) || (cleanId === 'TS' && a.includes('TS')));
 });
 }
-const eksName = myEks.map(e => e.name).join(', ') || 'Ekstrakurikuler';
+const user = Auth.userData || Auth.currentUser || {};
 const totalEnrolled = myEks.reduce((sum, e) => sum + Object.keys(e.students || {}).length, 0);
 const attList = DB.toArray(snapAtt.val() || {}).filter(a => myEks.some(e => e.id === a.ekstraId));
-const coachName = Auth.userData?.name || Auth.currentUser?.displayName || 'Pembina';
+const coachName = user.name || user.displayName || 'Pembina';
+const coachPosition = user.position || user.jabatan || (myEks.length === 1 ? `Pembina ${myEks[0].name}` : 'Pembina Ekstrakurikuler');
 const heroHtml = AppConfig.getDashboardHeroHtml({
-user: Auth.userData || Auth.currentUser,
+user,
 attendanceRecord: null,
 name: coachName,
-position: `Pembina ${eksName}`,
+position: coachPosition,
 statusTitle: 'Model Presensi',
 statusText: 'Berbasis Pertemuan',
 statusClass: 'badge-primary',
@@ -4047,27 +4048,27 @@ NBM: <strong>${AppConfig.escapeHtml(empNbm)}</strong> · Status: <strong>${AppCo
 </div>
 </div>
 <div class="${alertClass}">
-<i class="ph ph-${grade === 'A' || grade === 'B' ? 'sparkle' : 'warning-circle'}"></i> <strong>Amanah & Motivasi Disiplin:</strong> "${AppConfig.escapeHtml(message)}"
+<i class="ph ph-${grade === 'A' || grade === 'B' ? 'sparkle' : 'warning-circle'}"></i> <div><strong>Amanah & Motivasi Disiplin:</strong> "${AppConfig.escapeHtml(message)}"</div>
 </div>
 <div class="card section-block mb-16">
 <h3 class="card-title kpi-section-title"><i class="ph ph-chart-donut"></i> 3 Indikator Utama KPI Real-Time (Arahan Personalia)</h3>
 <div class="kpi-metric-item">
 <div class="kpi-metric-label">
-<span><strong>1. Kehadiran / Masuk Mengajar</strong> (Target: &ge;90%)</span>
+<span><strong>1. Kehadiran / Masuk Mengajar</strong> <span class="kpi-target-note text-muted">(Target: &ge;90%)</span></span>
 <strong>${lAum}%</strong>
 </div>
 <div class="progress-bar"><div class="progress-fill kpi-fill-success" data-progress="${Math.min(100, lAum)}"></div></div>
 </div>
 <div class="kpi-metric-item">
 <div class="kpi-metric-label">
-<span><strong>2. Ketepatan Waktu Datang & Pulang</strong> (Target: Jam Kerja Sekolah)</span>
+<span><strong>2. Ketepatan Waktu Datang & Pulang</strong> <span class="kpi-target-note text-muted">(Target: Jam Kerja Sekolah)</span></span>
 <strong>${lCom}%</strong>
 </div>
 <div class="progress-bar"><div class="progress-fill ${lCom >= 75 ? 'kpi-fill-success' : 'kpi-fill-warning'}" data-progress="${Math.min(100, lCom)}"></div></div>
 </div>
 <div class="kpi-metric-item">
 <div class="kpi-metric-label">
-<span><strong>3. Keaktifan Pembinaan Musada & Kajian PCM/PDM</strong> (Warga Muhammadiyah)</span>
+<span><strong>3. Keaktifan Pembinaan Musada & Kajian PCM/PDM</strong> <span class="kpi-target-note text-muted">(Warga Muhammadiyah)</span></span>
 <strong>${lMuham}%</strong>
 </div>
 <div class="progress-bar"><div class="progress-fill kpi-fill-primary" data-progress="${Math.min(100, lMuham)}"></div></div>
@@ -4153,27 +4154,27 @@ NBM: <strong>${AppConfig.escapeHtml(empNbm)}</strong> · Status: <strong>${AppCo
 </div>
 </div>
 <div class="${alertClass}">
-<i class="ph ph-${grade === 'A' || grade === 'B' ? 'sparkle' : 'warning-circle'}"></i> <strong>Amanah & Catatan Personalia:</strong> "${AppConfig.escapeHtml(message)}"
+<i class="ph ph-${grade === 'A' || grade === 'B' ? 'sparkle' : 'warning-circle'}"></i> <div><strong>Amanah & Catatan Personalia:</strong> "${AppConfig.escapeHtml(message)}"</div>
 </div>
 <div class="card section-block mb-16">
 <h3 class="card-title kpi-section-title"><i class="ph ph-check-square-offset"></i> 3 Indikator Utama Evaluasi (Arahan Personalia)</h3>
 <div class="kpi-metric-item">
 <div class="kpi-metric-label">
-<span><strong>1. Kehadiran / Masuk Mengajar</strong> (Loyalitas thd AUM)</span>
+<span><strong>1. Kehadiran / Masuk Mengajar</strong> <span class="kpi-target-note text-muted">(Loyalitas thd AUM)</span></span>
 <strong>${lAum}%</strong>
 </div>
 <div class="progress-bar"><div class="progress-fill kpi-fill-success" data-progress="${Math.min(100, lAum)}"></div></div>
 </div>
 <div class="kpi-metric-item">
 <div class="kpi-metric-label">
-<span><strong>2. Ketepatan Waktu Datang & Pulang</strong> (Kepatuhan & Kedisiplinan Jam Kerja)</span>
+<span><strong>2. Ketepatan Waktu Datang & Pulang</strong> <span class="kpi-target-note text-muted">(Kepatuhan & Kedisiplinan Jam Kerja)</span></span>
 <strong>${lCom}%</strong>
 </div>
 <div class="progress-bar"><div class="progress-fill ${lCom >= 75 ? 'kpi-fill-success' : 'kpi-fill-warning'}" data-progress="${Math.min(100, lCom)}"></div></div>
 </div>
 <div class="kpi-metric-item">
 <div class="kpi-metric-label">
-<span><strong>3. Keaktifan Pembinaan Musada & Kajian PCM/PDM</strong> (Warga Muhammadiyah)</span>
+<span><strong>3. Keaktifan Pembinaan Musada & Kajian PCM/PDM</strong> <span class="kpi-target-note text-muted">(Warga Muhammadiyah)</span></span>
 <strong>${lMuham}%</strong>
 </div>
 <div class="progress-bar"><div class="progress-fill kpi-fill-primary" data-progress="${Math.min(100, lMuham)}"></div></div>

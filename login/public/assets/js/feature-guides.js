@@ -658,9 +658,15 @@ const FeatureGuides = {
       </div>
     `;
   },
+  _activeCleanup: null,
   attach(container, routePath) {
     if (!container) return;
-    if (container.querySelector('#feature-guide-banner')) return;
+    if (this._activeCleanup) {
+      this._activeCleanup();
+      this._activeCleanup = null;
+    }
+    const existing = container.querySelector('#feature-guide-banner');
+    if (existing) existing.remove();
     const guideHtml = this.render(routePath);
     if (!guideHtml) return;
     const temp = document.createElement('div');
@@ -672,16 +678,80 @@ const FeatureGuides = {
     const contentEl = bannerEl.querySelector('#feature-guide-content');
     const textEl = bannerEl.querySelector('#text-toggle-feature-guide');
     const iconEl = bannerEl.querySelector('#icon-toggle-feature-guide');
-    if (toggleBtn && contentEl) {
+    let isManuallyToggled = false;
+    let autoCloseTimer = null;
+    const closeGuide = () => {
+      bannerEl.classList.add('collapsed');
+      if (contentEl) contentEl.classList.add('collapsed');
+      if (textEl) textEl.innerText = 'Buka';
+      if (iconEl) iconEl.className = 'ph ph-caret-down';
+    };
+    const openGuide = () => {
+      bannerEl.classList.remove('collapsed');
+      if (contentEl) contentEl.classList.remove('collapsed');
+      if (textEl) textEl.innerText = 'Tutup';
+      if (iconEl) iconEl.className = 'ph ph-caret-up';
+    };
+    const toggleGuide = () => {
+      isManuallyToggled = true;
+      if (autoCloseTimer) {
+        clearTimeout(autoCloseTimer);
+        autoCloseTimer = null;
+      }
+      if (bannerEl.classList.contains('collapsed')) {
+        openGuide();
+      } else {
+        closeGuide();
+      }
+    };
+    if (toggleBtn) {
       toggleBtn.onclick = (e) => {
         e.preventDefault();
-        const isCollapsed = contentEl.classList.toggle('collapsed');
-        if (textEl) textEl.innerText = isCollapsed ? 'Buka' : 'Tutup';
-        if (iconEl) {
-          iconEl.className = isCollapsed ? 'ph ph-caret-down' : 'ph ph-caret-up';
-        }
+        toggleGuide();
       };
     }
+    autoCloseTimer = setTimeout(() => {
+      if (!isManuallyToggled) {
+        closeGuide();
+      }
+    }, 4500);
+    const onPointerDown = (e) => {
+      if (!bannerEl.contains(e.target)) {
+        if (!bannerEl.classList.contains('collapsed')) {
+          closeGuide();
+        }
+        if (autoCloseTimer) {
+          clearTimeout(autoCloseTimer);
+          autoCloseTimer = null;
+        }
+      }
+    };
+    const onScroll = () => {
+      if (window.scrollY > 40 && !isManuallyToggled) {
+        if (!bannerEl.classList.contains('collapsed')) {
+          closeGuide();
+        }
+        if (autoCloseTimer) {
+          clearTimeout(autoCloseTimer);
+          autoCloseTimer = null;
+        }
+      }
+    };
+    const onBannerMouseEnter = () => {
+      if (autoCloseTimer) {
+        clearTimeout(autoCloseTimer);
+        autoCloseTimer = null;
+      }
+    };
+    bannerEl.addEventListener('mouseenter', onBannerMouseEnter);
+    document.addEventListener('pointerdown', onPointerDown, { passive: true });
+    window.addEventListener('scroll', onScroll, { passive: true });
+    this._activeCleanup = () => {
+      if (autoCloseTimer) clearTimeout(autoCloseTimer);
+      bannerEl.removeEventListener('mouseenter', onBannerMouseEnter);
+      document.removeEventListener('pointerdown', onPointerDown);
+      window.removeEventListener('scroll', onScroll);
+    };
   }
 ,
   customSteps: {

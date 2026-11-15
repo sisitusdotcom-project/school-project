@@ -29,7 +29,8 @@ const lCount = clsStudents.filter((s) => s.gender === 'L').length;
 const pCount = clsStudents.filter((s) => s.gender === 'P').length;
 const teacher = userList.find((u) => u.id === cls.teacherId || (u.assignments && u.assignments.includes(`GURU_KELAS_${String(cls.id || '').replace('CLASS_', '')}`)));
 const teacherName = teacher ? teacher.name : '-';
-const fase = AppConfig.getClassPhase(cls);
+const faseLetter = AppConfig.getClassPhase(cls, 'letter');
+const fase = AppConfig.getClassPhase(cls, 'full');
 const total = clsStudents.length;
 let capStatus = 'Ideal';
 let capTone = 'success';
@@ -48,6 +49,7 @@ id: cls.id,
 name: cls.name,
 level: cls.level || parseInt(cls.name, 10) || 1,
 fase,
+faseLetter,
 teacherName,
 lCount,
 pCount,
@@ -103,35 +105,35 @@ ${heroHtml}
 </div>
 </section>
 <section class="card section-spacer">
-<div class="card-header flex-between">
-<div>
-<h3 class="card-title"><i class="ph ph-chart-pie-slice"></i> Laporan Ringkasan Siswa &amp; Analisis Kapasitas Rombel</h3>
-<p class="text-muted small">Monitoring distribusi siswa, keseimbangan gender, dan kesesuaian kapasitas standar kelas (Standar Permendikbud: 28 Siswa/Rombel).</p>
+<div class="card-header rombel-summary-header">
+<div class="rombel-summary-title-wrap">
+<h3 class="card-title"><i class="ph ph-chart-pie-slice"></i> Ringkasan Siswa &amp; Kapasitas Rombel</h3>
+<p class="text-muted small">Monitoring distribusi siswa &amp; kapasitas rombel (Std: 28/kelas)</p>
 </div>
-<div class="button-group">
-<button id="btn-filter-fase-all" class="btn btn-sm btn-outline active">Semua Fase</button>
-<button id="btn-filter-fase-a" class="btn btn-sm btn-outline">Fase A (1-2)</button>
-<button id="btn-filter-fase-b" class="btn btn-sm btn-outline">Fase B (3-4)</button>
-<button id="btn-filter-fase-c" class="btn btn-sm btn-outline">Fase C (5-6)</button>
+<div class="rombel-fase-filter">
+<button id="btn-filter-fase-all" class="btn btn-xs btn-outline active">Semua</button>
+<button id="btn-filter-fase-a" class="btn btn-xs btn-outline">Fase A (1-2)</button>
+<button id="btn-filter-fase-b" class="btn btn-xs btn-outline">Fase B (3-4)</button>
+<button id="btn-filter-fase-c" class="btn btn-xs btn-outline">Fase C (5-6)</button>
 </div>
 </div>
 <div class="card-body">
 <div class="capacity-kpi-grid">
 <div class="card capacity-card-ideal">
 <div class="text-muted small">Kapasitas Ideal (20-28 Siswa)</div>
-<div class="capacity-val-ideal">${idealRombelCount} Rombel</div>
+<div class="capacity-val-ideal" id="val-cap-ideal">${idealRombelCount} Rombel</div>
 </div>
 <div class="card capacity-card-full">
 <div class="text-muted small">Penuh / Maksimal (29-30 Siswa)</div>
-<div class="capacity-val-full">${fullRombelCount} Rombel</div>
+<div class="capacity-val-full" id="val-cap-full">${fullRombelCount} Rombel</div>
 </div>
 <div class="card capacity-card-over">
 <div class="text-muted small">Over-Capacity (&gt; 30 Siswa)</div>
-<div class="capacity-val-over">${overRombelCount} Rombel</div>
+<div class="capacity-val-over" id="val-cap-over">${overRombelCount} Rombel</div>
 </div>
 <div class="card capacity-card-under">
 <div class="text-muted small">Kuota Tersedia (&lt; 20 Siswa)</div>
-<div class="capacity-val-under">${underRombelCount} Rombel</div>
+<div class="capacity-val-under" id="val-cap-under">${underRombelCount} Rombel</div>
 </div>
 </div>
 <div class="table-responsive">
@@ -152,7 +154,7 @@ ${heroHtml}
 ${rombelSummary.map((r, i) => {
 const capPercent = Math.min(100, Math.round((r.total / 28) * 100));
 return `
-<tr data-fase="${r.fase}">
+<tr data-fase="${r.faseLetter}">
 <td>${i + 1}</td>
 <td><strong>${AppConfig.escapeHtml(r.name)}</strong></td>
 <td><span class="badge badge-info">${AppConfig.escapeHtml(r.fase)}</span></td>
@@ -174,50 +176,50 @@ return `
 <tfoot>
 <tr class="tfoot-rekap-bg">
 <td colspan="4" class="text-right">TOTAL KESELURUHAN:</td>
-<td class="text-center text-primary">${maleTotal}</td>
-<td class="text-center text-danger">${femaleTotal}</td>
-<td class="text-center">${activeStudents}</td>
-<td><span class="badge badge-primary">${totalRombel} Rombel Terdata</span></td>
+<td class="text-center text-primary" id="rekap-total-l">${maleTotal}</td>
+<td class="text-center text-danger" id="rekap-total-p">${femaleTotal}</td>
+<td class="text-center" id="rekap-total-all">${activeStudents}</td>
+<td><span class="badge badge-primary" id="rekap-total-rombel">${totalRombel} Rombel Terdata</span></td>
 </tr>
 </tfoot>
 </table>
 </div>
-<div class="button-group mt-3">
-<button id="btn-export-excel" class="btn btn-primary btn-sm"><i class="ph ph-file-xls"></i> Unduh Rekap + Daftar Siswa Excel</button>
-<button id="btn-export-pdf" class="btn btn-danger btn-sm"><i class="ph ph-file-pdf"></i> Unduh Rekap + Daftar Siswa PDF</button>
+<div class="rombel-export-group">
+<button id="btn-export-excel" class="btn btn-xs btn-primary"><i class="ph ph-file-xls"></i> Unduh Rekap Excel</button>
+<button id="btn-export-pdf" class="btn btn-xs btn-danger"><i class="ph ph-file-pdf"></i> Unduh Rekap PDF</button>
 </div>
 </div>
 </section>
 <div class="card-grid section-spacer">
 <section class="card">
-<div class="card-header flex-between">
-<div>
-<h3 class="card-title"><i class="ph ph-trophy"></i> Prestasi Siswa &amp; Cetak Sertifikat Resmi</h3>
-<p class="text-muted small">Monitoring keikutsertaan kontingen lomba (Juara vs Partisipan) dan cetak sertifikat apresiasi.</p>
+<div class="card-header prest-card-header">
+<div class="prest-header-title">
+<h3 class="card-title"><i class="ph ph-trophy"></i> Prestasi &amp; Sertifikat Siswa</h3>
+<p class="text-muted small">Monitoring kontingen lomba &amp; cetak sertifikat</p>
 </div>
-<a href="#/student-affairs/achievements" class="btn btn-sm btn-outline"><i class="ph ph-arrow-up-right"></i> Kelola di Tabel</a>
+<a href="#/student-affairs/achievements" class="btn btn-xs btn-outline"><i class="ph ph-arrow-up-right"></i> Kelola</a>
 </div>
 <div class="card-body">
 <div class="kpi-metric-item">
 <div class="kpi-metric-label">
-<span><strong>Perolehan Juara (1, 2, 3 &amp; Harapan)</strong>: ${totalJuara}</span>
-<span>${juaraPercent}%</span>
+<span><strong>Perolehan Juara</strong> <span class="kpi-target-note text-muted">(1, 2, 3 &amp; Harapan)</span>: <strong>${totalJuara}</strong></span>
+<strong class="text-success">${juaraPercent}%</strong>
 </div>
 <div class="progress-bar"><div class="progress-fill kpi-fill-success" data-progress="${juaraPercent}"></div></div>
 </div>
 <div class="kpi-metric-item">
 <div class="kpi-metric-label">
-<span><strong>Partisipan Apresiasi (Pengalaman Tanding)</strong>: ${totalPartisipan}</span>
-<span>${partisipanPercent}%</span>
+<span><strong>Partisipan Lomba</strong> <span class="kpi-target-note text-muted">(Pengalaman Tanding)</span>: <strong>${totalPartisipan}</strong></span>
+<strong class="text-primary">${partisipanPercent}%</strong>
 </div>
 <div class="progress-bar"><div class="progress-fill kpi-fill-primary" data-progress="${partisipanPercent}"></div></div>
 </div>
-<div class="badge-group mt-3 badge-group-mb">
+<div class="prest-badges-row">
 <span class="badge badge-success"><i class="ph ph-medal"></i> ${totalJuara} Juara</span>
 <span class="badge badge-info"><i class="ph ph-hand-heart"></i> ${totalPartisipan} Partisipan</span>
 <span class="badge badge-primary"><i class="ph ph-files"></i> Sertifikat Siap Cetak</span>
 </div>
-<h4 class="achieve-sub-title"><i class="ph ph-clock-counter-clockwise"></i> 5 Catatan Lomba Terkini (Siap Cetak Sertifikat):</h4>
+<h4 class="achieve-sub-title"><i class="ph ph-clock-counter-clockwise"></i> 5 Catatan Lomba Terkini:</h4>
 <div class="table-responsive">
 <table class="table achieve-table-sm">
 <thead><tr><th>Tanggal</th><th>Siswa</th><th>Nama Lomba / Event</th><th>Capaian</th><th class="text-right">Aksi</th></tr></thead>
@@ -243,29 +245,29 @@ return `
 </div>
 </section>
 <section class="card">
-<div class="card-header flex-between">
-<div>
-<h3 class="card-title"><i class="ph ph-users-three"></i> Pendaftar SPMB &amp; Jalur Inden (Terpadu)</h3>
-<p class="text-muted small">Rasio calon siswa baru jalur reguler aktif dan pemesanan kuota inden.</p>
+<div class="card-header spmb-card-header">
+<div class="spmb-header-title">
+<h3 class="card-title"><i class="ph ph-users-three"></i> Pendaftar SPMB &amp; Inden</h3>
+<p class="text-muted small">Rasio calon siswa baru reguler &amp; kuota inden</p>
 </div>
-<a href="#/student-affairs/ppdb" class="btn btn-sm btn-outline"><i class="ph ph-arrow-up-right"></i> Kelola SPMB</a>
+<a href="#/student-affairs/ppdb" class="btn btn-xs btn-outline"><i class="ph ph-arrow-up-right"></i> Kelola</a>
 </div>
 <div class="card-body">
 <div class="kpi-metric-item">
 <div class="kpi-metric-label">
-<span><strong>Jalur Reguler (Tahun Ajaran Berjalan)</strong>: ${regulerCount}</span>
-<span>${regulerPercent}%</span>
+<span><strong>Jalur Reguler</strong> <span class="kpi-target-note text-muted">(T.A Berjalan)</span>: <strong>${regulerCount}</strong></span>
+<strong class="text-primary">${regulerPercent}%</strong>
 </div>
 <div class="progress-bar"><div class="progress-fill kpi-fill-primary" data-progress="${regulerPercent}"></div></div>
 </div>
 <div class="kpi-metric-item">
 <div class="kpi-metric-label">
-<span><strong>Jalur Inden (Pemesanan Kuota Depan)</strong>: ${indenCount}</span>
-<span>${indenPercent}%</span>
+<span><strong>Jalur Inden</strong> <span class="kpi-target-note text-muted">(Kuota Depan)</span>: <strong>${indenCount}</strong></span>
+<strong class="text-warning">${indenPercent}%</strong>
 </div>
 <div class="progress-bar"><div class="progress-fill kpi-fill-warning" data-progress="${indenPercent}"></div></div>
 </div>
-<div class="badge-group mt-3">
+<div class="spmb-badges-row">
 <span class="badge badge-primary"><i class="ph ph-user-check"></i> ${regulerCount} Reguler</span>
 <span class="badge badge-warning"><i class="ph ph-calendar-plus"></i> ${indenCount} Inden</span>
 <span class="badge badge-success"><i class="ph ph-check-circle"></i> ${acceptedCount} Diterima</span>
@@ -321,14 +323,49 @@ const btnB = document.getElementById('btn-filter-fase-b');
 const btnC = document.getElementById('btn-filter-fase-c');
 const buttons = [btnAll, btnA, btnB, btnC];
 const rows = document.querySelectorAll('#table-rombel-summary tbody tr');
-const filterFase = (fase) => {
-rows.forEach((r) => {
-if (!fase || r.dataset.fase === fase) {
-r.style.display = '';
-} else {
-r.style.display = 'none';
+const valIdeal = document.getElementById('val-cap-ideal');
+const valFull = document.getElementById('val-cap-full');
+const valOver = document.getElementById('val-cap-over');
+const valUnder = document.getElementById('val-cap-under');
+const rekapL = document.getElementById('rekap-total-l');
+const rekapP = document.getElementById('rekap-total-p');
+const rekapAll = document.getElementById('rekap-total-all');
+const rekapRombel = document.getElementById('rekap-total-rombel');
+const filterFase = (targetLetter) => {
+const norm = (targetLetter || '').trim().toUpperCase();
+let countL = 0;
+let countP = 0;
+let countTotal = 0;
+let countRombel = 0;
+let cIdeal = 0;
+let cFull = 0;
+let cOver = 0;
+let cUnder = 0;
+rombelSummary.forEach((r, idx) => {
+const matches = !norm || r.faseLetter === norm;
+const rowEl = rows[idx];
+if (rowEl) {
+rowEl.style.display = matches ? '' : 'none';
+}
+if (matches) {
+countL += r.lCount;
+countP += r.pCount;
+countTotal += r.total;
+countRombel += 1;
+if (r.capStatus === 'Ideal') cIdeal++;
+else if (r.capStatus === 'Penuh') cFull++;
+else if (r.capStatus === 'Over-Capacity') cOver++;
+else if (r.capStatus === 'Tersedia') cUnder++;
 }
 });
+if (valIdeal) valIdeal.textContent = `${cIdeal} Rombel`;
+if (valFull) valFull.textContent = `${cFull} Rombel`;
+if (valOver) valOver.textContent = `${cOver} Rombel`;
+if (valUnder) valUnder.textContent = `${cUnder} Rombel`;
+if (rekapL) rekapL.textContent = countL;
+if (rekapP) rekapP.textContent = countP;
+if (rekapAll) rekapAll.textContent = countTotal;
+if (rekapRombel) rekapRombel.textContent = `${countRombel} Rombel Terdata`;
 };
 if (btnAll) {
 btnAll.onclick = () => {
@@ -341,21 +378,21 @@ if (btnA) {
 btnA.onclick = () => {
 buttons.forEach((b) => b && b.classList.remove('active'));
 btnA.classList.add('active');
-filterFase('Fase A');
+filterFase('A');
 };
 }
 if (btnB) {
 btnB.onclick = () => {
 buttons.forEach((b) => b && b.classList.remove('active'));
 btnB.classList.add('active');
-filterFase('Fase B');
+filterFase('B');
 };
 }
 if (btnC) {
 btnC.onclick = () => {
 buttons.forEach((b) => b && b.classList.remove('active'));
 btnC.classList.add('active');
-filterFase('Fase C');
+filterFase('C');
 };
 }
 };

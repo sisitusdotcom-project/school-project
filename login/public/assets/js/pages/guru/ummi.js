@@ -565,8 +565,11 @@ async renderUmmiClasses(container) {
         <div class="card section-spacer">
           <div class="card-header ummi-rombel-header">
             <div class="ummi-rombel-info">
-              <h3 class="card-title">${idx + 1}. ${AppConfig.escapeHtml(cls.name)} ${getSessionBadge(getUmmiClassSession(cls))}</h3>
-              <p class="text-muted ummi-rombel-meta"><i class="ph ph-map-pin"></i> <strong>Tempat:</strong> ${AppConfig.escapeHtml(cls.room || 'Tempat belum diatur')} · Tingkat: ${AppConfig.escapeHtml(cls.level || 'Jilid')} · Total ${studentsInRombel.length} Santri Binaan Lintas Kelas</p>
+              <div class="ummi-rombel-header-top">
+                <h3 class="card-title">${idx + 1}. ${AppConfig.escapeHtml(cls.name)}</h3>
+                ${getSessionBadge(getUmmiClassSession(cls))}
+              </div>
+              <p class="text-muted ummi-rombel-meta"><i class="ph ph-map-pin"></i> ${AppConfig.escapeHtml(cls.room || 'Tempat belum diatur')} &nbsp;·&nbsp; ${AppConfig.escapeHtml(cls.level || 'Jilid')} &nbsp;·&nbsp; ${studentsInRombel.length} Santri Binaan</p>
             </div>
             <div class="card-header-actions ummi-rombel-actions">
               <a href="#/guru/ummi/progress?classId=${cls.id}" class="btn btn-primary btn-sm"><i class="ph ph-book-open"></i> Jurnal Rombel Ini</a>
@@ -847,13 +850,16 @@ async renderUmmiClasses(container) {
               <label>Catatan Kesalahan / Keterangan Belajar di Sekolah</label>
               <input type="text" id="in-note" placeholder="Contoh: Perhatikan panjang mad thabi\'i pada baris ke-3, fashahah sudah sangat baik.">
             </div>
-            <button type="submit" class="btn btn-primary ummi-submit-btn" id="btn-save-journal"><i class="ph ph-floppy-disk"></i> Simpan Sesi & Perbarui Capaian BTQ</button>
+            <button type="submit" class="btn btn-primary ummi-submit-btn" id="btn-save-journal"><i class="ph ph-floppy-disk"></i> Simpan Sesi &amp; Capaian BTQ</button>
           </form>
         </div>
         <div class="card section-spacer">
-          <div class="card-header">
-            <h3 class="card-title"><i class="ph ph-table"></i> Kartu Prestasi Santri (${AppConfig.escapeHtml(activeStudent.name)})</h3>
-            <span class="badge badge-primary">9 Kolom Standar Prestasi</span>
+          <div class="card-header ummi-card-header">
+            <div class="ummi-card-title-wrap">
+              <h3 class="card-title"><i class="ph ph-table"></i> Kartu Prestasi Santri</h3>
+              <span class="ummi-card-student-name">${AppConfig.escapeHtml(activeStudent.name)}</span>
+            </div>
+            <span class="badge badge-primary badge-sm ummi-standard-badge">9 Kolom Standar</span>
           </div>
           <div class="table-responsive">
             <table class="table">
@@ -999,7 +1005,7 @@ async renderUmmiClasses(container) {
         } catch (err) {
           alert(err.message || 'Gagal menyimpan jurnal.');
           btn.disabled = false;
-          btn.innerHTML = '<i class="ph ph-floppy-disk"></i> Simpan Sesi & Perbarui Capaian BTQ';
+          btn.innerHTML = '<i class="ph ph-floppy-disk"></i> Simpan Sesi & Capaian BTQ';
         }
       };
       if (typeof FeatureGuides !== 'undefined') {

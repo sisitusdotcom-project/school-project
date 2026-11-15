@@ -272,35 +272,114 @@
     padding: 50px;
     color: red;
 }
-.certificate-page{width:100%;max-width:1050px;min-height:680px;padding:16px;margin:20px auto;box-sizing:border-box;background:#ffffff;display:flex;flex-direction:column;}
-.certificate-outer-frame{border:4px double #1e3a8a;padding:6px;height:100%;flex:1;display:flex;flex-direction:column;box-sizing:border-box;}
-.certificate-inner-frame{border:1.5px solid #d97706;padding:24px 32px;height:100%;flex:1;display:flex;flex-direction:column;justify-content:space-between;text-align:center;background:radial-gradient(circle at center,#ffffff 60%,#fffbeb 100%);box-sizing:border-box;}
-.certificate-header{display:flex;align-items:center;justify-content:space-between;gap:16px;}
+.certificate-page{width:100%;max-width:1060px;aspect-ratio:297/210;box-sizing:border-box;background:#ffffff;padding:14px;margin:0 auto;box-shadow:0 14px 40px -6px rgba(15,23,42,0.18),0 0 0 1px rgba(15,23,42,0.06);border-radius:4px;display:flex;flex-direction:column;}
+.certificate-outer-frame{border:3px solid #142a5c;padding:5px;height:100%;flex:1;display:flex;flex-direction:column;box-sizing:border-box;box-shadow:inset 0 0 0 1px rgba(212,175,55,0.4);}
+.certificate-inner-frame{border:1.5px solid #c59b27;padding:20px 32px 16px;height:100%;flex:1;display:flex;flex-direction:column;justify-content:space-between;text-align:center;background:radial-gradient(circle at center,#ffffff 55%,#fdfbf7 85%,#f8f3ea 100%);box-sizing:border-box;position:relative;}
+.cert-corner{position:absolute;width:14px;height:14px;border:2px solid #142a5c;pointer-events:none;}
+.cert-corner-tl{top:4px;left:4px;border-right:none;border-bottom:none;}
+.cert-corner-tr{top:4px;right:4px;border-left:none;border-bottom:none;}
+.cert-corner-bl{bottom:4px;left:4px;border-right:none;border-top:none;}
+.cert-corner-br{bottom:4px;right:4px;border-left:none;border-top:none;}
+.certificate-header{display:flex;align-items:center;justify-content:space-between;gap:18px;}
 .cert-logo-left,.cert-logo-right{width:56px;height:56px;object-fit:contain;flex-shrink:0;}
 .cert-header-text{flex:1;text-align:center;}
-.cert-org,.cert-pcm{font-size:10px;font-weight:700;margin:0 0 1px 0;color:#1e3a8a;text-transform:uppercase;}
-.cert-school-name{font-size:18px;font-weight:900;margin:2px 0;letter-spacing:0.8px;color:#0f172a;}
-.cert-school-address{font-size:8.5px;color:#475569;margin:0;}
-.cert-divider{height:3px;background:linear-gradient(90deg,#1e3a8a 0%,#d97706 50%,#1e3a8a 100%);margin:10px 0 14px 0;}
-.cert-title{font-size:22px;font-weight:900;color:#1e3a8a;letter-spacing:1.5px;margin:0 0 2px 0;text-transform:uppercase;}
-.cert-no{font-size:11px;color:#64748b;margin:0 0 10px 0;letter-spacing:0.5px;}
-.cert-lead{font-size:12px;color:#334155;margin:0 0 8px 0;font-style:italic;}
-.cert-student-name{font-size:24px;font-weight:900;color:#0f172a;margin:4px 0 2px 0;text-decoration:underline;text-underline-offset:4px;}
-.cert-student-meta{font-size:11.5px;color:#475569;margin:0 0 12px 0;}
-.cert-narrative{font-size:12.5px;color:#1e293b;line-height:1.6;max-width:820px;margin:0 auto 16px auto;}
-.cert-footer{display:flex;align-items:flex-end;justify-content:space-between;margin-top:auto;padding:0 20px;}
+.cert-org,.cert-pcm{font-family:'Cinzel','Montserrat',sans-serif;font-size:9.5px;font-weight:700;margin:0 0 1px 0;color:#142a5c;text-transform:uppercase;letter-spacing:0.4px;line-height:1.25;}
+.cert-school-name{font-family:'Cinzel','Playfair Display',serif;font-size:18px;font-weight:900;margin:2px 0;letter-spacing:1px;color:#0f172a;line-height:1.2;}
+.cert-school-address{font-family:'Montserrat',sans-serif;font-size:8.5px;color:#475569;margin:0;line-height:1.2;font-weight:500;}
+.cert-divider{height:2.5px;background:linear-gradient(90deg,#142a5c 0%,#d4af37 50%,#142a5c 100%);margin:8px 0 10px 0;}
+.cert-body{flex:1;display:flex;flex-direction:column;justify-content:space-evenly;margin:4px 0;}
+.cert-title-block{text-align:center;margin:0 0 4px 0;}
+.cert-title-main{font-family:'Cinzel','Playfair Display','Times New Roman',serif;font-size:27px;font-weight:900;color:#142a5c;letter-spacing:6px;margin:0;line-height:1.1;text-transform:uppercase;}
+.cert-title-sub{font-family:'Cinzel','Montserrat',sans-serif;font-size:14px;font-weight:700;color:#946719;letter-spacing:4px;margin:2px 0 0 0;line-height:1.15;text-transform:uppercase;}
+.cert-no{font-family:'Montserrat',sans-serif;font-size:10px;color:#64748b;margin:4px 0 0 0;letter-spacing:0.8px;font-weight:600;}
+.cert-lead{font-family:'Cinzel','Montserrat',sans-serif;font-size:11px;font-weight:700;color:#a16207;letter-spacing:2.5px;text-transform:uppercase;margin:6px 0 2px 0;line-height:1.2;}
+.cert-recipient-block{margin:2px 0 6px 0;text-align:center;}
+.cert-student-name{font-family:'Great Vibes','Brush Script MT','Lucida Calligraphy',cursive,serif;font-size:44px;font-weight:400;color:#122853;margin:0;line-height:1.15;letter-spacing:0.5px;text-shadow:0 1px 1px rgba(0,0,0,0.04);}
+.cert-ornament{display:flex;align-items:center;justify-content:center;gap:12px;margin:3px auto 5px auto;max-width:380px;}
+.cert-ornament-line{flex:1;height:1px;background:linear-gradient(90deg,transparent 0%,#d4af37 50%,#b8860b 100%);}
+.cert-ornament-line:last-child{background:linear-gradient(90deg,#b8860b 0%,#d4af37 50%,transparent 100%);}
+.cert-ornament-flourish{font-size:10px;color:#b48324;letter-spacing:3px;line-height:1;}
+.cert-student-meta{font-family:'Montserrat',sans-serif;font-size:10px;color:#475569;margin:0;letter-spacing:0.5px;font-weight:500;}
+.cert-narrative{font-family:'Montserrat',sans-serif;font-size:11.5px;color:#334155;line-height:1.65;max-width:760px;margin:0 auto;font-weight:400;}
+.cert-footer{display:flex;align-items:flex-end;justify-content:space-between;margin-top:8px;padding:0 18px 2px;}
 .cert-sig{text-align:center;width:220px;}
-.cert-sig-title{font-size:10.5px;margin:0 0 2px 0;}
-.cert-sig-role{font-size:11px;font-weight:700;color:#0f172a;margin:0;}
-.cert-sig-space{height:48px;}
-.cert-sig-name{font-size:11.5px;font-weight:700;margin:0;color:#0f172a;text-decoration:underline;}
-.cert-sig-id{font-size:9.5px;color:#64748b;margin:1px 0 0 0;}
-.cert-seal{display:flex;align-items:center;justify-content:center;}
-.cert-seal-badge{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;width:68px;height:68px;border-radius:50%;border:2px dashed #d97706;background:#fffbeb;color:#b45309;}
-.cert-seal-badge i{font-size:24px;}
-.cert-seal-badge span{font-size:7px;font-weight:800;letter-spacing:0.5px;margin-top:2px;}
+.cert-sig-title{font-family:'Montserrat',sans-serif;font-size:10px;margin:0 0 2px 0;color:#475569;}
+.cert-sig-role{font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:#0f172a;margin:0;}
+.cert-sig-space{height:40px;}
+.cert-sig-name{font-family:'Montserrat',sans-serif;font-size:11.5px;font-weight:700;margin:0;color:#0f172a;}
+.cert-sig-id{font-family:'Montserrat',sans-serif;font-size:9.5px;color:#64748b;margin:2px 0 0 0;}
+.cert-seal{display:flex;align-items:center;justify-content:center;margin-bottom:4px;}
+.cert-seal-badge{display:inline-flex;align-items:center;justify-content:center;width:66px;height:66px;border-radius:50%;border:2px solid #b8860b;box-shadow:0 0 0 2px #fef3c7,0 0 0 3.5px #d4af37,0 4px 10px rgba(184,134,11,0.25);background:radial-gradient(circle at 35% 35%,#fffdf5 0%,#fef3c7 70%,#fde68a 100%);color:#92400e;position:relative;}
+.cert-seal-inner{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;}
+.cert-seal-inner i{font-size:24px;color:#b45309;}
+.cert-seal-inner span{font-family:'Cinzel','Montserrat',sans-serif;font-size:6.5px;font-weight:800;letter-spacing:0.6px;color:#78350f;margin-top:1px;}
+body.certificate-mode{background:#f1f5f9;margin:0;padding:24px 16px;min-height:100vh;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;}
+body.certificate-mode #print-container{width:100%;display:flex;flex-direction:column;align-items:center;}
+@media (max-width:768px){
+body.certificate-mode{padding:56px 8px 16px;}
+.certificate-page{aspect-ratio:auto;padding:8px;border-radius:6px;}
+.certificate-inner-frame{padding:14px 14px 10px;}
+.cert-corner{width:10px;height:10px;}
+.cert-logo-left,.cert-logo-right{width:36px;height:36px;}
+.cert-org,.cert-pcm{font-size:8px;letter-spacing:0;}
+.cert-school-name{font-size:13px;letter-spacing:0.2px;}
+.cert-school-address{font-size:7px;}
+.cert-divider{margin:5px 0 6px 0;height:2px;}
+.cert-title-main{font-size:18px;letter-spacing:3px;}
+.cert-title-sub{font-size:10.5px;letter-spacing:2px;}
+.cert-no{font-size:8.5px;margin-top:2px;}
+.cert-lead{font-size:9px;letter-spacing:1px;margin:5px 0 2px 0;}
+.cert-student-name{font-size:26px;margin:2px 0 0 0;}
+.cert-ornament{margin:2px auto 4px auto;max-width:240px;}
+.cert-student-meta{font-size:8.5px;margin:0;}
+.cert-narrative{font-size:9.5px;line-height:1.45;}
+.cert-footer{margin-top:8px;padding:0 4px;}
+.cert-sig{width:105px;}
+.cert-sig-title,.cert-sig-role{font-size:8px;}
+.cert-sig-space{height:24px;}
+.cert-sig-name{font-size:8.5px;}
+.cert-sig-id{font-size:7px;}
+.cert-seal{margin-bottom:2px;}
+.cert-seal-badge{width:46px;height:46px;box-shadow:0 0 0 1.5px #fef3c7,0 0 0 2.5px #d4af37;}
+.cert-seal-inner i{font-size:16px;}
+.cert-seal-inner span{font-size:4.8px;}
+}
 @media print{
 @page{size:A4 landscape;margin:0;}
-body{background:#fff!important;margin:0!important;padding:0!important;}
-.certificate-page{width:100%!important;max-width:100%!important;height:100dvh!important;min-height:100dvh!important;margin:0!important;padding:10mm!important;}
+html,body{width:297mm!important;height:210mm!important;margin:0!important;padding:0!important;background:#fff!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;overflow:hidden!important;}
+.print-actions{display:none!important;}
+body.certificate-mode{background:#fff!important;margin:0!important;padding:0!important;width:297mm!important;height:210mm!important;display:block!important;}
+body.certificate-mode #print-container{width:297mm!important;height:210mm!important;margin:0!important;padding:0!important;display:block!important;}
+body.certificate-mode .certificate-page{width:297mm!important;height:210mm!important;max-width:297mm!important;max-height:210mm!important;margin:0!important;padding:7mm!important;box-sizing:border-box!important;box-shadow:none!important;border-radius:0!important;page-break-after:avoid!important;page-break-before:avoid!important;page-break-inside:avoid!important;break-inside:avoid!important;overflow:hidden!important;}
+body.certificate-mode .certificate-outer-frame{border:3px solid #142a5c!important;padding:4px!important;height:100%!important;box-sizing:border-box!important;box-shadow:inset 0 0 0 1px rgba(212,175,55,0.4)!important;}
+body.certificate-mode .certificate-inner-frame{border:1.5px solid #c59b27!important;padding:14px 24px 10px!important;height:100%!important;background:radial-gradient(circle at center,#ffffff 55%,#fdfbf7 85%,#f8f3ea 100%)!important;box-sizing:border-box!important;justify-content:space-between!important;}
+body.certificate-mode .cert-corner{width:12px!important;height:12px!important;border-width:2px!important;}
+body.certificate-mode .cert-logo-left,body.certificate-mode .cert-logo-right{width:50px!important;height:50px!important;}
+body.certificate-mode .cert-org,body.certificate-mode .cert-pcm{font-size:8.5pt!important;line-height:1.2!important;letter-spacing:0.3px!important;}
+body.certificate-mode .cert-school-name{font-size:16pt!important;line-height:1.15!important;letter-spacing:0.8px!important;}
+body.certificate-mode .cert-school-address{font-size:7.5pt!important;line-height:1.15!important;}
+body.certificate-mode .cert-divider{height:2px!important;margin:5px 0 6px 0!important;}
+body.certificate-mode .cert-body{margin:2px 0!important;}
+body.certificate-mode .cert-title-block{margin:0 0 2px 0!important;}
+body.certificate-mode .cert-title-main{font-size:24pt!important;line-height:1.1!important;letter-spacing:5px!important;}
+body.certificate-mode .cert-title-sub{font-size:12pt!important;line-height:1.15!important;letter-spacing:3.5px!important;}
+body.certificate-mode .cert-no{font-size:8.5pt!important;margin:2px 0 0 0!important;letter-spacing:0.6px!important;}
+body.certificate-mode .cert-lead{font-size:9.5pt!important;margin:4px 0 1px 0!important;letter-spacing:2px!important;}
+body.certificate-mode .cert-recipient-block{margin:1px 0 3px 0!important;}
+body.certificate-mode .cert-student-name{font-size:36pt!important;line-height:1.1!important;letter-spacing:0.4px!important;}
+body.certificate-mode .cert-ornament{margin:2px auto 3px auto!important;max-width:320px!important;}
+body.certificate-mode .cert-ornament-flourish{font-size:8pt!important;}
+body.certificate-mode .cert-student-meta{font-size:8.5pt!important;margin:0!important;}
+body.certificate-mode .cert-narrative{font-size:9.5pt!important;line-height:1.55!important;max-width:820px!important;}
+body.certificate-mode .cert-footer{margin-top:4px!important;padding:0 14px 0!important;}
+body.certificate-mode .cert-sig{width:205px!important;}
+body.certificate-mode .cert-sig-title{font-size:8.5pt!important;}
+body.certificate-mode .cert-sig-role{font-size:9pt!important;}
+body.certificate-mode .cert-sig-space{height:32px!important;}
+body.certificate-mode .cert-sig-name{font-size:9.5pt!important;}
+body.certificate-mode .cert-sig-id{font-size:7.5pt!important;}
+body.certificate-mode .cert-seal{margin-bottom:2px!important;}
+body.certificate-mode .cert-seal-badge{width:56px!important;height:56px!important;}
+body.certificate-mode .cert-seal-inner i{font-size:20px!important;}
+body.certificate-mode .cert-seal-inner span{font-size:5.8px!important;}
 }

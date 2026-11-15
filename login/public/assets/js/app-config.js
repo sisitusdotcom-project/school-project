@@ -1378,11 +1378,14 @@ const name = opts.name || user.name || user.displayName || empProfile.name || 'P
 const nbm = opts.nbm || empProfile.nbm || empProfile.nuptk || user.nbm || user.nuptk || user.nip || '-';
 let position = opts.position || '';
 if (!position) {
-if (empProfile.position) position = empProfile.position;
+if (empProfile.position || empProfile.jabatan) position = empProfile.position || empProfile.jabatan;
 else if (user.position || user.jabatan) position = user.position || user.jabatan;
 else if (user.role === ROLES.KEPSEK) position = 'Kepala Sekolah';
 else if (user.role === ROLES.TENDIK) position = 'Tenaga Administrasi Sekolah';
-else if (user.role === ROLES.GURU_UMMI) position = 'Guru BTQ Ummi';
+else if (user.role === ROLES.GURU_UMMI) {
+const assigns = (typeof Auth !== 'undefined' && Auth.currentAssignments) || getRoleAssignments(user) || [];
+position = assigns.includes('KOORD_UMMI') ? 'Koordinator BTQ Ummi' : 'Guru BTQ Ummi';
+}
 else if (user.role === ROLES.GURU_EKSKUL) position = 'Pembina Ekstrakurikuler';
 else if (user.role === ROLES.ADMIN) position = 'Administrator Sistem';
 else position = 'Guru Kelas/Mapel';

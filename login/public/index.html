@@ -170,7 +170,7 @@
     <div class="modal modal-profile-dialog">
       <div class="modal-header">
         <h3 class="modal-title">Profil Saya</h3>
-        <button class="btn-icon" data-close-modal="modal-profile"><i class="ph ph-x"></i></button>
+        <button type="button" class="btn-icon" data-close-modal="modal-profile" aria-label="Tutup"><i class="ph ph-x"></i></button>
       </div>
       <form id="form-profile">
         <div class="modal-body">
@@ -183,25 +183,32 @@
               <div class="profile-role-badge" id="profile-role"></div>
               <input type="file" id="profile-photo-input" accept="image/*" class="hidden">
               <div class="profile-avatar-actions">
-                <button type="button" class="btn btn-outline btn-xs" id="btn-change-photo"><i class="ph ph-camera"></i>
-                  Ganti Foto</button>
-                <button type="button" class="btn btn-outline btn-xs text-danger hidden" id="btn-remove-photo"><i
-                    class="ph ph-trash"></i> Hapus</button>
+                <button type="button" class="btn btn-outline btn-xs" id="btn-change-photo"><i class="ph ph-camera"></i> Ganti Foto</button>
+                <button type="button" class="btn btn-outline btn-xs text-danger hidden" id="btn-remove-photo"><i class="ph ph-trash"></i> Hapus</button>
               </div>
             </div>
           </div>
           <div class="form-group">
-            <label for="profile-email">Email</label>
-            <input type="email" id="profile-email" placeholder="contoh@gmail.com">
+            <label for="profile-email">Email Akun</label>
+            <input type="email" id="profile-email" placeholder="nama@musada.sch.id">
           </div>
           <div class="form-group">
             <label for="profile-password">Ganti Password</label>
-            <input type="password" id="profile-password" minlength="6"
-              placeholder="(Kosongkan jika tidak diubah, min. 6 karakter)">
+            <input type="password" id="profile-password" minlength="6" placeholder="Masukkan password baru">
+            <div class="profile-field-hint"><i class="ph ph-info"></i> Kosongkan jika tidak ingin mengubah password (min. 6 karakter).</div>
+          </div>
+          <div class="profile-system-box">
+            <div class="profile-system-meta">
+              <div class="profile-system-icon"><i class="ph ph-arrows-clockwise"></i></div>
+              <div class="profile-system-text">
+                <span class="profile-system-title">Pembaruan Sistem</span>
+                <span class="profile-system-desc">Periksa pembaruan rilis aplikasi</span>
+              </div>
+            </div>
+            <button type="button" class="btn btn-outline btn-xs" id="btn-check-app-update">Cek Update</button>
           </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-outline btn-sm" id="btn-check-app-update"><i class="ph ph-arrows-clockwise"></i> Cek Pembaruan</button>
+        <div class="modal-footer modal-profile-footer">
           <button type="button" class="btn btn-outline" data-close-modal="modal-profile">Batal</button>
           <button type="submit" class="btn btn-primary">Simpan Profil</button>
         </div>

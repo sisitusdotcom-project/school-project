@@ -27,6 +27,7 @@
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   --sidebar-width: 240px;
   --shell-header-height: 74px;
+  --mobile-header-height: 56px;
   --control-height: 40px;
   --control-height-compact: 36px;
   --card-padding: 16px;

@@ -3,6 +3,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const type = urlParams.get('type') || 'report';
   const id = urlParams.get('id');
   const container = document.getElementById('print-container');
+  if (type === 'certificate') {
+    document.title = 'Cetak Sertifikat | SD Muhammadiyah 1 Sedati';
+    document.body.classList.add('certificate-mode');
+    let pageStyle = document.getElementById('cert-page-style');
+    if (!pageStyle) {
+      pageStyle = document.createElement('style');
+      pageStyle.id = 'cert-page-style';
+      document.head.appendChild(pageStyle);
+    }
+    pageStyle.textContent = '@page { size: A4 landscape; margin: 0; }';
+    if (container) {
+      container.innerHTML = '<p class="print-loading-message">Memuat sertifikat resmi...</p>';
+    }
+  }
   if (!id) {
     container.innerHTML = '<p class="print-error-text">Error: Parameter ID tidak ditemukan.</p>';
     return;
@@ -350,15 +364,27 @@ async function generateCertificate(achieveId, container) {
   try {
     const achieve = await DB._read(`student_affairs/achievements/${achieveId}`);
     if (!achieve) throw new Error('Data prestasi/sertifikat tidak ditemukan.');
+    const [settings, classes, users] = await Promise.all([
+      DB.getSettings().catch(() => ({})),
+      DB.getClasses().catch(() => ({})),
+      DB.getAllUsers ? DB.getAllUsers().catch(() => ({})) : Promise.resolve({})
+    ]);
     const student = (achieve.studentId ? await DB.getStudent(achieve.studentId) : null) || {
       name: achieve.studentName || 'Siswa Berprestasi',
       nis: '-',
       nisn: '-'
     };
-    const classes = await DB.getClasses().catch(() => ({}));
     const cls = classes[student.classId] || { name: student.className || '-' };
+    const userList = Array.isArray(users) ? users : Object.values(users || {});
+    const waka = userList.find(u => (u.assignments && u.assignments.includes('WAKA_KESISWAAN')) || (u.role && String(u.role).toLowerCase().includes('kesiswaan')) || (u.name && String(u.name).toLowerCase().includes('furqon')));
+    const wakaName = (waka && waka.name) || settings.wakaKesiswaanName || 'Furqon, SH';
+    const wakaNbm = (waka && (waka.nbm || waka.nip)) ? `NBM: ${waka.nbm || waka.nip}` : (settings.wakaKesiswaanNbm ? `NBM: ${settings.wakaKesiswaanNbm}` : 'NBM: 1333984');
+    const kepsekName = settings.kepsekName || 'Dhani Harsyahyadi, S.H.I.';
+    const kepsekNbm = settings.kepsekNBM || settings.kepsekNbm ? `NBM: ${settings.kepsekNBM || settings.kepsekNbm}` : 'NUPTK: 8962767668130162';
     const isJuara = (achieve.participationType || 'Juara') === 'Juara' || (achieve.rank && !achieve.rank.toLowerCase().includes('partisipan') && !achieve.rank.toLowerCase().includes('peserta'));
-    const certTitle = isJuara ? 'SERTIFIKAT PENGHARGAAN' : 'SERTIFIKAT APRESIASI PARTISIPASI';
+    const certMainTitle = 'SERTIFIKAT';
+    const certSubTitle = isJuara ? 'PENGHARGAAN' : 'PARTISIPASI';
+    const docTitle = `${certMainTitle} ${certSubTitle}`;
     const yr = achieve.year || (achieve.date ? achieve.date.slice(0, 4) : new Date().getFullYear());
     const certNo = achieve.certificateNo || `0${(achieveId || '').slice(-4).toUpperCase()}/SERT-PRESTASI/SDM1/${yr}`;
     const dateFormatted = achieve.date ? new Date(achieve.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -366,31 +392,46 @@ async function generateCertificate(achieveId, container) {
     const narrativeText = isJuara
       ? `Atas dedikasi, ketekunan, dan prestasi gemilang yang berhasil diraih sebagai <strong>${AppConfig.escapeHtml(rankText)}</strong> dalam ajang <strong>${AppConfig.escapeHtml(achieve.title || 'Kejuaraan')}</strong> (Tingkat ${AppConfig.escapeHtml(achieve.level || 'Kabupaten')}) bidang ${AppConfig.escapeHtml(achieve.category || 'Prestasi')} yang diselenggarakan pada tanggal ${dateFormatted}.`
       : `Atas dedikasi, semangat juang, dan partisipasi aktif yang membanggakan sebagai <strong>Kontingen / Peserta Lomba</strong> dalam ajang <strong>${AppConfig.escapeHtml(achieve.title || 'Kegiatan')}</strong> (Tingkat ${AppConfig.escapeHtml(achieve.level || 'Kabupaten')}) bidang ${AppConfig.escapeHtml(achieve.category || 'Prestasi')} yang diselenggarakan pada tanggal ${dateFormatted}.`;
+    document.title = `${docTitle} - ${student.name} - SD Muhammadiyah 1 Sedati`;
     container.innerHTML = `
-      <div class="print-actions-bar">
-        <button type="button" class="btn-print-action btn-print-close" id="btn-cert-close"><i class="ph ph-x"></i> Tutup</button>
-        <button type="button" class="btn-print-action btn-print-run" id="btn-cert-print"><i class="ph ph-printer"></i> Cetak Sertifikat</button>
+      <div class="print-actions">
+        <button type="button" class="btn-action btn-close" id="btn-cert-close"><i class="ph ph-x"></i> Tutup</button>
+        <button type="button" class="btn-action btn-print" id="btn-cert-print"><i class="ph ph-printer"></i> Cetak Sertifikat</button>
       </div>
       <div class="certificate-page">
         <div class="certificate-outer-frame">
           <div class="certificate-inner-frame">
+            <div class="cert-corner cert-corner-tl"></div>
+            <div class="cert-corner cert-corner-tr"></div>
+            <div class="cert-corner cert-corner-bl"></div>
+            <div class="cert-corner cert-corner-br"></div>
             <div class="certificate-header">
-              <img src="../../assets/img/logo/dikdasmen.webp" alt="Logo Dikdasmen" class="cert-logo-left">
+              <img src="assets/img/dikdasmen.webp" alt="Logo Dikdasmen" class="cert-logo-left">
               <div class="cert-header-text">
                 <h4 class="cert-org">MAJELIS PENDIDIKAN DASAR MENENGAH DAN PENDIDIKAN NONFORMAL</h4>
                 <h4 class="cert-pcm">PIMPINAN CABANG MUHAMMADIYAH SEDATI</h4>
                 <h2 class="cert-school-name">SD MUHAMMADIYAH 1 SEDATI</h2>
                 <p class="cert-school-address">Alamat: Jl. H. Syukur No. 65, Sedati Gede, Sidoarjo 61253 | Telp: 0859-6439-9398 | Website: musada.sch.id</p>
               </div>
-              <img src="../../assets/img/logo/logo.webp" alt="Logo Musada" class="cert-logo-right">
+              <img src="assets/img/logo.webp" alt="Logo Musada" class="cert-logo-right">
             </div>
             <div class="cert-divider"></div>
             <div class="cert-body">
-              <h1 class="cert-title">${certTitle}</h1>
-              <p class="cert-no">Nomor: ${AppConfig.escapeHtml(certNo)}</p>
-              <p class="cert-lead">Diberikan oleh SD Muhammadiyah 1 Sedati sebagai wujud apresiasi dan kebanggaan kepada:</p>
-              <h2 class="cert-student-name">${AppConfig.escapeHtml(student.name)}</h2>
-              <p class="cert-student-meta">NIS: <strong>${AppConfig.escapeHtml(AppConfig.getStudentNis(student) || student.nis || '-')}</strong> &nbsp;·&nbsp; NISN: <strong>${AppConfig.escapeHtml(AppConfig.getStudentNisn(student) || student.nisn || '-')}</strong> &nbsp;·&nbsp; Kelas: <strong>${AppConfig.escapeHtml(cls.name || '-')}</strong></p>
+              <div class="cert-title-block">
+                <h1 class="cert-title-main">${certMainTitle}</h1>
+                <h2 class="cert-title-sub">${certSubTitle}</h2>
+                <p class="cert-no">Nomor: ${AppConfig.escapeHtml(certNo)}</p>
+              </div>
+              <p class="cert-lead">SERTIFIKAT INI DIBERIKAN KEPADA:</p>
+              <div class="cert-recipient-block">
+                <h2 class="cert-student-name">${AppConfig.escapeHtml(student.name)}</h2>
+                <div class="cert-ornament">
+                  <span class="cert-ornament-line"></span>
+                  <span class="cert-ornament-flourish">✦ ❖ ✦</span>
+                  <span class="cert-ornament-line"></span>
+                </div>
+                <p class="cert-student-meta">NIS: <strong>${AppConfig.escapeHtml(AppConfig.getStudentNis(student) || student.nis || '-')}</strong> &nbsp;·&nbsp; NISN: <strong>${AppConfig.escapeHtml(AppConfig.getStudentNisn(student) || student.nisn || '-')}</strong> &nbsp;·&nbsp; Kelas: <strong>${AppConfig.escapeHtml(cls.name || '-')}</strong></p>
+              </div>
               <p class="cert-narrative">${narrativeText}</p>
             </div>
             <div class="cert-footer">
@@ -398,21 +439,23 @@ async function generateCertificate(achieveId, container) {
                 <p class="cert-sig-title">Mengetahui,</p>
                 <p class="cert-sig-role">Waka Kesiswaan</p>
                 <div class="cert-sig-space"></div>
-                <p class="cert-sig-name">Waka Kesiswaan SDM 1 Sedati</p>
-                <p class="cert-sig-id">Pimpinan Cabang Muhammadiyah Sedati</p>
+                <p class="cert-sig-name"><u>${AppConfig.escapeHtml(wakaName)}</u></p>
+                <p class="cert-sig-id">${AppConfig.escapeHtml(wakaNbm)}</p>
               </div>
               <div class="cert-seal">
                 <div class="cert-seal-badge">
-                  <i class="ph ph-seal-check"></i>
-                  <span>RESMI SEKOLAH</span>
+                  <div class="cert-seal-inner">
+                    <i class="ph ph-seal-check"></i>
+                    <span>RESMI SEKOLAH</span>
+                  </div>
                 </div>
               </div>
               <div class="cert-sig cert-sig-right">
                 <p class="cert-sig-title">Sedati, ${dateFormatted}</p>
                 <p class="cert-sig-role">Kepala Sekolah</p>
                 <div class="cert-sig-space"></div>
-                <p class="cert-sig-name"><strong>Dhani Harsyahyadi, S.H.I.</strong></p>
-                <p class="cert-sig-id">NUPTK: 8962767668130162</p>
+                <p class="cert-sig-name"><u><strong>${AppConfig.escapeHtml(kepsekName)}</strong></u></p>
+                <p class="cert-sig-id">${AppConfig.escapeHtml(kepsekNbm)}</p>
               </div>
             </div>
           </div>
@@ -423,6 +466,12 @@ async function generateCertificate(achieveId, container) {
     if (btnCertClose) btnCertClose.addEventListener('click', () => window.close());
     const btnCertPrint = document.getElementById('btn-cert-print');
     if (btnCertPrint) btnCertPrint.addEventListener('click', () => window.print());
+    const imgLeft = container.querySelector('.cert-logo-left');
+    if (imgLeft) {
+      imgLeft.addEventListener('error', () => {
+        imgLeft.src = 'assets/img/majlis-dikdaspnf.webp';
+      }, { once: true });
+    }
   } catch (err) {
     console.error(err);
     container.innerHTML = `<p class="print-error-text">Terjadi kesalahan: ${AppConfig.escapeHtml(err.message)}</p>`;
