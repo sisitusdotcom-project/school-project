@@ -276,6 +276,10 @@
     "personnel": {
       ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')",
       ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')",
+      "announcements": {
+        ".read": "auth != null",
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')"
+      },
       "attendance": {
         ".indexOn": [
           "employeeId",

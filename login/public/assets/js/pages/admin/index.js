@@ -104,9 +104,17 @@ ${summaryCards.map((item) => `
 <div class="quick-nav-desc">Pencadangan data sekolah</div>
 </div>
 </a>
+<a href="javascript:void(0)" id="btn-quick-bulletin-add" class="quick-nav-card">
+<div class="quick-nav-icon"><i class="ph ph-megaphone"></i></div>
+<div class="quick-nav-info">
+<div class="quick-nav-title">Papan Informasi</div>
+<div class="quick-nav-desc">Siarkan pengumuman & edaran</div>
+</div>
+</a>
 </div>
 </div>
 </section>
+<div id="admin-bulletin-container" class="section-spacer"></div>
 <section class="card section-spacer">
 <div class="card-header">
 <h3 class="card-title">Konfigurasi sekolah (SSOT)</h3>
@@ -120,6 +128,15 @@ ${summaryCards.map((item) => `
 </ul>
 </section>
 `;
+AppConfig.renderBulletinBoard(container.querySelector('#admin-bulletin-container'), { user });
+const quickBulletin = container.querySelector('#btn-quick-bulletin-add');
+if (quickBulletin) {
+quickBulletin.onclick = () => {
+AppConfig.showAddAnnouncementModal({
+onSaved: () => AppConfig.renderBulletinBoard(container.querySelector('#admin-bulletin-container'), { user })
+});
+};
+}
 },
 async renderCharacters(container) {
 Router.setTitle('Indikator karakter', 'Aspek karakter yang dinilai guru.');

@@ -117,8 +117,18 @@ const ROLE_LABELS = Object.freeze({
 });
 const NAV_ITEMS = Object.freeze({
 [ROLES.ADMIN]: [
-{ hash: '#/dashboard', icon: 'ph-squares-four', text: 'Dasbor Sekolah' },
-{ hash: '#/attendance', icon: 'ph-map-pin', text: 'Presensi GTK' }
+{ hash: '#/dashboard', icon: 'ph-squares-four', text: 'Dasbor Admin' },
+{ hash: '#/attendance', icon: 'ph-map-pin', text: 'Presensi Mandiri' },
+{ hash: '#/admin/users', icon: 'ph-users-three', text: 'Kelola Pengguna', group: 'Manajemen Akun' },
+{ hash: '#/admin/assignments', icon: 'ph-tree-structure', text: 'Distribusi Tugas', group: 'Manajemen Akun' },
+{ hash: '#/admin/classes', icon: 'ph-chalkboard', text: 'Pembagian Rombel', group: 'Akademik' },
+{ hash: '#/admin/subjects', icon: 'ph-book-open', text: 'Pemetaan Mapel', group: 'Akademik' },
+{ hash: '#/admin/characters', icon: 'ph-star', text: 'Indikator Karakter', group: 'Akademik' },
+{ hash: '#/admin/attendance', icon: 'ph-clock-user', text: 'Pantau Presensi GTK', group: 'Monitoring' },
+{ hash: '#/kepsek/reports', icon: 'ph-clipboard-text', text: 'Pantau Rapor', group: 'Monitoring' },
+{ hash: '#/it-admin/sync', icon: 'ph-arrows-clockwise', text: 'Sinkron Dapodik', group: 'Sistem & Data' },
+{ hash: '#/it-admin/backup', icon: 'ph-database', text: 'Cadangkan Data', group: 'Sistem & Data' },
+{ hash: '#/it-admin/logs', icon: 'ph-list-dashes', text: 'Log Aktivitas', group: 'Sistem & Data' }
 ],
 [ROLES.GURU]: [
 { hash: '#/dashboard', icon: 'ph-squares-four', text: 'Beranda' }
