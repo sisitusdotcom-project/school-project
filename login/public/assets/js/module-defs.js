@@ -1140,36 +1140,6 @@
         { key: 'recordId', label: 'ID Data', type: 'text', readonly: true }
       ]
     },
-    '#/it-admin/network': {
-      node: 'it_admin/network', noun: 'Infrastruktur Jaringan', writeRoles: [R.ADMIN], units: ['TIM_IT'], statusField: 'status', badges: { Aktif: 'success', Gangguan: 'warning', Mati: 'danger' },
-      subtitle: 'Manajemen router, access point, dan perangkat jaringan sekolah.',
-      summary: [
-        { label: 'Total Perangkat', icon: 'ph-wifi-high', tone: 'primary' },
-        { label: 'Gangguan', icon: 'ph-warning', tone: 'danger', where: { status: ['Gangguan', 'Mati'] } }
-      ],
-      fields: [
-        t('device', 'Nama Perangkat', { required: true }),
-        sel('type', 'Jenis', ['Router', 'Switch', 'Access Point', 'Server', 'CCTV'], { required: true }),
-        t('ip', 'Alamat IP / MAC', { required: true }),
-        t('location', 'Lokasi / Ruangan'),
-        sel('status', 'Status', ['Aktif', 'Gangguan', 'Mati'], { required: true, default: 'Aktif' }),
-        area('notes', 'Konfigurasi / Catatan')
-      ]
-    },
-    '#/it-admin/integration': {
-      node: 'it_admin/api_keys', noun: 'Integrasi API & CBT', writeRoles: [R.ADMIN], units: ['TIM_IT'], statusField: 'status', badges: { Aktif: 'success', Nonaktif: 'danger' },
-      subtitle: 'Koneksi dan tautan integrasi aplikasi pihak ketiga.',
-      summary: [
-        { label: 'Total Layanan', icon: 'ph-plugs', tone: 'primary' }
-      ],
-      fields: [
-        t('service', 'Nama Layanan / Aplikasi', { required: true }),
-        t('endpoint', 'Tautan Layanan (URL)'),
-        t('apiKey', 'Kunci Akses / Token (Opsional)'),
-        sel('status', 'Status', ['Aktif', 'Nonaktif'], { required: true, default: 'Aktif' }),
-        area('notes', 'Deskripsi Integrasi')
-      ]
-    },
     '#/student-affairs/alumni': {
       node: 'student_affairs/alumni', noun: 'Penelusuran Alumni', writeRoles: SA, dateField: 'graduationYear', canAdd: false,
       subtitle: 'Tracer study data kelulusan siswa dan kelanjutan studi ke jenjang lanjutan.',

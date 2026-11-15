@@ -64,20 +64,6 @@ const ITAdminPages = {
                 <div class="quick-nav-desc">Jejak aktivitas & forensik</div>
               </div>
             </a>
-            <a href="#/it-admin/network" class="quick-nav-card">
-              <div class="quick-nav-icon"><i class="ph ph-wifi-high"></i></div>
-              <div class="quick-nav-info">
-                <div class="quick-nav-title">Infrastruktur Jaringan</div>
-                <div class="quick-nav-desc">Mikrotik, switch & AP WiFi</div>
-              </div>
-            </a>
-            <a href="#/it-admin/integration" class="quick-nav-card">
-              <div class="quick-nav-icon"><i class="ph ph-plugs-connected"></i></div>
-              <div class="quick-nav-info">
-                <div class="quick-nav-title">Integrasi API & CBT</div>
-                <div class="quick-nav-desc">Gateway WhatsApp & webhook</div>
-              </div>
-            </a>
           </div>
         </div>
       </section>

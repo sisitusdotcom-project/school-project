@@ -564,18 +564,6 @@ const FeatureGuides = {
       to: 'Auditor IT & Kepala Sekolah',
       usage: 'Filter aktivitas berdasarkan tanggal atau nama staf untuk melacak siapa yang melakukan aksi tertentu pada sistem.'
     },
-    '#/it-admin/network': {
-      func: 'Monitoring perangkat jaringan lokal sekolah (Access Point WiFi, Router Mikrotik, Switch Hub, dan alokasi bandwidth kelas).',
-      from: 'Teknisi Jaringan IT',
-      to: 'Kebutuhan CBT, Smart Classroom, & Kantor',
-      usage: 'Pantau status aktif access point per lantai, uji latensi internet, dan catat riwayat perawatan kabel LAN/WiFi.'
-    },
-    '#/it-admin/integration': {
-      func: 'Manajemen kunci API, integrasi server Computer Based Test (CBT), gateway WhatsApp notifikasi, dan webhook eksternal.',
-      from: 'Tim Pengembang IT',
-      to: 'Otomatisasi Notifikasi Wali Murid & Server Ujian',
-      usage: 'Atur koneksi API WhatsApp gateway untuk kirim bukti presensi murid otomatis ke orang tua, atau sambungkan server ujian CBT.'
-    },
     '#/it-admin/dashboard': {
       func: 'Pusat telemetri operasional teknologi: monitoring lalu lintas API, kuota penyimpanan server, dan status geofence sekolah.',
       from: 'Telemetri Sistem Realtime',

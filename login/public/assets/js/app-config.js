@@ -341,9 +341,7 @@ const NAV_ITEMS = Object.freeze({
 { hash: '#/admin/users', icon: 'ph-users', text: 'Akun Pengguna', group: 'Operasional' },
 { hash: '#/it-admin/sync', icon: 'ph-arrows-clockwise', text: 'Sinkron Dapodik', group: 'Operasional' },
 { hash: '#/it-admin/backup', icon: 'ph-database', text: 'Cadangkan Data', group: 'Database' },
-{ hash: '#/it-admin/logs', icon: 'ph-list-dashes', text: 'Log Aktivitas', group: 'Database' },
-{ hash: '#/it-admin/network', icon: 'ph-wifi-high', text: 'Jaringan & WiFi', group: 'Jaringan' },
-{ hash: '#/it-admin/integration', icon: 'ph-plugs', text: 'Integrasi Sistem', group: 'Jaringan' }
+{ hash: '#/it-admin/logs', icon: 'ph-list-dashes', text: 'Log Aktivitas', group: 'Database' }
 ],
 'GURU_EKSTRA': [
 { hash: '#/guru/ekstra/syllabus', icon: 'ph-clipboard-text', text: 'Program Latihan', group: 'Perencanaan' },
