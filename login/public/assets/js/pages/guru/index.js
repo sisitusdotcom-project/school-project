@@ -1548,15 +1548,21 @@ return;
 formContainer.innerHTML = '<div class="loader" style="margin: 20px auto"></div>';
 const year = settings.currentAcademicYear;
 const sem = settings.currentSemester;
-const [cocu, stuEks, att, note, snapAch] = await Promise.all([
+const [cocu, stuEks, att, note, snapAch, p5Projects] = await Promise.all([
 DB.getCocurricular(year, sem, studentId),
 DB.getStudentExtracurriculars(year, sem, studentId),
 DB.getAttendance(year, sem, studentId),
 DB.getTeacherNote(year, sem, studentId),
-db.ref('student_affairs/achievements').orderByChild('studentId').equalTo(studentId).once('value')
+db.ref('student_affairs/achievements').orderByChild('studentId').equalTo(studentId).once('value'),
+DB.getCocurricularProjects()
 ]);
 const achList = [];
 snapAch.forEach(c => { achList.push({ id: c.key, ...c.val() }); });
+const currentCls = classes[classId];
+const phase = currentCls ? AppConfig.getClassPhase(currentCls) : '';
+const phaseTarget = `FASE_${phase}`;
+const p5Arr = Object.values(p5Projects || {});
+const activeP5 = p5Arr.find(p => (p.target === phaseTarget || p.target === classId || p.target === 'ALL') && (p.semester == sem || !p.semester) && (p.academicYear == year || !p.academicYear)) || p5Arr.find(p => p.target === phaseTarget || p.target === classId || p.target === 'ALL');
 const eksList = eksArr.map(e => {
 const isEnrolled = (e.students && e.students[studentId]) || (stuEks && stuEks[e.id]);
 const selected = isEnrolled;
@@ -1572,7 +1578,18 @@ ${AppConfig.escapeHtml(e.name)}${e.students && e.students[studentId] ? ' <span c
 }).join('');
 formContainer.innerHTML = `
 <div class="card" style="margin-bottom:20px">
-<h3 class="card-title" style="margin-bottom:16px">Kokurikuler</h3>
+<h3 class="card-title" style="margin-bottom:16px">Kokurikuler (P5)</h3>
+${activeP5 ? `
+<div class="alert alert-info">
+<div><strong>Proyek P5: ${AppConfig.escapeHtml(activeP5.title || '-')}</strong> <span class="badge badge-primary">${AppConfig.escapeHtml(activeP5.theme || 'P5')}</span></div>
+${activeP5.description ? `<div class="text-xs text-muted mt-1">${AppConfig.escapeHtml(activeP5.description)}</div>` : ''}
+${activeP5.narrativeTemplate ? `
+<div class="mt-2">
+<button type="button" class="btn btn-sm btn-outline" id="btn-copy-p5"><i class="ph ph-copy"></i> Salin Template Capaian Kurikulum</button>
+</div>
+` : ''}
+</div>
+` : ''}
 <div class="form-group">
 <textarea id="add-cocu" rows="3" placeholder="Contoh: Ananda mandiri dan aktif dalam kegiatan sekolah...">${cocu ? (cocu.description || '') : ''}</textarea>
 </div>
@@ -1633,6 +1650,19 @@ const achSummary = achList.map(a => `${a.title || a.competition || 'Prestasi'} (
 const addition = `Meraih prestasi membanggakan: ${achSummary}. `;
 if (!noteField.value.includes(achSummary)) {
 noteField.value = (noteField.value ? noteField.value.trim() + ' ' : '') + addition;
+}
+};
+}
+const btnCopyP5 = document.getElementById('btn-copy-p5');
+if (btnCopyP5 && activeP5 && activeP5.narrativeTemplate) {
+btnCopyP5.onclick = () => {
+const cocuEl = document.getElementById('add-cocu');
+if (!cocuEl) return;
+const curVal = cocuEl.value.trim();
+if (!curVal) {
+cocuEl.value = activeP5.narrativeTemplate;
+} else if (!curVal.includes(activeP5.title || '')) {
+cocuEl.value = curVal + '\n' + activeP5.narrativeTemplate;
 }
 };
 }

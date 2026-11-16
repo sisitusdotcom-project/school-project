@@ -19,15 +19,15 @@
     },
     "settings": {
       ".read": "auth != null",
-      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('unitFlags').child('TIM_IT').val() === true || root.child('users').child(auth.uid).child('unitFlags').child('WAKA_KURIKULUM').val() === true || root.child('users').child(auth.uid).child('unitFlags').child('WAKA_HUMAS_PERSONALIA').val() === true)"
+      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'curriculum' || root.child('users').child(auth.uid).child('unitFlags').child('TIM_IT').val() === true || root.child('users').child(auth.uid).child('unitFlags').child('WAKA_KURIKULUM').val() === true || root.child('users').child(auth.uid).child('unitFlags').child('STAF_KURIKULUM').val() === true || root.child('users').child(auth.uid).child('unitFlags').child('WAKA_HUMAS_PERSONALIA').val() === true)"
     },
     "characters": {
       ".read": "auth != null",
-      ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'"
+      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'curriculum' || root.child('users').child(auth.uid).child('unitFlags').child('WAKA_KURIKULUM').val() === true || root.child('users').child(auth.uid).child('unitFlags').child('STAF_KURIKULUM').val() === true)"
     },
     "subjects": {
       ".read": "auth != null",
-      ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'"
+      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'curriculum' || root.child('users').child(auth.uid).child('unitFlags').child('WAKA_KURIKULUM').val() === true || root.child('users').child(auth.uid).child('unitFlags').child('STAF_KURIKULUM').val() === true)"
     },
     "extracurriculars": {
       ".read": "auth != null",
@@ -35,7 +35,7 @@
     },
     "classes": {
       ".read": "auth != null",
-      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('unitFlags').child('WAKA_KURIKULUM').val() === true)"
+      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'curriculum' || root.child('users').child(auth.uid).child('unitFlags').child('WAKA_KURIKULUM').val() === true || root.child('users').child(auth.uid).child('unitFlags').child('STAF_KURIKULUM').val() === true)"
     },
     "ummi_classes": {
       ".read": "auth != null",
@@ -220,6 +220,15 @@
     "curriculum": {
       ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')",
       ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')",
+      "cocurricular": {
+        ".read": "auth != null",
+        ".indexOn": [
+          "phase",
+          "classId",
+          "academicYear",
+          "semester"
+        ]
+      },
       "schedules": {
         ".read": "auth != null",
         ".indexOn": [
@@ -372,7 +381,7 @@
     },
     "student_promotions": {
       ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() !== 'ortu')",
-      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('unitFlags').child('WAKA_KURIKULUM').val() === true)"
+      ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'curriculum' || root.child('users').child(auth.uid).child('unitFlags').child('WAKA_KURIKULUM').val() === true || root.child('users').child(auth.uid).child('unitFlags').child('STAF_KURIKULUM').val() === true)"
     },
     "library": {
       ".read": "true",

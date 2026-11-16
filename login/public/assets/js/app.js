@@ -466,6 +466,7 @@ const App = {
           '#/parent/report-card': typeof OrtuPages !== 'undefined' ? OrtuPages.renderReportCard : null,
           '#/finance': typeof FinancePages !== 'undefined' ? FinancePages.renderDashboard : null,
           '#/curriculum': typeof CurriculumPages !== 'undefined' ? CurriculumPages.renderDashboard : null,
+          '#/curriculum/cocurricular': typeof CurriculumPages !== 'undefined' ? CurriculumPages.renderCocurricular : null,
           '#/student-affairs': typeof StudentAffairsPages !== 'undefined' ? StudentAffairsPages.renderDashboard : null,
           '#/student-affairs/attendance': typeof StudentAffairsPages !== 'undefined' ? StudentAffairsPages.renderAttendanceMonitoring : null,
           '#/personnel': typeof PersonnelPages !== 'undefined' ? PersonnelPages.renderDashboard : null,

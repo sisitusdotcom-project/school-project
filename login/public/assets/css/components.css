@@ -3511,3 +3511,5 @@ body{background:#fff !important;color:#000 !important;}
 .img-viewer-body{min-height:180px;padding:8px;}
 .img-viewer-img{max-height:60vh;}
 }
+.grid-dimensions{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;}
+.grid-dimensions > *{min-width:0;}

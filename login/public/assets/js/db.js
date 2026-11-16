@@ -1164,6 +1164,27 @@ const DB = {
       updatedAt: firebase.database.ServerValue.TIMESTAMP
     });
   },
+  async getCocurricularProjects() {
+    try {
+      return await this._readCollection('curriculum/cocurricular', {});
+    } catch (_) {
+      return {};
+    }
+  },
+  async saveCocurricularProject(id, data) {
+    if (!isDBReady()) return null;
+    const ref = id ? db.ref(`curriculum/cocurricular/${id}`) : db.ref('curriculum/cocurricular').push();
+    const payload = {
+      ...data,
+      updatedAt: firebase.database.ServerValue.TIMESTAMP
+    };
+    await ref.set(payload);
+    return ref.key;
+  },
+  async deleteCocurricularProject(id) {
+    if (!isDBReady() || !id) return;
+    await db.ref(`curriculum/cocurricular/${id}`).remove();
+  },
   async getAttendance(year, sem, studentId) {
     return this._read(`${this._raporPath('attendances', year, sem)}/${studentId}`, null);
   },

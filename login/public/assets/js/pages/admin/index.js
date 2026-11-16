@@ -506,7 +506,7 @@ DB.getAllStudents(),
 DB.getSubjects()
 ]);
 const classArr = DB.toArray(classes);
-const isKurikulum = Auth.currentRole === AppConfig.ROLES.ADMIN || Auth.currentAssignments.includes('WAKA_KURIKULUM');
+const isKurikulum = Auth.currentRole === AppConfig.ROLES.ADMIN || Auth.currentRole === AppConfig.ROLES.CURRICULUM || Auth.hasRole(AppConfig.ROLES.ADMIN) || Auth.hasRole(AppConfig.ROLES.CURRICULUM) || Auth.hasUnit('WAKA_KURIKULUM') || Auth.hasUnit('STAF_KURIKULUM') || (Auth.currentAssignments && (Auth.currentAssignments.includes('WAKA_KURIKULUM') || Auth.currentAssignments.includes('STAF_KURIKULUM')));
 const guruArr = DB.toArray(users).filter(u => AppConfig.isTeacher(u));
 const subArr = DB.toArray(subjects).sort((a, b) => (a.order || 0) - (b.order || 0));
 const studentArr = DB.toArray(students);
@@ -802,8 +802,19 @@ window.location.hash = `#/admin/students/${btn.dataset.viewCls}`;
 });
 document.getElementById('form-cls').onsubmit = async (e) => {
 e.preventDefault();
+const submitBtn = e.target.querySelector('button[type="submit"]') || e.target.querySelector('.btn-primary');
+const originalHtml = submitBtn ? submitBtn.innerHTML : 'Simpan';
+if (submitBtn) {
+submitBtn.disabled = true;
+submitBtn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Menyimpan...';
+}
+try {
 const id = document.getElementById('cls-id').value || null;
 const clsName = document.getElementById('cls-name').value.trim();
+if (!clsName) {
+alert('Nama kelas wajib diisi.');
+return;
+}
 await DB.saveClass(id, {
 name: clsName,
 phase: AppConfig.getClassPhase({ name: clsName, id }),
@@ -811,15 +822,43 @@ teacherId: document.getElementById('cls-teacher').value || null
 });
 App.closeModal('modal-cls');
 AdminPages.renderClasses(container);
+} catch (err) {
+console.error('Gagal menyimpan kelas:', err);
+alert('Gagal menyimpan kelas: ' + (err.message || 'Terjadi kesalahan sistem.'));
+} finally {
+if (submitBtn) {
+submitBtn.disabled = false;
+submitBtn.innerHTML = originalHtml;
+}
+}
 };
 document.getElementById('form-mapel').onsubmit = async (e) => {
 e.preventDefault();
-if (!isKurikulum) return;
+if (!isKurikulum) {
+alert('Akses ditolak: Hanya tim kurikulum atau administrator yang berhak mengedit penugasan.');
+return;
+}
 const id = document.getElementById('mapel-cls-id').value;
 if (!id) return;
+const submitBtn = e.target.querySelector('button[type="submit"]') || e.target.querySelector('.btn-primary');
+const originalHtml = submitBtn ? submitBtn.innerHTML : 'Simpan Penugasan Rombel';
+if (submitBtn) {
+submitBtn.disabled = true;
+submitBtn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Menyimpan...';
+}
+try {
 await DB.saveClassSubjectTeachers(id, editingSubjectTeachers);
 App.closeModal('modal-mapel');
 AdminPages.renderClasses(container);
+} catch (err) {
+console.error('Gagal menyimpan penugasan rombel:', err);
+alert('Gagal menyimpan penugasan rombel: ' + (err.message || 'Terjadi kesalahan sistem.'));
+} finally {
+if (submitBtn) {
+submitBtn.disabled = false;
+submitBtn.innerHTML = originalHtml;
+}
+}
 };
 const btnPromoCls = document.getElementById('btn-promo-cls');
 if (btnPromoCls) {
@@ -1164,8 +1203,13 @@ if (s) AdminPages._openSubjectModal(s);
 container.querySelectorAll('[data-del-sub]').forEach(btn => {
 btn.onclick = async () => {
 if (!confirm('Yakin menghapus mata pelajaran ini?')) return;
+try {
 await DB.deleteSubject(btn.dataset.delSub);
 AdminPages.renderSubjects(container);
+} catch (err) {
+console.error('Gagal menghapus mata pelajaran:', err);
+alert('Gagal menghapus: ' + (err.message || 'Terjadi kesalahan sistem.'));
+}
 };
 });
 };
@@ -1197,14 +1241,35 @@ document.getElementById('search-sub').addEventListener('input', renderTable);
 document.getElementById('btn-add-sub').onclick = () => AdminPages._openSubjectModal(null, subArr.length + 1);
 document.getElementById('form-sub').onsubmit = async (e) => {
 e.preventDefault();
+const submitBtn = e.target.querySelector('button[type="submit"]') || e.target.querySelector('.btn-primary');
+const originalHtml = submitBtn ? submitBtn.innerHTML : 'Simpan';
+if (submitBtn) {
+submitBtn.disabled = true;
+submitBtn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Menyimpan...';
+}
+try {
 const id = document.getElementById('sub-id').value || null;
+const nameVal = document.getElementById('sub-name').value.trim();
+if (!nameVal) {
+alert('Nama mata pelajaran wajib diisi.');
+return;
+}
 await DB.saveSubject(id, {
-name: document.getElementById('sub-name').value.trim(),
+name: nameVal,
 category: document.getElementById('sub-category').value,
 order: parseInt(document.getElementById('sub-order').value) || 1
 });
 App.closeModal('modal-sub');
 AdminPages.renderSubjects(container);
+} catch (err) {
+console.error('Gagal menyimpan mata pelajaran:', err);
+alert('Gagal menyimpan mata pelajaran: ' + (err.message || 'Terjadi kesalahan sistem.'));
+} finally {
+if (submitBtn) {
+submitBtn.disabled = false;
+submitBtn.innerHTML = originalHtml;
+}
+}
 };
 },
 _subjectModal() {
