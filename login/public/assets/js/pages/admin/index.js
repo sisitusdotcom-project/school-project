@@ -815,11 +815,41 @@ if (!clsName) {
 alert('Nama kelas wajib diisi.');
 return;
 }
-await DB.saveClass(id, {
+const newTeacherId = document.getElementById('cls-teacher').value || null;
+const oldClass = id ? classArr.find(x => x.id === id) : null;
+const oldTeacherId = oldClass ? oldClass.teacherId : null;
+const savedId = await DB.saveClass(id, {
 name: clsName,
 phase: AppConfig.getClassPhase({ name: clsName, id }),
-teacherId: document.getElementById('cls-teacher').value || null
+teacherId: newTeacherId
 });
+const targetClassId = id || savedId;
+if (newTeacherId && targetClassId) {
+const newTeacher = guruArr.find(g => g.id === newTeacherId);
+if (newTeacher) {
+const curAssigns = AppConfig.normalizeAssignments(newTeacher.assignments || []);
+const code = 'GURU_KELAS_' + targetClassId;
+if (!curAssigns.includes(code)) {
+curAssigns.push(code);
+const unitFlags = DB._buildUnitFlags ? DB._buildUnitFlags(curAssigns) : (newTeacher.unitFlags || {});
+await DB.saveUser(newTeacherId, { ...newTeacher, assignments: curAssigns, unitFlags });
+newTeacher.assignments = curAssigns;
+}
+}
+}
+if (oldTeacherId && oldTeacherId !== newTeacherId && targetClassId) {
+const oldTeacher = guruArr.find(g => g.id === oldTeacherId);
+if (oldTeacher) {
+const curAssigns = AppConfig.normalizeAssignments(oldTeacher.assignments || []);
+const code = 'GURU_KELAS_' + targetClassId;
+const filteredAssigns = curAssigns.filter(a => a !== code);
+if (filteredAssigns.length !== curAssigns.length) {
+const unitFlags = DB._buildUnitFlags ? DB._buildUnitFlags(filteredAssigns) : (oldTeacher.unitFlags || {});
+await DB.saveUser(oldTeacherId, { ...oldTeacher, assignments: filteredAssigns, unitFlags });
+oldTeacher.assignments = filteredAssigns;
+}
+}
+}
 App.closeModal('modal-cls');
 AdminPages.renderClasses(container);
 } catch (err) {

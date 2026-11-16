@@ -91,7 +91,7 @@ const FeatureGuides = {
       usage: 'Daftarkan nama kegiatan, susunan ketua panitia, jadwal pelaksanaan, dan target capaian acara.'
     },
     '#/admin/classes': {
-      func: 'Master pembagian 16 rombel (1A-6B), plotting wali kelas, serta eksekusi kenaikan kelas dan kelulusan massal.',
+      func: 'Master pembagian 16 rombel sekolah, plotting wali kelas, serta eksekusi kenaikan kelas dan kelulusan massal.',
       from: 'Waka Kurikulum & Administrator',
       to: 'Wali Kelas, Seluruh Dewan Guru, dan Operator Sistem',
       usage: 'Kelola wali kelas dan mapel khusus. Pada akhir tahun, gunakan tombol Kenaikan Kelas untuk mempromosikan murid secara massal.'

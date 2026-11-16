@@ -1,19 +1,27 @@
 window.AdminAssignmentsModule = {
   async render(container) {
     Router.setTitle('Distribusi Penugasan GTK', 'Peta pembagian tugas struktural dan amanah tambahan seluruh pendidik & tenaga kependidikan.');
-    const users = DB.toArray(await DB.getAllUsers());
-    const gtkList = users.filter(u => AppConfig.isGTK(u)).sort((a, b) => a.name.localeCompare(b.name));
+    const [usersData, classesData, ekskulsData] = await Promise.all([
+      DB.getAllUsers(),
+      DB.getClasses(),
+      DB.getExtracurriculars()
+    ]);
+    const users = DB.toArray(usersData);
+    const classList = DB.toArray(classesData).sort((a, b) => (a.name || '').localeCompare(b.name || '', 'id', { numeric: true }));
+    const eksList = DB.toArray(ekskulsData).sort((a, b) => (a.order || 0) - (b.order || 0) || (a.name || '').localeCompare(b.name || '', 'id'));
+    const gtkList = users.filter(u => AppConfig.isGTK(u)).sort((a, b) => a.name.localeCompare(b.name, 'id'));
     const countWaka = gtkList.filter(u => (u.assignments || []).some(a => a.startsWith('WAKA_'))).length;
     const countUmmi = gtkList.filter(u => AppConfig.isUserUmmi(u)).length;
-    const countWali = gtkList.filter(u => (u.assignments || []).some(a => a.startsWith('GURU_KELAS_'))).length;
-    const countEkskul = gtkList.filter(u => AppConfig.isUserEkstra(u)).length;
+    const countWali = gtkList.filter(u => (u.assignments || []).some(a => a.startsWith('GURU_KELAS_')) || classList.some(c => c.teacherId === u.id)).length;
+    const countEkskul = gtkList.filter(u => AppConfig.isUserEkstra(u) || eksList.some(e => e.teacherId === u.id)).length;
     let activeFilter = 'ALL';
     let searchQuery = '';
     const renderTable = () => {
       const q = searchQuery.toLowerCase();
       const filtered = gtkList.filter(u => {
         const assigns = AppConfig.getRoleAssignments(u);
-        const matchSearch = (u.name || '').toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q) || assigns.some(a => a.toLowerCase().includes(q));
+        const waliClasses = classList.filter(c => c.teacherId === u.id);
+        const matchSearch = (u.name || '').toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q) || assigns.some(a => a.toLowerCase().includes(q)) || waliClasses.some(c => (c.name || '').toLowerCase().includes(q));
         if (!matchSearch) return false;
         if (activeFilter === 'ALL') return true;
         if (activeFilter === 'WAKA') return assigns.some(a => a.startsWith('WAKA_'));
@@ -23,18 +31,36 @@ window.AdminAssignmentsModule = {
         if (activeFilter === 'KEUANGAN') return assigns.some(a => a.includes('KEUANGAN'));
         if (activeFilter === 'SARPRAS') return assigns.some(a => a.includes('SARPRAS'));
         if (activeFilter === 'UMMI') return AppConfig.isUserUmmi(u);
-        if (activeFilter === 'WALI') return assigns.some(a => a.startsWith('GURU_KELAS_'));
-        if (activeFilter === 'EKSKUL') return AppConfig.isUserEkstra(u);
+        if (activeFilter === 'WALI') return assigns.some(a => a.startsWith('GURU_KELAS_')) || waliClasses.length > 0;
+        if (activeFilter === 'EKSKUL') return AppConfig.isUserEkstra(u) || eksList.some(e => e.teacherId === u.id);
         if (activeFilter === 'IT') return assigns.some(a => a === 'TIM_IT');
         return true;
       });
       const rows = filtered.length ? filtered.map((u, idx) => {
         const assigns = AppConfig.getRoleAssignments(u);
-        const badgesHtml = assigns.length ? assigns.map(item => {
-          const label = AppConfig.UNIT_LABELS[item] || (item.startsWith('GURU_KELAS_') ? ('Wali Kelas ' + item.replace('GURU_KELAS_', '').replace(/_/g, ' ')) : item);
-          const badgeClass = AppConfig.getAssignmentBadgeClass ? AppConfig.getAssignmentBadgeClass(item) : 'badge-outline';
-          return `<span class="badge ${badgeClass}">${AppConfig.escapeHtml(label)}</span>`;
-        }).join('') : '<span class="text-muted">Hanya Tugas Utama Guru / Tendik</span>';
+        const waliClasses = classList.filter(c => c.teacherId === u.id);
+        const displayItems = [];
+        const seenCodes = new Set();
+        assigns.forEach(item => {
+          if (item.startsWith('GURU_KELAS_')) {
+            const rawId = item.replace('GURU_KELAS_', '');
+            const foundCls = classList.find(c => c.id === rawId || c.name.replace(/[^A-Za-z0-9]/g, '_').toUpperCase() === rawId);
+            const label = foundCls ? ('Wali ' + foundCls.name) : ('Wali Kelas ' + rawId.replace(/_/g, ' '));
+            seenCodes.add(foundCls ? foundCls.id : rawId);
+            displayItems.push({ label, badgeClass: 'badge-primary' });
+          } else {
+            const label = AppConfig.UNIT_LABELS[item] || item.replace(/_/g, ' ');
+            const badgeClass = AppConfig.getAssignmentBadgeClass ? AppConfig.getAssignmentBadgeClass(item) : 'badge-outline';
+            displayItems.push({ label, badgeClass });
+          }
+        });
+        waliClasses.forEach(c => {
+          if (!seenCodes.has(c.id)) {
+            seenCodes.add(c.id);
+            displayItems.push({ label: 'Wali ' + c.name, badgeClass: 'badge-primary' });
+          }
+        });
+        const badgesHtml = displayItems.length ? displayItems.map(d => `<span class="badge ${d.badgeClass}">${AppConfig.escapeHtml(d.label)}</span>`).join('') : '<span class="text-muted">Hanya Tugas Utama Guru / Tendik</span>';
         return `
           <tr>
             <td>${idx + 1}</td>
@@ -61,12 +87,25 @@ window.AdminAssignmentsModule = {
           document.getElementById('assign-user-role').innerText = AppConfig.PRIMARY_ROLES[u.role] || u.role;
           const currentAssigns = AppConfig.normalizeAssignments(u.assignments || []);
           document.querySelectorAll('#form-assign-modal input[type="checkbox"]').forEach(cb => {
-            cb.checked = currentAssigns.includes(cb.value);
+            const clsId = cb.dataset.classId;
+            if (clsId) {
+              const clsObj = classList.find(c => c.id === clsId);
+              const isAssigned = (clsObj && clsObj.teacherId === u.id) || currentAssigns.includes(cb.value) || currentAssigns.includes('GURU_KELAS_' + clsId);
+              cb.checked = Boolean(isAssigned);
+            } else {
+              cb.checked = currentAssigns.includes(cb.value);
+            }
           });
           document.getElementById('modal-assign-gtk').classList.add('active');
         };
       });
     };
+    const waliCheckboxesHtml = classList.length ? classList.map(c => `
+      <label title="${AppConfig.escapeHtml(c.name)}">
+        <input type="checkbox" value="GURU_KELAS_${c.id}" data-class-id="${c.id}">
+        Wali ${AppConfig.escapeHtml(c.name)}
+      </label>
+    `).join('') : '<p class="text-muted text-xs">Belum ada data rombel di master data.</p>';
     container.innerHTML = `
       <section class="card-grid section-spacer">
         <div class="card stat-card">
@@ -83,7 +122,7 @@ window.AdminAssignmentsModule = {
         </div>
         <div class="card stat-card">
           <div class="stat-icon stat-icon--primary"><i class="ph ph-users-three"></i></div>
-          <div><p class="stat-value">${countWali}</p><p class="stat-label text-muted">Wali Kelas</p></div>
+          <div><p class="stat-value">${countWali}</p><p class="stat-label text-muted">Wali Kelas (${classList.length} Rombel)</p></div>
         </div>
       </section>
       <div class="card toolbar-panel">
@@ -160,20 +199,9 @@ window.AdminAssignmentsModule = {
                 </div>
               </div>
               <div class="assignment-unit-group">
-                <div class="assignment-unit-title"><i class="ph ph-users-three"></i> Amanah Wali Kelas (16 Rombel)</div>
+                <div class="assignment-unit-title"><i class="ph ph-users-three"></i> Amanah Wali Kelas (${classList.length} Rombel)</div>
                 <div class="assignment-checkbox-grid">
-                  <label><input type="checkbox" value="GURU_KELAS_1A"> Wali Kelas 1A</label>
-                  <label><input type="checkbox" value="GURU_KELAS_1B"> Wali Kelas 1B</label>
-                  <label><input type="checkbox" value="GURU_KELAS_2A"> Wali Kelas 2A</label>
-                  <label><input type="checkbox" value="GURU_KELAS_2B"> Wali Kelas 2B</label>
-                  <label><input type="checkbox" value="GURU_KELAS_3A"> Wali Kelas 3A</label>
-                  <label><input type="checkbox" value="GURU_KELAS_3B"> Wali Kelas 3B</label>
-                  <label><input type="checkbox" value="GURU_KELAS_4A"> Wali Kelas 4A</label>
-                  <label><input type="checkbox" value="GURU_KELAS_4B"> Wali Kelas 4B</label>
-                  <label><input type="checkbox" value="GURU_KELAS_5A"> Wali Kelas 5A</label>
-                  <label><input type="checkbox" value="GURU_KELAS_5B"> Wali Kelas 5B</label>
-                  <label><input type="checkbox" value="GURU_KELAS_6A"> Wali Kelas 6A</label>
-                  <label><input type="checkbox" value="GURU_KELAS_6B"> Wali Kelas 6B</label>
+                  ${waliCheckboxesHtml}
                 </div>
               </div>
               <div class="assignment-unit-group">
@@ -230,8 +258,12 @@ window.AdminAssignmentsModule = {
         const userId = document.getElementById('assign-user-id').value;
         if (!userId) return;
         const selected = [];
+        const selectedWaliClassIds = [];
         container.querySelectorAll('#form-assign-modal input[type="checkbox"]:checked').forEach(cb => {
           selected.push(cb.value);
+          if (cb.dataset.classId) {
+            selectedWaliClassIds.push(cb.dataset.classId);
+          }
         });
         const targetUser = gtkList.find(u => u.id === userId);
         if (!targetUser) return;
@@ -250,6 +282,20 @@ window.AdminAssignmentsModule = {
           });
           targetUser.assignments = selected;
           targetUser.unitFlags = unitFlags;
+          const classSyncPromises = [];
+          for (const c of classList) {
+            const isChecked = selectedWaliClassIds.includes(c.id);
+            if (isChecked && c.teacherId !== userId) {
+              c.teacherId = userId;
+              classSyncPromises.push(DB.saveClass(c.id, { ...c, teacherId: userId }));
+            } else if (!isChecked && c.teacherId === userId) {
+              c.teacherId = null;
+              classSyncPromises.push(DB.saveClass(c.id, { ...c, teacherId: null }));
+            }
+          }
+          if (classSyncPromises.length > 0) {
+            await Promise.all(classSyncPromises);
+          }
           alert('Penugasan untuk ' + targetUser.name + ' berhasil diperbarui!');
           closeModal();
           renderTable();
