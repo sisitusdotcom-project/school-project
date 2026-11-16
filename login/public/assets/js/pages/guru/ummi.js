@@ -778,7 +778,7 @@ async renderUmmiClasses(container) {
             <td>${AppConfig.escapeHtml(j.material || '-')}</td>
             <td><span class="badge ${badgeCls}">${j.score || '-'} (${j.predicate || (UMMI_GRADES.find(g => g.score === Number(j.score)) || {}).predicate || '-'})</span><br><small class="text-muted">${AppConfig.escapeHtml(j.action || (UMMI_GRADES.find(g => g.score === Number(j.score)) || {}).action || '')}</small></td>
             <td><span class="badge badge-success"><i class="ph ph-check"></i> ${AppConfig.escapeHtml(j.teacherName || 'Ustadz')}</span></td>
-            <td>${j.parentVerified ? `<span class="badge badge-success"><i class="ph ph-check-double"></i> Disimak (${AppConfig.escapeHtml(j.parentVerifiedBy || 'Orang Tua')})</span>` : '<span class="badge badge-warning">Belum Disimak</span>'}</td>
+            <td>${j.parentVerified ? `<span class="badge badge-success"><i class="ph ph-checks"></i> Disimak (${AppConfig.escapeHtml(j.parentVerifiedBy || 'Orang Tua')})</span>` : '<span class="badge badge-warning">Belum Disimak</span>'}</td>
             <td>${AppConfig.escapeHtml(j.note || j.notes || '-')}</td>
             <td class="action-cell">
               <button class="btn btn-danger btn-sm" data-del-journal="${j.id}" title="Hapus"><i class="ph ph-trash"></i></button>

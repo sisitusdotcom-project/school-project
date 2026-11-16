@@ -8,7 +8,7 @@ const KepsekPages = {
     const dateStr = AppConfig.getLocalDateStr ? AppConfig.getLocalDateStr(today) : today.toISOString().slice(0, 10);
     const user = Auth.userData || Auth.currentUser || {};
     const uid = user.uid || Auth.currentUser?.uid;
-    const [students, classes, chars, allAssess, allAcad, obsData, myAtt, directoryData] = await Promise.all([
+    const [students, classes, chars, allAssess, allAcad, obsData, myAtt, directoryData, users] = await Promise.all([
       DB.getAllStudents(),
       DB.getClasses(),
       DB.getCharacters(),
@@ -16,7 +16,8 @@ const KepsekPages = {
       DB.getAllAcademicGrades(year, sem),
       DB.getAllObservations(),
       DB.getTeacherAttendance(dateStr, uid).catch(() => null),
-      DB._readCollection ? DB._readCollection('personnel/directory', {}) : Promise.resolve({})
+      DB._readCollection ? DB._readCollection('personnel/directory', {}) : Promise.resolve({}),
+      DB.getAllUsers()
     ]);
     const dirList = DB.toArray(directoryData);
     const cleanUserName = (user.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -36,10 +37,7 @@ const KepsekPages = {
     const studentAverages = {};
     const charAverages = {};
     charArr.forEach(c => {
-      charAverages[c.id] = {
-        total: 0,
-        count: 0
-      };
+      charAverages[c.id] = { total: 0, count: 0 };
     });
     const atRiskStudents = [];
     studentArr.forEach(s => {
@@ -47,8 +45,7 @@ const KepsekPages = {
       const sObs = obsArr.filter(o => o.studentId === s.id);
       const hasWarningObs = sObs.some(o => o.type === 'needs_improvement');
       if (scores) {
-        let total = 0,
-          count = 0;
+        let total = 0, count = 0;
         Object.keys(scores).forEach(charId => {
           const sc = scores[charId].score;
           if (sc && charAverages[charId]) {
@@ -95,14 +92,12 @@ const KepsekPages = {
       if (hasChar || hasAcad) assessedStudentsCount++;
     });
     const complianceRate = studentArr.length > 0 ? Math.round((assessedStudentsCount / studentArr.length) * 100) : 0;
-    const positiveObs = obsArr.filter(o => o.type === 'positive').length;
-    const warningObs = obsArr.filter(o => o.type === 'needs_improvement').length;
     const atRiskHtml = atRiskStudents.length > 0 ? atRiskStudents.map(item => {
       const cls = classArr.find(c => c.id === item.student.classId);
       return `
         <tr>
           <td><strong>${AppConfig.escapeHtml(item.student.name)}</strong></td>
-          <td>${cls ? cls.name : '-'}</td>
+          <td>${cls ? AppConfig.escapeHtml(cls.name) : '-'}</td>
           <td class="text-center"><span class="badge ${item.avg < 2.5 && item.avg !== '-' ? 'badge-danger' : 'badge-warning'}">${item.avg}</span></td>
           <td class="text-center">${item.warningCount > 0 ? `<span class="badge badge-warning">${item.warningCount} Catatan</span>` : '-'}</td>
         </tr>
@@ -130,8 +125,8 @@ const KepsekPages = {
       </section>
       <section class="card-grid section-spacer">
         <div class="card card-accent-danger">
-          <h3 class="card-title section-spacer"><i class="ph ph-warning-circle" class="text-danger"></i> Daftar Siswa Perlu Perhatian Khusus</h3>
-          <p class="text-muted soft-note section-spacer">Daftar siswa dengan rata-rata karakter di bawah 2.5 atau memiliki catatan observasi "Perlu Bimbingan".</p>
+          <h3 class="card-title section-spacer"><i class="ph ph-warning-circle text-danger"></i> Daftar Siswa Perlu Perhatian Khusus</h3>
+          <p class="text-muted soft-note section-spacer">Daftar siswa dengan rata-rata karakter di bawah 2.5 atau memiliki catatan observasi bimbingan.</p>
           <div class="table-responsive">
             <table class="table">
               <thead>
@@ -148,11 +143,11 @@ const KepsekPages = {
       </section>
       <section class="card">
         <div class="card-header">
-          <h3 class="card-title">Rekapitulasi per Kelas</h3>
+          <h3 class="card-title">Rekapitulasi per Rombel</h3>
         </div>
         <div class="table-responsive">
           <table class="table">
-            <thead><tr><th>Kelas</th><th>Jumlah Siswa</th><th>Rata-rata Karakter</th><th>Aksi</th></tr></thead>
+            <thead><tr><th>Kelas &amp; Fase</th><th>Wali Kelas</th><th>Jumlah Siswa</th><th>Rata-rata Karakter</th><th>Aksi</th></tr></thead>
             <tbody id="class-recap-body"></tbody>
           </table>
         </div>
@@ -183,31 +178,18 @@ const KepsekPages = {
           r: {
             beginAtZero: true,
             max: 4,
-            ticks: {
-              stepSize: 1,
-              font: {
-                size: 10
-              }
-            },
-            pointLabels: {
-              font: {
-                size: 11
-              }
-            }
+            ticks: { stepSize: 1, font: { size: 10 } },
+            pointLabels: { font: { size: 11 } }
           }
         },
-        plugins: {
-          legend: {
-            display: false
-          }
-        }
+        plugins: { legend: { display: false } }
       }
     });
     const tbody = document.getElementById('class-recap-body');
     classArr.forEach(cls => {
       const clsStudents = studentArr.filter(s => s.classId === cls.id);
-      let clsTotal = 0,
-        clsCount = 0;
+      const teacher = users ? users[cls.teacherId] : null;
+      let clsTotal = 0, clsCount = 0;
       clsStudents.forEach(s => {
         const scores = allAssess?.[s.id];
         if (!scores) return;
@@ -221,92 +203,401 @@ const KepsekPages = {
       const avg = clsCount > 0 ? (clsTotal / clsCount).toFixed(2) : '-';
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td><strong>${AppConfig.escapeHtml(cls.name)}</strong></td>
-        <td>${clsStudents.length}</td>
+        <td><strong>${AppConfig.escapeHtml(cls.name)}</strong> <span class="badge badge-outline">Fase ${AppConfig.escapeHtml(AppConfig.getClassPhase(cls))}</span></td>
+        <td>${teacher ? AppConfig.escapeHtml(teacher.name) : '<span class="text-muted">Belum ditugaskan</span>'}</td>
+        <td>${clsStudents.length} siswa</td>
         <td>${avg !== '-' ? avg + ' / 4' : '<span class="text-muted">Belum ada data</span>'}</td>
-        <td><a href="#/kepsek/class/${cls.id}" class="btn btn-outline btn-sm"><i class="ph ph-eye"></i> Detail</a></td>`;
+        <td><a href="#/kepsek/class/${cls.id}" class="btn btn-outline btn-sm"><i class="ph ph-eye"></i> Detail</a></td>
+      `;
       tbody.appendChild(tr);
     });
   },
+  async renderReports(container) {
+    Router.setTitle('Laporan Rombel', 'Pilih kelas untuk memantau nilai akademik, indikator karakter, dan kelengkapan rapor.');
+    const settings = await DB.getSettings();
+    const year = settings.currentAcademicYear;
+    const sem = settings.currentSemester;
+    const [classes, students, users, allAssess, allAcad] = await Promise.all([
+      DB.getClasses(),
+      DB.getAllStudents(),
+      DB.getAllUsers(),
+      DB.getAllAssessmentsForPeriod(year, sem),
+      DB.getAllAcademicGrades(year, sem)
+    ]);
+    const classArr = DB.toArray(classes);
+    const studentArr = DB.toArray(students);
+    const renderCards = () => {
+      const q = (document.getElementById('search-report-cls')?.value || '').toLowerCase();
+      const phaseFilter = document.getElementById('filter-report-phase')?.value || '';
+      const filtered = classArr.filter(c => {
+        const teacher = users ? users[c.teacherId] : null;
+        const phase = AppConfig.getClassPhase(c);
+        const matchesQ = !q || c.name.toLowerCase().includes(q) || (teacher && teacher.name.toLowerCase().includes(q));
+        const matchesPhase = !phaseFilter || phase === phaseFilter;
+        return matchesQ && matchesPhase;
+      });
+      const cardsHtml = filtered.length ? filtered.map(c => {
+        const clsStudents = studentArr.filter(s => s.classId === c.id);
+        const count = clsStudents.length;
+        const teacher = users ? users[c.teacherId] : null;
+        const phase = AppConfig.getClassPhase(c);
+        let acadTotal = 0, acadCount = 0;
+        let charTotal = 0, charCount = 0;
+        let evaluatedCount = 0;
+        clsStudents.forEach(s => {
+          const sAcad = allAcad?.[s.id];
+          const sChar = allAssess?.[s.id];
+          let hasAny = false;
+          if (sAcad) {
+            Object.values(sAcad).forEach(g => {
+              if (g.score) {
+                acadTotal += parseInt(g.score);
+                acadCount++;
+                hasAny = true;
+              }
+            });
+          }
+          if (sChar) {
+            Object.values(sChar).forEach(ch => {
+              if (ch.score) {
+                charTotal += ch.score;
+                charCount++;
+                hasAny = true;
+              }
+            });
+          }
+          if (hasAny) evaluatedCount++;
+        });
+        const acadAvg = acadCount > 0 ? Math.round(acadTotal / acadCount) : '-';
+        const charAvg = charCount > 0 ? (charTotal / charCount).toFixed(1) : '-';
+        const progressPct = count > 0 ? Math.round((evaluatedCount / count) * 100) : 0;
+        return `
+          <div class="card class-card report-class-card" data-href="#/kepsek/class/${c.id}">
+            <div class="report-class-header">
+              <div class="report-class-title-wrap">
+                <h3 class="card-title text-base mb-1">${AppConfig.escapeHtml(c.name)}</h3>
+                <span class="badge badge-outline">Fase ${AppConfig.escapeHtml(phase)}</span>
+              </div>
+              <span class="badge ${progressPct === 100 ? 'badge-success' : (progressPct > 0 ? 'badge-primary' : 'badge-warning')}">${progressPct}% Lengkap</span>
+            </div>
+            <div class="report-class-walas">
+              <i class="ph ph-chalkboard-teacher"></i> Wali Kelas: <strong>${teacher ? AppConfig.escapeHtml(teacher.name) : 'Belum ditugaskan'}</strong>
+            </div>
+            <div class="report-class-stats">
+              <div class="report-stat-pill">
+                <div class="report-stat-label">Siswa</div>
+                <div class="report-stat-value">${count}</div>
+              </div>
+              <div class="report-stat-pill">
+                <div class="report-stat-label">Akademik</div>
+                <div class="report-stat-value ${acadAvg !== '-' && acadAvg < 75 ? 'text-danger' : 'text-primary'}">${acadAvg}</div>
+              </div>
+              <div class="report-stat-pill">
+                <div class="report-stat-label">Karakter</div>
+                <div class="report-stat-value ${charAvg !== '-' && charAvg < 2.5 ? 'text-danger' : 'text-success'}">${charAvg}</div>
+              </div>
+            </div>
+            <button type="button" class="btn btn-outline btn-sm btn-block" data-open-class="${c.id}"><i class="ph ph-eye"></i> Buka Laporan Rombel</button>
+          </div>
+        `;
+      }).join('') : '<div class="card"><p class="text-muted text-center">Tidak ada rombel yang sesuai filter.</p></div>';
+      const containerEl = document.getElementById('report-cards-container');
+      if (containerEl) {
+        containerEl.innerHTML = cardsHtml;
+        containerEl.querySelectorAll('[data-href]').forEach(card => {
+          card.onclick = (e) => {
+            const target = e.currentTarget.dataset.href;
+            if (target) window.location.hash = target;
+          };
+        });
+      }
+    };
+    container.innerHTML = `
+      <div class="card toolbar-panel">
+        <div class="toolbar-row">
+          <div class="report-toolbar-controls">
+            <div class="search-box">
+              <i class="ph ph-magnifying-glass"></i>
+              <input type="text" id="search-report-cls" placeholder="Cari nama rombel / wali kelas...">
+            </div>
+            <select id="filter-report-phase">
+              <option value="">Semua Fase</option>
+              <option value="A">Fase A (Kelas 1–2)</option>
+              <option value="B">Fase B (Kelas 3–4)</option>
+              <option value="C">Fase C (Kelas 5–6)</option>
+            </select>
+          </div>
+          <div class="toolbar-actions">
+            <span class="badge badge-primary">Tahun Ajaran ${AppConfig.escapeHtml(year)} · Semester ${AppConfig.escapeHtml(sem)}</span>
+          </div>
+        </div>
+      </div>
+      <div id="report-cards-container" class="card-grid"></div>
+    `;
+    renderCards();
+    document.getElementById('search-report-cls')?.addEventListener('input', renderCards);
+    document.getElementById('filter-report-phase')?.addEventListener('change', renderCards);
+  },
   async renderClassDetail(container, classId) {
-    const [classes, students, chars, settings] = await Promise.all([
+    if (!classId) {
+      window.location.hash = '#/kepsek/reports';
+      return;
+    }
+    const settings = await DB.getSettings();
+    const year = settings.currentAcademicYear;
+    const sem = settings.currentSemester;
+    const [classes, students, chars, subjects, users, allAssess, allAcad, attendances, teacherNotes] = await Promise.all([
       DB.getClasses(),
       DB.getStudentsByClass(classId),
       DB.getCharacters(),
-      DB.getSettings()
+      DB.getSubjects(),
+      DB.getAllUsers(),
+      DB.getAllAssessmentsForPeriod(year, sem),
+      DB.getAllAcademicGrades(year, sem),
+      DB._readCollection ? DB._readCollection(`attendances/${year}_${sem}`, {}) : Promise.resolve({}),
+      DB._readCollection ? DB._readCollection(`teacher_notes/${year}_${sem}`, {}) : Promise.resolve({})
     ]);
     const cls = classes[classId];
     if (!cls) {
-      container.innerHTML = '<div class="card"><p class="error-text">Kelas tidak ditemukan.</p></div>';
+      container.innerHTML = `
+        <div class="card">
+          <div class="card-body text-center">
+            <h3 class="text-danger mb-2">Kelas Tidak Ditemukan</h3>
+            <p class="text-muted mb-3">Data rombel yang Anda cari tidak tersedia dalam sistem.</p>
+            <a href="#/kepsek/reports" class="btn btn-outline"><i class="ph ph-arrow-left"></i> Kembali ke Laporan Rombel</a>
+          </div>
+        </div>
+      `;
       return;
     }
-    Router.setTitle(`Rekap ${AppConfig.escapeHtml(cls.name)}`, `${settings.currentAcademicYear} — Semester ${settings.currentSemester}`);
+    const phase = AppConfig.getClassPhase(cls);
+    const teacher = users ? users[cls.teacherId] : null;
     const studentArr = DB.toArray(students).sort((a, b) => a.name.localeCompare(b.name));
     const charArr = DB.toArray(chars).filter(c => c.active !== false).sort((a, b) => (a.order || 0) - (b.order || 0));
-    const year = settings.currentAcademicYear;
-    const sem = settings.currentSemester;
-    const allScores = {};
-    for (const s of studentArr) {
-      allScores[s.id] = await DB.getAssessments(year, sem, s.id);
-    }
-    const scoreLabel = {
-      4: 'Sangat Baik',
-      3: 'Baik',
-      2: 'Mulai Berkembang',
-      1: 'Perlu Bimbingan'
+    const allSubjectsArr = DB.toArray(subjects).sort((a, b) => (a.order || 0) - (b.order || 0));
+    const assignedSubIds = Object.keys(cls.subjectTeachers || {});
+    const activeSubjects = allSubjectsArr.filter(s => assignedSubIds.length === 0 || assignedSubIds.includes(s.id));
+    Router.setTitle(`Laporan ${AppConfig.escapeHtml(cls.name)}`, `Fase ${AppConfig.escapeHtml(phase)} · TA ${year} Semester ${sem}`);
+    let activeTab = 'summary';
+    let searchQuery = '';
+    const renderContent = () => {
+      const q = searchQuery.toLowerCase();
+      const filteredStudents = studentArr.filter(s => !q || s.name.toLowerCase().includes(q) || (s.nis && String(s.nis).includes(q)));
+      let tabHtml = '';
+      if (activeTab === 'summary') {
+        const rows = filteredStudents.length ? filteredStudents.map((s, idx) => {
+          const sAcad = allAcad?.[s.id] || {};
+          const sChar = allAssess?.[s.id] || {};
+          const sAtt = attendances?.[s.id] || {};
+          const sNote = teacherNotes?.[s.id] || {};
+          let acadTot = 0, acadCnt = 0;
+          Object.values(sAcad).forEach(g => {
+            if (g.score) { acadTot += parseInt(g.score); acadCnt++; }
+          });
+          const acadAvg = acadCnt > 0 ? Math.round(acadTot / acadCnt) : '-';
+          let charTot = 0, charCnt = 0;
+          Object.values(sChar).forEach(ch => {
+            if (ch.score) { charTot += ch.score; charCnt++; }
+          });
+          const charAvg = charCnt > 0 ? (charTot / charCnt).toFixed(1) : '-';
+          const sakit = sAtt.sakit || 0;
+          const izin = sAtt.izin || 0;
+          const alpa = sAtt.alpa || 0;
+          const attStr = (sakit || izin || alpa) ? `S:${sakit} I:${izin} A:${alpa}` : 'Nihil';
+          return `
+            <tr>
+              <td class="text-center">${idx + 1}</td>
+              <td>
+                <div class="user-cell-name font-bold">${AppConfig.escapeHtml(s.name)}</div>
+                <div class="user-cell-sub text-muted text-xs">NIS: ${AppConfig.escapeHtml(s.nis || s.nisn || '-')}</div>
+              </td>
+              <td class="text-center font-bold ${acadAvg !== '-' && acadAvg < 75 ? 'text-danger' : 'text-primary'}">${acadAvg}</td>
+              <td class="text-center font-bold ${charAvg !== '-' && charAvg < 2.5 ? 'text-danger' : 'text-success'}">${charAvg}</td>
+              <td class="text-center text-xs">${attStr}</td>
+              <td class="text-xs text-muted">${sNote.note ? AppConfig.escapeHtml(sNote.note.slice(0, 40) + (sNote.note.length > 40 ? '...' : '')) : '-'}</td>
+              <td class="action-cell">
+                <a href="print.html?id=${s.id}&sem=${sem}&year=${encodeURIComponent(year)}" target="_blank" class="btn btn-outline btn-sm"><i class="ph ph-file-text"></i> E-Rapor</a>
+              </td>
+            </tr>
+          `;
+        }).join('') : '<tr><td colspan="7" class="text-center text-muted">Tidak ada siswa yang sesuai pencarian.</td></tr>';
+        tabHtml = `
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th class="table-col-sm text-center">No</th>
+                  <th>Nama Siswa</th>
+                  <th class="text-center">Rata-rata Mapel</th>
+                  <th class="text-center">Rata-rata Karakter</th>
+                  <th class="text-center">Ketidakhadiran</th>
+                  <th>Catatan Walas</th>
+                  <th class="table-col-md">Aksi</th>
+                </tr>
+              </thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>
+        `;
+      } else if (activeTab === 'academic') {
+        const thMapel = activeSubjects.map(sub => `<th class="text-center text-xs">${AppConfig.escapeHtml(sub.name)}</th>`).join('');
+        const rows = filteredStudents.length ? filteredStudents.map((s, idx) => {
+          const sAcad = allAcad?.[s.id] || {};
+          let tot = 0, cnt = 0;
+          const tds = activeSubjects.map(sub => {
+            const grade = sAcad[sub.id];
+            const sc = grade ? grade.score : null;
+            if (sc) { tot += parseInt(sc); cnt++; }
+            return `<td class="text-center font-mono ${sc && sc < 75 ? 'text-danger font-bold' : ''}">${sc || '—'}</td>`;
+          }).join('');
+          const avg = cnt > 0 ? Math.round(tot / cnt) : '-';
+          return `
+            <tr>
+              <td class="text-center">${idx + 1}</td>
+              <td><strong>${AppConfig.escapeHtml(s.name)}</strong></td>
+              ${tds}
+              <td class="text-center font-bold text-primary">${avg}</td>
+            </tr>
+          `;
+        }).join('') : `<tr><td colspan="${activeSubjects.length + 3}" class="text-center text-muted">Tidak ada siswa.</td></tr>`;
+        tabHtml = `
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th class="table-col-sm text-center">No</th>
+                  <th>Nama Siswa</th>
+                  ${thMapel}
+                  <th class="text-center">Rata-rata</th>
+                </tr>
+              </thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>
+        `;
+      } else if (activeTab === 'characters') {
+        const scoreBadge = { 4: 'badge-primary', 3: 'badge-success', 2: 'badge-warning', 1: 'badge-danger' };
+        const thChars = charArr.map(c => `<th class="text-center text-xs">${AppConfig.escapeHtml(c.name)}</th>`).join('');
+        const rows = filteredStudents.length ? filteredStudents.map((s, idx) => {
+          const sChar = allAssess?.[s.id] || {};
+          let tot = 0, cnt = 0;
+          const tds = charArr.map(c => {
+            const sc = sChar[c.id]?.score;
+            if (sc) { tot += sc; cnt++; }
+            return `<td class="text-center">${sc ? `<span class="badge ${scoreBadge[sc] || ''}">${sc}</span>` : '<span class="text-muted">—</span>'}</td>`;
+          }).join('');
+          const avg = cnt > 0 ? (tot / cnt).toFixed(1) : '-';
+          return `
+            <tr>
+              <td class="text-center">${idx + 1}</td>
+              <td><strong>${AppConfig.escapeHtml(s.name)}</strong></td>
+              ${tds}
+              <td class="text-center font-bold text-success">${avg}</td>
+            </tr>
+          `;
+        }).join('') : `<tr><td colspan="${charArr.length + 3}" class="text-center text-muted">Tidak ada siswa.</td></tr>`;
+        tabHtml = `
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th class="table-col-sm text-center">No</th>
+                  <th>Nama Siswa</th>
+                  ${thChars}
+                  <th class="text-center">Rata-rata</th>
+                </tr>
+              </thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>
+        `;
+      }
+      const mount = document.getElementById('class-detail-mount');
+      if (mount) mount.innerHTML = tabHtml;
     };
-    const scoreBadge = {
-      4: 'badge-primary',
-      3: 'badge-success',
-      2: 'badge-warning',
-      1: 'badge-danger'
-    };
-    const thChars = charArr.map(c => `<th class="text-center">${AppConfig.escapeHtml(c.name)}</th>`).join('');
-    const rows = studentArr.map(s => {
-      const scores = allScores[s.id] || {};
-      let total = 0,
-        count = 0;
-      const tds = charArr.map(c => {
-        const sc = scores[c.id]?.score;
-        if (sc) {
-          total += sc;
-          count++;
-        }
-        return `<td class="text-center">${sc ? `<span class="badge ${scoreBadge[sc] || ''}">${sc}</span>` : '<span class="text-muted">—</span>'}</td>`;
-      }).join('');
-      const avg = count > 0 ? (total / count).toFixed(1) : '-';
-      return `<tr><td><strong>${AppConfig.escapeHtml(s.name)}</strong></td>${tds}<td class="text-center" style="font-weight:600">${avg}</td></tr>`;
-    }).join('');
+    let globalClsAcadTot = 0, globalClsAcadCnt = 0;
+    let globalClsCharTot = 0, globalClsCharCnt = 0;
+    studentArr.forEach(s => {
+      const sAcad = allAcad?.[s.id];
+      const sChar = allAssess?.[s.id];
+      if (sAcad) {
+        Object.values(sAcad).forEach(g => {
+          if (g.score) { globalClsAcadTot += parseInt(g.score); globalClsAcadCnt++; }
+        });
+      }
+      if (sChar) {
+        Object.values(sChar).forEach(ch => {
+          if (ch.score) { globalClsCharTot += ch.score; globalClsCharCnt++; }
+        });
+      }
+    });
+    const clsAcadAvg = globalClsAcadCnt > 0 ? Math.round(globalClsAcadTot / globalClsAcadCnt) : '-';
+    const clsCharAvg = globalClsCharCnt > 0 ? (globalClsCharTot / globalClsCharCnt).toFixed(1) : '-';
     container.innerHTML = `
-      <div class="kepsek-back-btn"><a href="#/dashboard" class="btn btn-outline"><i class="ph ph-arrow-left"></i> Kembali</a></div>
-      <div class="card">
-        <div class="table-responsive">
-          <table class="table">
-            <thead><tr><th>Siswa</th>${thChars}<th class="text-center">Rata-rata</th></tr></thead>
-            <tbody>${rows}</tbody>
-          </table>
+      <div class="flex-between align-center mb-3">
+        <a href="#/kepsek/reports" class="btn btn-outline"><i class="ph ph-arrow-left"></i> Kembali ke Laporan Rombel</a>
+        <span class="badge badge-primary">Tahun Ajaran ${AppConfig.escapeHtml(year)} · Semester ${AppConfig.escapeHtml(sem)}</span>
+      </div>
+      <section class="card mb-3">
+        <div class="flex-between align-start flex-wrap gap-2">
+          <div>
+            <h2 class="card-title text-xl mb-1">${AppConfig.escapeHtml(cls.name)}</h2>
+            <div class="user-cell-sub text-muted">
+              <span class="badge badge-outline">Fase ${AppConfig.escapeHtml(phase)}</span> · 
+              Wali Kelas: <strong>${teacher ? AppConfig.escapeHtml(teacher.name) : 'Belum Ditugaskan'}</strong>
+              ${teacher?.nbm ? `(NBM: ${AppConfig.escapeHtml(teacher.nbm)})` : ''}
+            </div>
+          </div>
+          <div class="report-detail-stats">
+            <div class="report-stat-pill">
+              <div class="report-stat-label">Total Siswa</div>
+              <div class="report-stat-value">${studentArr.length}</div>
+            </div>
+            <div class="report-stat-pill">
+              <div class="report-stat-label">Rata Akademik</div>
+              <div class="report-stat-value text-primary">${clsAcadAvg}</div>
+            </div>
+            <div class="report-stat-pill">
+              <div class="report-stat-label">Rata Karakter</div>
+              <div class="report-stat-value text-success">${clsCharAvg}</div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <div class="card toolbar-panel">
+        <div class="toolbar-row">
+          <div class="report-toolbar-controls">
+            <div class="report-tab-nav">
+              <button type="button" class="btn btn-sm btn-primary" id="btn-tab-summary"><i class="ph ph-list-numbers"></i> Rekap Nilai &amp; Rapor</button>
+              <button type="button" class="btn btn-sm btn-outline" id="btn-tab-academic"><i class="ph ph-book-open"></i> Matriks Mapel</button>
+              <button type="button" class="btn btn-sm btn-outline" id="btn-tab-characters"><i class="ph ph-star"></i> Matriks Karakter</button>
+            </div>
+            <div class="search-box">
+              <i class="ph ph-magnifying-glass"></i>
+              <input type="text" id="search-student-detail" placeholder="Cari nama siswa / NIS...">
+            </div>
+          </div>
         </div>
       </div>
+      <div class="card">
+        <div id="class-detail-mount"></div>
+      </div>
     `;
-  },
-  async renderReports(container) {
-    Router.setTitle('Laporan per kelas', 'Pilih kelas untuk melihat laporan lengkap.');
-    const [classes, students] = await Promise.all([DB.getClasses(), DB.getAllStudents()]);
-    const classArr = DB.toArray(classes);
-    const studentArr = DB.toArray(students);
-    const cards = classArr.map(c => {
-      const count = studentArr.filter(s => s.classId === c.id).length;
-      return `
-        <div class="card class-card" data-href="#/kepsek/class/${c.id}">
-          <h3 class="card-title">${AppConfig.escapeHtml(c.name)}</h3>
-          <p class="text-muted">${count} siswa</p>
-        </div>`;
-    }).join('');
-    container.innerHTML = classArr.length ? `<div class="card-grid">${cards}</div>` : '<div class="card"><p class="text-muted">Belum ada data kelas.</p></div>';
-    container.querySelectorAll('.class-card').forEach(card => {
-      card.addEventListener('click', (e) => {
-        if (e.currentTarget.dataset.href) window.location.hash = e.currentTarget.dataset.href;
-      });
+    renderContent();
+    const btnSummary = document.getElementById('btn-tab-summary');
+    const btnAcad = document.getElementById('btn-tab-academic');
+    const btnChar = document.getElementById('btn-tab-characters');
+    const updateTabBtns = () => {
+      btnSummary.className = `btn btn-sm ${activeTab === 'summary' ? 'btn-primary' : 'btn-outline'}`;
+      btnAcad.className = `btn btn-sm ${activeTab === 'academic' ? 'btn-primary' : 'btn-outline'}`;
+      btnChar.className = `btn btn-sm ${activeTab === 'characters' ? 'btn-primary' : 'btn-outline'}`;
+    };
+    btnSummary.onclick = () => { activeTab = 'summary'; updateTabBtns(); renderContent(); };
+    btnAcad.onclick = () => { activeTab = 'academic'; updateTabBtns(); renderContent(); };
+    btnChar.onclick = () => { activeTab = 'characters'; updateTabBtns(); renderContent(); };
+    document.getElementById('search-student-detail')?.addEventListener('input', (e) => {
+      searchQuery = e.target.value;
+      renderContent();
     });
   }
 };

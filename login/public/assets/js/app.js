@@ -101,8 +101,30 @@ const App = {
       if (guruAllowed.includes(path)) return true;
     }
     if (role === AppConfig.ROLES.KEPSEK) {
-      const kepsekPrefixes = ['#/dashboard', '#/attendance', '#/admin/attendance', '#/kepsek/', '#/curriculum', '#/student-affairs', '#/finance', '#/personnel', '#/facilities', '#/komite', '#/guru/portfolio', '#/tendik/portfolio', '#/gtk/official-travel', '#/guru/student-attendance'];
-      if (kepsekPrefixes.some(p => path === p || path.startsWith(p + '/'))) return true;
+      const kepsekPrefixes = [
+        '#/dashboard',
+        '#/attendance',
+        '#/admin/attendance',
+        '#/admin/classes',
+        '#/admin/students',
+        '#/admin/subjects',
+        '#/admin/characters',
+        '#/admin/assignments',
+        '#/admin/users',
+        '#/kepsek',
+        '#/curriculum',
+        '#/student-affairs',
+        '#/finance',
+        '#/personnel',
+        '#/facilities',
+        '#/humas',
+        '#/komite',
+        '#/guru/portfolio',
+        '#/tendik/portfolio',
+        '#/gtk/official-travel',
+        '#/guru/student-attendance'
+      ];
+      if (kepsekPrefixes.some(p => path === p || path.startsWith(p.endsWith('/') ? p : p + '/'))) return true;
     }
     if (role === AppConfig.ROLES.CURRICULUM || assignments.includes('WAKA_KURIKULUM') || assignments.includes('STAF_KURIKULUM')) {
       if (path === '#/curriculum' || path.startsWith('#/curriculum/')) return true;
@@ -397,7 +419,7 @@ const App = {
         allRoutes.add(item.hash);
       });
     });
-    ['#/admin/students/:id', '#/guru/assess/:id', '#/guru/observe/:id', '#/guru/student-attendance/:id', '#/panduan', '#/help/report-issue'].forEach(r => allRoutes.add(r));
+    ['#/admin/students/:id', '#/guru/assess/:id', '#/guru/observe/:id', '#/guru/student-attendance/:id', '#/panduan', '#/help/report-issue', '#/kepsek/class/:id'].forEach(r => allRoutes.add(r));
     allRoutes.forEach(path => {
       if (path === '#/dashboard') return;
       Router.add(path, async (container, routeParams) => {
@@ -462,6 +484,7 @@ const App = {
           '#/guru/ummi/koord/exams': typeof UMMIPages !== 'undefined' ? UMMIPages.renderExams : null,
           '#/guru/ummi/koord/tasmi': typeof UMMIPages !== 'undefined' ? UMMIPages.renderTasmiPlotting : null,
           '#/kepsek/reports': typeof KepsekPages !== 'undefined' ? KepsekPages.renderReports : null,
+          '#/kepsek/class/:id': typeof KepsekPages !== 'undefined' ? (c, params) => KepsekPages.renderClassDetail(c, params) : null,
           '#/ortu/dashboard': typeof OrtuPages !== 'undefined' ? OrtuPages.renderDashboard : null,
           '#/parent/report-card': typeof OrtuPages !== 'undefined' ? OrtuPages.renderReportCard : null,
           '#/finance': typeof FinancePages !== 'undefined' ? FinancePages.renderDashboard : null,

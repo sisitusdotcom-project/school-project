@@ -119,7 +119,7 @@ const PersonnelPages = {
               { href: '#/personnel/evaluations', icon: 'ph-chart-line-up', title: 'Penilaian Kinerja SDM', desc: 'Rubrik 3 pilar Majelis Dikdasmen' },
               { href: '#/personnel/disciplinary', icon: 'ph-warning-octagon', title: 'Peringatan & Disiplin SDM', desc: 'Pencatatan teguran lisan, tertulis & SP' },
               { href: '#/personnel/portfolio', icon: 'ph-folder-star', title: 'Portofolio & Kompetensi', desc: 'Rekam jejak pelatihan, diklat & sertifikasi' },
-              { href: '#/guru/portfolio', icon: 'ph-folder-check', title: 'Verifikasi Portofolio Guru', desc: 'Telaah berkas & persetujuan (ACC)' },
+              { href: '#/guru/portfolio', icon: 'ph-seal-check', title: 'Verifikasi Portofolio Guru', desc: 'Telaah berkas & persetujuan (ACC)' },
               { href: '#/humas/official-travel', icon: 'ph-airplane-takeoff', title: 'Verifikasi Perjalanan Dinas', desc: 'Validasi surat tugas & penetapan vakasi' },
               { href: '#/gtk/salary-slip', icon: 'ph-receipt', title: 'Slip Gaji Pribadi', desc: 'Rincian honorarium & gaji staf personalia' },
               { href: '#/personnel/complaints', icon: 'ph-chat-teardrop-dots', title: 'Layanan Pengaduan', desc: 'Aspirasi & masukan wali murid' },
