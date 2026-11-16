@@ -92,17 +92,50 @@ const KepsekPages = {
       if (hasChar || hasAcad) assessedStudentsCount++;
     });
     const complianceRate = studentArr.length > 0 ? Math.round((assessedStudentsCount / studentArr.length) * 100) : 0;
-    const atRiskHtml = atRiskStudents.length > 0 ? atRiskStudents.map(item => {
-      const cls = classArr.find(c => c.id === item.student.classId);
-      return `
-        <tr>
-          <td><strong>${AppConfig.escapeHtml(item.student.name)}</strong></td>
-          <td>${cls ? AppConfig.escapeHtml(cls.name) : '-'}</td>
-          <td class="text-center"><span class="badge ${item.avg < 2.5 && item.avg !== '-' ? 'badge-danger' : 'badge-warning'}">${item.avg}</span></td>
-          <td class="text-center">${item.warningCount > 0 ? `<span class="badge badge-warning">${item.warningCount} Catatan</span>` : '-'}</td>
-        </tr>
-      `;
-    }).join('') : '<tr><td colspan="4" class="text-center text-muted">Bagus! Tidak ada siswa yang terdeteksi memerlukan perhatian khusus.</td></tr>';
+    const atRiskCardHtml = atRiskStudents.length > 0 ? `
+      <div class="card card-accent-danger">
+        <h3 class="card-title section-spacer"><i class="ph ph-warning-circle text-danger"></i> Daftar Siswa Perlu Perhatian Khusus</h3>
+        <p class="text-muted soft-note section-spacer">Daftar siswa dengan rata-rata karakter di bawah 2.5 atau memiliki catatan observasi bimbingan.</p>
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Siswa &amp; Kelas</th>
+                <th class="text-center">Rata Karakter</th>
+                <th class="text-center">Peringatan</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${atRiskStudents.map(item => {
+                const cls = classArr.find(c => c.id === item.student.classId);
+                return `
+                  <tr>
+                    <td>
+                      <div class="font-bold">${AppConfig.escapeHtml(item.student.name)}</div>
+                      <div class="user-cell-sub text-muted text-xs">${cls ? AppConfig.escapeHtml(cls.name) : '-'}</div>
+                    </td>
+                    <td class="text-center"><span class="badge ${item.avg < 2.5 && item.avg !== '-' ? 'badge-danger' : 'badge-warning'}">${item.avg}</span></td>
+                    <td class="text-center">${item.warningCount > 0 ? `<span class="badge badge-warning">${item.warningCount} Catatan</span>` : '<span class="text-muted">-</span>'}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    ` : `
+      <div class="card card-accent-success">
+        <h3 class="card-title section-spacer"><i class="ph ph-check-circle text-success"></i> Kondisi Karakter Siswa</h3>
+        <p class="text-muted soft-note section-spacer">Monitoring siswa dengan rata-rata karakter di bawah 2.5 atau catatan bimbingan.</p>
+        <div class="at-risk-empty">
+          <div class="at-risk-empty-icon"><i class="ph ph-seal-check"></i></div>
+          <div class="at-risk-empty-text">
+            <h4 class="at-risk-empty-title">Semua Siswa Terpantau Kondusif</h4>
+            <p class="at-risk-empty-desc">Tidak ada siswa yang terdeteksi memerlukan perhatian khusus (rata-rata karakter &lt; 2.5 atau catatan observasi bimbingan) pada semester ini.</p>
+          </div>
+        </div>
+      </div>
+    `;
     container.innerHTML = `
       ${heroHtml}
       <section class="card-grid section-spacer">
@@ -123,21 +156,10 @@ const KepsekPages = {
           <div><p class="stat-value">${studentArr.length}</p><p class="stat-label text-muted">Total Siswa Aktif</p></div>
         </div>
       </section>
-      <section class="card-grid section-spacer">
-        <div class="card card-accent-danger">
-          <h3 class="card-title section-spacer"><i class="ph ph-warning-circle text-danger"></i> Daftar Siswa Perlu Perhatian Khusus</h3>
-          <p class="text-muted soft-note section-spacer">Daftar siswa dengan rata-rata karakter di bawah 2.5 atau memiliki catatan observasi bimbingan.</p>
-          <div class="table-responsive">
-            <table class="table">
-              <thead>
-                <tr><th>Nama Siswa</th><th>Kelas</th><th class="text-center">Rata-rata Karakter</th><th class="text-center">Catatan Peringatan</th></tr>
-              </thead>
-              <tbody>${atRiskHtml}</tbody>
-            </table>
-          </div>
-        </div>
+      <section class="kepsek-grid-2 section-spacer">
+        ${atRiskCardHtml}
         <div class="card">
-          <h3 class="card-title section-spacer">Rata-rata Karakter Sekolah — Sem ${sem}, ${year}</h3>
+          <h3 class="card-title section-spacer"><i class="ph ph-chart-pie"></i> Rata-rata Karakter Sekolah — Sem ${AppConfig.escapeHtml(sem)}, ${AppConfig.escapeHtml(year)}</h3>
           <div class="kepsek-chart-wrap"><canvas id="chart-school"></canvas></div>
         </div>
       </section>
@@ -155,7 +177,26 @@ const KepsekPages = {
       <div id="kepsek-bulletin-container" class="section-spacer"></div>
     `;
     AppConfig.renderBulletinBoard(container.querySelector('#kepsek-bulletin-container'), { user });
-    const labels = charArr.map(c => c.name);
+    const wrapRadarLabel = (s, maxLen = 18) => {
+      if (!s) return '';
+      const clean = s.replace(/\s*\([^)]*\)/g, '').trim();
+      if (clean.length <= maxLen) return clean;
+      const words = clean.split(' ');
+      if (words.length <= 1) return clean;
+      const lines = [];
+      let cur = '';
+      words.forEach(w => {
+        if ((cur + ' ' + w).trim().length <= maxLen) {
+          cur = (cur + ' ' + w).trim();
+        } else {
+          if (cur) lines.push(cur);
+          cur = w;
+        }
+      });
+      if (cur) lines.push(cur);
+      return lines.length > 1 ? lines : clean;
+    };
+    const labels = charArr.map(c => wrapRadarLabel(c.name));
     const values = charArr.map(c => {
       const d = charAverages[c.id];
       return d && d.count > 0 ? parseFloat((d.total / d.count).toFixed(2)) : 0;
@@ -167,22 +208,47 @@ const KepsekPages = {
         datasets: [{
           label: 'Rata-rata sekolah',
           data: values,
-          borderColor: '#3b82f6',
-          backgroundColor: 'rgba(59,130,246,0.12)',
-          pointBackgroundColor: '#3b82f6',
+          borderColor: '#2563eb',
+          backgroundColor: 'rgba(37,99,235,0.12)',
+          pointBackgroundColor: '#2563eb',
           pointRadius: 4
         }]
       },
       options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        layout: {
+          padding: {
+            top: 15,
+            bottom: 15,
+            left: 30,
+            right: 30
+          }
+        },
         scales: {
           r: {
             beginAtZero: true,
             max: 4,
-            ticks: { stepSize: 1, font: { size: 10 } },
-            pointLabels: { font: { size: 11 } }
+            ticks: { stepSize: 1, font: { size: 10 }, backdropColor: 'transparent' },
+            pointLabels: {
+              font: { size: 11, weight: '600' },
+              color: '#334155',
+              padding: 8
+            }
           }
         },
-        plugins: { legend: { display: false } }
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              title: (items) => {
+                const idx = items[0]?.dataIndex;
+                return charArr[idx] ? charArr[idx].name : '';
+              },
+              label: (context) => `Nilai Rata-rata: ${context.raw} / 4`
+            }
+          }
+        }
       }
     });
     const tbody = document.getElementById('class-recap-body');
