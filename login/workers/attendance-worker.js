@@ -234,15 +234,24 @@ export default {
         }, request);
       }
       const serverTimestamp = new Date().toISOString();
+      let effectiveTimestamp = serverTimestamp;
+      if (clientTimestamp) {
+        const cTime = new Date(clientTimestamp).getTime();
+        const sTime = new Date(serverTimestamp).getTime();
+        const diffMs = Math.abs(sTime - cTime);
+        if (!isNaN(cTime) && diffMs <= 10 * 60 * 1000) {
+          effectiveTimestamp = clientTimestamp;
+        }
+      }
+      const effectiveJakartaDate = new Date(new Date(effectiveTimestamp).toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }));
       const serverDateStr = new Intl.DateTimeFormat('en-CA', {
         timeZone: 'Asia/Jakarta',
         year: 'numeric',
         month: '2-digit',
         day: '2-digit'
-      }).format(new Date());
+      }).format(effectiveJakartaDate);
       const effectiveDateStr = serverDateStr;
-      const jakartaNow = new Date(new Date(serverTimestamp).toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }));
-      const currentTimeText = jakartaNow.toTimeString().slice(0, 5);
+      const currentTimeText = effectiveJakartaDate.toTimeString().slice(0, 5);
       const windowName = type === 'in' ? 'hadir' : 'pulang';
       const dayNames = ['minggu', 'senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu'];
       const currentDayKey = dayNames[jakartaNow.getDay()] || 'senin';
@@ -300,23 +309,24 @@ export default {
         timeZone: 'Asia/Jakarta',
         hour: '2-digit',
         minute: '2-digit'
-      }).format(new Date(serverTimestamp)).replace('.', ':');
+      }).format(effectiveJakartaDate).replace('.', ':');
       const initialPatch = {
         serverTimestamp,
+        client_action_timestamp: clientTimestamp || serverTimestamp,
         serverSignature,
         photoHash,
         distanceMeters: Math.round(distance),
         ...(type === 'in' ? {
           time_in: timeFormatted,
-          location_in: { lat: Number(location.lat), lng: Number(location.lng), accuracy: accuracyValue, checkedAt: serverTimestamp },
+          location_in: { lat: Number(location.lat), lng: Number(location.lng), accuracy: accuracyValue, checkedAt: effectiveTimestamp },
           ...(body.lateReason ? {
             late_reason: body.lateReason,
             appeal_status: 'pending',
-            appeal_created_at: serverTimestamp
+            appeal_created_at: effectiveTimestamp
           } : {})
         } : {
           time_out: timeFormatted,
-          location_out: { lat: Number(location.lat), lng: Number(location.lng), accuracy: accuracyValue, checkedAt: serverTimestamp }
+          location_out: { lat: Number(location.lat), lng: Number(location.lng), accuracy: accuracyValue, checkedAt: effectiveTimestamp }
         })
       };
       await saveAttendanceRecord({ dateStr: effectiveDateStr, teacherId, record: initialPatch }, env);

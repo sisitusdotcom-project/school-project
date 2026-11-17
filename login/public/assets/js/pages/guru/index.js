@@ -2519,7 +2519,7 @@ onGeoError(err);
 tryStandard();
 }
 },
-{ enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+{ enableHighAccuracy: true, timeout: 8000, maximumAge: 30000 }
 );
 };
 const startGeolocationWatch = () => {
@@ -2536,7 +2536,7 @@ stopGeolocationWatch();
 watchId = navigator.geolocation.watchPosition(onGeoSuccess, onGeoError, {
 enableHighAccuracy: true,
 timeout: 15000,
-maximumAge: 0
+maximumAge: 15000
 });
 };
 const reportWaBtn = document.getElementById('btn-report-attendance-wa');
@@ -2579,6 +2579,9 @@ return;
 }
 btn.disabled = true;
 btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Mengirim presensi...';
+const actionDate = new Date();
+const actionIso = actionDate.toISOString();
+const actionTimeStr = new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit' }).format(actionDate).replace('.', ':');
 try {
 const isUmmi = AppConfig.isUserUmmi(Auth.userData || Auth.currentUser);
 const lateInput = document.getElementById('attendance-late-reason-input');
@@ -2594,9 +2597,11 @@ isUmmi,
 roleGroup: isUmmi ? 'ummi' : 'gtk',
 lateReason: lateReasonVal,
 attendanceType: currentSchedule?.isCustom ? 'custom' : 'daily',
-activityName: currentSchedule?.customActivity || ''
+activityName: currentSchedule?.customActivity || '',
+clientTimestamp: actionIso,
+actionTimeStr: actionTimeStr
 });
-const recordedTime = result?.record?.time_in || result?.record?.time_out || (type === 'in' ? (result.serverTimestamp ? new Date(result.serverTimestamp).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })) : (result.serverTimestamp ? new Date(result.serverTimestamp).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })));
+const recordedTime = result?.record?.time_in || result?.record?.time_out || actionTimeStr;
 AppConfig.showAttendanceSuccessModal({ type, timeStr: recordedTime, user: Auth.userData || Auth.currentUser, isUmmi, date: dateStr });
 capturedProofDataUrl = null;
 proofPreview.src = '';
@@ -2607,7 +2612,7 @@ stopCamera();
 void loadHistory();
 } catch (err) {
 console.error(err);
-alert(err && err.message ? err.message : 'Gagal mencatat presensi. Pastikan foto dan lokasi benar, serta endpoint server aktif.');
+alert(err && err.message ? err.message : 'Gagal mencatat presensi. Pastikan posisi Anda berada di area sekolah dan koneksi internet aktif.');
 btn.disabled = false;
 btn.innerHTML = type === 'in' ? '<i class="ph ph-sign-in"></i> Presensi Datang' : '<i class="ph ph-sign-out"></i> Presensi Pulang';
 }

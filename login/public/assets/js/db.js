@@ -214,57 +214,87 @@ const DB = {
     await this.saveTeacherAttendance(dateStr, teacherId, { proof_url: fileUrl });
     return fileUrl;
   },
-  async submitTeacherAttendanceToWorker({ dateStr, teacherId, type, photoDataUrl, location, accuracy, isUmmi, roleGroup, lateReason, attendanceType, activityName }) {
+  async submitTeacherAttendanceToWorker({ dateStr, teacherId, type, photoDataUrl, location, accuracy, isUmmi, roleGroup, lateReason, attendanceType, activityName, clientTimestamp, actionTimeStr }) {
     const workerUrl = (window.CLOUDFLARE_ATTENDANCE_WORKER_URL || '').trim();
-    if (!workerUrl || workerUrl.includes('your-subdomain')) {
-      const timeStr = new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit' }).format(new Date()).replace('.', ':');
-      const payload = {
-        ...(type === 'in' ? { time_in: timeStr } : {}),
-        ...(type === 'out' ? { time_out: timeStr } : {}),
-        ...(location ? (type === 'in' ? { location_in: location } : { location_out: location }) : {}),
-        ...(lateReason ? { late_reason: lateReason, appeal_status: 'pending', appeal_created_at: new Date().toISOString() } : {}),
-        ...(attendanceType ? { attendance_type: attendanceType } : {}),
-        ...(activityName ? { activity_name: activityName } : {})
-      };
-      await this.saveTeacherAttendance(dateStr, teacherId, payload);
+    const actionIso = clientTimestamp || new Date().toISOString();
+    const actionDate = new Date(actionIso);
+    const timeStr = actionTimeStr || new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit' }).format(isNaN(actionDate.getTime()) ? new Date() : actionDate).replace('.', ':');
+    const directPayload = {
+      ...(type === 'in' ? { time_in: timeStr } : {}),
+      ...(type === 'out' ? { time_out: timeStr } : {}),
+      ...(location ? (type === 'in' ? { location_in: location } : { location_out: location }) : {}),
+      ...(lateReason ? { late_reason: lateReason, appeal_status: 'pending', appeal_created_at: actionIso } : {}),
+      ...(attendanceType ? { attendance_type: attendanceType } : {}),
+      ...(activityName ? { activity_name: activityName } : {}),
+      client_action_timestamp: actionIso,
+      accuracy: Number(accuracy || 0)
+    };
+    const executeDirectFallback = async (reason = 'direct') => {
+      await this.saveTeacherAttendance(dateStr, teacherId, {
+        ...directPayload,
+        submission_source: reason
+      });
       if (photoDataUrl) {
         void this.saveTeacherAttendanceProof(dateStr, teacherId, photoDataUrl, 'image/jpeg');
       }
-      return { status: 'success', proof_url: '', record: payload };
+      return { status: 'success', proof_url: '', record: directPayload, serverTimestamp: actionIso, source: reason };
+    };
+    if (!workerUrl || workerUrl.includes('your-subdomain')) {
+      return executeDirectFallback('no_worker_configured');
     }
-    const user = typeof firebase !== 'undefined' && firebase.auth ? firebase.auth().currentUser : null;
-    const idToken = user ? await user.getIdToken() : '';
-    const response = await fetch(workerUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(idToken ? { Authorization: `Bearer ${idToken}` } : {})
-      },
-      body: JSON.stringify({
-        dateStr,
-        teacherId,
-        type,
-        photoDataUrl,
-        location,
-        accuracy,
-        isUmmi: !!isUmmi,
-        roleGroup: roleGroup || (isUmmi ? 'ummi' : 'gtk'),
-        clientTimestamp: new Date().toISOString(),
-        lateReason: lateReason || '',
-        attendance_type: attendanceType || '',
-        activity_name: activityName || ''
-      })
-    });
-    let result = {};
+    let controller = null;
+    let timeoutId = null;
     try {
-      result = await response.json();
-    } catch (error) {
-      result = { status: 'error', message: 'Respons worker tidak valid JSON.' };
+      const user = typeof firebase !== 'undefined' && firebase.auth ? firebase.auth().currentUser : null;
+      const idToken = user ? await user.getIdToken() : '';
+      if (typeof AbortController !== 'undefined') {
+        controller = new AbortController();
+        timeoutId = setTimeout(() => controller.abort(), 8500);
+      }
+      const response = await fetch(workerUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(idToken ? { Authorization: 'Bearer ' + idToken } : {})
+        },
+        signal: controller ? controller.signal : undefined,
+        body: JSON.stringify({
+          dateStr,
+          teacherId,
+          type,
+          photoDataUrl,
+          location,
+          accuracy,
+          isUmmi: !!isUmmi,
+          roleGroup: roleGroup || (isUmmi ? 'ummi' : 'gtk'),
+          clientTimestamp: actionIso,
+          lateReason: lateReason || '',
+          attendance_type: attendanceType || '',
+          activity_name: activityName || ''
+        })
+      });
+      if (timeoutId) clearTimeout(timeoutId);
+      let result = {};
+      try {
+        result = await response.json();
+      } catch (errParse) {
+        result = { status: 'error', message: 'Respons worker tidak valid JSON.' };
+      }
+      if (response.ok && result.status === 'success') {
+        return result;
+      }
+      if (response.status === 400 || response.status === 403) {
+        throw new Error(result && result.message ? result.message : 'Presensi ditolak oleh aturan sistem.');
+      }
+      return await executeDirectFallback('worker_http_' + response.status);
+    } catch (err) {
+      if (timeoutId) clearTimeout(timeoutId);
+      const msg = String(err && err.message ? err.message : err);
+      if (msg.includes('Presensi ditolak') || msg.includes('di luar area') || msg.includes('libur') || msg.includes('belum dibuka') || msg.includes('belum dapat dilakukan')) {
+        throw err;
+      }
+      return await executeDirectFallback('worker_fallback');
     }
-    if (!response.ok || result.status !== 'success') {
-      throw new Error(result && result.message ? result.message : 'Gagal memvalidasi absensi di server.');
-    }
-    return result;
   },
   async getDailyStudentAttendance(dateStr, classId) {
     return this._readCollection(`student_attendance_daily/${dateStr}/${classId}`, {});
