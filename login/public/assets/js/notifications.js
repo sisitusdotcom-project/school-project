@@ -30,11 +30,27 @@ const NotificationService = {
   formatMoney(num) {
     return 'Rp ' + Number(num || 0).toLocaleString('id-ID');
   },
+  _recentSent: new Map(),
   async send({ recipientUid, title, message, link = '', type = 'info', action = '' }) {
     if (!recipientUid || !isDBReady()) return;
+    const cleanTitle = (title || '').trim();
+    const cleanMsg = (message || '').replace(/\s*\(\s*\)/g, '').replace(/\s*""/g, '').trim();
+    const dedupeKey = `${recipientUid}:${cleanTitle}:${cleanMsg}:${link}`;
+    const now = Date.now();
+    const lastSent = this._recentSent.get(dedupeKey);
+    if (lastSent && (now - lastSent) < 60000) {
+      return;
+    }
+    this._recentSent.set(dedupeKey, now);
+    if (this._recentSent.size > 200) {
+      const cutoff = now - 120000;
+      for (const [k, time] of this._recentSent.entries()) {
+        if (time < cutoff) this._recentSent.delete(k);
+      }
+    }
     await db.ref(`notifications/${recipientUid}`).push({
-      title,
-      message,
+      title: cleanTitle,
+      message: cleanMsg,
       link,
       type,
       action,
@@ -83,11 +99,26 @@ const NotificationService = {
     if (!node || !isDBReady()) return;
     const moneyStr = this.formatMoney;
     if (node === 'curriculum/documents') {
+      const docType = payload.docType || 'Modul Ajar';
+      let subjectName = payload.subjectIdName || payload.subjectName || '';
+      if (!subjectName && payload.subjectId) {
+        try {
+          const subjects = await DB.getSubjects();
+          if (subjects && subjects[payload.subjectId]) {
+            subjectName = subjects[payload.subjectId].name || '';
+          }
+        } catch (_) {}
+      }
+      const subjectPart = subjectName ? ` Mata Pelajaran ${subjectName}` : '';
+      const semPart = payload.semester ? ` [${payload.semester}]` : '';
+      const notePart = payload.note ? ` ("${payload.note.length > 35 ? payload.note.slice(0, 35) + '...' : payload.note}")` : '';
+      const fullContext = `${docType}${subjectPart}${semPart}${notePart}`.trim();
       if (!isApprover) {
+        if (payload.status === 'Draft') return;
         this.sendToRole({
           unit: ['WAKA_KURIKULUM', 'STAF_KURIKULUM'],
-          title: 'Modul Ajar Perlu Ditinjau',
-          message: `${uploaderName} mengajukan ${payload.docType || 'Modul Ajar'} (${payload.title || ''}) untuk diverifikasi.`,
+          title: isEditing ? 'Perangkat Ajar Diperbarui' : 'Perangkat Ajar Perlu Ditinjau',
+          message: `${uploaderName} mengajukan ${fullContext} untuk diverifikasi.`,
           link: '#/curriculum/syllabus',
           type: 'info',
           action: 'Perlu Verifikasi',
@@ -95,24 +126,28 @@ const NotificationService = {
         });
       } else if (payload.teacherId) {
         const isAcc = payload.status === 'Disetujui (ACC)';
+        const feedbackStr = payload.reviewerFeedback ? ` Catatan verifikator: "${payload.reviewerFeedback}"` : '';
         this.send({
           recipientUid: payload.teacherId,
           title: isAcc ? 'Perangkat Ajar Disetujui (ACC)' : 'Perangkat Ajar Perlu Revisi',
           message: isAcc
-            ? `Perangkat ${payload.docType || 'Modul Ajar'} (${payload.title || ''}) Anda telah disetujui Kurikulum.`
-            : `Perangkat ${payload.docType || 'Modul Ajar'} (${payload.title || ''}) memerlukan revisi dari Kurikulum.`,
+            ? `Perangkat ${fullContext} Anda telah disetujui Kurikulum.${feedbackStr}`
+            : `Perangkat ${fullContext} Anda memerlukan revisi dari Kurikulum.${feedbackStr}`,
           link: '#/curriculum/syllabus',
           type: isAcc ? 'success' : 'warning',
           action: isAcc ? 'Lihat Berkas' : 'Perbaiki Berkas'
         });
       }
     } else if (node === 'guru/portfolio' || node === 'tendik/portfolio' || node === 'personnel/portfolio') {
+      const portTitle = payload.title ? `"${payload.title}"` : 'portofolio';
+      const catPart = payload.category ? ` (${payload.category})` : '';
       if (!isApprover) {
+        if (payload.status === 'Draft') return;
         this.sendToRole({
           unit: ['WAKA_HUMAS_PERSONALIA', 'STAF_HUMAS_PERSONALIA'],
-          title: 'Portofolio Baru Perlu Verifikasi',
-          message: `${uploaderName} mengajukan portofolio "${payload.title || ''}" (${payload.category || 'Pelatihan'}) untuk diverifikasi.`,
-          link: '#/guru/portfolio',
+          title: isEditing ? 'Portofolio Diperbarui' : 'Portofolio Baru Perlu Verifikasi',
+          message: `${uploaderName} mengajukan ${portTitle}${catPart} untuk diverifikasi.`,
+          link: '#/personnel/portfolio',
           type: 'info',
           action: 'Verifikasi & ACC',
           excludeUid: uid
@@ -121,12 +156,13 @@ const NotificationService = {
         const targetRecipient = payload.teacherId || payload.employeeId;
         const isAcc = payload.status === 'Disetujui (ACC)';
         if (targetRecipient) {
+          const feedbackStr = payload.reviewerFeedback ? ` Catatan verifikator: "${payload.reviewerFeedback}"` : '';
           this.send({
             recipientUid: targetRecipient,
             title: isAcc ? 'Portofolio Disetujui (ACC)' : 'Portofolio Perlu Revisi',
             message: isAcc
-              ? `Portofolio "${payload.title || ''}" Anda telah disetujui (ACC) oleh Personalia.`
-              : `Portofolio "${payload.title || ''}" Anda memerlukan revisi: ${payload.reviewerFeedback || 'Silakan cek catatan verifikator.'}`,
+              ? `Portofolio ${portTitle} Anda telah disetujui (ACC) oleh Personalia.${feedbackStr}`
+              : `Portofolio ${portTitle} Anda memerlukan revisi.${feedbackStr}`,
             link: '#/guru/portfolio',
             type: isAcc ? 'success' : 'warning',
             action: isAcc ? 'Lihat Portofolio' : 'Perbaiki Berkas'
@@ -134,11 +170,14 @@ const NotificationService = {
         }
       }
     } else if (node === 'personnel/official_travel') {
+      const dest = payload.location ? ` ke ${payload.location}` : '';
+      const inst = payload.institution ? ` (${payload.institution})` : '';
       if (!isApprover) {
+        if (payload.status === 'Draft') return;
         this.sendToRole({
           unit: ['WAKA_HUMAS_PERSONALIA', 'STAF_HUMAS_PERSONALIA'],
-          title: 'Tugas Dinas Baru Perlu Verifikasi',
-          message: `${payload.gtkIdName || uploaderName} mengajukan dinas ke ${payload.location || ''}${payload.institution ? ` (${payload.institution})` : ''}.`,
+          title: isEditing ? 'Tugas Dinas Diperbarui' : 'Tugas Dinas Baru Perlu Verifikasi',
+          message: `${payload.gtkIdName || uploaderName} mengajukan dinas${dest}${inst}.`,
           link: '#/humas/official-travel',
           type: 'info',
           action: 'Verifikasi & Vakasi',
@@ -146,10 +185,11 @@ const NotificationService = {
         });
       } else if (payload.gtkId) {
         const isAcc = payload.status === 'Disetujui';
+        const vakasiStr = Number(payload.vakasi) > 0 ? ` Vakasi: ${moneyStr(payload.vakasi)}.` : '';
         this.send({
           recipientUid: payload.gtkId,
           title: `Perjalanan Dinas ${payload.status || 'Diverifikasi'}`,
-          message: `Tugas dinas ke ${payload.location || ''} telah diverifikasi Humas. Status: ${payload.status}. Vakasi: ${moneyStr(payload.vakasi || 0)}.`,
+          message: `Tugas dinas${dest} telah diverifikasi Humas. Status: ${payload.status}.${vakasiStr}`,
           link: '#/gtk/official-travel',
           type: isAcc ? 'success' : 'info',
           action: 'Lihat Riwayat'
@@ -167,19 +207,22 @@ const NotificationService = {
         }
       }
     } else if (node === 'student_affairs/leaves') {
+      const typeStr = payload.type || 'Izin';
+      const dateStr = payload.startDate ? ` (${payload.startDate}${payload.endDate && payload.endDate !== payload.startDate ? ` s.d ${payload.endDate}` : ''})` : '';
       if (!isApprover) {
         DB.getAllStudents().then((allStudents) => {
           const stu = (allStudents || {})[payload.studentId];
-          const sName = stu ? (stu.name || payload.studentId) : payload.studentId;
-          const classId = stu?.classId;
+          const sName = stu ? (stu.name || payload.studentId) : (payload.studentIdName || payload.studentId || 'Murid');
+          const classId = stu?.classId || payload.classId;
           if (classId) {
             DB.getClasses().then((classes) => {
               const cls = (classes || {})[classId];
+              const clsName = cls ? ` (${cls.name})` : '';
               if (cls && cls.teacherId) {
                 this.send({
                   recipientUid: cls.teacherId,
                   title: 'Pengajuan Izin Siswa Baru',
-                  message: `Wali murid an. ${sName} (${cls.name}) mengajukan ${payload.type || 'izin'} (${payload.startDate}).`,
+                  message: `Wali murid an. ${sName}${clsName} mengajukan ${typeStr}${dateStr}.`,
                   link: `#/guru/student-attendance/${classId}`,
                   type: 'info',
                   action: 'Tindak Lanjut Absensi',
@@ -191,7 +234,7 @@ const NotificationService = {
           this.sendToRole({
             unit: ['WAKA_KESISWAAN', 'STAF_KESISWAAN'],
             title: 'Pengajuan Izin Siswa Masuk',
-            message: `Pengajuan ${payload.type || 'izin'} an. ${sName} (${payload.startDate}).`,
+            message: `Pengajuan ${typeStr} an. ${sName}${dateStr}.`,
             link: '#/student-affairs/leaves',
             type: 'info',
             action: 'Verifikasi Izin',
@@ -201,40 +244,44 @@ const NotificationService = {
       } else if (payload.createdBy && payload.createdBy !== uid) {
         this.send({
           recipientUid: payload.createdBy,
-          title: `Izin Siswa ${payload.status || 'Diverifikasi'}`,
-          message: `Pengajuan ${payload.type || 'izin'} anak Anda telah ${payload.status === 'Disetujui' ? 'disetujui' : payload.status}.`,
+          title: `Izin Siswa: ${payload.status || 'Diverifikasi'}`,
+          message: `Pengajuan ${typeStr} anak Anda telah ${payload.status === 'Disetujui' ? 'disetujui' : payload.status}.`,
           link: '#/ortu/leaves',
           type: payload.status === 'Disetujui' ? 'success' : 'info',
           action: 'Lihat Status'
         });
       }
     } else if (node === 'personnel/complaints') {
+      const complTitle = payload.title ? `"${payload.title}"` : (payload.complaint ? `"${payload.complaint.slice(0, 40)}..."` : 'aspirasi baru');
       if (!isApprover) {
         this.sendToRole({
           unit: ['WAKA_HUMAS_PERSONALIA', 'STAF_HUMAS_PERSONALIA'],
           title: 'Aspirasi / Pengaduan Baru',
-          message: `Aspirasi baru dari ${payload.name || uploaderName}: "${(payload.title || payload.complaint || '').slice(0, 50)}..."`,
+          message: `Aspirasi baru dari ${payload.name || uploaderName}: ${complTitle}`,
           link: '#/personnel/complaints',
           type: 'warning',
           action: 'Tindak Lanjut',
           excludeUid: uid
         });
       } else if (payload.createdBy && payload.createdBy !== uid) {
+        const solStr = payload.followUp ? ` Solusi: "${payload.followUp}"` : '';
         this.send({
           recipientUid: payload.createdBy,
           title: `Aspirasi Ditindaklanjuti: ${payload.status}`,
-          message: `Tindak lanjut atas aspirasi "${payload.title || ''}": ${payload.followUp || payload.status}.`,
+          message: `Tindak lanjut atas ${complTitle}: ${payload.status}.${solStr}`,
           link: '#/personnel/complaints',
           type: 'info',
           action: 'Lihat Solusi'
         });
       }
     } else if (node === 'personnel/welfare') {
+      const typeStr = payload.type ? ` ${payload.type}` : '';
+      const amountStr = Number(payload.amount) > 0 ? ` (${moneyStr(payload.amount)})` : '';
       if (!isApprover) {
         this.sendToRole({
           unit: ['WAKA_HUMAS_PERSONALIA', 'STAF_HUMAS_PERSONALIA'],
           title: 'Pengajuan Santunan Sosial GTK',
-          message: `Pengajuan santunan ${payload.type || ''} untuk ${payload.recipientName || 'GTK'} (${moneyStr(payload.amount || 0)}).`,
+          message: `Pengajuan santunan${typeStr} untuk ${payload.recipientName || 'GTK'}${amountStr}.`,
           link: '#/personnel/welfare',
           type: 'info',
           action: 'Perlu Verifikasi',
@@ -245,7 +292,7 @@ const NotificationService = {
           this.send({
             recipientUid: payload.recipientId,
             title: `Santunan Sosial GTK: ${payload.status}`,
-            message: `Santunan ${payload.type || ''} sebesar ${moneyStr(payload.amount || 0)} telah ${payload.status}.`,
+            message: `Santunan${typeStr}${amountStr} telah ${payload.status}.`,
             link: '#/personnel/welfare',
             type: payload.status.includes('Disetujui') ? 'success' : 'info'
           });
@@ -263,33 +310,39 @@ const NotificationService = {
         }
       }
     } else if (node === 'finance/proposals') {
+      const unitStr = payload.unit ? `Unit ${payload.unit} ` : '';
+      const propTitle = payload.title ? `"${payload.title}"` : 'proposal anggaran';
+      const budgetStr = Number(payload.budget) > 0 ? ` (${moneyStr(payload.budget)})` : '';
       if (!isApprover) {
         this.sendToRole({
           unit: ['WAKA_KEUANGAN', 'STAF_KEUANGAN'],
           role: 'kepsek',
           title: 'Proposal Anggaran Perlu Evaluasi',
-          message: `Unit ${payload.unit || ''} mengajukan proposal "${payload.title || ''}" (${moneyStr(payload.budget || 0)}).`,
+          message: `${unitStr}mengajukan ${propTitle}${budgetStr}.`,
           link: '#/finance/proposals',
           type: 'info',
           action: 'Evaluasi Proposal',
           excludeUid: uid
         });
       } else if (payload.createdBy && payload.createdBy !== uid) {
+        const approvedStr = Number(payload.approvedBudget || payload.budget) > 0 ? ` Disetujui: ${moneyStr(payload.approvedBudget || payload.budget)}.` : '';
         this.send({
           recipientUid: payload.createdBy,
           title: `Proposal Anggaran: ${payload.status}`,
-          message: `Proposal "${payload.title}" telah ${payload.status}. Disetujui: ${moneyStr(payload.approvedBudget || payload.budget || 0)}.`,
+          message: `Proposal ${propTitle} telah ${payload.status}.${approvedStr}`,
           link: '#/finance/proposals',
           type: payload.status.includes('Disetujui') ? 'success' : 'warning',
           action: 'Lihat Evaluasi'
         });
       }
     } else if (node === 'facilities/maintenance') {
+      const facName = payload.facilityName || payload.title || 'fasilitas sekolah';
+      const locStr = payload.location ? ` di ${payload.location}` : '';
       if (!isApprover) {
         this.sendToRole({
           unit: ['WAKA_SARPRAS', 'STAF_SARPRAS'],
           title: 'Laporan Kerusakan Fasilitas Masuk',
-          message: `Laporan kerusakan ${payload.facilityName || payload.title || 'fasilitas'} (${payload.location || ''}) memerlukan perbaikan.`,
+          message: `Laporan kerusakan ${facName}${locStr} memerlukan perbaikan.`,
           link: '#/facilities/maintenance',
           type: 'warning',
           action: 'Perlu Perbaikan',
@@ -299,16 +352,19 @@ const NotificationService = {
         this.send({
           recipientUid: payload.createdBy,
           title: `Pemeliharaan Fasilitas: ${payload.status}`,
-          message: `Status perbaikan ${payload.facilityName || payload.title || 'fasilitas'}: ${payload.status}.`,
+          message: `Status perbaikan ${facName}: ${payload.status}.`,
           link: '#/facilities/maintenance',
           type: payload.status === 'Selesai' ? 'success' : 'info'
         });
       }
     } else if (node === 'student_affairs/violations') {
+      const stuName = payload.studentIdName || payload.studentName || 'Murid';
+      const vioName = payload.violation || 'pelanggaran tata tertib';
+      const pointStr = Number(payload.points) > 0 ? ` (${payload.points} poin)` : '';
       this.sendToRole({
         unit: ['WAKA_KESISWAAN', 'STAF_KESISWAAN'],
         title: 'Catatan Kedisiplinan Siswa',
-        message: `Siswa an. ${payload.studentIdName || 'Murid'} tercatat ${payload.violation || 'pelanggaran'} (${payload.points || 0} poin).`,
+        message: `Siswa an. ${stuName} tercatat ${vioName}${pointStr}.`,
         link: '#/student-affairs/rules',
         type: 'warning',
         action: 'Pembinaan Siswa',
@@ -323,7 +379,7 @@ const NotificationService = {
               this.send({
                 recipientUid: cls.teacherId,
                 title: 'Pelanggaran Siswa Binaan',
-                message: `Murid kelas Anda an. ${stu.name} tercatat ${payload.violation || 'pelanggaran'}.`,
+                message: `Murid kelas Anda an. ${stu.name || stuName} tercatat ${vioName}${pointStr}.`,
                 link: '#/student-affairs/rules',
                 type: 'warning',
                 action: 'Pembinaan Kelas'
@@ -333,22 +389,27 @@ const NotificationService = {
         }
       });
     } else if (node === 'student_affairs/achievements') {
+      const stuName = payload.studentIdName || payload.studentName || 'Murid';
+      const achTitle = payload.title ? `"${payload.title}"` : 'kejuaraan';
+      const rankStr = payload.rank ? ` (${payload.rank})` : '';
       this.sendToRole({
         unit: ['WAKA_KESISWAAN', 'STAF_KESISWAAN'],
         role: 'kepsek',
         title: 'Prestasi Siswa Baru!',
-        message: `Siswa an. ${payload.studentIdName || 'Murid'} meraih prestasi ${payload.title || ''} (${payload.rank || ''}).`,
+        message: `Siswa an. ${stuName} meraih prestasi ${achTitle}${rankStr}.`,
         link: '#/student-affairs/achievements',
         type: 'success',
         action: 'Lihat Prestasi',
         excludeUid: uid
       });
     } else if (node === 'student_affairs/scholarships') {
+      const stuName = payload.studentIdName || payload.studentName || 'Murid';
+      const srcStr = payload.source ? ` (${payload.source})` : '';
       if (!isApprover) {
         this.sendToRole({
           unit: ['WAKA_KESISWAAN', 'STAF_KESISWAAN'],
           title: 'Pengajuan Beasiswa Siswa',
-          message: `Pengajuan beasiswa an. ${payload.studentIdName || 'Murid'} (${payload.source || ''}).`,
+          message: `Pengajuan beasiswa an. ${stuName}${srcStr}.`,
           link: '#/student-affairs/scholarships',
           type: 'info',
           action: 'Perlu Seleksi',
@@ -358,7 +419,7 @@ const NotificationService = {
         this.sendToRole({
           unit: ['WAKA_KEUANGAN', 'STAF_KEUANGAN'],
           title: 'Beasiswa Siswa Siap Direalisasikan',
-          message: `Beasiswa an. ${payload.studentIdName || 'Murid'} disetujui kesiswaan, siap diproses bendahara.`,
+          message: `Beasiswa an. ${stuName} disetujui kesiswaan, siap diproses bendahara.`,
           link: '#/finance/scholarships',
           type: 'info',
           action: 'Realisasi Beasiswa',
@@ -366,21 +427,23 @@ const NotificationService = {
         });
       }
     } else if (node === 'spmb_registrations') {
+      const regName = payload.studentName || payload.name || 'Calon Murid';
       this.sendToRole({
         unit: ['WAKA_KESISWAAN', 'STAF_KESISWAAN'],
         title: 'Pendaftar Baru SPMB Masuk',
-        message: `Calon siswa baru an. ${payload.studentName || payload.name || 'Calon Murid'} telah mendaftar.`,
+        message: `Calon siswa baru an. ${regName} telah mendaftar.`,
         link: '#/student-affairs/ppdb',
         type: 'info',
         action: 'Verifikasi Berkas',
         excludeUid: uid
       });
     } else if (node === 'komite/activities' || node === 'komite/finance-paguyuban') {
+      const repTitle = payload.title ? `"${payload.title}"` : 'kegiatan';
       this.sendToRole({
         unit: ['WAKA_HUMAS_PERSONALIA', 'STAF_HUMAS_PERSONALIA', 'WAKA_KEUANGAN'],
         role: 'kepsek',
         title: 'Laporan Paguyuban Komite Baru',
-        message: `Laporan ${noun || 'Komite'}: "${payload.title || ''}" telah diterbitkan.`,
+        message: `Laporan ${noun || 'Komite'}: ${repTitle} telah diterbitkan.`,
         link: '#/komite/activities',
         type: 'info',
         action: 'Tinjau Laporan',
@@ -649,7 +712,7 @@ const NotificationService = {
               <span>${AppConfig.escapeHtml(n.title)}</span>
               ${unreadDot}
             </div>
-            <div class="notif-message">${AppConfig.escapeHtml(n.message)}</div>
+            <div class="notif-message">${AppConfig.escapeHtml((n.message || '').replace(/\s*\(\s*\)/g, '').replace(/\s*""/g, '').trim())}</div>
             <div class="notif-meta">
               ${actionBadge}
               <span class="notif-time"><i class="ph ph-clock"></i> ${timeStr}</span>

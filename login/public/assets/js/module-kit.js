@@ -1058,6 +1058,18 @@ const ModuleKit = {
         if (!isApprover && def.fields.some((f) => f.key === 'humasFeedback')) {
           payload.humasFeedback = currentRow ? (currentRow.humasFeedback || '') : '';
         }
+        (def.fields || []).forEach((f) => {
+          if (f.ref && payload[f.key]) {
+            const nameKey = `${f.key}Name`;
+            if (!payload[nameKey]) {
+              const refMap = refs[f.ref] || (f.ref === 'subject' ? refs.__ctx?.meta?.allSubjects : null);
+              if (refMap && refMap[payload[f.key]]) {
+                const item = refMap[payload[f.key]];
+                payload[nameKey] = typeof item === 'object' ? (item.name || item.displayName || payload[f.key]) : item;
+              }
+            }
+          }
+        });
         const ctx = refs.__ctx;
         const derived = def.derive ? def.derive(payload, ctx) : {};
         const stamp = firebase.database.ServerValue.TIMESTAMP;
