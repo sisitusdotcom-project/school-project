@@ -3799,3 +3799,101 @@ html,body{width:100% !important;height:auto !important;background:#fff !importan
 .attendance-proof-fallback-text{font-size:12px;font-weight:600;color:#334155;}
 .attendance-proof-img.hidden{display:none !important;}
 .attendance-proof-fallback.hidden{display:none !important;}
+.sched-toolbar-card{margin-bottom:16px;}
+.sched-controls-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;align-items:flex-end;}
+.sched-nav-tabs{display:flex;gap:8px;border-bottom:1px solid #e2e8f0;padding-bottom:8px;margin-bottom:16px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.sched-tab-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:600;background:transparent;border:1px solid transparent;color:#64748b;cursor:pointer;transition:all 0.15s ease;white-space:nowrap;}
+.sched-tab-btn:hover{background:#f1f5f9;color:#0f172a;}
+.sched-tab-btn.active{background:#2563eb;color:#fff;border-color:#2563eb;}
+.sched-uniform-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px;}
+.sched-uniform-card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:8px 10px;text-align:center;min-width:0;}
+.sched-uniform-day{font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:2px;}
+.sched-uniform-val{font-size:12px;font-weight:700;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sched-grid-wrapper{overflow-x:auto;-webkit-overflow-scrolling:touch;min-width:0;background:#fff;border:1px solid #e2e8f0;border-radius:10px;margin-bottom:16px;}
+.sched-table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:760px;}
+.sched-table th{background:#f8fafc;padding:10px 8px;font-weight:700;color:#334155;border:1px solid #e2e8f0;text-align:center;}
+.sched-table td{padding:8px 6px;border:1px solid #e2e8f0;vertical-align:top;min-width:120px;}
+.sched-time-col{width:80px;min-width:80px;background:#f8fafc;text-align:center;font-weight:600;color:#475569;}
+.sched-cell-card{background:#f1f5f9;border-radius:6px;padding:6px 8px;border-left:3px solid #2563eb;position:relative;cursor:pointer;transition:all 0.15s ease;}
+.sched-cell-card:hover{transform:translateY(-1px);box-shadow:0 2px 6px rgba(0,0,0,0.06);}
+.sched-cell-card--ismuba{border-left-color:#10b981;background:#ecfdf5;}
+.sched-cell-card--umum{border-left-color:#3b82f6;background:#eff6ff;}
+.sched-cell-card--ekskul{border-left-color:#f59e0b;background:#fffbeb;}
+.sched-cell-card--break{border-left-color:#94a3b8;background:#f8fafc;text-align:center;color:#64748b;font-weight:600;}
+.sched-cell-card--conflict{border-left-color:#ef4444;background:#fef2f2;border:1px solid #f87171;}
+.sched-card-subj{font-weight:700;font-size:12px;color:#0f172a;line-height:1.2;margin-bottom:3px;}
+.sched-card-teacher{font-size:11px;color:#475569;display:flex;align-items:center;gap:4px;}
+.sched-card-room{font-size:10px;color:#64748b;margin-top:2px;}
+.sched-conflict-badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;color:#b91c1c;background:#fee2e2;padding:2px 5px;border-radius:4px;margin-top:3px;}
+.sched-joint-badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;color:#0369a1;background:#e0f2fe;padding:2px 5px;border-radius:4px;margin-top:3px;}
+.sched-stats-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:16px;}
+.sched-stat-item{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:12px;}
+.sched-stat-icon{width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;}
+.sched-workload-table{width:100%;border-collapse:collapse;font-size:12.5px;}
+.sched-workload-table th{background:#f8fafc;padding:10px 8px;font-weight:700;color:#334155;border-bottom:2px solid #cbd5e1;text-align:left;}
+.sched-workload-table td{padding:9px 8px;border-bottom:1px solid #e2e8f0;}
+.sched-print-paper{background:#fff;padding:20px;margin-bottom:20px;}
+@media (max-width:768px){
+.sched-controls-grid{grid-template-columns:1fr;}
+.sched-uniform-row{grid-template-columns:repeat(2,1fr);}
+.sched-tab-btn{font-size:12px;padding:6px 10px;}
+}
+.print-only{display:none !important;}
+.sched-filter-action-group{display:flex;gap:8px;align-items:flex-end;}
+.sched-cell-empty-dash{font-size:11px;color:#cbd5e1;}
+.sched-col-time-period{font-size:10px;color:#94a3b8;font-weight:700;}
+.sched-col-time-val{font-size:11px;font-weight:600;color:#475569;}
+.sched-print-kop-wrapper{margin-bottom:15px;}
+.sched-page-header-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
+.sched-page-title{font-size:18px;font-weight:700;color:#0f172a;margin:0 0 4px 0;}
+.sched-page-subtitle{margin:0;font-size:13px;color:#64748b;}
+.sched-badge-pill{font-size:12px;}
+.sched-col-time-header{width:90px;}
+.sched-signatures-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:32px;page-break-inside:avoid;}
+.sched-sig-box{text-align:center;}
+.sched-sig-role{margin:0 0 50px 0;font-size:10pt;line-height:1.4;color:#0f172a;}
+.sched-sig-name{margin:0;font-weight:700;text-decoration:underline;font-size:10pt;color:#0f172a;}
+.sched-sig-id{margin:0;font-size:9pt;color:#475569;}
+.sched-stat-icon--blue{background:#eff6ff;color:#2563eb;}
+.sched-stat-icon--green{background:#ecfdf5;color:#10b981;}
+.sched-stat-icon--amber{background:#fef3c7;color:#d97706;}
+.sched-stat-icon--danger{background:#fef2f2;color:#ef4444;}
+.sched-stat-icon--neutral{background:#f8fafc;color:#64748b;}
+.sched-stat-label{font-size:11px;color:#64748b;font-weight:600;}
+.sched-stat-val{font-size:18px;font-weight:700;color:#0f172a;}
+.sched-stat-status-text{font-size:15px;font-weight:700;}
+.sched-stat-status-text--ok{color:#047857;}
+.sched-stat-status-text--warn{color:#b45309;}
+.sched-stat-status-text--danger{color:#b91c1c;}
+.sched-meta-header-block{margin-bottom:16px;}
+.sched-td-center{text-align:center;}
+.sched-td-center-bold{text-align:center;font-weight:700;}
+.sched-teacher-meta{font-size:11px;color:#64748b;}
+.sched-workload-jp-cell{text-align:center;font-weight:700;font-size:14px;}
+.sched-th-no{width:40px;text-align:center;}
+.sched-th-jp{width:110px;text-align:center;}
+.sched-th-status{width:150px;text-align:center;}
+.sched-th-week{width:100px;text-align:center;}
+.sched-habit-block{margin-bottom:20px;}
+.sched-section-subtitle{font-size:15px;font-weight:700;color:#1e3a8a;margin-bottom:8px;}
+.sched-admin-box{border:1px solid #e2e8f0;background:#f8fafc;padding:16px;border-radius:8px;}
+.sched-admin-box--danger{border:1px solid #fee2e2;background:#fff5f5;padding:16px;border-radius:8px;}
+.sched-admin-card-title{margin:0 0 8px 0;font-size:15px;color:#0f172a;}
+.sched-admin-card-title--danger{margin:0 0 8px 0;font-size:15px;color:#b91c1c;}
+.sched-admin-card-desc{font-size:13px;color:#64748b;margin:0 0 16px 0;}
+.btn-outline-danger{color:#dc2626;border-color:#fca5a5;}
+.btn-outline-danger:hover{background:#fee2e2;color:#b91c1c;border-color:#f87171;}
+.sched-modal-dialog{max-width:540px;}
+.sched-modal-form{display:flex;flex-direction:column;gap:12px;}
+.sched-form-grid-half{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.sched-modal-footer-flex{display:flex;justify-content:space-between;align-items:center;}
+.sched-btn-group-row{display:flex;gap:8px;}
+@media print{
+.no-print{display:none !important;}
+.print-only{display:block !important;}
+.sched-signatures-grid{display:grid !important;}
+.sched-print-paper{box-shadow:none !important;padding:0 !important;border:none !important;background:#fff !important;}
+.sched-table th,.sched-table td{border:1px solid #000 !important;color:#000 !important;}
+.sched-cell-card{background:#fff !important;border:1px solid #cbd5e1 !important;border-left:3px solid #2563eb !important;}
+.sched-workload-table th,.sched-workload-table td{border:1px solid #000 !important;color:#000 !important;}
+}

@@ -1205,7 +1205,9 @@ const rows = filtered.length ? filtered.map(s => {
 const assignedTeachers = [...new Set(classArr.map(c => c.subjectTeachers && c.subjectTeachers[s.id]).filter(Boolean))];
 const assignedClassesCount = classArr.filter(c => c.subjectTeachers && c.subjectTeachers[s.id]).length;
 let mappingInfo = '<span class="text-muted">Mengikuti Wali Kelas</span>';
-if (assignedTeachers.length > 0) {
+if (s.id === 'SUB_BTQ' || assignedTeachers.includes('TIM_UMMI')) {
+mappingInfo = '<strong>16 Rombel</strong> <small class="text-muted">(14 Guru Ummi Terpetakan per Rombel &amp; Level)</small>';
+} else if (assignedTeachers.length > 0) {
 const names = assignedTeachers.map(tid => (users[tid]?.name || tid).split(',')[0]).join(', ');
 mappingInfo = `<strong>${assignedClassesCount} Rombel</strong> <small class="text-muted">(${AppConfig.escapeHtml(names)})</small>`;
 }

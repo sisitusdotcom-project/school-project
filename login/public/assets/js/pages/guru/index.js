@@ -3215,6 +3215,13 @@ ${heroHtml}
 <div class="quick-nav-desc">Catat presensi harian guru via GPS sekolah</div>
 </div>
 </a>
+<a href="#/guru/schedules" class="quick-nav-card">
+<div class="quick-nav-icon"><i class="ph ph-calendar"></i></div>
+<div class="quick-nav-info">
+<div class="quick-nav-title">Jadwal Mengajar Ummi</div>
+<div class="quick-nav-desc">Jadwal tatap muka halaqah & beban mengajar</div>
+</div>
+</a>
 <a href="#/guru/ummi/classes" class="quick-nav-card">
 <div class="quick-nav-icon"><i class="ph ph-chalkboard-teacher"></i></div>
 <div class="quick-nav-info">

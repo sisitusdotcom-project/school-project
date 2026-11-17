@@ -422,8 +422,30 @@ const DB = {
     await db.ref(`classes/${id}`).remove();
   },
   async saveClassSubjectTeachers(classId, subjectTeachers) {
-    if (!isDBReady()) return;
-    await db.ref(`classes/${classId}/subjectTeachers`).set(subjectTeachers);
+    if (!isDBReady() || !classId) return;
+    const updates = {};
+    updates[`classes/${classId}/subjectTeachers`] = subjectTeachers;
+    try {
+      const [schedSnap, usersSnap] = await Promise.all([
+        db.ref('curriculum/schedules').once('value'),
+        db.ref('users').once('value')
+      ]);
+      const scheds = schedSnap.val() || {};
+      const users = usersSnap.val() || {};
+      for (const [sId, slot] of Object.entries(scheds)) {
+        if (slot && slot.classId === classId && slot.subjectId && subjectTeachers[slot.subjectId]) {
+          const newTeacherId = subjectTeachers[slot.subjectId];
+          const newTeacherName = users[newTeacherId]?.name || users[newTeacherId]?.displayName || '';
+          if (slot.teacherId !== newTeacherId) {
+            updates[`curriculum/schedules/${sId}/teacherId`] = newTeacherId;
+            updates[`curriculum/schedules/${sId}/teacherName`] = newTeacherName;
+          }
+        }
+      }
+      await db.ref().update(updates);
+    } catch (err) {
+      await db.ref(`classes/${classId}/subjectTeachers`).set(subjectTeachers);
+    }
   },
   async getClassSubjects(classId) {
     if (!classId || !isDBReady()) return [];
@@ -856,6 +878,37 @@ const DB = {
     return Object.entries(all || {})
       .filter(([id, s]) => s && s.teacherId === teacherId)
       .map(([id, s]) => ({ id, ...s }));
+  },
+  async saveSchedule(id, data) {
+    if (!isDBReady()) return null;
+    if (id) {
+      await db.ref(`curriculum/schedules/${id}`).update({
+        ...data,
+        updatedAt: firebase.database.ServerValue.TIMESTAMP
+      });
+      return id;
+    }
+    const ref = db.ref('curriculum/schedules').push();
+    await ref.set({
+      ...data,
+      createdAt: firebase.database.ServerValue.TIMESTAMP
+    });
+    return ref.key;
+  },
+  async deleteSchedule(id) {
+    if (!id || !isDBReady()) return;
+    await db.ref(`curriculum/schedules/${id}`).remove();
+  },
+  async batchSaveSchedules(schedulesMap) {
+    if (!schedulesMap || !isDBReady()) return;
+    await db.ref('curriculum/schedules').update(schedulesMap);
+  },
+  async getScheduleSettings() {
+    return this._read('curriculum/schedule_settings', null);
+  },
+  async saveScheduleSettings(data) {
+    if (!isDBReady()) return;
+    await db.ref('curriculum/schedule_settings').set(data);
   },
   async getExtracurriculars() {
     return this._readCollection('extracurriculars', {});

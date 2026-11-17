@@ -74,6 +74,8 @@ const App = {
     if (role === AppConfig.ROLES.GURU || role === AppConfig.ROLES.GURU_EKSKUL || role === AppConfig.ROLES.GURU_UMMI) {
       const guruAllowed = [
         '#/attendance',
+        '#/guru/schedules',
+        '#/schedules',
         '#/guru/academic',
         '#/gtk/salary-slip',
         '#/gtk/official-travel',
@@ -492,6 +494,9 @@ const App = {
           '#/finance': typeof FinancePages !== 'undefined' ? FinancePages.renderDashboard : null,
           '#/curriculum': typeof CurriculumPages !== 'undefined' ? CurriculumPages.renderDashboard : null,
           '#/curriculum/cocurricular': typeof CurriculumPages !== 'undefined' ? CurriculumPages.renderCocurricular : null,
+          '#/curriculum/schedules': (c, p) => window.ScheduleManager?.render ? window.ScheduleManager.render(c, p || {}) : null,
+          '#/guru/schedules': (c, p) => window.ScheduleManager?.render ? window.ScheduleManager.render(c, { ...(p || {}), viewMode: 'teacher' }) : null,
+          '#/schedules': (c, p) => window.ScheduleManager?.render ? window.ScheduleManager.render(c, p || {}) : null,
           '#/curriculum/leger': (c, p) => window.LegerModule?.render ? window.LegerModule.render(c, p || {}) : null,
           '#/guru/leger': (c, p) => window.LegerModule?.render ? window.LegerModule.render(c, p || {}) : null,
           '#/admin/leger': (c, p) => window.LegerModule?.render ? window.LegerModule.render(c, p || {}) : null,

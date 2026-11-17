@@ -138,6 +138,7 @@ const NAV_ITEMS = Object.freeze({
 'GURU_UMUM': [
 { hash: '#/attendance', icon: 'ph-map-pin', text: 'Presensi Mandiri' },
 { hash: '#/guru/academic', icon: 'ph-check-square', text: 'Nilai Mapel', group: 'Akademik' },
+{ hash: '#/guru/schedules', icon: 'ph-calendar', text: 'Jadwal Mengajar', group: 'Akademik' },
 { hash: '#/curriculum/syllabus', icon: 'ph-upload-simple', text: 'Perangkat Ajar', group: 'Akademik' },
 { hash: '#/guru/portfolio', icon: 'ph-folder', text: 'Portofolio Guru', group: 'Akademik' },
 { hash: '#/guru/kpi', icon: 'ph-chart-line-up', text: 'Kinerja & KPI', group: 'Akademik' },
@@ -181,6 +182,7 @@ const NAV_ITEMS = Object.freeze({
 [ROLES.GURU_UMMI]: [
 { hash: '#/dashboard', icon: 'ph-squares-four', text: 'Beranda' },
 { hash: '#/attendance', icon: 'ph-map-pin', text: 'Presensi Mandiri' },
+{ hash: '#/guru/schedules', icon: 'ph-calendar', text: 'Jadwal Mengajar', group: 'Akademik' },
 { hash: '#/gtk/official-travel', icon: 'ph-airplane-takeoff', text: 'Tugas Dinas', group: 'Tugas Dinas' },
 { hash: '#/gtk/salary-slip', icon: 'ph-receipt', text: 'Slip Gaji', group: 'Tugas Dinas' }
 ],
