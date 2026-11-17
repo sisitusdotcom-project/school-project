@@ -476,17 +476,7 @@ const ModuleKit = {
         const unitLabel = (def.units && def.units[0]) ? (AppConfig.UNIT_LABELS[def.units[0]] || 'Penanggung Jawab') : 'Koordinator Unit';
         const unitLeaderName = (def.role === 'finance' || def.units?.includes('WAKA_KEUANGAN')) ? 'Ainaini Ratna Noeri, M.Pd.' : ((def.role === 'curriculum' || def.units?.includes('WAKA_KURIKULUM')) ? 'Nur Fadhilah, S.Pd.' : 'Koordinator Unit Terkait');
         printSheet.innerHTML = `
-          <div class="salary-slip-brand">
-            <img src="assets/img/majlis-dikdaspnf.webp" alt="Logo Majelis Dikdasmen PNF" class="salary-slip-logo salary-slip-logo-dikdas">
-            <div class="salary-slip-brand-text">
-              <div class="salary-slip-org">MAJELIS PENDIDIKAN DASAR MENENGAH DAN PENDIDIKAN NONFORMAL</div>
-              <div class="salary-slip-pcm">PIMPINAN CABANG MUHAMMADIYAH SEDATI</div>
-              <h2 class="salary-slip-title">SD MUHAMMADIYAH 1 SEDATI</h2>
-              <p class="salary-slip-meta">Jl. H. Syukur No. 65, Sedati Gede, Kec. Sedati, Sidoarjo 61253 | Telp/WA: 0859-6439-9398</p>
-              <p class="salary-slip-meta">Website: musada.sch.id | Email: sdmusada16@gmail.com</p>
-            </div>
-            <img src="assets/img/logo.webp" alt="Logo SD Muhammadiyah 1 Sedati" class="salary-slip-logo salary-slip-logo-school">
-          </div>
+          ${AppConfig.getOfficialKopHtml({ customClass: 'salary-slip-brand', showDivider: false })}
           <div class="salary-slip-doc-header">
             <h3 class="salary-slip-doc-title">${this.esc(docTitle)}</h3>
             <p class="salary-slip-doc-sub">Dicetak: <strong>${stampDate}</strong> | Filter: <strong>${this.esc(filterDesc)}</strong> | Total: <strong>${list.length} Rekod Data</strong></p>
@@ -1385,17 +1375,7 @@ const ModuleKit = {
       const { out, income, expense, closing } = lines();
       const stampDate = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
       printSheet.innerHTML = `
-        <div class="salary-slip-brand">
-          <img src="assets/img/majlis-dikdaspnf.webp" alt="Logo Majelis Dikdasmen PNF" class="salary-slip-logo salary-slip-logo-dikdas">
-          <div class="salary-slip-brand-text">
-            <div class="salary-slip-org">MAJELIS PENDIDIKAN DASAR MENENGAH DAN PENDIDIKAN NONFORMAL</div>
-            <div class="salary-slip-pcm">PIMPINAN CABANG MUHAMMADIYAH SEDATI</div>
-            <h2 class="salary-slip-title">SD MUHAMMADIYAH 1 SEDATI</h2>
-            <p class="salary-slip-meta">Jl. H. Syukur No. 65, Sedati Gede, Kec. Sedati, Sidoarjo 61253 | Telp/WA: 0859-6439-9398</p>
-            <p class="salary-slip-meta">Website: musada.sch.id | Email: sdmusada16@gmail.com</p>
-          </div>
-          <img src="assets/img/logo.webp" alt="Logo SD Muhammadiyah 1 Sedati" class="salary-slip-logo salary-slip-logo-school">
-        </div>
+        ${AppConfig.getOfficialKopHtml({ customClass: 'salary-slip-brand', showDivider: false })}
         <div class="salary-slip-doc-header">
           <h3 class="salary-slip-doc-title">BUKU KAS UMUM (BKU)</h3>
           <p class="salary-slip-doc-sub">Periode Bulan: <strong>${this.esc(state.month)}</strong> | Dicetak: <strong>${stampDate}</strong></p>

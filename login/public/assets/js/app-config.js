@@ -125,6 +125,7 @@ const NAV_ITEMS = Object.freeze({
 { hash: '#/admin/subjects', icon: 'ph-book-open', text: 'Pemetaan Mapel', group: 'Akademik' },
 { hash: '#/curriculum/cocurricular', icon: 'ph-plant', text: 'Kokurikuler (P5)', group: 'Akademik' },
 { hash: '#/admin/characters', icon: 'ph-star', text: 'Indikator Karakter', group: 'Akademik' },
+{ hash: '#/admin/leger', icon: 'ph-table', text: 'Buku Leger Rapor', group: 'Akademik' },
 { hash: '#/admin/attendance', icon: 'ph-clock-user', text: 'Pantau Presensi GTK', group: 'Monitoring' },
 { hash: '#/kepsek/reports', icon: 'ph-clipboard-text', text: 'Pantau Rapor', group: 'Monitoring' },
 { hash: '#/it-admin/sync', icon: 'ph-arrows-clockwise', text: 'Sinkron Dapodik', group: 'Sistem & Data' },
@@ -148,12 +149,14 @@ const NAV_ITEMS = Object.freeze({
 { hash: '#/guru/student-attendance', icon: 'ph-users-three', text: 'Presensi Siswa', group: 'Wali Kelas' },
 { hash: '#/student-affairs/leaves', icon: 'ph-calendar-x', text: 'Perizinan Siswa', group: 'Wali Kelas' },
 { hash: '#/guru/classes', icon: 'ph-chalkboard-teacher', text: 'E-Rapor Rombel', group: 'Wali Kelas' },
-{ hash: '#/guru/additional', icon: 'ph-folder-plus', text: 'Catatan Rapor', group: 'Wali Kelas' }
+{ hash: '#/guru/additional', icon: 'ph-folder-plus', text: 'Catatan Rapor', group: 'Wali Kelas' },
+{ hash: '#/guru/leger', icon: 'ph-table', text: 'Buku Leger Rapor', group: 'Wali Kelas' }
 ],
 [ROLES.KEPSEK]: [
 { hash: '#/dashboard', icon: 'ph-squares-four', text: 'Dasbor Kepsek' },
 { hash: '#/attendance', icon: 'ph-map-pin', text: 'Presensi Mandiri' },
 { hash: '#/kepsek/reports', icon: 'ph-clipboard-text', text: 'Laporan Rombel', group: 'Monitoring' },
+{ hash: '#/kepsek/leger', icon: 'ph-table', text: 'Buku Leger Rapor', group: 'Monitoring' },
 { hash: '#/curriculum', icon: 'ph-books', text: 'Pantau Kurikulum', group: 'Monitoring' },
 { hash: '#/student-affairs', icon: 'ph-users-three', text: 'Pantau Kesiswaan', group: 'Monitoring' },
 { hash: '#/finance', icon: 'ph-wallet', text: 'Pantau Keuangan', group: 'Monitoring' },
@@ -286,6 +289,7 @@ const NAV_ITEMS = Object.freeze({
 { hash: '#/curriculum/journals', icon: 'ph-notebook', text: 'Jurnal Mengajar', group: 'Pembelajaran' },
 { hash: '#/admin/attendance', icon: 'ph-clock', text: 'Kehadiran Guru', group: 'Pembelajaran' },
 { hash: '#/curriculum/grades', icon: 'ph-chart-bar', text: 'Rekap Nilai', group: 'Evaluasi' },
+{ hash: '#/curriculum/leger', icon: 'ph-table', text: 'Buku Leger Rapor', group: 'Evaluasi' },
 { hash: '#/curriculum/evaluations', icon: 'ph-sliders-horizontal', text: 'Bobot Penilaian', group: 'Evaluasi' },
 { hash: '#/curriculum/supervision', icon: 'ph-check-circle', text: 'Supervisi Guru', group: 'Evaluasi' }
 ],
@@ -299,7 +303,8 @@ const NAV_ITEMS = Object.freeze({
 { hash: '#/curriculum/monitoring', icon: 'ph-desktop', text: 'Pantau KBM', group: 'Pembelajaran' },
 { hash: '#/curriculum/questions', icon: 'ph-file-text', text: 'Bank Soal', group: 'Pembelajaran' },
 { hash: '#/curriculum/journals', icon: 'ph-notebook', text: 'Jurnal Mengajar', group: 'Pembelajaran' },
-{ hash: '#/curriculum/grades', icon: 'ph-chart-bar', text: 'Rekap Nilai', group: 'Evaluasi' }
+{ hash: '#/curriculum/grades', icon: 'ph-chart-bar', text: 'Rekap Nilai', group: 'Evaluasi' },
+{ hash: '#/curriculum/leger', icon: 'ph-table', text: 'Buku Leger Rapor', group: 'Evaluasi' }
 ],
 'WAKA_KEUANGAN': [
 { hash: '#/finance', icon: 'ph-wallet', text: 'Dasbor Keuangan', group: 'Keuangan' },
@@ -1784,7 +1789,53 @@ alert('Gagal menghapus informasi: ' + (err.message || err));
 });
 }
 }
+const SCHOOL_PROFILE = Object.freeze({
+foundation: 'MAJELIS PENDIDIKAN DASAR MENENGAH DAN PENDIDIKAN NONFORMAL',
+branch: 'PIMPINAN CABANG MUHAMMADIYAH SEDATI',
+name: 'SD MUHAMMADIYAH 1 SEDATI',
+shortName: 'SD MUSADA',
+nss: '102050218013',
+npsn: '69899722',
+accreditation: 'Terakreditasi "B"',
+address: 'Jl. H. Syukur No. 65, Sedati Gede, Kec. Sedati, Sidoarjo 61253',
+phone: '0859-6439-9398',
+website: 'musada.sch.id',
+email: 'sdmusada16@gmail.com',
+dikdasmenLogo: 'assets/img/dikdasmen.webp',
+dikdasmenLogoFallback: 'assets/img/majlis-dikdaspnf.webp',
+schoolLogo: 'assets/img/logo.webp',
+schoolLogoFallback: 'assets/img/logo/logo.webp'
+});
+function getOfficialKopHtml(options = {}) {
+const p = SCHOOL_PROFILE;
+const customClass = options.customClass ? ' ' + options.customClass : '';
+const showDivider = !!options.showDivider;
+const showEmail = options.showEmail !== false;
+const showWebsite = options.showWebsite !== false;
+const contactParts = [p.address, 'Telp/WA: ' + p.phone];
+if (showWebsite) contactParts.push(p.website);
+if (showEmail) contactParts.push('Email: ' + p.email);
+const contactStr = contactParts.join(' · ');
+const dividerHtml = showDivider ? '<div class="official-kop-divider cert-divider"></div>' : '';
+return `<div class="official-kop${customClass}"><img src="${p.dikdasmenLogo}" alt="Logo Majelis Dikdasmen PNF" class="official-kop-logo official-kop-logo-dikdas cert-logo-left salary-slip-logo salary-slip-logo-dikdas leger-kop-logo leger-kop-logo-dikdas" onerror="this.onerror=null;this.src='${p.dikdasmenLogoFallback}'"><div class="official-kop-text cert-header-text salary-slip-brand-text leger-kop-text"><div class="official-kop-org cert-org salary-slip-org leger-kop-m1">${p.foundation}</div><div class="official-kop-pcm cert-pcm salary-slip-pcm leger-kop-m2">${p.branch}</div><h2 class="official-kop-name cert-school-name salary-slip-title leger-kop-m3">${p.name}</h2><div class="official-kop-identity cert-school-meta salary-slip-identity leger-kop-m4">NSS: ${p.nss} · NPSN: ${p.npsn} · ${p.accreditation}</div><div class="official-kop-contact cert-school-address salary-slip-meta leger-kop-m4">${contactStr}</div></div><img src="${p.schoolLogo}" alt="Logo SD Muhammadiyah 1 Sedati" class="official-kop-logo official-kop-logo-school cert-logo-right salary-slip-logo salary-slip-logo-school leger-kop-logo leger-kop-logo-school" onerror="this.onerror=null;this.src='${p.schoolLogoFallback}'"></div>${dividerHtml}`.trim();
+}
+function getOfficialKopAoa(title = '') {
+const p = SCHOOL_PROFILE;
+const rows = [
+[p.foundation],
+[p.branch],
+[p.name],
+['NSS: ' + p.nss + ' · NPSN: ' + p.npsn + ' · ' + p.accreditation],
+[p.address + ' · Telp/WA: ' + p.phone + ' · ' + p.website + ' · Email: ' + p.email],
+['========================================================================================================']
+];
+if (title) rows.push([title]);
+return rows;
+}
 window.AppConfig = Object.freeze({
+SCHOOL_PROFILE,
+getOfficialKopHtml,
+getOfficialKopAoa,
 calculateClassRankings,
 getStudentClassRank,
 formatRupiah,

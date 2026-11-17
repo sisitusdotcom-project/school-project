@@ -179,17 +179,7 @@ const FinancePages = {
       return 'IKHTISAR LAPORAN KEUANGAN SEKOLAH';
     };
     const renderHeaderKop = () => `
-      <div class="salary-slip-brand">
-        <img src="assets/img/majlis-dikdaspnf.webp" alt="Logo Majelis Dikdasmen PNF" class="salary-slip-logo salary-slip-logo-dikdas" onerror="this.src=\'../../assets/img/link-terkait/majlis-dikdaspnf.webp\'">
-        <div class="salary-slip-brand-text">
-          <div class="salary-slip-org">MAJELIS PENDIDIKAN DASAR MENENGAH DAN PENDIDIKAN NONFORMAL</div>
-          <div class="salary-slip-pcm">PIMPINAN CABANG MUHAMMADIYAH SEDATI</div>
-          <h2 class="salary-slip-title">SD MUHAMMADIYAH 1 SEDATI</h2>
-          <p class="salary-slip-meta">Jl. H. Syukur No. 65, Sedati Gede, Kec. Sedati, Sidoarjo 61253 | Telp/WA: 0859-6439-9398</p>
-          <p class="salary-slip-meta">Website: musada.sch.id | Email: sdmusada16@gmail.com</p>
-        </div>
-        <img src="assets/img/logo.webp" alt="Logo SD Muhammadiyah 1 Sedati" class="salary-slip-logo salary-slip-logo-school" onerror="this.src=\'../../assets/img/logo/logo.webp\'">
-      </div>
+      ${AppConfig.getOfficialKopHtml({ customClass: 'salary-slip-brand', showDivider: false })}
       <div class="salary-slip-doc-header">
         <h3 class="salary-slip-doc-title">${getReportTitle()}</h3>
         <p class="salary-slip-doc-sub">Periode: <strong>${formatMonthLabel(selectedMonth)}</strong> | Tahun Ajaran: <strong>${esc(currentYear)}</strong></p>

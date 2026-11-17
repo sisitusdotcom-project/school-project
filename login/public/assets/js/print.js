@@ -405,17 +405,7 @@ async function generateCertificate(achieveId, container) {
             <div class="cert-corner cert-corner-tr"></div>
             <div class="cert-corner cert-corner-bl"></div>
             <div class="cert-corner cert-corner-br"></div>
-            <div class="certificate-header">
-              <img src="assets/img/dikdasmen.webp" alt="Logo Dikdasmen" class="cert-logo-left">
-              <div class="cert-header-text">
-                <h4 class="cert-org">MAJELIS PENDIDIKAN DASAR MENENGAH DAN PENDIDIKAN NONFORMAL</h4>
-                <h4 class="cert-pcm">PIMPINAN CABANG MUHAMMADIYAH SEDATI</h4>
-                <h2 class="cert-school-name">SD MUHAMMADIYAH 1 SEDATI</h2>
-                <p class="cert-school-address">Alamat: Jl. H. Syukur No. 65, Sedati Gede, Sidoarjo 61253 | Telp: 0859-6439-9398 | Website: musada.sch.id</p>
-              </div>
-              <img src="assets/img/logo.webp" alt="Logo Musada" class="cert-logo-right">
-            </div>
-            <div class="cert-divider"></div>
+            ${AppConfig.getOfficialKopHtml({ customClass: 'certificate-header', showDivider: true })}
             <div class="cert-body">
               <div class="cert-title-block">
                 <h1 class="cert-title-main">${certMainTitle}</h1>

@@ -27,6 +27,7 @@ const CurriculumPages = {
       { href: '#/curriculum/questions', icon: 'ph-question', title: 'Bank Soal Asesmen', desc: 'Kumpulan kisi-kisi & naskah STS/SAS' },
       { href: '#/curriculum/journals', icon: 'ph-notebook', title: 'Jurnal Pembelajaran', desc: 'Catatan harian materi kelas' },
       { href: '#/curriculum/grades', icon: 'ph-chart-bar', title: 'Rekapitulasi Nilai', desc: 'Rekap capaian akademik murid' },
+      { href: '#/curriculum/leger', icon: 'ph-table', title: 'Buku Leger Rapor', desc: 'Rekapitulasi nilai & cetak leger 16 rombel' },
       { href: '#/curriculum/evaluations', icon: 'ph-sliders', title: 'Sistem Penilaian', desc: 'Bobot formatif, sumatif & TP' },
       { href: '#/curriculum/supervision', icon: 'ph-clipboard-text', title: 'Supervisi Guru', desc: 'Observasi pedagogik mengajar' }
     ]);

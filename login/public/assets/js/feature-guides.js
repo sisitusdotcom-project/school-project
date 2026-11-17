@@ -144,6 +144,12 @@ const FeatureGuides = {
       to: 'Waka Kurikulum & Kepala Sekolah',
       usage: 'Pilih rombel dan mata pelajaran untuk melihat sebaran nilai formatif dan sumatif siswa secara menyeluruh.'
     },
+    '#/curriculum/leger': {
+      func: 'Buku Leger Rapor: Rekapitulasi nilai hasil belajar murid per rombongan belajar secara terpadu, komprehensif, dan sah.',
+      from: 'E-Rapor Seluruh Guru Mapel & Wali Kelas',
+      to: 'Wali Kelas, Waka Kurikulum, Kepala Sekolah, dan Administrator',
+      usage: 'Pilih rombel dan periode untuk melihat rekapitulasi nilai komprehensif, ekspor ke file Excel (.xlsx), atau cetak buku leger format resmi.'
+    },
     '#/curriculum/evaluations': {
       func: 'Kebijakan sistem penilaian sekolah (bobot formatif, sumatif tengah semester, dan sumatif akhir semester).',
       from: 'Waka Kurikulum',

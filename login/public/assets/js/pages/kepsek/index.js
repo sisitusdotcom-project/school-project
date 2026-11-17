@@ -363,7 +363,10 @@ const KepsekPages = {
                 <div class="report-stat-value ${charAvg !== '-' && charAvg < 2.5 ? 'text-danger' : 'text-success'}">${charAvg}</div>
               </div>
             </div>
-            <button type="button" class="btn btn-outline btn-sm btn-block" data-open-class="${c.id}"><i class="ph ph-eye"></i> Buka Laporan Rombel</button>
+            <div class="card-actions-row">
+              <button type="button" class="btn btn-outline btn-sm flex-1" data-open-class="${c.id}"><i class="ph ph-eye"></i> Laporan Rombel</button>
+              <a href="#/kepsek/leger?classId=${c.id}" class="btn btn-primary btn-sm flex-1"><i class="ph ph-table"></i> Buku Leger</a>
+            </div>
           </div>
         `;
       }).join('') : '<div class="card"><p class="text-muted text-center">Tidak ada rombel yang sesuai filter.</p></div>';
@@ -602,7 +605,10 @@ const KepsekPages = {
     container.innerHTML = `
       <div class="flex-between align-center mb-3">
         <a href="#/kepsek/reports" class="btn btn-outline"><i class="ph ph-arrow-left"></i> Kembali ke Laporan Rombel</a>
-        <span class="badge badge-primary">Tahun Ajaran ${AppConfig.escapeHtml(year)} · Semester ${AppConfig.escapeHtml(sem)}</span>
+        <div class="quick-inline">
+          <a href="#/kepsek/leger?classId=${cls.id}" class="btn btn-primary"><i class="ph ph-table"></i> Buku Leger Rapor</a>
+          <span class="badge badge-primary">Tahun Ajaran ${AppConfig.escapeHtml(year)} · Semester ${AppConfig.escapeHtml(sem)}</span>
+        </div>
       </div>
       <section class="card mb-3">
         <div class="flex-between align-start flex-wrap gap-2">

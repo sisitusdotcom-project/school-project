@@ -291,6 +291,7 @@ actionButtons = `
 </div>
 <div class="card-actions-row">
 <a href="#/guru/observe/${c.id}" class="btn btn-outline btn-sm"><i class="ph ph-note-pencil"></i> Catatan Rapor</a>
+<a href="#/guru/leger?classId=${c.id}" class="btn btn-outline btn-sm"><i class="ph ph-table"></i> Buku Leger</a>
 <button type="button" class="btn btn-outline btn-sm btn-print-modal-cls" data-print-cls="${c.id}"><i class="ph ph-printer"></i> Cetak Rapor Murid</button>
 </div>
 </div>
@@ -303,6 +304,7 @@ actionButtons = `
 <div class="card-actions-row">
 <a href="#/guru/academic?classId=${c.id}${firstSubId ? `&subjectId=${firstSubId}` : ''}" class="btn btn-primary btn-sm"><i class="ph ph-check-square"></i> Input Nilai ${AppConfig.escapeHtml(mySubjectNames[0] || 'Mapel')}</a>
 <a href="#/guru/observe/${c.id}" class="btn btn-outline btn-sm"><i class="ph ph-chat-text"></i> Catatan</a>
+<a href="#/guru/leger?classId=${c.id}" class="btn btn-outline btn-sm"><i class="ph ph-table"></i> Leger</a>
 </div>
 </div>
 `;
@@ -3912,17 +3914,7 @@ container.innerHTML = `
 <div class="salary-slip-notice">
 <i class="ph ph-info"></i> <strong>Informasi Penggajian:</strong> ${AppConfig.escapeHtml(slip.noticeText)}
 </div>
-<div class="salary-slip-brand">
-<img src="assets/img/majlis-dikdaspnf.webp" alt="Logo Majelis Dikdasmen PNF" class="salary-slip-logo salary-slip-logo-dikdas" onerror="this.src='../../assets/img/link-terkait/majlis-dikdaspnf.webp'">
-<div class="salary-slip-brand-text">
-<div class="salary-slip-org">MAJELIS PENDIDIKAN DASAR MENENGAH DAN PENDIDIKAN NONFORMAL</div>
-<div class="salary-slip-pcm">PIMPINAN CABANG MUHAMMADIYAH SEDATI</div>
-<h2 class="salary-slip-title">SD MUHAMMADIYAH 1 SEDATI</h2>
-<p class="salary-slip-meta">Jl. H. Syukur No. 65, Sedati Gede, Kec. Sedati, Sidoarjo 61253 | Telp/WA: 0859-6439-9398</p>
-<p class="salary-slip-meta">Website: musada.sch.id | Email: sdmusada16@gmail.com</p>
-</div>
-<img src="assets/img/logo.webp" alt="Logo SD Muhammadiyah 1 Sedati" class="salary-slip-logo salary-slip-logo-school" onerror="this.src='../../assets/img/logo/logo.webp'">
-</div>
+${AppConfig.getOfficialKopHtml({ customClass: 'salary-slip-brand', showDivider: false })}
 <div class="salary-slip-doc-header">
 <h3 class="salary-slip-doc-title">SURAT BUKTI RINCIAN HONORARIUM & GAJI PEGAWAI</h3>
 <p class="salary-slip-doc-sub">Periode: <strong>${cutoff.monthLabel}</strong> (${cutoff.cutoffLabel})</p>
