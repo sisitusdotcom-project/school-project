@@ -2734,6 +2734,102 @@ padding: 14px;
 .salary-slip-sig-box strong{font-size:11px;}
 }
 .mk-print-sheet{display:none;}
+.tahfidz-toolbar-card{margin-bottom:12px;padding:12px 16px;}
+.tahfidz-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.tahfidz-filter-group{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;flex:1;min-width:0;}
+.tahfidz-filter-item{display:flex;flex-direction:column;gap:3px;min-width:0;}
+.tahfidz-filter-label{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.02em;margin:0;}
+.tahfidz-filter-select{width:100%;padding:6px 10px;border-radius:var(--radius-sm,6px);border:1px solid var(--border-color,#e2e8f0);font-size:12.5px;background:var(--bg-card,#fff);color:var(--text-main,#0f172a);min-height:36px;box-sizing:border-box;}
+.tahfidz-toolbar-actions{display:flex;align-items:flex-end;gap:8px;}
+.tahfidz-toolbar-actions .btn{min-height:36px;padding:6px 14px;font-size:13px;white-space:nowrap;}
+.tahfidz-stats-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:12px;}
+.tahfidz-stat-card{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border,#e2e8f0);border-radius:10px;background:linear-gradient(180deg,var(--bg-card,#fff),#f8fafc);box-shadow:var(--shadow-sm);min-width:0;}
+.tahfidz-stat-card.primary{background:linear-gradient(180deg,#eff6ff,#f8fbff);border-color:rgba(59,130,246,0.18);}
+.tahfidz-stat-card.success{background:linear-gradient(180deg,#ecfdf5,#f8fffb);border-color:rgba(16,185,129,0.18);}
+.tahfidz-stat-card.info{background:linear-gradient(180deg,#f3f4f6,#fafafa);border-color:rgba(148,163,184,0.22);}
+.tahfidz-stat-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.tahfidz-stat-card.primary .tahfidz-stat-icon{background:#dbeafe;color:#1d4ed8;}
+.tahfidz-stat-card.success .tahfidz-stat-icon{background:#d1fae5;color:#047857;}
+.tahfidz-stat-card.info .tahfidz-stat-icon{background:#e2e8f0;color:#334155;}
+.tahfidz-stat-info{min-width:0;flex:1;}
+.tahfidz-stat-val{font-size:16px;font-weight:700;color:var(--text-main,#0f172a);line-height:1.1;}
+.tahfidz-stat-lbl{font-size:10px;font-weight:600;color:var(--text-muted,#64748b);text-transform:uppercase;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tahfidz-table-card{padding:14px 16px;}
+.tahfidz-search-bar{margin-bottom:12px;}
+.tahfidz-desktop-table{display:block;}
+.tahfidz-mobile-cards{display:none;}
+.tahfidz-item-card{background:var(--bg-hover,#f8fafc);border:1px solid var(--border,#e2e8f0);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;box-sizing:border-box;}
+.tahfidz-item-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
+.tahfidz-item-student{min-width:0;flex:1;}
+.tahfidz-item-name{font-size:13.5px;font-weight:700;color:var(--text-main,#0f172a);line-height:1.3;word-break:break-word;}
+.tahfidz-item-meta{font-size:11.5px;color:var(--text-muted,#64748b);margin-top:2px;}
+.tahfidz-item-body{display:flex;flex-direction:column;gap:4px;padding:6px 8px;background:var(--bg-card,#fff);border:1px solid var(--border,#e2e8f0);border-radius:6px;font-size:12px;}
+.tahfidz-item-surah-row{display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap;}
+.tahfidz-item-notes{font-size:11.5px;color:var(--text-muted,#64748b);line-height:1.35;word-break:break-word;}
+.tahfidz-item-bottom{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:2px;}
+.tahfidz-item-teacher{font-size:11px;color:var(--text-muted,#64748b);}
+.tahfidz-item-actions{display:flex;gap:6px;}
+.tasmi-desktop-table{display:block;}
+.tasmi-mobile-cards{display:none;}
+.tasmi-tabs-pill-wrap{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px 0;}
+.tasmi-search-box{flex:1;max-width:320px;min-width:200px;}
+.empty-state-box{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 16px;text-align:center;gap:6px;}
+.empty-state-box i{font-size:32px;color:var(--text-muted,#64748b);opacity:0.7;}
+.empty-state-box-title{font-size:13.5px;font-weight:700;color:var(--text-main,#0f172a);margin-top:2px;}
+.empty-state-box-desc{font-size:11.5px;color:var(--text-muted,#64748b);max-width:340px;line-height:1.4;}
+.tasmi-item-card{background:var(--bg-hover,#f8fafc);border:1px solid var(--border,#e2e8f0);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;box-sizing:border-box;}
+.tasmi-item-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
+.tasmi-item-student{min-width:0;flex:1;}
+.tasmi-item-name{font-size:13.5px;font-weight:700;color:var(--text-main,#0f172a);line-height:1.3;word-break:break-word;}
+.tasmi-item-meta{font-size:11.5px;color:var(--text-muted,#64748b);margin-top:2px;}
+.tasmi-item-body{display:flex;flex-direction:column;gap:4px;padding:6px 8px;background:var(--bg-card,#fff);border:1px solid var(--border,#e2e8f0);border-radius:6px;font-size:12px;}
+.tasmi-item-schedule{display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap;}
+.tasmi-item-bottom{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:2px;}
+.tasmi-item-examiner{font-size:11px;color:var(--text-muted,#64748b);}
+.exam-desktop-table{display:block;}
+.exam-mobile-cards{display:none;}
+.exam-item-card{background:var(--bg-hover,#f8fafc);border:1px solid var(--border,#e2e8f0);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;box-sizing:border-box;}
+.exam-item-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
+.exam-item-student{min-width:0;flex:1;}
+.exam-item-name{font-size:13.5px;font-weight:700;color:var(--text-main,#0f172a);line-height:1.3;word-break:break-word;}
+.exam-item-meta{font-size:11.5px;color:var(--text-muted,#64748b);margin-top:2px;}
+.exam-item-body{display:flex;flex-direction:column;gap:6px;padding:8px 10px;background:var(--bg-card,#fff);border:1px solid var(--border,#e2e8f0);border-radius:6px;font-size:12px;}
+.exam-item-level-row{display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap;}
+.exam-item-notes{font-size:11.5px;color:var(--text-muted,#64748b);line-height:1.4;word-break:break-word;}
+.exam-item-bottom{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:4px;flex-wrap:wrap;}
+.exam-item-actions{display:flex;gap:6px;flex-wrap:wrap;}
+@media (max-width:768px){
+.tahfidz-toolbar-card{padding:10px 12px;}
+.tahfidz-toolbar{flex-direction:column;align-items:stretch;gap:8px;}
+.tahfidz-filter-group{grid-template-columns:1fr 1fr;gap:6px;}
+.tahfidz-filter-group > :last-child:nth-child(odd){grid-column:1 / -1;}
+.tahfidz-toolbar-actions{width:100%;}
+.tahfidz-toolbar-actions .btn{width:100%;justify-content:center;}
+.tahfidz-stats-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-bottom:10px;}
+.tahfidz-stat-card{padding:7px 8px;gap:6px;border-radius:8px;}
+.tahfidz-stat-icon{width:26px;height:26px;font-size:14px;border-radius:6px;}
+.tahfidz-stat-val{font-size:14px;}
+.tahfidz-stat-lbl{font-size:9px;}
+.tahfidz-table-card{padding:10px 12px;}
+.tahfidz-desktop-table{display:none;}
+.tahfidz-mobile-cards{display:flex;flex-direction:column;gap:8px;}
+.tasmi-desktop-table{display:none;}
+.tasmi-mobile-cards{display:flex;flex-direction:column;gap:8px;}
+.exam-desktop-table{display:none;}
+.exam-mobile-cards{display:flex;flex-direction:column;gap:8px;}
+.tasmi-tabs-pill-wrap{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin-bottom:10px;}
+.tasmi-tabs-pill-wrap::-webkit-scrollbar{display:none;}
+.tasmi-tabs-pill-wrap .filter-pill{flex-shrink:0;}
+.tasmi-search-box{width:100%;max-width:100%;}
+.empty-state-box{padding:18px 12px;}
+.empty-state-box i{font-size:26px;}
+.empty-state-box-title{font-size:12.5px;}
+.empty-state-box-desc{font-size:11px;}
+}
+@media (max-width:480px){
+.tahfidz-stat-lbl{font-size:8.5px;}
+.tahfidz-filter-select{font-size:11.5px;min-height:34px;padding:4px 8px;}
+}
 @media print{
 @page{size:A4 portrait;margin:10mm 12mm;}
 *,*:before,*:after{box-sizing:border-box !important;-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;}

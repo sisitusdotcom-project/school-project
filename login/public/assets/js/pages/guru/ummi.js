@@ -52,6 +52,122 @@ const UMMI_GRADES = [
   { score: 75, predicate: 'C+', label: '75 = C+ (Salah 4 kali, bisa membetulkan sendiri = Belum boleh dinaikkan/diulangi lagi)', action: 'Belum boleh dinaikkan / diulangi lagi' },
   { score: 70, predicate: 'C', label: '70 = C (Salah 5 kali, bisa membetulkan sendiri = Belum boleh dinaikkan/diulangi lagi)', action: 'Belum boleh dinaikkan / diulangi lagi' }
 ];
+const QURAN_SURAHS = [
+  { no: 1, name: "Al-Fatihah", verses: 7, juz: [1] },
+  { no: 2, name: "Al-Baqarah", verses: 286, juz: [1, 2, 3] },
+  { no: 3, name: "Ali 'Imran", verses: 200, juz: [3, 4] },
+  { no: 4, name: "An-Nisa'", verses: 176, juz: [4, 5, 6] },
+  { no: 5, name: "Al-Ma'idah", verses: 120, juz: [6, 7] },
+  { no: 6, name: "Al-An'am", verses: 165, juz: [7, 8] },
+  { no: 7, name: "Al-A'raf", verses: 206, juz: [8, 9] },
+  { no: 8, name: "Al-Anfal", verses: 75, juz: [9, 10] },
+  { no: 9, name: "At-Taubah", verses: 129, juz: [10, 11] },
+  { no: 10, name: "Yunus", verses: 109, juz: [11] },
+  { no: 11, name: "Hud", verses: 123, juz: [11, 12] },
+  { no: 12, name: "Yusuf", verses: 111, juz: [12, 13] },
+  { no: 13, name: "Ar-Ra'd", verses: 43, juz: [13] },
+  { no: 14, name: "Ibrahim", verses: 52, juz: [13] },
+  { no: 15, name: "Al-Hijr", verses: 99, juz: [14] },
+  { no: 16, name: "An-Nahl", verses: 128, juz: [14] },
+  { no: 17, name: "Al-Isra'", verses: 111, juz: [15] },
+  { no: 18, name: "Al-Kahf", verses: 110, juz: [15, 16] },
+  { no: 19, name: "Maryam", verses: 98, juz: [16] },
+  { no: 20, name: "Taha", verses: 135, juz: [16] },
+  { no: 21, name: "Al-Anbiya'", verses: 112, juz: [17] },
+  { no: 22, name: "Al-Hajj", verses: 78, juz: [17] },
+  { no: 23, name: "Al-Mu'minun", verses: 118, juz: [18] },
+  { no: 24, name: "An-Nur", verses: 64, juz: [18] },
+  { no: 25, name: "Al-Furqan", verses: 77, juz: [18, 19] },
+  { no: 26, name: "Asy-Syu'ara'", verses: 227, juz: [19] },
+  { no: 27, name: "An-Naml", verses: 93, juz: [19, 20] },
+  { no: 28, name: "Al-Qasas", verses: 88, juz: [20] },
+  { no: 29, name: "Al-'Ankabut", verses: 69, juz: [20, 21] },
+  { no: 30, name: "Ar-Rum", verses: 60, juz: [21] },
+  { no: 31, name: "Luqman", verses: 34, juz: [21] },
+  { no: 32, name: "As-Sajdah", verses: 30, juz: [21] },
+  { no: 33, name: "Al-Ahzab", verses: 73, juz: [21, 22] },
+  { no: 34, name: "Saba'", verses: 54, juz: [22] },
+  { no: 35, name: "Fatir", verses: 45, juz: [22] },
+  { no: 36, name: "Ya-Sin", verses: 83, juz: [22, 23] },
+  { no: 37, name: "As-Saffat", verses: 182, juz: [23] },
+  { no: 38, name: "Sad", verses: 88, juz: [23] },
+  { no: 39, name: "Az-Zumar", verses: 75, juz: [23, 24] },
+  { no: 40, name: "Ghafir", verses: 85, juz: [24] },
+  { no: 41, name: "Fussilat", verses: 54, juz: [24, 25] },
+  { no: 42, name: "Asy-Syura", verses: 53, juz: [25] },
+  { no: 43, name: "Az-Zukhruf", verses: 89, juz: [25] },
+  { no: 44, name: "Ad-Dukhan", verses: 59, juz: [25] },
+  { no: 45, name: "Al-Jasiyah", verses: 37, juz: [25] },
+  { no: 46, name: "Al-Ahqaf", verses: 35, juz: [26] },
+  { no: 47, name: "Muhammad", verses: 38, juz: [26] },
+  { no: 48, name: "Al-Fath", verses: 29, juz: [26] },
+  { no: 49, name: "Al-Hujurat", verses: 18, juz: [26] },
+  { no: 50, name: "Qaf", verses: 45, juz: [26] },
+  { no: 51, name: "Az-Zariyat", verses: 60, juz: [26, 27] },
+  { no: 52, name: "At-Tur", verses: 49, juz: [27] },
+  { no: 53, name: "An-Najm", verses: 62, juz: [27] },
+  { no: 54, name: "Al-Qamar", verses: 55, juz: [27] },
+  { no: 55, name: "Ar-Rahman", verses: 78, juz: [27] },
+  { no: 56, name: "Al-Waqi'ah", verses: 96, juz: [27] },
+  { no: 57, name: "Al-Hadid", verses: 29, juz: [27] },
+  { no: 58, name: "Al-Mujadilah", verses: 22, juz: [28] },
+  { no: 59, name: "Al-Hasyr", verses: 24, juz: [28] },
+  { no: 60, name: "Al-Mumtahanah", verses: 13, juz: [28] },
+  { no: 61, name: "As-Saff", verses: 14, juz: [28] },
+  { no: 62, name: "Al-Jumu'ah", verses: 11, juz: [28] },
+  { no: 63, name: "Al-Munafiqun", verses: 11, juz: [28] },
+  { no: 64, name: "At-Taghabun", verses: 18, juz: [28] },
+  { no: 65, name: "At-Talaq", verses: 12, juz: [28] },
+  { no: 66, name: "At-Tahrim", verses: 12, juz: [28] },
+  { no: 67, name: "Al-Mulk", verses: 30, juz: [29] },
+  { no: 68, name: "Al-Qalam", verses: 52, juz: [29] },
+  { no: 69, name: "Al-Haqqah", verses: 52, juz: [29] },
+  { no: 70, name: "Al-Ma'arij", verses: 44, juz: [29] },
+  { no: 71, name: "Nuh", verses: 28, juz: [29] },
+  { no: 72, name: "Al-Jinn", verses: 28, juz: [29] },
+  { no: 73, name: "Al-Muzzammil", verses: 20, juz: [29] },
+  { no: 74, name: "Al-Muddassir", verses: 56, juz: [29] },
+  { no: 75, name: "Al-Qiyamah", verses: 40, juz: [29] },
+  { no: 76, name: "Al-Insan", verses: 31, juz: [29] },
+  { no: 77, name: "Al-Mursalat", verses: 50, juz: [29] },
+  { no: 78, name: "An-Naba'", verses: 40, juz: [30] },
+  { no: 79, name: "An-Nazi'at", verses: 46, juz: [30] },
+  { no: 80, name: "'Abasa", verses: 42, juz: [30] },
+  { no: 81, name: "At-Takwir", verses: 29, juz: [30] },
+  { no: 82, name: "Al-Infitar", verses: 19, juz: [30] },
+  { no: 83, name: "Al-Muthaffifin", verses: 36, juz: [30] },
+  { no: 84, name: "Al-Insyiqaq", verses: 25, juz: [30] },
+  { no: 85, name: "Al-Buruj", verses: 22, juz: [30] },
+  { no: 86, name: "At-Tariq", verses: 17, juz: [30] },
+  { no: 87, name: "Al-A'la", verses: 19, juz: [30] },
+  { no: 88, name: "Al-Ghasyiyah", verses: 26, juz: [30] },
+  { no: 89, name: "Al-Fajr", verses: 30, juz: [30] },
+  { no: 90, name: "Al-Balad", verses: 20, juz: [30] },
+  { no: 91, name: "Asy-Syams", verses: 15, juz: [30] },
+  { no: 92, name: "Al-Lail", verses: 21, juz: [30] },
+  { no: 93, name: "Ad-Duha", verses: 11, juz: [30] },
+  { no: 94, name: "Asy-Syarh", verses: 8, juz: [30] },
+  { no: 95, name: "At-Tin", verses: 8, juz: [30] },
+  { no: 96, name: "Al-'Alaq", verses: 19, juz: [30] },
+  { no: 97, name: "Al-Qadr", verses: 5, juz: [30] },
+  { no: 98, name: "Al-Bayyinah", verses: 8, juz: [30] },
+  { no: 99, name: "Az-Zalzalah", verses: 8, juz: [30] },
+  { no: 100, name: "Al-'Adiyat", verses: 11, juz: [30] },
+  { no: 101, name: "Al-Qari'ah", verses: 11, juz: [30] },
+  { no: 102, name: "At-Takasur", verses: 8, juz: [30] },
+  { no: 103, name: "Al-'Asr", verses: 3, juz: [30] },
+  { no: 104, name: "Al-Humazah", verses: 9, juz: [30] },
+  { no: 105, name: "Al-Fil", verses: 5, juz: [30] },
+  { no: 106, name: "Quraisy", verses: 4, juz: [30] },
+  { no: 107, name: "Al-Ma'un", verses: 7, juz: [30] },
+  { no: 108, name: "Al-Kausar", verses: 3, juz: [30] },
+  { no: 109, name: "Al-Kafirun", verses: 6, juz: [30] },
+  { no: 110, name: "An-Nasr", verses: 3, juz: [30] },
+  { no: 111, name: "Al-Lahab", verses: 5, juz: [30] },
+  { no: 112, name: "Al-Ikhlas", verses: 4, juz: [30] },
+  { no: 113, name: "Al-Falaq", verses: 5, juz: [30] },
+  { no: 114, name: "An-Nas", verses: 6, juz: [30] }
+];
 const UMMIPages = {
   async renderUmmiMapping(container) {
     Router.setTitle('Pemetaan Rombel & Guru Ummi', 'Atur pembagian rombel berbasis kemampuan santri lintas kelas dan pemetaan per sesi.');
@@ -190,7 +306,7 @@ const UMMIPages = {
           <button type="button" class="filter-pill" data-filter-session="2"><i class="ph ph-sun"></i> Sesi 2 (Kelas 3-4) · ${sessStats['2'].rombel}</button>
           <button type="button" class="filter-pill" data-filter-session="3"><i class="ph ph-sun-horizon"></i> Sesi 3 (Kelas 5-6) · ${sessStats['3'].rombel}</button>
         </div>
-        <div class="search-box">
+        <div class="search-box tasmi-search-box">
           <i class="ph ph-magnifying-glass"></i>
           <input type="text" id="input-search-ummi" placeholder="Cari nama rombel, guru pengampu, tingkat jilid/pasca, atau ruang...">
         </div>
@@ -1057,11 +1173,12 @@ async renderUmmiClasses(container) {
         if (e.status === 'Dijadwalkan') badgeCls = 'badge-primary';
         else if (e.status === 'Lolos') badgeCls = 'badge-success';
         else if (e.status === 'Ditolak') badgeCls = 'badge-danger';
+        const sesVal = (() => { const sObj = studentMap[e.studentId]; if (sObj) { const fCls = classMap[sObj.classId]; const g = fCls ? (Number(fCls.grade) || parseInt(fCls.name || '', 10) || 0) : 0; if (g === 1 || g === 2) return '1'; if (g === 3 || g === 4) return '2'; if (g === 5 || g === 6) return '3'; } return '1'; })();
         return `
           <tr>
             <td>${idx + 1}</td>
             <td><strong>${AppConfig.escapeHtml(e.studentName || '-')}</strong></td>
-            <td>${getSessionBadge((() => { const sObj = studentMap[e.studentId]; if (sObj) { const fCls = classMap[sObj.classId]; const g = fCls ? (Number(fCls.grade) || parseInt(fCls.name || '', 10) || 0) : 0; if (g === 1 || g === 2) return '1'; if (g === 3 || g === 4) return '2'; if (g === 5 || g === 6) return '3'; } return '1'; })())}</td>
+            <td>${getSessionBadge(sesVal)}</td>
             <td><span class="badge badge-outline">${AppConfig.escapeHtml(e.currentLevel || '-')}</span> <i class="ph ph-arrow-right"></i> <span class="badge badge-primary">${AppConfig.escapeHtml(e.targetLevel || '-')}</span></td>
             <td>${AppConfig.escapeHtml(e.requestedByName || '-')}<br><small class="text-muted">${AppConfig.escapeHtml(e.teacherNotes || '-')}</small></td>
             <td><span class="badge ${badgeCls}">${e.status}</span></td>
@@ -1080,8 +1197,74 @@ async renderUmmiClasses(container) {
             </td>
           </tr>
         `;
-      }).join('') : '<tr><td colspan="8" class="text-center text-muted">Tidak ada data ujian pada filter ini.</td></tr>';
-      document.getElementById('exam-table-body').innerHTML = rows;
+      }).join('') : `
+        <tr>
+          <td colspan="9">
+            <div class="empty-state-box">
+              <i class="ph ph-folder-open"></i>
+              <div class="empty-state-box-title">Tidak ada antrean ujian</div>
+              <div class="empty-state-box-desc">Belum ada pengajuan ujian munaqosyah atau kenaikan jilid pada filter ini.</div>
+            </div>
+          </td>
+        </tr>
+      `;
+      const mobileCards = filtered.length ? filtered.map((e) => {
+        let badgeCls = 'badge-warning';
+        if (e.status === 'Dijadwalkan') badgeCls = 'badge-primary';
+        else if (e.status === 'Lolos') badgeCls = 'badge-success';
+        else if (e.status === 'Ditolak') badgeCls = 'badge-danger';
+        const sesVal = (() => { const sObj = studentMap[e.studentId]; if (sObj) { const fCls = classMap[sObj.classId]; const g = fCls ? (Number(fCls.grade) || parseInt(fCls.name || '', 10) || 0) : 0; if (g === 1 || g === 2) return '1'; if (g === 3 || g === 4) return '2'; if (g === 5 || g === 6) return '3'; } return '1'; })();
+        return `
+          <div class="exam-item-card">
+            <div class="exam-item-top">
+              <div class="exam-item-student">
+                <div class="exam-item-name">${AppConfig.escapeHtml(e.studentName || '-')}</div>
+                <div class="exam-item-meta">Diajukan oleh: ${AppConfig.escapeHtml(e.requestedByName || '-')}</div>
+              </div>
+              <div class="d-flex align-items-center gap-1">
+                ${getSessionBadge(sesVal)}
+                <span class="badge ${badgeCls}">${e.status}</span>
+              </div>
+            </div>
+            <div class="exam-item-body">
+              <div class="exam-item-level-row">
+                <span>Kenaikan:</span>
+                <div>
+                  <span class="badge badge-outline">${AppConfig.escapeHtml(e.currentLevel || '-')}</span>
+                  <i class="ph ph-arrow-right"></i>
+                  <span class="badge badge-primary">${AppConfig.escapeHtml(e.targetLevel || '-')}</span>
+                </div>
+              </div>
+              ${e.teacherNotes ? `<div class="exam-item-notes"><strong>Catatan Guru:</strong> ${AppConfig.escapeHtml(e.teacherNotes)}</div>` : ''}
+              ${e.scheduledDate ? `<div class="exam-item-notes"><strong>Jadwal:</strong> ${e.scheduledDate} (Penguji: ${AppConfig.escapeHtml(e.examinerName || '-')})</div>` : '<div class="exam-item-notes text-muted"><em>Belum dijadwalkan</em></div>'}
+              ${e.examNotes ? `<div class="exam-item-notes"><strong>Catatan Ujian:</strong> ${AppConfig.escapeHtml(e.examNotes)}</div>` : (e.score ? `<div class="exam-item-notes"><strong>Nilai:</strong> ${e.score}</div>` : '')}
+            </div>
+            <div class="exam-item-bottom">
+              <div class="exam-item-actions">
+                ${e.status === 'Menunggu ACC' ? `
+                  <button class="btn btn-primary btn-sm" data-acc-exam="${e.id}"><i class="ph ph-calendar-plus"></i> ACC & Jadwal</button>
+                  <button class="btn btn-danger btn-sm" data-reject-exam="${e.id}"><i class="ph ph-x-circle"></i> Tolak</button>
+                ` : ''}
+                ${e.status === 'Dijadwalkan' ? `
+                  <button class="btn btn-success btn-sm" data-result-exam="${e.id}"><i class="ph ph-check-circle"></i> Input Hasil Tes</button>
+                ` : ''}
+                ${e.status === 'Lolos' ? `<span class="badge badge-success"><i class="ph ph-seal-check"></i> Tingkat Naik</span>` : ''}
+                ${e.status === 'Ditolak' ? `<button class="btn btn-outline btn-sm" data-reopen-exam="${e.id}"><i class="ph ph-arrows-clockwise"></i> Evaluasi Ulang</button>` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('') : `
+        <div class="empty-state-box">
+          <i class="ph ph-folder-open"></i>
+          <div class="empty-state-box-title">Tidak ada antrean ujian</div>
+          <div class="empty-state-box-desc">Belum ada pengajuan ujian munaqosyah atau kenaikan jilid pada filter ini.</div>
+        </div>
+      `;
+      const tBody = document.getElementById('exam-table-body');
+      if (tBody) tBody.innerHTML = rows;
+      const mCards = document.getElementById('exam-mobile-cards');
+      if (mCards) mCards.innerHTML = mobileCards;
       container.querySelectorAll('[data-acc-exam]').forEach(btn => {
         btn.onclick = () => {
           const id = btn.dataset.accExam;
@@ -1152,23 +1335,25 @@ async renderUmmiClasses(container) {
         </div>
       </div>
       <div class="card">
-        <div class="table-responsive">
+        <div class="table-responsive exam-desktop-table">
           <table class="table">
             <thead>
               <tr>
-                <th>No</th>
+                <th class="table-col-sm">No</th>
                 <th>Santri</th>
-                <th>Tingkat -> Target</th>
+                <th>Sesi</th>
+                <th>Kenaikan Jilid</th>
                 <th>Pengaju & Catatan</th>
                 <th>Status</th>
                 <th>Jadwal & Penguji</th>
                 <th>Catatan Ujian</th>
-                <th>Aksi Koordinator</th>
+                <th class="table-col-action">Aksi Koordinator</th>
               </tr>
             </thead>
             <tbody id="exam-table-body"></tbody>
           </table>
         </div>
+        <div class="exam-mobile-cards" id="exam-mobile-cards"></div>
       </div>
       <div class="modal-overlay" id="modal-acc-exam">
         <div class="modal">
@@ -1374,17 +1559,922 @@ async renderUmmiClasses(container) {
       }
     };
   },
-    async renderTahfidz(container) {
-    if (typeof ModuleKit !== 'undefined') {
-      return ModuleKit.render(container, '#/guru/ummi/tahfidz');
+  async renderTahfidz(container) {
+    Router.setTitle('Setoran Tahfidz Santri', 'Buku mutabaah hafalan surat dan juz Al-Qur\'an santri.');
+    const uid = Auth.currentUser.uid;
+    const [ummiClasses, allStudents, allClasses, tahfidzRaw, allUsers] = await Promise.all([
+      DB.getUmmiClasses(),
+      DB.getAllStudents(),
+      DB.getClasses(),
+      DB.getUmmiTahfidz(),
+      DB.getAllUsers()
+    ]);
+    const classArr = DB.toArray(ummiClasses);
+    const userAssigns = Auth.currentAssignments || AppConfig.getRoleAssignments(Auth.userData || Auth.currentUser || {});
+    const isKoordOrAdmin = userAssigns.includes('KOORD_UMMI') || Auth.currentRole === 'admin' || Auth.userData?.role === 'admin';
+    let myClasses = isKoordOrAdmin ? classArr : classArr.filter(c => c.teacherId === uid);
+    if (!myClasses.length) {
+      myClasses = classArr.filter(c => userAssigns.some(a => a.toLowerCase().includes((c.name || '').toLowerCase().replace(/[^a-z0-9]/g, ''))));
+    }
+    if (!myClasses.length) {
+      myClasses = classArr;
+    }
+    const studentMap = DB.toArray(allStudents).reduce((acc, s) => { acc[s.id] = s; return acc; }, {});
+    const gradeClassMap = DB.toArray(allClasses).reduce((acc, c) => { acc[c.id] = c.name; return acc; }, {});
+    const guruUmmi = DB.toArray(allUsers).filter(u => AppConfig.isUserUmmi(u));
+    const teacherMap = guruUmmi.reduce((acc, u) => { acc[u.id] = u.name; return acc; }, {});
+    let activeClassId = myClasses[0] ? myClasses[0].id : 'all';
+    let activeStudentId = 'all';
+    let activeJuz = 'all';
+    let searchQuery = '';
+    const getFlattenedRecords = () => {
+      const records = [];
+      if (tahfidzRaw) {
+        Object.entries(tahfidzRaw).forEach(([sId, entries]) => {
+          if (entries && typeof entries === 'object') {
+            Object.entries(entries).forEach(([k, rec]) => {
+              if (rec && typeof rec === 'object') {
+                records.push({ id: k, studentId: sId, ...rec });
+              }
+            });
+          }
+        });
+      }
+      return records.sort((a, b) => (b.date || '').localeCompare(a.date || '') || (b.createdAt || 0) - (a.createdAt || 0));
+    };
+    let allRecords = getFlattenedRecords();
+    const clsOptions = [
+      '<option value="all">Semua Rombel Ummi</option>',
+      ...myClasses.map(c => `<option value="${c.id}" ${c.id === activeClassId ? 'selected' : ''}>${AppConfig.escapeHtml(c.name)} (${AppConfig.escapeHtml(c.level || 'Jilid')})</option>`)
+    ].join('');
+    const juzOptions = [
+      '<option value="all">Semua Juz (1 - 30)</option>',
+      '<option value="30" selected>Juz 30 (Juz \'Amma)</option>',
+      '<option value="29">Juz 29 (Tabarak)</option>',
+      '<option value="28">Juz 28</option>',
+      ...Array.from({ length: 27 }, (_, i) => `<option value="${i + 1}">Juz ${i + 1}</option>`)
+    ].join('');
+    container.innerHTML = `
+      <div class="card toolbar-panel tahfidz-toolbar-card">
+        <div class="tahfidz-toolbar">
+          <div class="tahfidz-filter-group">
+            <div class="tahfidz-filter-item">
+              <label class="tahfidz-filter-label">Rombel</label>
+              <select id="sel-tahfidz-cls" class="tahfidz-filter-select">${clsOptions}</select>
+            </div>
+            <div class="tahfidz-filter-item">
+              <label class="tahfidz-filter-label">Santri</label>
+              <select id="sel-tahfidz-student" class="tahfidz-filter-select">
+                <option value="all">Semua Santri</option>
+              </select>
+            </div>
+            <div class="tahfidz-filter-item">
+              <label class="tahfidz-filter-label">Juz</label>
+              <select id="sel-tahfidz-juz" class="tahfidz-filter-select">${juzOptions}</select>
+            </div>
+          </div>
+          <div class="tahfidz-toolbar-actions">
+            <button class="btn btn-primary" id="btn-add-tahfidz"><i class="ph ph-plus"></i> Input Setoran Baru</button>
+          </div>
+        </div>
+      </div>
+      <div class="tahfidz-stats-grid" id="tahfidz-stats-container"></div>
+      <div class="card tahfidz-table-card">
+        <div class="tahfidz-search-bar">
+          <div class="search-box">
+            <i class="ph ph-magnifying-glass"></i>
+            <input type="text" id="input-search-tahfidz" placeholder="Cari santri, surat, catatan, atau guru pengampu...">
+          </div>
+        </div>
+        <div class="tahfidz-desktop-table table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Tanggal</th>
+                <th>Santri & Kelas</th>
+                <th>Rombel Ummi</th>
+                <th>Surat & Juz</th>
+                <th>Ayat</th>
+                <th>Predikat Kelancaran</th>
+                <th>Catatan & Guru</th>
+                <th class="action-cell">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="tahfidz-table-tbody"></tbody>
+          </table>
+        </div>
+        <div class="tahfidz-mobile-cards" id="tahfidz-cards-mobile"></div>
+      </div>
+      <div class="modal-overlay" id="modal-tahfidz-entry">
+        <div class="modal modal-lg">
+          <div class="modal-header">
+            <h3 class="modal-title" id="modal-tahfidz-title">Input Setoran Tahfidz Santri</h3>
+            <button class="btn-icon" data-close-modal="modal-tahfidz-entry"><i class="ph ph-x"></i></button>
+          </div>
+          <form id="form-tahfidz-entry">
+            <div class="modal-body">
+              <input type="hidden" id="tahfidz-entry-id">
+              <input type="hidden" id="tahfidz-entry-orig-student">
+              <div class="form-group">
+                <label>Pilih Santri *</label>
+                <select id="tahfidz-entry-student" required class="form-input"></select>
+              </div>
+              <div class="form-row">
+                <div class="form-group form-col">
+                  <label>Tanggal Setoran *</label>
+                  <input type="date" id="tahfidz-entry-date" required class="form-input">
+                </div>
+                <div class="form-group form-col">
+                  <label>Juz *</label>
+                  <select id="tahfidz-entry-juz" required class="form-input">
+                    <option value="30">Juz 30 (Juz \'Amma)</option>
+                    <option value="29">Juz 29 (Tabarak)</option>
+                    <option value="28">Juz 28</option>
+                    ${Array.from({ length: 27 }, (_, i) => `<option value="${i + 1}">Juz ${i + 1}</option>`).join('')}
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group form-col">
+                  <label>Surat *</label>
+                  <select id="tahfidz-entry-surah" required class="form-input"></select>
+                </div>
+                <div class="form-group form-col">
+                  <label>Rentang Ayat *</label>
+                  <input type="text" id="tahfidz-entry-verse" required placeholder="Contoh: 1 - 20 atau 1 - 40 (Tuntas)" class="form-input">
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Nilai / Predikat Kelancaran *</label>
+                <select id="tahfidz-entry-grade" required class="form-input">
+                  <option value="A+">A+ (Mumtaz - Mutqin / Sangat Lancar Tanpa Bantuan)</option>
+                  <option value="A" selected>A (Jayyid Jiddan - Lancar / Bantuan Maks 1x)</option>
+                  <option value="B">B (Jayyid - Cukup Lancar / Bantuan 2-3x)</option>
+                  <option value="C">C (Maqbul - Kurang Lancar / Perlu Muraja\'ah)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Catatan Makharijul Huruf & Tajwid</label>
+                <textarea id="tahfidz-entry-notes" rows="2" placeholder="Catatan evaluasi tajwid, hukum mad, dengung, makhraj..." class="form-input"></textarea>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-outline" data-close-modal="modal-tahfidz-entry">Batal</button>
+              <button type="submit" class="btn btn-primary" id="btn-save-tahfidz-entry"><i class="ph ph-floppy-disk"></i> Simpan Setoran Hafalan</button>
+            </div>
+          </form>
+        </div>
+      </div>`;
+    const selCls = container.querySelector('#sel-tahfidz-cls');
+    const selStudent = container.querySelector('#sel-tahfidz-student');
+    const selJuz = container.querySelector('#sel-tahfidz-juz');
+    const searchInput = container.querySelector('#input-search-tahfidz');
+    const updateStudentFilterDropdown = () => {
+      let enrolled = [];
+      if (activeClassId !== 'all') {
+        const cls = classArr.find(c => c.id === activeClassId);
+        if (cls && cls.students) {
+          enrolled = Object.keys(cls.students).map(id => studentMap[id]).filter(Boolean);
+        }
+      }
+      if (!enrolled.length) {
+        enrolled = DB.toArray(allStudents);
+      }
+      enrolled.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+      selStudent.innerHTML = '<option value="all">Semua Santri</option>' + enrolled.map(s => `
+        <option value="${s.id}">${AppConfig.escapeHtml(s.name)} (${gradeClassMap[s.classId] || s.classId || '-'})</option>
+      `).join('');
+      selStudent.value = activeStudentId;
+    };
+    const renderTahfidzView = () => {
+      const filtered = allRecords.filter(r => {
+        if (activeClassId !== 'all') {
+          const cls = classArr.find(c => c.id === activeClassId);
+          if (cls && cls.students) {
+            if (!cls.students[r.studentId]) return false;
+          } else if (r.ummiClassId && r.ummiClassId !== activeClassId) {
+            return false;
+          }
+        }
+        if (activeStudentId !== 'all' && r.studentId !== activeStudentId) return false;
+        if (activeJuz !== 'all' && String(r.juz || '') !== String(activeJuz)) return false;
+        if (searchQuery) {
+          const sObj = studentMap[r.studentId];
+          const sName = (sObj?.name || r.studentName || '').toLowerCase();
+          const surah = (r.surah || '').toLowerCase();
+          const notes = (r.notes || '').toLowerCase();
+          const teacher = (teacherMap[r.teacherId] || r.teacherName || '').toLowerCase();
+          if (!sName.includes(searchQuery) && !surah.includes(searchQuery) && !notes.includes(searchQuery) && !teacher.includes(searchQuery)) return false;
+        }
+        return true;
+      });
+      const totalSetoran = filtered.length;
+      const mutqinCount = filtered.filter(r => r.grade === 'A+' || r.grade === 'A').length;
+      const uniqueStudents = new Set(filtered.map(r => r.studentId)).size;
+      const statContainer = container.querySelector('#tahfidz-stats-container');
+      if (statContainer) {
+        statContainer.innerHTML = `
+          <div class="tahfidz-stat-card primary">
+            <div class="tahfidz-stat-icon"><i class="ph ph-book-open"></i></div>
+            <div class="tahfidz-stat-info">
+              <div class="tahfidz-stat-val">${totalSetoran}</div>
+              <div class="tahfidz-stat-lbl">Total Setoran</div>
+            </div>
+          </div>
+          <div class="tahfidz-stat-card success">
+            <div class="tahfidz-stat-icon"><i class="ph ph-seal-check"></i></div>
+            <div class="tahfidz-stat-info">
+              <div class="tahfidz-stat-val">${mutqinCount}</div>
+              <div class="tahfidz-stat-lbl">Mutqin (A+/A)</div>
+            </div>
+          </div>
+          <div class="tahfidz-stat-card info">
+            <div class="tahfidz-stat-icon"><i class="ph ph-users"></i></div>
+            <div class="tahfidz-stat-info">
+              <div class="tahfidz-stat-val">${uniqueStudents}</div>
+              <div class="tahfidz-stat-lbl">Santri Setor</div>
+            </div>
+          </div>
+        `;
+      }
+      const tbody = container.querySelector('#tahfidz-table-tbody');
+      const mobileCards = container.querySelector('#tahfidz-cards-mobile');
+      if (!tbody || !mobileCards) return;
+      if (!filtered.length) {
+        const emptyTahfidz = `
+          <div class="empty-state-box">
+            <i class="ph ph-book-open"></i>
+            <div class="empty-state-box-title">Belum Ada Setoran Tahfidz</div>
+            <div class="empty-state-box-desc">Belum ada riwayat mutabaah hafalan yang sesuai kriteria. Silakan klik tombol "Input Setoran Baru" di atas untuk menambahkan hafalan santri.</div>
+          </div>
+        `;
+        tbody.innerHTML = `<tr><td colspan="9">${emptyTahfidz}</td></tr>`;
+        mobileCards.innerHTML = emptyTahfidz;
+        return;
+      }
+      tbody.innerHTML = filtered.map((r, idx) => {
+        const sObj = studentMap[r.studentId] || {};
+        const sName = sObj.name || r.studentName || 'Santri';
+        const cFormal = gradeClassMap[sObj.classId] || sObj.classId || '-';
+        const teacherName = teacherMap[r.teacherId] || r.teacherName || 'Guru Ummi';
+        const clsObj = classArr.find(c => c.id === r.ummiClassId) || classArr.find(c => c.students && c.students[r.studentId]);
+        const clsName = clsObj ? clsObj.name : '-';
+        let gradeBadge = '<span class="badge badge-info">B (Jayyid)</span>';
+        if (r.grade === 'A+') gradeBadge = '<span class="badge badge-success font-bold"><i class="ph ph-star"></i> A+ (Mutqin)</span>';
+        else if (r.grade === 'A') gradeBadge = '<span class="badge badge-primary font-bold">A (Lancar)</span>';
+        else if (r.grade === 'C') gradeBadge = '<span class="badge badge-warning">C (Muraja\'ah)</span>';
+        else if (r.grade === 'D') gradeBadge = '<span class="badge badge-danger">D (Kurang)</span>';
+        return `
+          <tr>
+            <td>${idx + 1}</td>
+            <td><strong>${r.date || '-'}</strong></td>
+            <td>
+              <div class="font-bold text-main">${AppConfig.escapeHtml(sName)}</div>
+              <div class="text-xs text-muted">${AppConfig.escapeHtml(cFormal)} · ${sObj.nis || sObj.id || ''}</div>
+            </td>
+            <td><span class="badge badge-outline">${AppConfig.escapeHtml(clsName)}</span></td>
+            <td>
+              <span class="badge badge-info">Juz ${r.juz || 30}</span>
+              <strong>${AppConfig.escapeHtml(r.surah || '-')}</strong>
+            </td>
+            <td>Ayat ${AppConfig.escapeHtml(r.verse || '-')}</td>
+            <td>${gradeBadge}</td>
+            <td>
+              <div class="text-sm">${AppConfig.escapeHtml(r.notes || '-')}</div>
+              <div class="text-xs text-muted"><i class="ph ph-chalkboard-teacher"></i> ${AppConfig.escapeHtml(teacherName)}</div>
+            </td>
+            <td class="action-cell">
+              <button class="btn btn-outline btn-sm" data-edit-tahfidz="${r.studentId}:${r.id}" title="Edit Setoran"><i class="ph ph-pencil-simple"></i></button>
+              <button class="btn btn-danger btn-sm" data-del-tahfidz="${r.studentId}:${r.id}" title="Hapus"><i class="ph ph-trash"></i></button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+      mobileCards.innerHTML = filtered.map((r, idx) => {
+        const sObj = studentMap[r.studentId] || {};
+        const sName = sObj.name || r.studentName || 'Santri';
+        const cFormal = gradeClassMap[sObj.classId] || sObj.classId || '-';
+        const teacherName = teacherMap[r.teacherId] || r.teacherName || 'Guru Ummi';
+        const clsObj = classArr.find(c => c.id === r.ummiClassId) || classArr.find(c => c.students && c.students[r.studentId]);
+        const clsName = clsObj ? clsObj.name : '-';
+        let gradeBadge = '<span class="badge badge-info">B (Jayyid)</span>';
+        if (r.grade === 'A+') gradeBadge = '<span class="badge badge-success font-bold"><i class="ph ph-star"></i> A+ (Mutqin)</span>';
+        else if (r.grade === 'A') gradeBadge = '<span class="badge badge-primary font-bold">A (Lancar)</span>';
+        else if (r.grade === 'C') gradeBadge = '<span class="badge badge-warning">C (Muraja\'ah)</span>';
+        else if (r.grade === 'D') gradeBadge = '<span class="badge badge-danger">D (Kurang)</span>';
+        return `
+          <div class="tahfidz-item-card">
+            <div class="tahfidz-item-top">
+              <div class="tahfidz-item-student">
+                <div class="tahfidz-item-name">${idx + 1}. ${AppConfig.escapeHtml(sName)}</div>
+                <div class="tahfidz-item-meta">${AppConfig.escapeHtml(cFormal)} · ${AppConfig.escapeHtml(clsName)}</div>
+              </div>
+              <div>${gradeBadge}</div>
+            </div>
+            <div class="tahfidz-item-body">
+              <div class="tahfidz-item-surah-row">
+                <span><span class="badge badge-info badge-sm">Juz ${r.juz || 30}</span> <strong>${AppConfig.escapeHtml(r.surah || '-')}</strong></span>
+                <span class="font-bold text-primary">Ayat ${AppConfig.escapeHtml(r.verse || '-')}</span>
+              </div>
+              ${r.notes ? `<div class="tahfidz-item-notes"><i class="ph ph-chat-text"></i> ${AppConfig.escapeHtml(r.notes)}</div>` : ''}
+            </div>
+            <div class="tahfidz-item-bottom">
+              <div class="tahfidz-item-teacher">
+                <div><strong>${r.date || '-'}</strong> · <i class="ph ph-chalkboard-teacher"></i> ${AppConfig.escapeHtml(teacherName)}</div>
+              </div>
+              <div class="tahfidz-item-actions">
+                <button class="btn btn-outline btn-xs" data-edit-tahfidz="${r.studentId}:${r.id}" title="Edit"><i class="ph ph-pencil-simple"></i> Edit</button>
+                <button class="btn btn-danger btn-xs" data-del-tahfidz="${r.studentId}:${r.id}" title="Hapus"><i class="ph ph-trash"></i></button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+      container.querySelectorAll('[data-edit-tahfidz]').forEach(btn => {
+        btn.onclick = () => {
+          const [sId, recId] = btn.getAttribute('data-edit-tahfidz').split(':');
+          const rec = allRecords.find(item => item.studentId === sId && item.id === recId);
+          if (!rec) return;
+          openTahfidzModal(rec);
+        };
+      });
+      container.querySelectorAll('[data-del-tahfidz]').forEach(btn => {
+        btn.onclick = async () => {
+          const [sId, recId] = btn.getAttribute('data-del-tahfidz').split(':');
+          if (!confirm('Hapus riwayat setoran tahfidz ini?')) return;
+          try {
+            await DB.deleteUmmiTahfidz(sId, recId);
+            allRecords = allRecords.filter(item => !(item.studentId === sId && item.id === recId));
+            renderTahfidzView();
+          } catch (err) {
+            alert(err.message || 'Gagal menghapus data setoran.');
+          }
+        };
+      });
+    };
+    const openTahfidzModal = (editData = null) => {
+      const modal = document.getElementById('modal-tahfidz-entry');
+      if (!modal) return;
+      const form = document.getElementById('form-tahfidz-entry');
+      form.reset();
+      const modalTitle = document.getElementById('modal-tahfidz-title');
+      const hiddenId = document.getElementById('tahfidz-entry-id');
+      const hiddenOrigStu = document.getElementById('tahfidz-entry-orig-student');
+      const selStu = document.getElementById('tahfidz-entry-student');
+      const inputDate = document.getElementById('tahfidz-entry-date');
+      const selJuzInput = document.getElementById('tahfidz-entry-juz');
+      const selSurahInput = document.getElementById('tahfidz-entry-surah');
+      const inputVerse = document.getElementById('tahfidz-entry-verse');
+      const selGrade = document.getElementById('tahfidz-entry-grade');
+      const inputNotes = document.getElementById('tahfidz-entry-notes');
+      let selectableStudents = [];
+      if (activeClassId !== 'all') {
+        const cls = classArr.find(c => c.id === activeClassId);
+        if (cls && cls.students) {
+          selectableStudents = Object.keys(cls.students).map(id => studentMap[id]).filter(Boolean);
+        }
+      }
+      if (!selectableStudents.length) {
+        selectableStudents = DB.toArray(allStudents);
+      }
+      selectableStudents.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+      selStu.innerHTML = '<option value="">— Pilih Santri —</option>' + selectableStudents.map(s => `
+        <option value="${s.id}">${AppConfig.escapeHtml(s.name)} (${gradeClassMap[s.classId] || s.classId || '-'})</option>
+      `).join('');
+      const populateSurahs = (juzVal, keepSurah = null) => {
+        let surahList = QURAN_SURAHS;
+        if (juzVal && juzVal !== 'all') {
+          const jNum = Number(juzVal);
+          surahList = QURAN_SURAHS.filter(s => Array.isArray(s.juz) ? s.juz.includes(jNum) : s.juz === jNum);
+          if (!surahList.length) surahList = QURAN_SURAHS;
+        }
+        selSurahInput.innerHTML = surahList.map(s => `
+          <option value="${s.name}" data-verses="${s.verses}" data-juz="${Array.isArray(s.juz) ? s.juz.join(',') : s.juz}">No. ${s.no} - ${s.name} (${s.verses} ayat)</option>
+        `).join('');
+        if (keepSurah && surahList.some(s => s.name === keepSurah)) {
+          selSurahInput.value = keepSurah;
+        }
+        const curOpt = selSurahInput.options[selSurahInput.selectedIndex];
+        if (curOpt) {
+          const vCount = curOpt.getAttribute('data-verses');
+          if (vCount) inputVerse.placeholder = `Contoh: 1 - ${vCount} (Tuntas)`;
+        }
+      };
+      selJuzInput.onchange = () => {
+        populateSurahs(selJuzInput.value);
+      };
+      selSurahInput.onchange = () => {
+        const curOpt = selSurahInput.options[selSurahInput.selectedIndex];
+        if (curOpt) {
+          const vCount = curOpt.getAttribute('data-verses');
+          if (vCount) inputVerse.placeholder = `Contoh: 1 - ${vCount} (Tuntas)`;
+        }
+      };
+      if (editData) {
+        modalTitle.innerText = 'Edit Setoran Tahfidz Santri';
+        hiddenId.value = editData.id || '';
+        hiddenOrigStu.value = editData.studentId || '';
+        selStu.value = editData.studentId || '';
+        inputDate.value = editData.date || '';
+        selJuzInput.value = editData.juz || 30;
+        populateSurahs(editData.juz || 30);
+        selSurahInput.value = editData.surah || '';
+        inputVerse.value = editData.verse || '';
+        selGrade.value = editData.grade || 'A';
+        inputNotes.value = editData.notes || '';
+      } else {
+        modalTitle.innerText = 'Input Setoran Baru Tahfidz';
+        hiddenId.value = '';
+        hiddenOrigStu.value = '';
+        inputDate.value = AppConfig.getLocalDateStr ? AppConfig.getLocalDateStr() : new Date().toISOString().slice(0, 10);
+        selJuzInput.value = activeJuz !== 'all' ? activeJuz : '30';
+        populateSurahs(selJuzInput.value);
+        if (activeStudentId !== 'all') {
+          selStu.value = activeStudentId;
+        } else if (selectableStudents.length === 1) {
+          selStu.value = selectableStudents[0].id;
+        }
+        selGrade.value = 'A';
+        inputVerse.value = '1 - ';
+      }
+      App.openModal('modal-tahfidz-entry');
+    };
+    selCls.onchange = () => {
+      activeClassId = selCls.value;
+      activeStudentId = 'all';
+      updateStudentFilterDropdown();
+      renderTahfidzView();
+    };
+    selStudent.onchange = () => {
+      activeStudentId = selStudent.value;
+      renderTahfidzView();
+    };
+    selJuz.onchange = () => {
+      activeJuz = selJuz.value;
+      renderTahfidzView();
+    };
+    searchInput.oninput = () => {
+      searchQuery = searchInput.value.trim().toLowerCase();
+      renderTahfidzView();
+    };
+    container.querySelector('#btn-add-tahfidz').onclick = () => {
+      openTahfidzModal(null);
+    };
+    document.getElementById('form-tahfidz-entry').onsubmit = async (e) => {
+      e.preventDefault();
+      const recId = document.getElementById('tahfidz-entry-id').value.trim();
+      const origStu = document.getElementById('tahfidz-entry-orig-student').value.trim();
+      const studentId = document.getElementById('tahfidz-entry-student').value;
+      const date = document.getElementById('tahfidz-entry-date').value;
+      const juz = Number(document.getElementById('tahfidz-entry-juz').value) || 30;
+      const surah = document.getElementById('tahfidz-entry-surah').value;
+      const verse = document.getElementById('tahfidz-entry-verse').value.trim();
+      const grade = document.getElementById('tahfidz-entry-grade').value;
+      const notes = document.getElementById('tahfidz-entry-notes').value.trim();
+      if (!studentId) {
+        alert('Harap pilih santri!');
+        return;
+      }
+      const sObj = studentMap[studentId];
+      const clsObj = classArr.find(c => c.students && c.students[studentId]) || classArr.find(c => c.id === activeClassId);
+      const btn = document.getElementById('btn-save-tahfidz-entry');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Menyimpan...';
+      try {
+        if (origStu && origStu !== studentId && recId) {
+          await DB.deleteUmmiTahfidz(origStu, recId);
+        }
+        const savedKey = await DB.saveUmmiTahfidz(studentId, recId || null, {
+          date,
+          juz,
+          surah,
+          verse,
+          grade,
+          notes,
+          studentName: sObj ? sObj.name : '',
+          ummiClassId: clsObj ? clsObj.id : '',
+          teacherId: uid,
+          teacherName: Auth.userData?.name || Auth.currentUser.displayName || 'Guru Ummi'
+        });
+        const newRecord = {
+          id: savedKey || recId || Date.now().toString(),
+          studentId,
+          date,
+          juz,
+          surah,
+          verse,
+          grade,
+          notes,
+          studentName: sObj ? sObj.name : '',
+          ummiClassId: clsObj ? clsObj.id : '',
+          teacherId: uid,
+          teacherName: Auth.userData?.name || Auth.currentUser.displayName || 'Guru Ummi'
+        };
+        const existIdx = allRecords.findIndex(r => r.studentId === studentId && r.id === newRecord.id);
+        if (existIdx >= 0) allRecords[existIdx] = newRecord;
+        else allRecords.unshift(newRecord);
+        App.closeModal('modal-tahfidz-entry');
+        alert('Setoran tahfidz berhasil disimpan!');
+        renderTahfidzView();
+      } catch (err) {
+        alert(err.message || 'Gagal menyimpan setoran tahfidz.');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="ph ph-floppy-disk"></i> Simpan Setoran Hafalan';
+      }
+    };
+    updateStudentFilterDropdown();
+    renderTahfidzView();
+    if (typeof FeatureGuides !== 'undefined') {
+      FeatureGuides.attach(container, '#/guru/ummi/tahfidz');
     }
   },
   async renderTasmi(container) {
-    if (typeof ModuleKit !== 'undefined') {
-      return ModuleKit.render(container, '#/guru/ummi/tasmi');
+    Router.setTitle('Pengujian Tasmi\' Bil Ghaib', 'Pengujian hafalan Al-Qur\'an santri sekali duduk di hadapan dewan penguji.');
+    const uid = Auth.currentUser.uid;
+    const [snapPlotting, allStudents, users, allClasses, roomsData] = await Promise.all([
+      DB.getUmmiTasmiPlotting(),
+      DB.getAllStudents(),
+      DB.getAllUsers(),
+      DB.getClasses(),
+      DB.getRooms()
+    ]);
+    const plottingArr = DB.toArray(snapPlotting).sort((a, b) => (b.date || '').localeCompare(a.date || '') || (b.createdAt || 0) - (a.createdAt || 0));
+    const studentMap = DB.toArray(allStudents).reduce((acc, s) => { acc[s.id] = s; return acc; }, {});
+    const guruUmmi = DB.toArray(users).filter(u => AppConfig.isUserUmmi(u));
+    const teacherMap = guruUmmi.reduce((acc, u) => { acc[u.id] = u.name; return acc; }, {});
+    const classMap = DB.toArray(allClasses).reduce((acc, c) => { acc[c.id] = c.name; return acc; }, {});
+    let activeTab = 'my';
+    let activeSession = 'all';
+    let activeStatus = 'all';
+    let searchQuery = '';
+    const myPlottingCount = plottingArr.filter(p => p.examinerId === uid || (p.examinerName && Auth.userData?.name && p.examinerName.toLowerCase().includes(Auth.userData.name.toLowerCase()))).length;
+    if (myPlottingCount === 0 && plottingArr.length > 0) {
+      activeTab = 'all';
+    }
+    container.innerHTML = `
+      <div class="filter-pills tasmi-tabs-pill-wrap" id="tasmi-tabs-nav">
+        <button class="filter-pill ${activeTab === 'my' ? 'active' : ''}" data-tasmi-tab="my">
+          <i class="ph ph-user-check"></i> Tugas Menguji Saya (${myPlottingCount})
+        </button>
+        <button class="filter-pill ${activeTab === 'all' ? 'active' : ''}" data-tasmi-tab="all">
+          <i class="ph ph-list-dashes"></i> Semua Jadwal & Rekap Ujian (${plottingArr.length})
+        </button>
+      </div>
+      <div class="card toolbar-panel tahfidz-toolbar-card">
+        <div class="tahfidz-toolbar">
+          <div class="tahfidz-filter-group">
+            <div class="tahfidz-filter-item">
+              <label class="tahfidz-filter-label">Sesi</label>
+              <select id="sel-tasmi-session" class="tahfidz-filter-select">
+                <option value="all">Semua Sesi</option>
+                <option value="1">Sesi 1 (Kelas 1 - 2)</option>
+                <option value="2">Sesi 2 (Kelas 3 - 4)</option>
+                <option value="3">Sesi 3 (Kelas 5 - 6)</option>
+              </select>
+            </div>
+            <div class="tahfidz-filter-item">
+              <label class="tahfidz-filter-label">Status</label>
+              <select id="sel-tasmi-status" class="tahfidz-filter-select">
+                <option value="all">Semua Status</option>
+                <option value="Terjadwal">Terjadwal</option>
+                <option value="Lulus">Lulus (Semua Predikat)</option>
+                <option value="Mengulang">Mengulang</option>
+              </select>
+            </div>
+          </div>
+          <div class="search-box">
+            <i class="ph ph-magnifying-glass"></i>
+            <input type="text" id="input-search-tasmi-exam" placeholder="Cari santri, penguji, kategori, atau ruang...">
+          </div>
+        </div>
+      </div>
+      <div class="card tahfidz-table-card">
+        <div class="tasmi-desktop-table table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Santri & Kelas</th>
+                <th>Kategori / Juz</th>
+                <th>Jadwal & Waktu</th>
+                <th>Ruangan</th>
+                <th>Penguji</th>
+                <th>Status & Skor</th>
+                <th>Catatan Evaluasi</th>
+                <th class="action-cell">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="tasmi-exam-tbody"></tbody>
+          </table>
+        </div>
+        <div class="tasmi-mobile-cards" id="tasmi-cards-mobile"></div>
+      </div>
+      <div class="modal-overlay" id="modal-eval-tasmi">
+        <div class="modal modal-lg">
+          <div class="modal-header">
+            <h3 class="modal-title">Penilaian Ujian Tasmi\' Bil Ghaib</h3>
+            <button class="btn-icon" data-close-modal="modal-eval-tasmi"><i class="ph ph-x"></i></button>
+          </div>
+          <form id="form-eval-tasmi">
+            <div class="modal-body">
+              <input type="hidden" id="eval-tasmi-id">
+              <input type="hidden" id="eval-tasmi-student-id">
+              <div class="alert alert-info mb-3">
+                <div class="font-bold text-base" id="eval-tasmi-student-name">-</div>
+                <div class="text-xs text-muted" id="eval-tasmi-meta-info">-</div>
+              </div>
+              <div class="form-row">
+                <div class="form-group form-col">
+                  <label>Kelancaran Hafalan (Bobot 40%) *</label>
+                  <input type="number" id="eval-tasmi-fluency" min="0" max="100" required value="95" class="form-input">
+                </div>
+                <div class="form-group form-col">
+                  <label>Hukum Tajwid (Bobot 30%) *</label>
+                  <input type="number" id="eval-tasmi-tajwid" min="0" max="100" required value="90" class="form-input">
+                </div>
+                <div class="form-group form-col">
+                  <label>Fashahah & Makhraj (Bobot 30%) *</label>
+                  <input type="number" id="eval-tasmi-fashahah" min="0" max="100" required value="90" class="form-input">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group form-col">
+                  <label>Skor Akhir (Otomatis)</label>
+                  <input type="number" id="eval-tasmi-score" readonly required value="92" class="form-input font-bold text-primary">
+                </div>
+                <div class="form-group form-col">
+                  <label>Keputusan Hasil Ujian *</label>
+                  <select id="eval-tasmi-status" required class="form-input">
+                    <option value="Lulus (Mumtaz - Istimewa)">Lulus (Mumtaz - Istimewa)</option>
+                    <option value="Lulus (Jayyid Jiddan - Baik Sekali)">Lulus (Jayyid Jiddan - Baik Sekali)</option>
+                    <option value="Lulus (Jayyid - Baik)">Lulus (Jayyid - Baik)</option>
+                    <option value="Mengulang (Perlu Muraja\'ah)">Mengulang (Perlu Muraja\'ah)</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Catatan Dewan Penguji *</label>
+                <textarea id="eval-tasmi-notes" rows="3" required placeholder="Catatan kelancaran, ayat yang perlu diperbaiki, evaluasi tajwid..." class="form-input"></textarea>
+              </div>
+              <div class="form-group" id="wrap-promote-pasca">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="eval-tasmi-promote">
+                  <span>Tandai Lulus Munaqosyah & Naikkan ke Tingkat Pasca</span>
+                </label>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-outline" data-close-modal="modal-eval-tasmi">Batal</button>
+              <button type="submit" class="btn btn-primary" id="btn-save-eval-tasmi"><i class="ph ph-floppy-disk"></i> Simpan Penilaian Ujian</button>
+            </div>
+          </form>
+        </div>
+      </div>`;
+    const tabButtons = container.querySelectorAll('[data-tasmi-tab]');
+    const selSession = container.querySelector('#sel-tasmi-session');
+    const selStatus = container.querySelector('#sel-tasmi-status');
+    const searchInput = container.querySelector('#input-search-tasmi-exam');
+    const tbody = container.querySelector('#tasmi-exam-tbody');
+    const mobileCards = container.querySelector('#tasmi-cards-mobile');
+    const renderTable = () => {
+      const filtered = plottingArr.filter(p => {
+        if (activeTab === 'my') {
+          const isMine = p.examinerId === uid || (p.examinerName && Auth.userData?.name && p.examinerName.toLowerCase().includes(Auth.userData.name.toLowerCase()));
+          if (!isMine) return false;
+        }
+        if (activeSession !== 'all' && String(p.session || '1') !== String(activeSession)) return false;
+        if (activeStatus !== 'all') {
+          if (activeStatus === 'Lulus') {
+            if (!(p.status || '').startsWith('Lulus')) return false;
+          } else if (p.status !== activeStatus) {
+            return false;
+          }
+        }
+        if (searchQuery) {
+          const sObj = studentMap[p.studentId];
+          const sName = (sObj?.name || p.studentName || '').toLowerCase();
+          const examiner = (teacherMap[p.examinerId] || p.examinerName || '').toLowerCase();
+          const cat = (p.category || '').toLowerCase();
+          const rm = (p.room || '').toLowerCase();
+          if (!sName.includes(searchQuery) && !examiner.includes(searchQuery) && !cat.includes(searchQuery) && !rm.includes(searchQuery)) return false;
+        }
+        return true;
+      });
+      if (!tbody || !mobileCards) return;
+      if (!filtered.length) {
+        const emptyBox = `
+          <div class="empty-state-box">
+            <i class="ph ph-calendar-blank"></i>
+            <div class="empty-state-box-title">${activeTab === 'my' ? 'Belum Ada Tugas Menguji' : 'Tidak Ada Jadwal Tasmi'}</div>
+            <div class="empty-state-box-desc">${activeTab === 'my' ? 'Saat ini belum ada jadwal tasmi bil ghaib yang ditugaskan kepada Anda. Anda dapat melihat jadwal seluruh santri pada tab "Semua Jadwal & Rekap Ujian".' : 'Tidak ada jadwal pengujian tasmi yang sesuai dengan filter atau kata kunci pencarian.'}</div>
+          </div>
+        `;
+        tbody.innerHTML = `<tr><td colspan="9">${emptyBox}</td></tr>`;
+        mobileCards.innerHTML = emptyBox;
+        return;
+      }
+      tbody.innerHTML = filtered.map((p, idx) => {
+        const sObj = studentMap[p.studentId] || {};
+        const sName = sObj.name || p.studentName || 'Santri';
+        const cFormal = classMap[sObj.classId] || sObj.classId || '-';
+        const examiner = teacherMap[p.examinerId] || p.examinerName || 'Dewan Penguji';
+        let statusBadge = '<span class="badge badge-outline">Terjadwal</span>';
+        if ((p.status || '').startsWith('Lulus')) {
+          statusBadge = `<span class="badge badge-success font-bold"><i class="ph ph-check-circle"></i> ${AppConfig.escapeHtml(p.status)} (${p.score || '-'})</span>`;
+        } else if ((p.status || '').startsWith('Mengulang')) {
+          statusBadge = `<span class="badge badge-warning font-bold"><i class="ph ph-arrows-counter-clockwise"></i> ${AppConfig.escapeHtml(p.status)} (${p.score || '-'})</span>`;
+        }
+        const isMyExam = p.examinerId === uid || (p.examinerName && Auth.userData?.name && p.examinerName.toLowerCase().includes(Auth.userData.name.toLowerCase()));
+        return `
+          <tr>
+            <td>${idx + 1}</td>
+            <td>
+              <div class="font-bold text-main">${AppConfig.escapeHtml(sName)}</div>
+              <div class="text-xs text-muted">${AppConfig.escapeHtml(cFormal)} · ${sObj.nis || sObj.id || ''}</div>
+            </td>
+            <td>
+              <span class="badge badge-primary">${AppConfig.escapeHtml(p.category || 'Tasmi\' Juz 30')}</span>
+              <div class="text-xs text-muted mt-1">${getSessionBadge(p.session || '1')}</div>
+            </td>
+            <td>
+              <div><strong>${p.date || '-'}</strong></div>
+              <div class="text-xs text-muted"><i class="ph ph-clock"></i> ${AppConfig.escapeHtml(p.time || '07.30 - 08.30 WIB')}</div>
+            </td>
+            <td><i class="ph ph-map-pin"></i> ${AppConfig.escapeHtml(p.room || 'Serambi Masjid')}</td>
+            <td>
+              <strong>${AppConfig.escapeHtml(examiner)}</strong>
+              ${isMyExam ? '<div class="text-xs text-primary font-bold"><i class="ph ph-user"></i> Penugasan Anda</div>' : ''}
+            </td>
+            <td>${statusBadge}</td>
+            <td>
+              <div class="text-sm">${AppConfig.escapeHtml(p.notes || p.prepNotes || '-')}</div>
+            </td>
+            <td class="action-cell">
+              <button class="btn btn-primary btn-sm" data-eval-tasmi="${p.id}" title="Input & Nilai Ujian"><i class="ph ph-check-circle"></i> Nilai</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+      mobileCards.innerHTML = filtered.map((p, idx) => {
+        const sObj = studentMap[p.studentId] || {};
+        const sName = sObj.name || p.studentName || 'Santri';
+        const cFormal = classMap[sObj.classId] || sObj.classId || '-';
+        const examiner = teacherMap[p.examinerId] || p.examinerName || 'Dewan Penguji';
+        let statusBadge = '<span class="badge badge-outline badge-sm">Terjadwal</span>';
+        if ((p.status || '').startsWith('Lulus')) {
+          statusBadge = `<span class="badge badge-success badge-sm font-bold"><i class="ph ph-check-circle"></i> ${AppConfig.escapeHtml(p.status)} (${p.score || '-'})</span>`;
+        } else if ((p.status || '').startsWith('Mengulang')) {
+          statusBadge = `<span class="badge badge-warning badge-sm font-bold"><i class="ph ph-arrows-counter-clockwise"></i> ${AppConfig.escapeHtml(p.status)} (${p.score || '-'})</span>`;
+        }
+        const isMyExam = p.examinerId === uid || (p.examinerName && Auth.userData?.name && p.examinerName.toLowerCase().includes(Auth.userData.name.toLowerCase()));
+        return `
+          <div class="tasmi-item-card">
+            <div class="tasmi-item-top">
+              <div class="tasmi-item-student">
+                <div class="tasmi-item-name">${idx + 1}. ${AppConfig.escapeHtml(sName)}</div>
+                <div class="tasmi-item-meta">${AppConfig.escapeHtml(cFormal)} · ${getSessionBadge(p.session || '1')}</div>
+              </div>
+              <div>${statusBadge}</div>
+            </div>
+            <div class="tasmi-item-body">
+              <div class="tasmi-item-schedule">
+                <span class="badge badge-primary badge-sm">${AppConfig.escapeHtml(p.category || 'Tasmi\' Juz 30')}</span>
+                <span><i class="ph ph-map-pin"></i> ${AppConfig.escapeHtml(p.room || 'Serambi Masjid')}</span>
+              </div>
+              <div class="text-xs text-muted">
+                <i class="ph ph-calendar"></i> <strong>${p.date || '-'}</strong> (${AppConfig.escapeHtml(p.time || '07.30 - 08.30 WIB')})
+              </div>
+              ${(p.notes || p.prepNotes) ? `<div class="tahfidz-item-notes"><i class="ph ph-note"></i> ${AppConfig.escapeHtml(p.notes || p.prepNotes)}</div>` : ''}
+            </div>
+            <div class="tasmi-item-bottom">
+              <div class="tasmi-item-examiner">
+                <div>Penguji: <strong>${AppConfig.escapeHtml(examiner)}</strong></div>
+                ${isMyExam ? '<div class="text-xs text-primary font-bold"><i class="ph ph-user"></i> Penugasan Anda</div>' : ''}
+              </div>
+              <button class="btn btn-primary btn-xs" data-eval-tasmi="${p.id}"><i class="ph ph-check-circle"></i> Nilai Ujian</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+      container.querySelectorAll('[data-eval-tasmi]').forEach(btn => {
+        btn.onclick = () => {
+          const id = btn.getAttribute('data-eval-tasmi');
+          const p = plottingArr.find(item => item.id === id);
+          if (!p) return;
+          openEvalModal(p);
+        };
+      });
+    };
+    const openEvalModal = (p) => {
+      const sObj = studentMap[p.studentId] || {};
+      const sName = sObj.name || p.studentName || 'Santri';
+      const cFormal = classMap[sObj.classId] || sObj.classId || '-';
+      const examiner = teacherMap[p.examinerId] || p.examinerName || '-';
+      document.getElementById('eval-tasmi-id').value = p.id;
+      document.getElementById('eval-tasmi-student-id').value = p.studentId || '';
+      document.getElementById('eval-tasmi-student-name').innerText = sName;
+      document.getElementById('eval-tasmi-meta-info').innerText = `${cFormal} · ${p.category || 'Tasmi\' Juz 30'} · Penguji: ${examiner}`;
+      const fluInput = document.getElementById('eval-tasmi-fluency');
+      const tajInput = document.getElementById('eval-tasmi-tajwid');
+      const fasInput = document.getElementById('eval-tasmi-fashahah');
+      const scoreInput = document.getElementById('eval-tasmi-score');
+      const statusSel = document.getElementById('eval-tasmi-status');
+      const notesInput = document.getElementById('eval-tasmi-notes');
+      const promoCheck = document.getElementById('eval-tasmi-promote');
+      fluInput.value = p.fluencyScore !== undefined ? p.fluencyScore : (p.score || 95);
+      tajInput.value = p.tajwidScore !== undefined ? p.tajwidScore : (p.score || 90);
+      fasInput.value = p.fashahahScore !== undefined ? p.fashahahScore : (p.score || 90);
+      scoreInput.value = p.score || 92;
+      statusSel.value = p.status && p.status !== 'Terjadwal' ? p.status : 'Lulus (Mumtaz - Istimewa)';
+      notesInput.value = p.notes || '';
+      promoCheck.checked = !!(p.category && p.category.toLowerCase().includes('munaqasyah'));
+      const calcScore = () => {
+        const flu = Number(fluInput.value) || 0;
+        const taj = Number(tajInput.value) || 0;
+        const fas = Number(fasInput.value) || 0;
+        const total = Math.round((flu * 0.4) + (taj * 0.3) + (fas * 0.3));
+        scoreInput.value = total;
+        if (total >= 90) statusSel.value = 'Lulus (Mumtaz - Istimewa)';
+        else if (total >= 80) statusSel.value = 'Lulus (Jayyid Jiddan - Baik Sekali)';
+        else if (total >= 70) statusSel.value = 'Lulus (Jayyid - Baik)';
+        else statusSel.value = 'Mengulang (Perlu Muraja\'ah)';
+      };
+      fluInput.oninput = calcScore;
+      tajInput.oninput = calcScore;
+      fasInput.oninput = calcScore;
+      App.openModal('modal-eval-tasmi');
+    };
+    tabButtons.forEach(btn => {
+      btn.onclick = () => {
+        tabButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeTab = btn.getAttribute('data-tasmi-tab');
+        renderTable();
+      };
+    });
+    selSession.onchange = () => {
+      activeSession = selSession.value;
+      renderTable();
+    };
+    selStatus.onchange = () => {
+      activeStatus = selStatus.value;
+      renderTable();
+    };
+    searchInput.oninput = () => {
+      searchQuery = searchInput.value.trim().toLowerCase();
+      renderTable();
+    };
+    document.getElementById('form-eval-tasmi').onsubmit = async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('eval-tasmi-id').value;
+      const sId = document.getElementById('eval-tasmi-student-id').value;
+      const fluencyScore = Number(document.getElementById('eval-tasmi-fluency').value) || 0;
+      const tajwidScore = Number(document.getElementById('eval-tasmi-tajwid').value) || 0;
+      const fashahahScore = Number(document.getElementById('eval-tasmi-fashahah').value) || 0;
+      const score = Number(document.getElementById('eval-tasmi-score').value) || 0;
+      const status = document.getElementById('eval-tasmi-status').value;
+      const notes = document.getElementById('eval-tasmi-notes').value.trim();
+      const promote = document.getElementById('eval-tasmi-promote').checked;
+      const btn = document.getElementById('btn-save-eval-tasmi');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Menyimpan...';
+      try {
+        await DB.saveUmmiTasmiPlotting(id, {
+          fluencyScore,
+          tajwidScore,
+          fashahahScore,
+          score,
+          status,
+          notes,
+          evaluatedAt: Date.now(),
+          evaluatedBy: uid,
+          evaluatedByName: Auth.userData?.name || Auth.currentUser.displayName || 'Penguji Tasmi'
+        });
+        if (promote && sId && status.startsWith('Lulus')) {
+          await DB.updateStudentUmmiLevel(sId, 'Pasca');
+        }
+        const pObj = plottingArr.find(item => item.id === id);
+        if (pObj) {
+          Object.assign(pObj, { fluencyScore, tajwidScore, fashahahScore, score, status, notes, evaluatedAt: Date.now() });
+        }
+        App.closeModal('modal-eval-tasmi');
+        alert('Hasil ujian tasmi\' berhasil disimpan!');
+        renderTable();
+      } catch (err) {
+        alert(err.message || 'Gagal menyimpan hasil ujian.');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="ph ph-floppy-disk"></i> Simpan Penilaian Ujian';
+      }
+    };
+    renderTable();
+    if (typeof FeatureGuides !== 'undefined') {
+      FeatureGuides.attach(container, '#/guru/ummi/tasmi');
     }
   },
-  async renderTasmiPlotting(container) {
+    async renderTasmiPlotting(container) {
     Router.setTitle("Plotting Penguji Tasmi' & Munaqosyah", "Jadwal dan penugasan ustadz/ustadzah penguji tasmi' bil ghoib dan munaqasyah santri.");
     const [snapPlotting, allStudents, users, allClasses, roomsData] = await Promise.all([
       DB.getUmmiTasmiPlotting(),

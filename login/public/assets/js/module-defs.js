@@ -1056,7 +1056,7 @@
       ]
     },
     '#/guru/ummi/tahfidz': {
-      node: 'ummi_tahfidz', noun: 'Setoran Tahfidz', writeRoles: [R.GURU], dateField: 'date', statusField: 'grade', badges: { A: 'success', B: 'success', C: 'warning', D: 'danger' },
+      node: 'ummi_tahfidz', noun: 'Setoran Tahfidz', writeRoles: [R.GURU, R.GURU_UMMI], dateField: 'date', statusField: 'grade', badges: { 'A+': 'success', A: 'success', B: 'success', C: 'warning', D: 'danger' },
       subtitle: 'Buku mutabaah hafalan surat dan juz siswa.',
       summary: [
         { label: 'Total Setoran', icon: 'ph-book-bookmark', tone: 'primary' }
@@ -1066,23 +1066,23 @@
         ref('studentId', 'Siswa', 'ummiStudent', { required: true }),
         t('surah', 'Surat', { required: true }),
         t('verse', 'Ayat', { required: true }),
-        sel('grade', 'Nilai (Kelancaran)', ['A', 'B', 'C', 'D'], { required: true }),
+        sel('grade', 'Nilai (Kelancaran)', ['A+', 'A', 'B', 'C', 'D'], { required: true }),
         area('notes', 'Catatan (Tajwid / Makhroj)')
       ]
     },
     '#/guru/ummi/tasmi': {
-      node: 'ummi_tasmi_results', noun: 'Hasil Ujian Tasmi\'', writeRoles: [R.GURU], dateField: 'date', statusField: 'status', badges: { Lulus: 'success', Mengulang: 'warning' },
-      subtitle: 'Penilaian hasil ujian Tasmi\' oleh penguji.',
+      node: 'ummi_tasmi_schedules', noun: 'Pengujian Tasmi\'', writeRoles: [R.GURU, R.GURU_UMMI], dateField: 'date', statusField: 'status', badges: { 'Lulus (Mumtaz - Istimewa)': 'success', 'Lulus (Jayyid Jiddan - Baik Sekali)': 'success', 'Lulus (Jayyid - Baik)': 'success', Lulus: 'success', Mengulang: 'warning', Terjadwal: 'neutral' },
+      subtitle: 'Penilaian hasil ujian Tasmi\' oleh dewan penguji.',
       summary: [
         { label: 'Total Ujian', icon: 'ph-headphones', tone: 'primary' },
         { label: 'Lulus', icon: 'ph-check-circle', tone: 'success', where: { status: 'Lulus' } }
       ],
       fields: [
         date('date', 'Tanggal', { required: true }),
-        ref('studentId', 'Siswa', 'ummiStudent', { required: true }),
-        t('juz', 'Juz', { required: true }),
+        ref('studentId', 'Siswa', 'student', { required: true }),
+        t('category', 'Kategori / Juz', { required: true }),
         num('score', 'Skor Nilai', { required: true }),
-        sel('status', 'Status', ['Lulus', 'Mengulang'], { required: true }),
+        sel('status', 'Status', ['Terjadwal', 'Lulus (Mumtaz - Istimewa)', 'Lulus (Jayyid Jiddan - Baik Sekali)', 'Lulus (Jayyid - Baik)', 'Lulus', 'Mengulang'], { required: true }),
         area('notes', 'Catatan Penguji')
       ]
     },

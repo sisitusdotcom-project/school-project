@@ -618,6 +618,43 @@ const DB = {
   async deleteUmmiTasmiSchedule(id) {
     return this.deleteUmmiTasmiPlotting(id);
   },
+  async getUmmiTahfidz(studentId) {
+    if (!isDBReady()) return {};
+    if (studentId) {
+      const snap = await db.ref(`ummi_tahfidz/${studentId}`).once('value');
+      return snap.val() || {};
+    }
+    const snap = await db.ref('ummi_tahfidz').once('value');
+    return snap.val() || {};
+  },
+  async saveUmmiTahfidz(studentId, tahfidzId, data) {
+    if (!isDBReady() || !studentId) return null;
+    let key = tahfidzId;
+    if (key) {
+      await db.ref(`ummi_tahfidz/${studentId}/${key}`).update({
+        ...data,
+        studentId,
+        updatedAt: firebase.database.ServerValue.TIMESTAMP
+      });
+    } else {
+      const ref = db.ref(`ummi_tahfidz/${studentId}`).push();
+      key = ref.key;
+      await ref.set({
+        ...data,
+        id: key,
+        studentId,
+        createdAt: firebase.database.ServerValue.TIMESTAMP
+      });
+    }
+    return key;
+  },
+  async deleteUmmiTahfidz(studentId, tahfidzId) {
+    if (!isDBReady() || !studentId || !tahfidzId) return;
+    await db.ref(`ummi_tahfidz/${studentId}/${tahfidzId}`).remove();
+  },
+  async saveUmmiTasmiResult(id, data) {
+    return this.saveUmmiTasmiSchedule(id, data);
+  },
   async updateStudentUmmiLevel(studentId, newLevel, ummiClassId) {
     if (!isDBReady() || !studentId || !newLevel) return;
     await db.ref(`students/${studentId}/ummiLevel`).set(newLevel);
