@@ -3769,3 +3769,16 @@ html,body{width:100% !important;height:auto !important;background:#fff !importan
 .official-kop-contact{font-size:5.5pt !important;color:#222 !important;line-height:1.1 !important;margin:0.5mm 0 0 !important;}
 .official-kop-divider{border-bottom:1.5pt double #000 !important;margin:1.5mm 0 !important;}
 }
+.attendance-history-row{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e5e7eb;padding-bottom:8px;margin-bottom:8px;}
+.attendance-history-label{color:#64748b;font-size:13px;}
+.attendance-history-val{font-size:13px;font-weight:700;color:#0f172a;}
+.attendance-proof-card{margin-top:12px;border:1px solid #e2e8f0;border-radius:10px;background:#f8fafc;padding:10px;overflow:hidden;}
+.attendance-proof-card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px;}
+.attendance-proof-badge{font-size:11.5px;font-weight:700;color:#047857;display:inline-flex;align-items:center;gap:4px;}
+.attendance-proof-img-wrap{position:relative;width:100%;border-radius:8px;overflow:hidden;background:#e2e8f0;min-height:90px;display:flex;align-items:center;justify-content:center;}
+.attendance-proof-img{width:100%;max-height:180px;object-fit:cover;border-radius:8px;cursor:pointer;display:block;}
+.attendance-proof-fallback{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px 12px;text-align:center;gap:8px;width:100%;background:#f1f5f9;border-radius:8px;}
+.attendance-proof-fallback-icon{font-size:28px;color:#059669;}
+.attendance-proof-fallback-text{font-size:12px;font-weight:600;color:#334155;}
+.attendance-proof-img.hidden{display:none !important;}
+.attendance-proof-fallback.hidden{display:none !important;}

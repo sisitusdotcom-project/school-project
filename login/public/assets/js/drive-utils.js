@@ -43,14 +43,32 @@ const DriveBridge = {
     }
     return `${viewerPath}?file=${encodeURIComponent(cleanUrl)}&title=${cleanTitle}${isImage ? '&type=image' : ''}`;
   },
-  normalizeDriveImageUrl(rawUrl, size = 'w200', fallback = '') {
+  normalizeDriveImageUrl(rawUrl, size = 'w400', fallback = '') {
     if (!rawUrl) return fallback;
     const url = rawUrl.trim();
     if (!url) return fallback;
     if (url.startsWith('data:') || url.startsWith('blob:')) return url;
     const fileId = this.extractFileId(url);
-    if (fileId) return `https://drive.google.com/thumbnail?id=${fileId}&sz=${size}`;
+    if (fileId) {
+      const numSize = size.replace(/^[a-z]+/i, '') || '800';
+      return `https://lh3.googleusercontent.com/d/${fileId}=s${numSize}`;
+    }
     return url;
+  },
+  getDriveFallbackUrls(rawUrl, size = 'w400') {
+    if (!rawUrl || typeof rawUrl !== 'string') return [];
+    const url = rawUrl.trim();
+    if (url.startsWith('data:') || url.startsWith('blob:')) return [url];
+    const fileId = this.extractFileId(url);
+    if (!fileId) return [url];
+    const numSize = size.replace(/^[a-z]+/i, '') || '800';
+    return [
+      `https://lh3.googleusercontent.com/d/${fileId}=s${numSize}`,
+      `https://lh3.googleusercontent.com/d/${fileId}`,
+      `https://drive.google.com/thumbnail?id=${fileId}&sz=${size}`,
+      `https://drive.google.com/uc?export=view&id=${fileId}`,
+      url
+    ];
   },
   normalizeImageUrl(rawUrl, size = 'w200', fallback = '') {
     return this.normalizeDriveImageUrl(rawUrl, size, fallback);
