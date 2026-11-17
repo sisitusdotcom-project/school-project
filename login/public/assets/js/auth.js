@@ -98,9 +98,15 @@ const Auth = {
       if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
         err.innerText = 'Email atau password salah.';
       } else if (error.code === 'auth/too-many-requests') {
-        err.innerText = 'Terlalu banyak percobaan. Silakan coba lagi nanti.';
+        err.innerText = 'Terlalu banyak percobaan. Silakan coba beberapa saat lagi.';
+      } else if (error.code === 'auth/network-request-failed' || error.code === 'auth/timeout') {
+        err.innerText = 'Gagal terhubung ke server. Periksa koneksi internet Anda atau nonaktifkan pemblokir iklan (ad-blocker), lalu coba lagi.';
+      } else if (error.code === 'auth/invalid-email') {
+        err.innerText = 'Format email atau NIS tidak valid.';
+      } else if (error.code === 'auth/user-disabled') {
+        err.innerText = 'Akun ini telah dinonaktifkan. Silakan hubungi admin sekolah.';
       } else {
-        err.innerText = 'Terjadi kesalahan saat login: ' + error.message;
+        err.innerText = 'Terjadi kesalahan saat login. Periksa koneksi Anda dan coba lagi.';
       }
       err.classList.remove('hidden');
       btn.disabled = false;
