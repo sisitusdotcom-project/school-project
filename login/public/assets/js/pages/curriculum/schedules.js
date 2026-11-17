@@ -659,7 +659,7 @@ const ScheduleManager = {
       </tr>
     `).join('');
     view.innerHTML = `
-      <section class="card section-spacer sched-print-paper">
+      <section class="sched-print-paper card section-spacer">
         <div class="print-only sched-print-kop-wrapper">
           ${AppConfig.getOfficialKopHtml({ showDivider: true })}
         </div>
@@ -717,6 +717,18 @@ const ScheduleManager = {
                 <div class="sched-uniform-val">${this.uniforms[d] || '-'}</div>
               </div>
             `).join('')}
+          </div>
+        </div>
+        <div class="print-only sched-signatures-grid">
+          <div class="sched-sig-box">
+            <p class="sched-sig-role">Mengetahui,<br>Kepala SD Muhammadiyah 1 Sedati</p>
+            <p class="sched-sig-name">${AppConfig.SCHOOL_PROFILE.headmaster}</p>
+            <p class="sched-sig-id">NBM: ${AppConfig.SCHOOL_PROFILE.headmasterNbm}</p>
+          </div>
+          <div class="sched-sig-box">
+            <p class="sched-sig-role">Sidoarjo, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}<br>Waka Kurikulum</p>
+            <p class="sched-sig-name">Dhani Harsyahyadi, S.H.I.</p>
+            <p class="sched-sig-id">NBM/NIP: -</p>
           </div>
         </div>
       </section>

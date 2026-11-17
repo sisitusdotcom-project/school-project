@@ -178,6 +178,10 @@ const UMMIPages = {
       DB.getClasses(),
       DB.getRooms()
     ]);
+    if (typeof DB.cleanupLegacyRooms === 'function') {
+      DB.cleanupLegacyRooms();
+    }
+    const locationRecommendations = DB.getUmmiRoomRecommendations ? DB.getUmmiRoomRecommendations(ummiClasses, roomsData, allClasses) : [];
     const roomArr = DB.toArray(roomsData);
     const classArr = DB.toArray(ummiClasses);
     const guruUmmi = DB.toArray(users).filter(u => AppConfig.isUserUmmi(u));
@@ -366,9 +370,9 @@ const UMMIPages = {
               </div>
               <div class="form-group">
                 <label>Tempat / Ruang Belajar (Di Lingkungan Sekolah)</label>
-                <input type="text" id="ummi-room" list="rooms-list-options" placeholder="Contoh: Serambi Masjid (Sayap Timur), Kelas 1 Abu Bakar, dll.">
+                <input type="text" id="ummi-room" list="rooms-list-options" placeholder="Contoh: Serambi Masjid, Ruang Kelas 1 Abu Bakar, dll.">
                 <datalist id="rooms-list-options">
-                  ${roomArr.map(r => `<option value="${AppConfig.escapeHtml(r.name || r.id)}"></option>`).join('')}
+                  ${locationRecommendations.map(loc => `<option value="${AppConfig.escapeHtml(loc)}"></option>`).join('')}
                 </datalist>
               </div>
               <div class="form-group">
@@ -410,7 +414,7 @@ const UMMIPages = {
                   <button type="button" class="btn btn-outline btn-sm" id="btn-map-select-all"><i class="ph ph-check-square"></i> Pilih Semua</button>
                   <button type="button" class="btn btn-outline btn-sm" id="btn-map-deselect-all"><i class="ph ph-square"></i> Batal Semua</button>
                 </div>
-                <span class="eks-badge-counter" id="modal-map-count">0 Santri Terpilih</span>
+                <span class="eks-badge-counter" id="modal-map-count">0 Terpilih</span>
               </div>
             </div>
             <div class="eks-students-list" id="modal-map-students-list"></div>
@@ -491,12 +495,12 @@ const UMMIPages = {
     const sess = getUmmiClassSession(cls);
     const sessObj = UMMI_SESSIONS[sess] || UMMI_SESSIONS['1'];
     document.getElementById('modal-map-stu-title').innerText = `Petakan Santri: ${cls.name}`;
-    document.getElementById('modal-map-stu-sub').innerText = `${sessObj.label} · Tingkat ${cls.level || 'Ummi'} · Masukkan santri sesuai kemampuan membaca Al-Qur'an`;
+    document.getElementById('modal-map-stu-sub').innerText = `${sessObj.short || sessObj.label} · Tingkat ${cls.level || 'Ummi'}`;
     const selectedMap = { ...(cls.students || {}) };
     const classMap = classArr.reduce((acc, c) => { acc[c.id] = c; return acc; }, {});
     const updateCount = () => {
       const cnt = Object.keys(selectedMap).length;
-      document.getElementById('modal-map-count').innerText = `${cnt} Santri Terpilih`;
+      document.getElementById('modal-map-count').innerText = `${cnt} Terpilih`;
     };
     const classFilterSelect = document.getElementById('modal-map-class-filter');
     const targetGradeNums = sessObj.grades;
@@ -505,7 +509,7 @@ const UMMIPages = {
       return targetGradeNums.includes(g);
     }).map(c => c.id);
     let classOptionsHtml = '<option value="">— Semua Kelas Formal (1 s/d 6) —</option>';
-    classOptionsHtml += `<option value="__session__" selected>★ Santri Sesuai ${sessObj.label} (${targetGradeNums.map(n => `Kelas ${n}`).join(' & ')})</option>`;
+    classOptionsHtml += `<option value="__session__" selected>★ Sesuai ${sessObj.short || sessObj.label}</option>`;
     classArr.forEach(c => {
       classOptionsHtml += `<option value="${c.id}">${AppConfig.escapeHtml(c.name)}</option>`;
     });
@@ -2109,13 +2113,15 @@ async renderUmmiClasses(container) {
   async renderTasmi(container) {
     Router.setTitle('Pengujian Tasmi\' Bil Ghaib', 'Pengujian hafalan Al-Qur\'an santri sekali duduk di hadapan dewan penguji.');
     const uid = Auth.currentUser.uid;
-    const [snapPlotting, allStudents, users, allClasses, roomsData] = await Promise.all([
+    const [snapPlotting, allStudents, users, allClasses, roomsData, snapUmmiClasses] = await Promise.all([
       DB.getUmmiTasmiPlotting(),
       DB.getAllStudents(),
       DB.getAllUsers(),
       DB.getClasses(),
-      DB.getRooms()
+      DB.getRooms(),
+      DB.getUmmiClasses()
     ]);
+    const locationRecommendations = DB.getUmmiRoomRecommendations ? DB.getUmmiRoomRecommendations(snapUmmiClasses, roomsData, allClasses) : [];
     const plottingArr = DB.toArray(snapPlotting).sort((a, b) => (b.date || '').localeCompare(a.date || '') || (b.createdAt || 0) - (a.createdAt || 0));
     const studentMap = DB.toArray(allStudents).reduce((acc, s) => { acc[s.id] = s; return acc; }, {});
     const guruUmmi = DB.toArray(users).filter(u => AppConfig.isUserUmmi(u));
@@ -2806,7 +2812,7 @@ async renderUmmiClasses(container) {
                 <label>Ruang / Lokasi Ujian</label>
                 <input type="text" id="tasmi-plot-room" list="tasmi-rooms-list" value="Serambi Masjid" placeholder="Contoh: Serambi Masjid, Ruang Kelas..." class="form-input">
                 <datalist id="tasmi-rooms-list">
-                  ${roomArr.map(r => `<option value="${AppConfig.escapeHtml(r.name || r.id)}"></option>`).join('')}
+                  ${locationRecommendations.map(loc => `<option value="${AppConfig.escapeHtml(loc)}"></option>`).join('')}
                 </datalist>
               </div>
               <div class="form-group">

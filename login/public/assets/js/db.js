@@ -693,7 +693,63 @@ const DB = {
   async getRooms() {
     if (!isDBReady()) return {};
     const snap = await db.ref('rooms').once('value');
-    return snap.val() || {};
+    const rooms = snap.val() || {};
+    const cleanRooms = {};
+    Object.keys(rooms).forEach(k => {
+      const r = rooms[k];
+      const name = (r && r.name) || '';
+      if (!name.toLowerCase().includes('sayap') && !name.toLowerCase().includes('perpustakaan')) {
+        cleanRooms[k] = r;
+      }
+    });
+    return cleanRooms;
+  },
+  async deleteRoom(id) {
+    if (!isDBReady() || !id) return;
+    await db.ref(`rooms/${id}`).remove();
+  },
+  async cleanupLegacyRooms() {
+    if (!isDBReady()) return;
+    try {
+      const snap = await db.ref('rooms').once('value');
+      const rooms = snap.val() || {};
+      Object.keys(rooms).forEach(k => {
+        const name = (rooms[k]?.name || '').toLowerCase();
+        if (name.includes('sayap') || name.includes('perpustakaan')) {
+          db.ref(`rooms/${k}`).remove().catch(() => {});
+        }
+      });
+    } catch (_) {}
+  },
+  getUmmiRoomRecommendations(ummiClasses, roomsData, formalClasses) {
+    const roomSet = new Set();
+    const uArr = this.toArray(ummiClasses || {});
+    uArr.forEach(u => {
+      const r = (u.room || '').trim();
+      if (r && !r.toLowerCase().includes('sayap') && !r.toLowerCase().includes('perpustakaan')) {
+        roomSet.add(r);
+      }
+    });
+    const cArr = this.toArray(formalClasses || {});
+    cArr.forEach(c => {
+      if (c && c.name) {
+        const name = c.name.trim();
+        const formatted = name.toLowerCase().startsWith('ruang') ? name : `Ruang Kelas ${name}`;
+        if (!formatted.toLowerCase().includes('sayap') && !formatted.toLowerCase().includes('perpustakaan')) {
+          roomSet.add(formatted);
+        }
+      }
+    });
+    const rArr = this.toArray(roomsData || {});
+    rArr.forEach(r => {
+      const name = (r && (r.name || r.id) || '').trim();
+      if (name && !name.toLowerCase().includes('sayap') && !name.toLowerCase().includes('perpustakaan')) {
+        roomSet.add(name);
+      }
+    });
+    if (!roomSet.has('Serambi Masjid')) roomSet.add('Serambi Masjid');
+    if (!roomSet.has('Serambi Kelas 6')) roomSet.add('Serambi Kelas 6');
+    return Array.from(roomSet).sort((a, b) => a.localeCompare(b, 'id'));
   },
   async saveRoom(id, data) {
     if (!isDBReady()) return;
