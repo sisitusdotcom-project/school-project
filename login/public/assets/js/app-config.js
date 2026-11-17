@@ -1806,7 +1806,9 @@ email: 'sdmusada16@gmail.com',
 dikdasmenLogo: 'assets/img/dikdasmen.webp',
 dikdasmenLogoFallback: 'assets/img/majlis-dikdaspnf.webp',
 schoolLogo: 'assets/img/logo.webp',
-schoolLogoFallback: 'assets/img/logo/logo.webp'
+schoolLogoFallback: 'assets/img/logo/logo.webp',
+headmaster: 'Dhani Harsyahyadi, S.H.I.',
+headmasterNbm: '1314863'
 });
 function getOfficialKopHtml(options = {}) {
 const p = SCHOOL_PROFILE;

@@ -159,6 +159,20 @@ const ScheduleManager = {
       }
     });
   },
+  getKepsekInfo() {
+    const kepsek = Object.values(this.users || {}).find(u => u && (u.role === 'kepsek' || u.unit === 'KEPSEK' || (u.assignments || []).includes('KEPSEK')));
+    return {
+      name: (kepsek && (kepsek.name || kepsek.displayName)) || AppConfig.SCHOOL_PROFILE.headmaster || 'Dhani Harsyahyadi, S.H.I.',
+      nbm: (kepsek && (kepsek.nbm || kepsek.nip)) || AppConfig.SCHOOL_PROFILE.headmasterNbm || '1314863'
+    };
+  },
+  getCurriculumLeadInfo() {
+    const lead = Object.values(this.users || {}).find(u => u && ((u.assignments || []).includes('WAKA_KURIKULUM') || u.unit === 'WAKA_KURIKULUM' || u.role === 'kurikulum'));
+    return {
+      name: (lead && (lead.name || lead.displayName)) || 'Roudhotul Millah, S.Pd., Gr.',
+      nbm: (lead && (lead.nbm || lead.nip)) || '-'
+    };
+  },
   bindToolbarEvents(container, isGuruOnly) {
     const tabBtns = container.querySelectorAll('.sched-tab-btn');
     tabBtns.forEach(btn => {
@@ -224,6 +238,7 @@ const ScheduleManager = {
   },
   renderRombelView(view) {
     const currentClass = this.classes[this.selectedClassId] || {};
+    const kepsek = this.getKepsekInfo();
     const walas = this.users[currentClass.teacherId];
     const walasName = walas ? (walas.name || walas.displayName) : 'Belum Ditentukan';
     const classSlots = Object.entries(this.schedules)
@@ -242,7 +257,7 @@ const ScheduleManager = {
           <tr>
             <td class="sched-time-col">${p.time}</td>
             <td colspan="5" class="sched-cell-card--break">
-              <i class="ph ${p.type === 'ishoma' ? 'ph-bowl-food' : 'ph-coffee'}"></i> ${p.label} (${p.time})
+              <i class="ph ${p.type === 'ishoma' ? 'ph-bowl-food' : 'ph-coffee'}"></i> ${p.label}
             </td>
           </tr>
         `;
@@ -291,7 +306,7 @@ const ScheduleManager = {
     view.innerHTML = `
       <section class="sched-print-paper card section-spacer">
         <div class="print-only sched-print-kop-wrapper">
-          ${AppConfig.getOfficialKopHtml({ showDivider: true })}
+          ${AppConfig.getOfficialKopHtml({ showDivider: false })}
         </div>
         <div class="sched-page-header-row">
           <div>
@@ -325,8 +340,8 @@ const ScheduleManager = {
         <div class="print-only sched-signatures-grid">
           <div class="sched-sig-box">
             <p class="sched-sig-role">Mengetahui,<br>Kepala SD Muhammadiyah 1 Sedati</p>
-            <p class="sched-sig-name">${AppConfig.SCHOOL_PROFILE.headmaster}</p>
-            <p class="sched-sig-id">NBM: ${AppConfig.SCHOOL_PROFILE.headmasterNbm}</p>
+            <p class="sched-sig-name">${AppConfig.escapeHtml(kepsek.name)}</p>
+            <p class="sched-sig-id">NBM: ${AppConfig.escapeHtml(kepsek.nbm)}</p>
           </div>
           <div class="sched-sig-box">
             <p class="sched-sig-role">Sidoarjo, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}<br>Wali Kelas ${AppConfig.escapeHtml(currentClass.name || '')}</p>
@@ -400,6 +415,7 @@ const ScheduleManager = {
   },
   renderGuruView(view) {
     const teacher = this.users[this.selectedTeacherId] || {};
+    const kepsek = this.getKepsekInfo();
     const tName = teacher.name || teacher.displayName || 'Guru';
     const teacherSlots = Object.entries(this.schedules)
       .map(([id, s]) => ({ id, ...s }))
@@ -465,7 +481,7 @@ const ScheduleManager = {
     view.innerHTML = `
       <section class="sched-print-paper card section-spacer">
         <div class="print-only sched-print-kop-wrapper">
-          ${AppConfig.getOfficialKopHtml({ showDivider: true })}
+          ${AppConfig.getOfficialKopHtml({ showDivider: false })}
         </div>
         <div class="sched-stats-cards no-print">
           <div class="sched-stat-item">
@@ -518,8 +534,8 @@ const ScheduleManager = {
         <div class="print-only sched-signatures-grid">
           <div class="sched-sig-box">
             <p class="sched-sig-role">Mengetahui,<br>Kepala SD Muhammadiyah 1 Sedati</p>
-            <p class="sched-sig-name">${AppConfig.SCHOOL_PROFILE.headmaster}</p>
-            <p class="sched-sig-id">NBM: ${AppConfig.SCHOOL_PROFILE.headmasterNbm}</p>
+            <p class="sched-sig-name">${AppConfig.escapeHtml(kepsek.name)}</p>
+            <p class="sched-sig-id">NBM: ${AppConfig.escapeHtml(kepsek.nbm)}</p>
           </div>
           <div class="sched-sig-box">
             <p class="sched-sig-role">Sidoarjo, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}<br>Guru Yang Bersangkutan</p>
@@ -540,6 +556,8 @@ const ScheduleManager = {
     if (btnPrint) btnPrint.addEventListener('click', () => window.print());
   },
   renderWorkloadView(view) {
+    const kepsek = this.getKepsekInfo();
+    const curriculumLead = this.getCurriculumLeadInfo();
     const userList = DB.toArray(this.users)
       .filter(u => u && (u.role === 'guru' || u.role === 'guruUmmi' || u.role === 'guru_ummi' || u.role === 'guruEkskul' || u.role === 'guru_ekskul' || (u.assignments || []).some(a => a.startsWith('GURU_'))))
       .sort((a, b) => (a.name || a.displayName || '').localeCompare(b.name || b.displayName || '', 'id'));
@@ -578,7 +596,7 @@ const ScheduleManager = {
     view.innerHTML = `
       <section class="sched-print-paper card section-spacer">
         <div class="print-only sched-print-kop-wrapper">
-          ${AppConfig.getOfficialKopHtml({ showDivider: true })}
+          ${AppConfig.getOfficialKopHtml({ showDivider: false })}
         </div>
         <div class="sched-stats-cards no-print">
           <div class="sched-stat-item">
@@ -661,7 +679,7 @@ const ScheduleManager = {
     view.innerHTML = `
       <section class="sched-print-paper card section-spacer">
         <div class="print-only sched-print-kop-wrapper">
-          ${AppConfig.getOfficialKopHtml({ showDivider: true })}
+          ${AppConfig.getOfficialKopHtml({ showDivider: false })}
         </div>
         <div class="sched-page-header-row">
           <div>
@@ -722,13 +740,13 @@ const ScheduleManager = {
         <div class="print-only sched-signatures-grid">
           <div class="sched-sig-box">
             <p class="sched-sig-role">Mengetahui,<br>Kepala SD Muhammadiyah 1 Sedati</p>
-            <p class="sched-sig-name">${AppConfig.SCHOOL_PROFILE.headmaster}</p>
-            <p class="sched-sig-id">NBM: ${AppConfig.SCHOOL_PROFILE.headmasterNbm}</p>
+            <p class="sched-sig-name">${AppConfig.escapeHtml(kepsek.name)}</p>
+            <p class="sched-sig-id">NBM: ${AppConfig.escapeHtml(kepsek.nbm)}</p>
           </div>
           <div class="sched-sig-box">
             <p class="sched-sig-role">Sidoarjo, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}<br>Waka Kurikulum</p>
-            <p class="sched-sig-name">Dhani Harsyahyadi, S.H.I.</p>
-            <p class="sched-sig-id">NBM/NIP: -</p>
+            <p class="sched-sig-name">${AppConfig.escapeHtml(curriculumLead.name)}</p>
+            <p class="sched-sig-id">NBM/NIP: ${AppConfig.escapeHtml(curriculumLead.nbm)}</p>
           </div>
         </div>
       </section>
