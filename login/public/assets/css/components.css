@@ -3769,9 +3769,26 @@ html,body{width:100% !important;height:auto !important;background:#fff !importan
 .official-kop-contact{font-size:5.5pt !important;color:#222 !important;line-height:1.1 !important;margin:0.5mm 0 0 !important;}
 .official-kop-divider{border-bottom:1.5pt double #000 !important;margin:1.5mm 0 !important;}
 }
-.attendance-history-row{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e5e7eb;padding-bottom:8px;margin-bottom:8px;}
-.attendance-history-label{color:#64748b;font-size:13px;}
-.attendance-history-val{font-size:13px;font-weight:700;color:#0f172a;}
+.attendance-history-row{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e5e7eb;padding-bottom:10px;margin-bottom:10px;gap:12px;min-width:0;}
+.attendance-history-label{color:#64748b;font-size:13.5px;font-weight:500;}
+.attendance-history-val-group{display:flex;align-items:center;gap:10px;min-width:0;}
+.attendance-history-val{font-size:14px;font-weight:700;color:#0f172a;letter-spacing:0.3px;}
+.btn-history-proof{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;font-size:11.5px;font-weight:600;color:#0284c7;background:#f0f9ff;border:1px solid #bae6fd;border-radius:6px;cursor:pointer;transition:all 0.15s ease;text-decoration:none;white-space:nowrap;line-height:1.2;}
+.btn-history-proof:hover{background:#0284c7;color:#fff;border-color:#0284c7;}
+.btn-history-proof i{font-size:14px;}
+@media (max-width:480px){
+.attendance-history-row{padding-bottom:8px;margin-bottom:8px;}
+.attendance-history-label{font-size:12.5px;}
+.attendance-history-val{font-size:13px;}
+.btn-history-proof{padding:3px 7px;font-size:11px;}
+.btn-history-proof i{font-size:13px;}
+.mk-preview-modal{width:96%;height:auto;max-height:92vh;margin:10px auto;}
+.mk-preview-body{padding:8px;}
+.mk-preview-img-wrap{padding:4px;}
+.mk-preview-img{max-height:62vh;}
+.mk-preview-modal .modal-footer{padding:8px 12px;gap:6px;flex-wrap:wrap;justify-content:flex-end;}
+.mk-preview-modal .modal-footer .btn{font-size:12px;padding:6px 10px;}
+}
 .attendance-proof-card{margin-top:12px;border:1px solid #e2e8f0;border-radius:10px;background:#f8fafc;padding:10px;overflow:hidden;}
 .attendance-proof-card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px;}
 .attendance-proof-badge{font-size:11.5px;font-weight:700;color:#047857;display:inline-flex;align-items:center;gap:4px;}

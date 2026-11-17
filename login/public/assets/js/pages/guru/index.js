@@ -2186,17 +2186,10 @@ statusText.innerText = `Hari ini (${sched.dayKey}) jadwal presensi opsional untu
 if (!myAtt) {
 histContainer.innerHTML = '<p class="text-muted" style="font-size: 13px; margin: 0;">Belum ada rekam presensi hari ini.</p>';
 } else {
-const proofItems = [];
-if (myAtt.proof_url) {
-proofItems.push({ label: 'Bukti Presensi Datang', url: myAtt.proof_url });
-}
-if (myAtt.proof_url_out && myAtt.proof_url_out !== myAtt.proof_url) {
-proofItems.push({ label: 'Bukti Presensi Pulang', url: myAtt.proof_url_out });
-}
-const proofMarkup = proofItems.map((item) => {
-const normUrl = (window.DriveBridge && DriveBridge.normalizeDriveImageUrl) ? DriveBridge.normalizeDriveImageUrl(item.url, 'w400') : item.url;
-return `<div class="attendance-proof-card"><div class="attendance-proof-card-header"><span class="attendance-proof-badge"><i class="ph ph-shield-check"></i> ${AppConfig.escapeHtml(item.label)}</span><button type="button" class="btn btn-xs btn-outline btn-open-proof-modal" data-preview-url="${AppConfig.escapeHtml(item.url)}"><i class="ph ph-magnifying-glass-plus"></i> Lihat Bukti</button></div><div class="attendance-proof-img-wrap"><img src="${AppConfig.escapeHtml(normUrl)}" data-fallback-index="0" data-proof-raw="${AppConfig.escapeHtml(item.url)}" class="attendance-proof-img" alt="${AppConfig.escapeHtml(item.label)}"><div class="attendance-proof-fallback hidden"><i class="ph ph-shield-check attendance-proof-fallback-icon"></i><div class="attendance-proof-fallback-text">${AppConfig.escapeHtml(item.label)} Terverifikasi</div><button type="button" class="btn btn-xs btn-primary btn-open-proof-modal" data-preview-url="${AppConfig.escapeHtml(item.url)}"><i class="ph ph-arrow-square-out"></i> Buka Foto Bukti</button></div></div></div>`;
-}).join('');
+const proofDatangUrl = myAtt.proof_url || '';
+const proofPulangUrl = myAtt.proof_url_out || (myAtt.time_out && !myAtt.time_in ? myAtt.proof_url : '');
+const btnProofDatang = proofDatangUrl ? `<button type="button" class="btn-history-proof btn-view-proof" data-proof-url="${AppConfig.escapeHtml(proofDatangUrl)}" data-title="Bukti Presensi Datang (${AppConfig.escapeHtml(myAtt.time_in || '')})" title="Lihat Foto Bukti Datang"><i class="ph ph-eye"></i> <span>Bukti Datang</span></button>` : '';
+const btnProofPulang = proofPulangUrl ? `<button type="button" class="btn-history-proof btn-view-proof" data-proof-url="${AppConfig.escapeHtml(proofPulangUrl)}" data-title="Bukti Presensi Pulang (${AppConfig.escapeHtml(myAtt.time_out || '')})" title="Lihat Foto Bukti Pulang"><i class="ph ph-eye"></i> <span>Bukti Pulang</span></button>` : '';
 const isMyAttLate = myAtt.time_in && AppConfig.isAttendanceLate ? AppConfig.isAttendanceLate(myAtt.time_in, sched, myAtt) : false;
 let lateSectionHtml = '';
 if (!sched.noLatePenalty && (!sched.isOptional || !isUmmi)) {
@@ -2211,43 +2204,26 @@ lateSectionHtml = `<div class="attendance-late-history-item"><div class="attenda
 histContainer.innerHTML = `
 <div class="attendance-history-row">
 <span class="attendance-history-label">Datang</span>
+<div class="attendance-history-val-group">
 <strong class="attendance-history-val">${myAtt.time_in || '-'}</strong>
+${btnProofDatang}
+</div>
 </div>
 <div class="attendance-history-row">
 <span class="attendance-history-label">Pulang</span>
+<div class="attendance-history-val-group">
 <strong class="attendance-history-val">${myAtt.time_out || '-'}</strong>
+${btnProofPulang}
+</div>
 </div>
 ${lateSectionHtml}
-${proofMarkup}
 `;
-histContainer.querySelectorAll('.attendance-proof-img').forEach((img) => {
-img.addEventListener('error', () => {
-const raw = img.dataset.proofRaw;
-const fallbacks = (window.DriveBridge && DriveBridge.getDriveFallbackUrls) ? DriveBridge.getDriveFallbackUrls(raw) : [];
-let idx = parseInt(img.dataset.fallbackIndex || '0', 10) + 1;
-if (idx < fallbacks.length) {
-img.dataset.fallbackIndex = String(idx);
-img.src = fallbacks[idx];
-} else {
-img.classList.add('hidden');
-const fallbackBox = img.parentElement ? img.parentElement.querySelector('.attendance-proof-fallback') : null;
-if (fallbackBox) {
-fallbackBox.classList.remove('hidden');
-}
-}
-});
-img.addEventListener('click', () => {
-const raw = img.dataset.proofRaw || img.src;
-if (raw && window.ModuleKit && typeof ModuleKit.previewFile === 'function') {
-ModuleKit.previewFile(raw, 'Foto Bukti Presensi');
-}
-});
-});
-histContainer.querySelectorAll('.btn-open-proof-modal').forEach((btn) => {
+histContainer.querySelectorAll('.btn-view-proof').forEach((btn) => {
 btn.addEventListener('click', () => {
-const raw = btn.dataset.previewUrl;
-if (raw && window.ModuleKit && typeof ModuleKit.previewFile === 'function') {
-ModuleKit.previewFile(raw, 'Foto Bukti Presensi');
+const rawUrl = btn.dataset.proofUrl;
+const modalTitle = btn.dataset.title || 'Bukti Presensi';
+if (rawUrl && window.ModuleKit && typeof ModuleKit.previewFile === 'function') {
+ModuleKit.previewFile(rawUrl, modalTitle);
 }
 });
 });

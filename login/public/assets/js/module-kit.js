@@ -1447,7 +1447,7 @@ const ModuleKit = {
     document.querySelectorAll('.mk-preview-overlay').forEach((m) => m.remove());
     const url = rawUrl.trim();
     const driveId = typeof DriveBridge !== 'undefined' && DriveBridge.extractFileId ? DriveBridge.extractFileId(url) : (url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/) || url.match(/[?&]id=([a-zA-Z0-9_-]+)/))?.[1];
-    const isImage = /\.(jpg|jpeg|png|webp|gif|bmp)(\?.*)?$/i.test(url) || url.startsWith('data:image/');
+    const isImage = /\.(jpg|jpeg|png|webp|gif|bmp)(\?.*)?$/i.test(url) || url.startsWith('data:image/') || (title && (title.toLowerCase().includes('bukti') || title.toLowerCase().includes('presensi') || title.toLowerCase().includes('foto')));
     const viewerUrl = typeof DriveBridge !== 'undefined' && DriveBridge.getViewerUrl ? DriveBridge.getViewerUrl(url, title) : url;
     const downloadUrl = (driveId && typeof DriveBridge !== 'undefined' && DriveBridge.getDownloadUrl) ? DriveBridge.getDownloadUrl(driveId) : url;
     let contentHtml = '';
