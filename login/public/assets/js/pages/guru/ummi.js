@@ -39,9 +39,9 @@ function getUmmiClassSession(cls) {
   if (name.includes('kelas 5') || name.includes('kelas 6') || name.startsWith('5 ') || name.startsWith('6 ')) return '3';
   return '1';
 }
-function getSessionBadge(sessId) {
+function getSessionBadge(sessId, isShort = false) {
   const s = UMMI_SESSIONS[sessId] || UMMI_SESSIONS['1'];
-  return `<span class="badge ${s.badge}"><i class="ph ph-clock"></i> ${s.label}</span>`;
+  return `<span class="badge ${s.badge}"><i class="ph ph-clock"></i> ${isShort ? s.short : s.label}</span>`;
 }
 const UMMI_GRADES = [
   { score: 100, predicate: 'A+', label: '100 = A+ (Benar semua, kualitas baca bagus sekali = Naik ke halaman berikutnya)', action: 'Naik ke halaman berikutnya' },
@@ -394,17 +394,24 @@ const UMMIPages = {
           </div>
           <div class="modal-body">
             <input type="hidden" id="modal-map-cls-id">
-            <div class="eks-students-filter-row">
-              <select id="modal-map-class-filter" class="mapel-select-input">
-                <option value="">— Semua Kelas Formal (1 s/d 6) —</option>
-                ${DB.toArray(allClasses).map(c => `<option value="${c.id}">${AppConfig.escapeHtml(c.name)}</option>`).join('')}
-              </select>
-              <input type="text" id="modal-map-search" placeholder="Cari nama santri atau NIS..." class="mapel-select-input">
-              <span class="eks-badge-counter" id="modal-map-count">0 Santri Terpilih</span>
-            </div>
-            <div class="card-actions-row">
-              <button type="button" class="btn btn-outline btn-sm" id="btn-map-select-all"><i class="ph ph-check-square"></i> Pilih Semua Tampil</button>
-              <button type="button" class="btn btn-outline btn-sm" id="btn-map-deselect-all"><i class="ph ph-square"></i> Batalkan Semua Tampil</button>
+            <div class="ummi-map-filter-box">
+              <div class="ummi-map-inputs-row">
+                <select id="modal-map-class-filter" class="form-control form-control-sm">
+                  <option value="">— Semua Kelas Formal —</option>
+                  ${DB.toArray(allClasses).map(c => `<option value="${c.id}">${AppConfig.escapeHtml(c.name)}</option>`).join('')}
+                </select>
+                <div class="search-box ummi-map-search">
+                  <i class="ph ph-magnifying-glass"></i>
+                  <input type="text" id="modal-map-search" placeholder="Cari santri atau NIS...">
+                </div>
+              </div>
+              <div class="ummi-map-actions-row">
+                <div class="ummi-map-btn-group">
+                  <button type="button" class="btn btn-outline btn-sm" id="btn-map-select-all"><i class="ph ph-check-square"></i> Pilih Semua</button>
+                  <button type="button" class="btn btn-outline btn-sm" id="btn-map-deselect-all"><i class="ph ph-square"></i> Batal Semua</button>
+                </div>
+                <span class="eks-badge-counter" id="modal-map-count">0 Santri Terpilih</span>
+              </div>
             </div>
             <div class="eks-students-list" id="modal-map-students-list"></div>
           </div>
@@ -1146,7 +1153,8 @@ async renderUmmiClasses(container) {
     const classMap = DB.toArray(allClasses).reduce((acc, c) => { acc[c.id] = c; return acc; }, {});
     const examArr = DB.toArray(snapExams).sort((a, b) => (b.requestedAt || 0) - (a.requestedAt || 0));
     const guruUmmi = DB.toArray(users).filter(u => AppConfig.isUserUmmi(u));
-    const pendingCount = examArr.filter(e => e.status === 'Menunggu ACC').length;
+    const isExamPending = (status) => (status === 'Menunggu ACC' || status === 'pending' || !status);
+    const pendingCount = examArr.filter(e => isExamPending(e.status)).length;
     const scheduledCount = examArr.filter(e => e.status === 'Dijadwalkan').length;
     const passedCount = examArr.filter(e => e.status === 'Lolos').length;
     const rejectedCount = examArr.filter(e => e.status === 'Ditolak').length;
@@ -1155,7 +1163,9 @@ async renderUmmiClasses(container) {
     const renderTable = (filter) => {
       if (filter !== undefined) activeFilter = filter;
       const filtered = examArr.filter(e => {
-        if (activeFilter !== 'all' && e.status !== activeFilter) return false;
+        const isPend = isExamPending(e.status);
+        if (activeFilter === 'Menunggu ACC' && !isPend) return false;
+        if (activeFilter !== 'all' && activeFilter !== 'Menunggu ACC' && e.status !== activeFilter) return false;
         if (examSearchQuery) {
           const sName = (e.studentName || '').toLowerCase();
           const rName = (e.requestedByName || '').toLowerCase();
@@ -1169,10 +1179,13 @@ async renderUmmiClasses(container) {
         return true;
       });
       const rows = filtered.length ? filtered.map((e, idx) => {
+        const isPend = isExamPending(e.status);
         let badgeCls = 'badge-warning';
-        if (e.status === 'Dijadwalkan') badgeCls = 'badge-primary';
-        else if (e.status === 'Lolos') badgeCls = 'badge-success';
-        else if (e.status === 'Ditolak') badgeCls = 'badge-danger';
+        let statusText = 'Menunggu ACC';
+        if (e.status === 'Dijadwalkan') { badgeCls = 'badge-primary'; statusText = 'Dijadwalkan'; }
+        else if (e.status === 'Lolos') { badgeCls = 'badge-success'; statusText = 'Lolos'; }
+        else if (e.status === 'Ditolak') { badgeCls = 'badge-danger'; statusText = 'Ditolak'; }
+        else if (!isPend) { statusText = e.status || 'Menunggu ACC'; }
         const sesVal = (() => { const sObj = studentMap[e.studentId]; if (sObj) { const fCls = classMap[sObj.classId]; const g = fCls ? (Number(fCls.grade) || parseInt(fCls.name || '', 10) || 0) : 0; if (g === 1 || g === 2) return '1'; if (g === 3 || g === 4) return '2'; if (g === 5 || g === 6) return '3'; } return '1'; })();
         return `
           <tr>
@@ -1181,11 +1194,11 @@ async renderUmmiClasses(container) {
             <td>${getSessionBadge(sesVal)}</td>
             <td><span class="badge badge-outline">${AppConfig.escapeHtml(e.currentLevel || '-')}</span> <i class="ph ph-arrow-right"></i> <span class="badge badge-primary">${AppConfig.escapeHtml(e.targetLevel || '-')}</span></td>
             <td>${AppConfig.escapeHtml(e.requestedByName || '-')}<br><small class="text-muted">${AppConfig.escapeHtml(e.teacherNotes || '-')}</small></td>
-            <td><span class="badge ${badgeCls}">${e.status}</span></td>
+            <td><span class="badge ${badgeCls}">${statusText}</span></td>
             <td>${e.scheduledDate ? `<strong>${e.scheduledDate}</strong><br><small class="text-muted">Penguji: ${AppConfig.escapeHtml(e.examinerName || '-')}</small>` : '<span class="text-muted">Belum dijadwalkan</span>'}</td>
             <td>${e.examNotes ? AppConfig.escapeHtml(e.examNotes) : (e.score ? `Nilai: ${e.score}` : '-')}</td>
             <td class="action-cell">
-              ${e.status === 'Menunggu ACC' ? `
+              ${isPend ? `
                 <button class="btn btn-primary btn-sm" data-acc-exam="${e.id}"><i class="ph ph-calendar-plus"></i> ACC & Jadwal</button>
                 <button class="btn btn-danger btn-sm" data-reject-exam="${e.id}"><i class="ph ph-x-circle"></i> Tolak</button>
               ` : ''}
@@ -1209,27 +1222,30 @@ async renderUmmiClasses(container) {
         </tr>
       `;
       const mobileCards = filtered.length ? filtered.map((e) => {
+        const isPend = isExamPending(e.status);
         let badgeCls = 'badge-warning';
-        if (e.status === 'Dijadwalkan') badgeCls = 'badge-primary';
-        else if (e.status === 'Lolos') badgeCls = 'badge-success';
-        else if (e.status === 'Ditolak') badgeCls = 'badge-danger';
+        let statusText = 'Menunggu ACC';
+        if (e.status === 'Dijadwalkan') { badgeCls = 'badge-primary'; statusText = 'Dijadwalkan'; }
+        else if (e.status === 'Lolos') { badgeCls = 'badge-success'; statusText = 'Lolos'; }
+        else if (e.status === 'Ditolak') { badgeCls = 'badge-danger'; statusText = 'Ditolak'; }
+        else if (!isPend) { statusText = e.status || 'Menunggu ACC'; }
         const sesVal = (() => { const sObj = studentMap[e.studentId]; if (sObj) { const fCls = classMap[sObj.classId]; const g = fCls ? (Number(fCls.grade) || parseInt(fCls.name || '', 10) || 0) : 0; if (g === 1 || g === 2) return '1'; if (g === 3 || g === 4) return '2'; if (g === 5 || g === 6) return '3'; } return '1'; })();
         return `
           <div class="exam-item-card">
             <div class="exam-item-top">
               <div class="exam-item-student">
                 <div class="exam-item-name">${AppConfig.escapeHtml(e.studentName || '-')}</div>
-                <div class="exam-item-meta">Diajukan oleh: ${AppConfig.escapeHtml(e.requestedByName || '-')}</div>
+                <div class="exam-item-meta"><i class="ph ph-user"></i> Pengaju: ${AppConfig.escapeHtml(e.requestedByName || '-')}</div>
               </div>
-              <div class="d-flex align-items-center gap-1">
-                ${getSessionBadge(sesVal)}
-                <span class="badge ${badgeCls}">${e.status}</span>
+              <div class="exam-item-badges">
+                ${getSessionBadge(sesVal, true)}
+                <span class="badge ${badgeCls}">${statusText}</span>
               </div>
             </div>
             <div class="exam-item-body">
               <div class="exam-item-level-row">
-                <span>Kenaikan:</span>
-                <div>
+                <span class="exam-item-level-lbl"><i class="ph ph-trend-up"></i> Kenaikan:</span>
+                <div class="exam-item-level-badges">
                   <span class="badge badge-outline">${AppConfig.escapeHtml(e.currentLevel || '-')}</span>
                   <i class="ph ph-arrow-right"></i>
                   <span class="badge badge-primary">${AppConfig.escapeHtml(e.targetLevel || '-')}</span>
@@ -1241,15 +1257,15 @@ async renderUmmiClasses(container) {
             </div>
             <div class="exam-item-bottom">
               <div class="exam-item-actions">
-                ${e.status === 'Menunggu ACC' ? `
+                ${isPend ? `
                   <button class="btn btn-primary btn-sm" data-acc-exam="${e.id}"><i class="ph ph-calendar-plus"></i> ACC & Jadwal</button>
                   <button class="btn btn-danger btn-sm" data-reject-exam="${e.id}"><i class="ph ph-x-circle"></i> Tolak</button>
                 ` : ''}
                 ${e.status === 'Dijadwalkan' ? `
-                  <button class="btn btn-success btn-sm" data-result-exam="${e.id}"><i class="ph ph-check-circle"></i> Input Hasil Tes</button>
+                  <button class="btn btn-success btn-sm btn-block" data-result-exam="${e.id}"><i class="ph ph-check-circle"></i> Input Hasil Tes</button>
                 ` : ''}
                 ${e.status === 'Lolos' ? `<span class="badge badge-success"><i class="ph ph-seal-check"></i> Tingkat Naik</span>` : ''}
-                ${e.status === 'Ditolak' ? `<button class="btn btn-outline btn-sm" data-reopen-exam="${e.id}"><i class="ph ph-arrows-clockwise"></i> Evaluasi Ulang</button>` : ''}
+                ${e.status === 'Ditolak' ? `<button class="btn btn-outline btn-sm btn-block" data-reopen-exam="${e.id}"><i class="ph ph-arrows-clockwise"></i> Evaluasi Ulang</button>` : ''}
               </div>
             </div>
           </div>
@@ -2523,9 +2539,17 @@ async renderUmmiClasses(container) {
         return true;
       });
       const tbody = container.querySelector('#tasmi-plotting-tbody');
-      if (!tbody) return;
+      const mCards = container.querySelector('#tasmi-plotting-mobile-cards');
       if (!filtered.length) {
-        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">Belum ada plotting jadwal penguji tasmi yang sesuai filter atau pencarian.</td></tr>';
+        const emptyHtml = `
+          <div class="empty-state-box">
+            <i class="ph ph-folder-open"></i>
+            <div class="empty-state-box-title">Belum ada plotting jadwal</div>
+            <div class="empty-state-box-desc">Tidak ada jadwal penguji tasmi atau munaqosyah yang cocok dengan kriteria filter.</div>
+          </div>
+        `;
+        if (tbody) tbody.innerHTML = '<tr><td colspan="8">' + emptyHtml + '</td></tr>';
+        if (mCards) mCards.innerHTML = emptyHtml;
         return;
       }
       tbody.innerHTML = filtered.map((p, idx) => {
@@ -2559,7 +2583,60 @@ async renderUmmiClasses(container) {
           </tr>
         `;
       }).join('');
-      tbody.querySelectorAll('[data-result-tasmi]').forEach(btn => {
+      if (mCards) {
+        mCards.innerHTML = filtered.map(p => {
+          const sObj = studentMap[p.studentId] || {};
+          const sName = sObj.name || p.studentName || '-';
+          const fCls = classMap[sObj.classId];
+          const className = fCls ? fCls.name : (sObj.classId || '-');
+          const idLabel = sObj.nis ? `NIS: ${sObj.nis}` : (sObj.nisn ? `NISN: ${sObj.nisn}` : '');
+          const sess = p.session || '1';
+          const examiner = teacherMap[p.examinerId] || p.examinerName || 'Belum Ditentukan';
+          let statusBadge = '<span class="badge badge-warning">Terjadwal</span>';
+          if ((p.status || '').startsWith('Lulus')) {
+            statusBadge = `<span class="badge badge-success"><i class="ph ph-check"></i> ${AppConfig.escapeHtml(p.status)}${p.score ? ` (${p.score})` : ''}</span>`;
+          } else if (p.status === 'Mengulang / Perbaikan') {
+            statusBadge = `<span class="badge badge-danger"><i class="ph ph-arrow-counter-clockwise"></i> Mengulang${p.score ? ` (${p.score})` : ''}</span>`;
+          }
+          return `
+            <div class="tasmi-plot-card">
+              <div class="tasmi-plot-card-top">
+                <div class="tasmi-plot-card-student">
+                  <div class="tasmi-plot-card-name">${AppConfig.escapeHtml(sName)}</div>
+                  <div class="tasmi-plot-card-sub">${AppConfig.escapeHtml(className)}${idLabel ? ` · ${idLabel}` : ''}</div>
+                </div>
+                <div class="tasmi-plot-card-badges">
+                  ${getSessionBadge(sess, true)}
+                  ${statusBadge}
+                </div>
+              </div>
+              <div class="tasmi-plot-card-body">
+                <div class="tasmi-plot-card-row">
+                  <span>Kategori:</span>
+                  <strong class="text-primary">${AppConfig.escapeHtml(p.category || 'Tasmi')}</strong>
+                </div>
+                <div class="tasmi-plot-card-row">
+                  <span>Penguji:</span>
+                  <span>${AppConfig.escapeHtml(examiner)}</span>
+                </div>
+                <div class="tasmi-plot-card-row">
+                  <span>Jadwal & Ruang:</span>
+                  <span>${AppConfig.escapeHtml(p.date || '-')} · ${AppConfig.escapeHtml(p.time || '07.30')} (${AppConfig.escapeHtml(p.room || 'Masjid')})</span>
+                </div>
+                ${p.notes ? `<div class="tasmi-plot-card-notes"><strong>Catatan:</strong> ${AppConfig.escapeHtml(p.notes)}</div>` : ''}
+              </div>
+              <div class="tasmi-plot-card-bottom">
+                <div class="tasmi-plot-card-actions">
+                  <button class="btn btn-primary btn-sm" data-result-tasmi="${p.id}"><i class="ph ph-check-circle"></i> Hasil</button>
+                  <button class="btn btn-outline btn-sm" data-edit-tasmi="${p.id}"><i class="ph ph-pencil-simple"></i> Edit</button>
+                  <button class="btn btn-danger btn-sm" data-del-tasmi="${p.id}"><i class="ph ph-trash"></i> Hapus</button>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+      container.querySelectorAll('[data-result-tasmi]').forEach(btn => {
         btn.onclick = () => {
           const id = btn.dataset.resultTasmi;
           const p = plottingArr.find(x => x.id === id);
@@ -2577,7 +2654,7 @@ async renderUmmiClasses(container) {
           App.openModal('modal-tasmi-result');
         };
       });
-      tbody.querySelectorAll('[data-edit-tasmi]').forEach(btn => {
+      container.querySelectorAll('[data-edit-tasmi]').forEach(btn => {
         btn.onclick = () => {
           const id = btn.dataset.editTasmi;
           const p = plottingArr.find(x => x.id === id);
@@ -2595,7 +2672,7 @@ async renderUmmiClasses(container) {
           App.openModal('modal-tasmi-plot');
         };
       });
-      tbody.querySelectorAll('[data-del-tasmi]').forEach(btn => {
+      container.querySelectorAll('[data-del-tasmi]').forEach(btn => {
         btn.onclick = async () => {
           const id = btn.dataset.delTasmi;
           const p = plottingArr.find(x => x.id === id);
@@ -2653,23 +2730,24 @@ async renderUmmiClasses(container) {
         </div>
       </div>
       <div class="card">
-        <div class="table-responsive">
+        <div class="table-responsive tasmi-plot-desktop-table">
           <table class="table">
             <thead>
               <tr>
-                <th class="text-center th-w45">No</th>
+                <th class="table-col-sm text-center">No</th>
                 <th>Santri & Kelas</th>
                 <th>Sesi</th>
                 <th>Kategori Ujian</th>
                 <th>Ustadz / Penguji</th>
                 <th>Jadwal & Ruang</th>
                 <th>Status & Nilai</th>
-                <th>Aksi</th>
+                <th class="table-col-action">Aksi</th>
               </tr>
             </thead>
             <tbody id="tasmi-plotting-tbody"></tbody>
           </table>
         </div>
+        <div class="tasmi-plot-mobile-cards" id="tasmi-plotting-mobile-cards"></div>
       </div>
       <div class="modal-overlay" id="modal-tasmi-plot">
         <div class="modal modal-lg">
