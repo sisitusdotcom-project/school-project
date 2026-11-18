@@ -1891,6 +1891,16 @@ const hostName = window.location.host;
 const isUmmi = AppConfig.isUserUmmi(Auth.userData || Auth.currentUser);
 const initSched = AppConfig.getAttendanceSchedule ? AppConfig.getAttendanceSchedule(null, isUmmi, new Date()) : null;
 let currentSchedule = initSched;
+let currentMyAtt = null;
+const getCheckoutValidation = () => {
+const nowWib = new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit' }).format(new Date()).replace('.', ':');
+const nowMin = AppConfig.timeToMinutes ? AppConfig.timeToMinutes(nowWib) : (() => { const [h, m] = nowWib.split(':').map(Number); return h * 60 + m; })();
+const outStartStr = currentSchedule?.outStart || (isUmmi ? '12:30' : '14:30');
+const outMin = AppConfig.timeToMinutes ? AppConfig.timeToMinutes(outStartStr) : (() => { const [h, m] = outStartStr.split(':').map(Number); return h * 60 + m; })();
+const isFlex = currentSchedule?.allowFlexible === true;
+const allowed = isFlex || (nowMin !== null && outMin !== null && nowMin >= outMin);
+return { allowed, outStartStr, nowWib };
+};
 const isInitOff = !!(initSched && initSched.isOff);
 const initIconHtml = isInitOff ? '<i class="ph ph-calendar-x" style="font-size: 32px;"></i>' : '<i class="ph ph-spinner ph-spin"></i>';
 const initIconBg = isInitOff ? '#F3F4F6' : '#F3F4F6';
@@ -2138,6 +2148,7 @@ DB.getTeacherAttendance(dateStr, teacherId),
 DB.getTeacherAttendanceHistory(teacherId, 60),
 DB.getSettings()
 ]);
+currentMyAtt = myAtt;
 const sched = AppConfig.getAttendanceSchedule ? AppConfig.getAttendanceSchedule(settings?.attendanceRules, isUmmi, new Date()) : (initSched || {
 inStart: '06:00', inEnd: isUmmi ? '07:15' : '06:45', outStart: isUmmi ? '12:30' : '14:30', outEnd: '17:30', isOff: false, label: `${isUmmi ? 'Guru Ummi' : 'GTK'}: Masuk 06:00`
 });
@@ -2251,6 +2262,11 @@ postAppealBtn.innerText = 'Simpan';
 }
 if (myAtt.time_in && !myAtt.time_out) {
 btnCheckin.style.display = 'none';
+const chk = getCheckoutValidation();
+if (!chk.allowed) {
+btnCheckout.disabled = true;
+btnCheckout.title = `Presensi pulang baru dapat dilakukan mulai pukul ${chk.outStartStr} WIB`;
+}
 } else if (myAtt.time_in && myAtt.time_out) {
 btnCheckin.style.display = 'none';
 btnCheckout.style.display = 'none';
@@ -2431,7 +2447,14 @@ proofWrapper.style.display = 'none';
 proofStatus.innerText = 'Belum ada foto';
 cameraCaptureBtn.innerText = 'Ambil Foto Kamera';
 btnCheckin.disabled = false;
+const chkNoGeofence = getCheckoutValidation();
+if (!chkNoGeofence.allowed) {
+btnCheckout.disabled = true;
+btnCheckout.title = `Presensi pulang baru dapat dilakukan mulai pukul ${chkNoGeofence.outStartStr} WIB`;
+} else {
 btnCheckout.disabled = false;
+btnCheckout.title = '';
+}
 void startCamera();
 stopGeolocationWatch();
 return true;
@@ -2451,14 +2474,22 @@ if (isInside) {
 statusIcon.style.background = '#D1FAE5'; statusIcon.style.color = '#10B981';
 statusIcon.innerHTML = '<i class="ph ph-check-circle" style="font-size: 32px;"></i>';
 statusTitle.innerText = "Berada di Area Sekolah";
-statusText.innerText = `Jarak efektif: ${Math.round(adjustedDistance)} meter. Akurasi posisi: ${Math.round(accuracy)} m.`;
+const chkInside = getCheckoutValidation();
+const chkMsg = (currentMyAtt && currentMyAtt.time_in && !currentMyAtt.time_out && !chkInside.allowed) ? ` Presensi datang tercatat (${currentMyAtt.time_in}). Pulang dibuka ${chkInside.outStartStr} WIB.` : '';
+statusText.innerText = `Jarak efektif: ${Math.round(adjustedDistance)} meter. Akurasi posisi: ${Math.round(accuracy)} m.${chkMsg}`;
 proofPanel.style.display = 'block';
 cameraVideo.style.display = 'block';
 proofWrapper.style.display = 'none';
 proofStatus.innerText = 'Belum ada foto';
 cameraCaptureBtn.innerText = 'Ambil Foto Kamera';
 btnCheckin.disabled = false;
+if (!chkInside.allowed) {
+btnCheckout.disabled = true;
+btnCheckout.title = `Presensi pulang baru dapat dilakukan mulai pukul ${chkInside.outStartStr} WIB`;
+} else {
 btnCheckout.disabled = false;
+btnCheckout.title = '';
+}
 void startCamera();
 stopGeolocationWatch();
 return true;
@@ -2587,6 +2618,13 @@ window.removeEventListener('hashchange', cleanupAttendance);
 window.addEventListener('hashchange', cleanupAttendance);
 const handlePresensi = async (type) => {
 if (!currentLocation) return;
+if (type === 'out') {
+const chkAction = getCheckoutValidation();
+if (!chkAction.allowed) {
+alert(`Presensi pulang hari ${currentSchedule?.dayKey || 'ini'} belum dapat dilakukan sebelum pukul ${chkAction.outStartStr} WIB. Saat ini pukul ${chkAction.nowWib} WIB.`);
+return;
+}
+}
 const btn = type === 'in' ? btnCheckin : btnCheckout;
 if (!capturedProofDataUrl || !capturedProofDataUrl.startsWith('data:image/')) {
 alert('Harap ambil foto bukti kehadiran dari kamera sebelum presensi disimpan.');
@@ -2628,7 +2666,13 @@ void loadHistory();
 } catch (err) {
 console.error(err);
 alert(err && err.message ? err.message : 'Gagal mencatat presensi. Pastikan posisi Anda berada di area sekolah dan koneksi internet aktif.');
+if (type === 'out') {
+const chkFail = getCheckoutValidation();
+btn.disabled = !chkFail.allowed;
+if (!chkFail.allowed) btn.title = `Presensi pulang baru dapat dilakukan mulai pukul ${chkFail.outStartStr} WIB`;
+} else {
 btn.disabled = false;
+}
 btn.innerHTML = type === 'in' ? '<i class="ph ph-sign-in"></i> Presensi Datang' : '<i class="ph ph-sign-out"></i> Presensi Pulang';
 }
 };

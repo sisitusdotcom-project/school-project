@@ -244,6 +244,7 @@ export default {
         }
       }
       const effectiveJakartaDate = new Date(new Date(effectiveTimestamp).toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }));
+      const jakartaNow = effectiveJakartaDate;
       const serverDateStr = new Intl.DateTimeFormat('en-CA', {
         timeZone: 'Asia/Jakarta',
         year: 'numeric',
@@ -254,7 +255,7 @@ export default {
       const currentTimeText = effectiveJakartaDate.toTimeString().slice(0, 5);
       const windowName = type === 'in' ? 'hadir' : 'pulang';
       const dayNames = ['minggu', 'senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu'];
-      const currentDayKey = dayNames[jakartaNow.getDay()] || 'senin';
+      const currentDayKey = dayNames[effectiveJakartaDate.getDay()] || 'senin';
       const isUmmi = body.isUmmi || body.roleGroup === 'ummi';
       const groupKey = isUmmi ? 'ummi' : 'gtk';
       const sched = attendanceRules.schedules?.[groupKey]?.[currentDayKey] || {};
@@ -281,8 +282,10 @@ export default {
           }, request);
         }
       }
-      const distance = getDistanceMeters(location.lat, location.lng, SCHOOL_LOCATION.lat, SCHOOL_LOCATION.lng);
-      const radius = SCHOOL_LOCATION.radiusMeters;
+      const targetSchoolLat = (env?.SCHOOL_LAT && Math.abs(Number(env.SCHOOL_LAT) - SCHOOL_LOCATION.lat) < 0.01) ? Number(env.SCHOOL_LAT) : SCHOOL_LOCATION.lat;
+      const targetSchoolLng = (env?.SCHOOL_LNG && Math.abs(Number(env.SCHOOL_LNG) - SCHOOL_LOCATION.lng) < 0.01) ? Number(env.SCHOOL_LNG) : SCHOOL_LOCATION.lng;
+      const distance = getDistanceMeters(location.lat, location.lng, targetSchoolLat, targetSchoolLng);
+      const radius = Number(env?.SCHOOL_RADIUS_METERS) || SCHOOL_LOCATION.radiusMeters;
       const accuracyValue = Number(accuracy || 0);
       if (distance > radius) {
         return jsonResponse(403, { status: 'error', message: `Lokasi di luar area sekolah. Jarak: ${Math.round(distance)}m.` }, request);

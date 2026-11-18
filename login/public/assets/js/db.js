@@ -230,6 +230,17 @@ const DB = {
       accuracy: Number(accuracy || 0)
     };
     const executeDirectFallback = async (reason = 'direct') => {
+      if (type === 'out') {
+        const rules = await this.getSettings().then(s => s?.attendanceRules || {}).catch(() => ({}));
+        const sched = AppConfig.getAttendanceSchedule(rules, isUmmi, new Date(actionIso));
+        if (!sched.isOff && !sched.allowFlexible) {
+          const actionMin = AppConfig.timeToMinutes ? AppConfig.timeToMinutes(timeStr) : (() => { const [h, m] = timeStr.split(':').map(Number); return h * 60 + m; })();
+          const outMin = AppConfig.timeToMinutes ? AppConfig.timeToMinutes(sched.outStart || '12:30') : (() => { const [h, m] = (sched.outStart || '12:30').split(':').map(Number); return h * 60 + m; })();
+          if (actionMin !== null && outMin !== null && actionMin < outMin) {
+            throw new Error(`Presensi pulang hari ${sched.dayKey} belum dapat dilakukan sebelum pukul ${sched.outStart || '12:30'}.`);
+          }
+        }
+      }
       await this.saveTeacherAttendance(dateStr, teacherId, {
         ...directPayload,
         submission_source: reason

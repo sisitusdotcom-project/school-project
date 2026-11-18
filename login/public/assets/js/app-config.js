@@ -127,6 +127,7 @@ const NAV_ITEMS = Object.freeze({
 { hash: '#/admin/characters', icon: 'ph-star', text: 'Indikator Karakter', group: 'Akademik' },
 { hash: '#/admin/leger', icon: 'ph-table', text: 'Buku Leger Rapor', group: 'Akademik' },
 { hash: '#/admin/attendance', icon: 'ph-clock-user', text: 'Pantau Presensi GTK', group: 'Monitoring' },
+{ hash: '#/personnel', icon: 'ph-sliders-horizontal', text: 'Pengaturan Personalia', group: 'Monitoring' },
 { hash: '#/kepsek/reports', icon: 'ph-clipboard-text', text: 'Pantau Rapor', group: 'Monitoring' },
 { hash: '#/it-admin/sync', icon: 'ph-arrows-clockwise', text: 'Sinkron Dapodik', group: 'Sistem & Data' },
 { hash: '#/it-admin/backup', icon: 'ph-database', text: 'Cadangkan Data', group: 'Sistem & Data' },
@@ -591,8 +592,15 @@ isCustom,
 customActivity,
 attendanceType: isCustom ? 'custom' : 'daily',
 noLatePenalty,
+allowFlexible: r.allowFlexibleTime === true,
 label
 };
+}
+function timeToMinutes(val) {
+if (!val || typeof val !== 'string') return null;
+const match = val.match(/^([0-1]?\d|2[0-3]):([0-5]\d)$/);
+if (!match) return null;
+return Number(match[1]) * 60 + Number(match[2]);
 }
 function isAttendanceLate(timeIn, sched, attRecord = null) {
 if (!timeIn || !sched) return false;
@@ -1890,6 +1898,7 @@ getTodayDateStr: getLocalDateStr,
 getLocalMonthStr,
 getAttendanceSchedule,
 isAttendanceLate,
+timeToMinutes,
 calculateGradeSummary,
 PAYROLL_CUTOFF_START,
 PAYROLL_CUTOFF_END,
