@@ -1688,14 +1688,63 @@ return aud === 'GTK' || aud === 'Tendik';
 }
 return aud === 'GTK';
 }
-function showAddAnnouncementModal(options = {}) {
+function cleanAnnouncementUrl(rawUrl) {
+if (!rawUrl || typeof rawUrl !== 'string') return '';
+const url = rawUrl.trim();
+try {
+if (!/^https?:\/\//i.test(url)) return url;
+const u = new URL(url);
+if (u.hostname.includes('google.') && u.pathname.includes('/search')) {
+const q = u.searchParams.get('q');
+const cleanU = new URL(u.origin + u.pathname);
+if (q) cleanU.searchParams.set('q', q);
+return cleanU.toString();
+}
+const stripParams = ['oq', 'gs_lcrp', 'sourceid', 'ved', 'ei', 'client', 'biw', 'bih', 'dpr', 'fbclid', 'gclid'];
+stripParams.forEach(p => u.searchParams.delete(p));
+Array.from(u.searchParams.keys()).forEach(k => {
+if (k.toLowerCase().startsWith('utm_')) u.searchParams.delete(k);
+});
+return u.toString();
+} catch (e) {
+return url;
+}
+}
+function renderRichText(rawText) {
+if (!rawText) return '';
+let text = escapeHtml(rawText);
+text = text.replace(/\t+/g, ' ');
+text = text.replace(/&lt;u&gt;([\s\S]*?)&lt;\/u&gt;/gi, '<u>$1</u>');
+text = text.replace(/__([^_]+)__/g, '<u>$1</u>');
+text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+text = text.replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, '<em>$1</em>');
+text = text.replace(/\[\s*([-*•]|\d+\.)\s+([^\]]+)\]\(((?:[^()\s]+|\([^()\s]*\))*)\)/g, '$1 [$2]($3)');
+text = text.replace(/\[([^\]]+)\]\(((?:[^()\s]+|\([^()\s]*\))*)\)/g, (match, label, rawUrl) => {
+const cleanUrl = cleanAnnouncementUrl(rawUrl.trim());
+const isSafe = /^https?:\/\//i.test(cleanUrl) || /^mailto:/i.test(cleanUrl) || cleanUrl.startsWith('#');
+const safeUrl = isSafe ? cleanUrl : '#';
+const target = cleanUrl.startsWith('#') ? '_self' : '_blank';
+return `<a href="${safeUrl}" class="bulletin-link" target="${target}" rel="noopener noreferrer">${label} <i class="ph ph-arrow-square-out"></i></a>`;
+});
+text = text.replace(/(?<!href=")(?<!">)(https?:\/\/[^\s<]+)/g, (match, bareUrl) => {
+const clean = cleanAnnouncementUrl(bareUrl);
+return `<a href="${clean}" class="bulletin-link" target="_blank" rel="noopener noreferrer">${clean} <i class="ph ph-arrow-square-out"></i></a>`;
+});
+return text;
+}
+function showAddAnnouncementModal(options = {}, editItem = null) {
 const oldModal = document.getElementById('modal-bulletin-composer');
 if (oldModal && oldModal.parentNode) oldModal.parentNode.removeChild(oldModal);
 const todayStr = getLocalDateStr(new Date());
 const modal = document.createElement('div');
 modal.id = 'modal-bulletin-composer';
 modal.className = 'modal-overlay active';
-modal.innerHTML = `<div class="modal bulletin-modal"><div class="modal-header"><h3 class="modal-title"><i class="ph ph-megaphone"></i> Buat Informasi / Pengumuman</h3><button type="button" class="modal-close" id="btn-close-bulletin-modal"><i class="ph ph-x"></i></button></div><form id="form-bulletin-composer"><div class="modal-body"><div class="form-group"><label>Judul Informasi / Edaran <span class="text-danger">*</span></label><input type="text" id="bulletin-inp-title" class="form-control" required placeholder="Contoh: Edaran Libur Awal Ramadhan 1448 H"></div><div class="form-group"><label>Sasaran Pembaca <span class="text-danger">*</span></label><select id="bulletin-sel-audience" class="form-control" required><option value="Semua">Semua Warga Sekolah (GTK & Orang Tua)</option><option value="GTK">Khusus GTK (Semua Guru & Tendik)</option><option value="Guru">Khusus Guru (Kelas, Mapel, Ummi, Ekskul)</option><option value="Tendik">Khusus Tendik (Administrasi & Tata Usaha)</option><option value="Orang Tua">Khusus Orang Tua / Wali Murid</option></select></div><div class="form-group"><label>Tanggal Edaran <span class="text-danger">*</span></label><input type="date" id="bulletin-inp-date" class="form-control" required value="${todayStr}"></div><div class="form-group"><label>Isi Informasi / Pengumuman <span class="text-danger">*</span></label><textarea id="bulletin-inp-desc" class="form-control" rows="4" required placeholder="Tuliskan isi pengumuman atau instruksi sekolah secara jelas..."></textarea></div></div><div class="modal-footer"><button type="button" class="btn btn-outline" id="btn-cancel-bulletin-modal">Batal</button><button type="submit" class="btn btn-primary" id="btn-submit-bulletin"><i class="ph ph-paper-plane-tilt"></i> Publikasikan</button></div></form></div>`;
+const isEdit = Boolean(editItem && editItem.id);
+const initTitle = editItem ? (editItem.title || '') : '';
+const initAudience = editItem ? (editItem.audience || 'Semua') : 'Semua';
+const initDate = editItem ? (editItem.date || todayStr) : todayStr;
+const initDesc = editItem ? (editItem.description || '') : '';
+modal.innerHTML = `<div class="modal bulletin-modal"><div class="modal-header"><h3 class="modal-title">${isEdit ? '<i class="ph ph-pencil-simple"></i> Edit Informasi / Pengumuman' : '<i class="ph ph-megaphone"></i> Buat Informasi / Pengumuman'}</h3><button type="button" class="modal-close" id="btn-close-bulletin-modal"><i class="ph ph-x"></i></button></div><form id="form-bulletin-composer"><div class="modal-body"><div class="form-group"><label>Judul Informasi / Edaran <span class="text-danger">*</span></label><input type="text" id="bulletin-inp-title" class="form-control" required placeholder="Contoh: Edaran Libur Awal Ramadhan 1448 H" value="${escapeHtml(initTitle)}"></div><div class="form-group"><label>Sasaran Pembaca <span class="text-danger">*</span></label><select id="bulletin-sel-audience" class="form-control" required><option value="Semua" ${initAudience === 'Semua' ? 'selected' : ''}>Semua Warga Sekolah (GTK &amp; Orang Tua)</option><option value="GTK" ${initAudience === 'GTK' ? 'selected' : ''}>Khusus GTK (Semua Guru &amp; Tendik)</option><option value="Guru" ${initAudience === 'Guru' ? 'selected' : ''}>Khusus Guru (Kelas, Mapel, Ummi, Ekskul)</option><option value="Tendik" ${initAudience === 'Tendik' ? 'selected' : ''}>Khusus Tendik (Administrasi &amp; Tata Usaha)</option><option value="Orang Tua" ${initAudience === 'Orang Tua' ? 'selected' : ''}>Khusus Orang Tua / Wali Murid</option></select></div><div class="form-group"><label>Tanggal Edaran <span class="text-danger">*</span></label><input type="date" id="bulletin-inp-date" class="form-control" required value="${escapeHtml(initDate)}"></div><div class="form-group"><label>Isi Informasi / Pengumuman <span class="text-danger">*</span></label><div class="feedback-reply-toolbar"><div class="feedback-reply-btn-group"><button type="button" class="fb-fmt-btn" id="btn-ann-bold" title="Tebal (**teks**)"><strong>B</strong></button><button type="button" class="fb-fmt-btn" id="btn-ann-italic" title="Miring (*teks*)"><em>I</em></button><button type="button" class="fb-fmt-btn" id="btn-ann-underline" title="Garis Bawah (<u>teks</u>)"><u>U</u></button><button type="button" class="fb-fmt-btn" id="btn-ann-link" title="Sisipkan Link Web / Panduan"><i class="ph ph-link"></i> Link</button></div></div><textarea id="bulletin-inp-desc" class="form-control feedback-reply-textarea" rows="6" required placeholder="Tuliskan isi pengumuman atau instruksi sekolah secara jelas...">${escapeHtml(initDesc)}</textarea><div class="feedback-reply-hint"><i class="ph ph-info"></i> Format: **Tebal**, *Miring*, <u>Garis Bawah</u>, [Label Link](https://...), enter untuk baris baru.</div></div></div><div class="modal-footer"><button type="button" class="btn btn-outline" id="btn-cancel-bulletin-modal">Batal</button><button type="submit" class="btn btn-primary" id="btn-submit-bulletin">${isEdit ? '<i class="ph ph-floppy-disk"></i> Simpan Perubahan' : '<i class="ph ph-paper-plane-tilt"></i> Publikasikan'}</button></div></form></div>`;
 document.body.appendChild(modal);
 const closeModal = () => {
 if (modal && modal.parentNode) modal.parentNode.removeChild(modal);
@@ -1704,6 +1753,42 @@ modal.querySelector('#btn-close-bulletin-modal').onclick = closeModal;
 modal.querySelector('#btn-cancel-bulletin-modal').onclick = closeModal;
 modal.onclick = (e) => {
 if (e.target === modal) closeModal();
+};
+const descEl = modal.querySelector('#bulletin-inp-desc');
+function wrapSelection(before, after, defaultText = 'teks') {
+const start = descEl.selectionStart;
+const end = descEl.selectionEnd;
+const val = descEl.value;
+const selected = val.substring(start, end) || defaultText;
+const replacement = before + selected + after;
+descEl.value = val.substring(0, start) + replacement + val.substring(end);
+descEl.focus();
+descEl.setSelectionRange(start + before.length, start + before.length + selected.length);
+}
+modal.querySelector('#btn-ann-bold').onclick = () => wrapSelection('**', '**', 'teks tebal');
+modal.querySelector('#btn-ann-italic').onclick = () => wrapSelection('*', '*', 'teks miring');
+modal.querySelector('#btn-ann-underline').onclick = () => wrapSelection('<u>', '</u>', 'teks bergaris bawah');
+modal.querySelector('#btn-ann-link').onclick = () => {
+const start = descEl.selectionStart;
+const end = descEl.selectionEnd;
+const val = descEl.value;
+const selected = val.substring(start, end);
+const inputUrl = prompt('Masukkan URL / Link tujuan (contoh: https://musada.sch.id atau #/panduan):', 'https://');
+if (!inputUrl) return;
+const cleanU = cleanAnnouncementUrl(inputUrl.trim());
+if (!cleanU) return;
+let targetSelected = selected;
+let bulletPrefix = '';
+const bMatch = targetSelected.match(/^(\s*[-*•]\s+|\s*\d+\.\s+)/);
+if (bMatch) {
+bulletPrefix = bMatch[0];
+targetSelected = targetSelected.substring(bulletPrefix.length);
+}
+const inputLabel = prompt('Teks label tautan yang ditampilkan:', targetSelected || 'Buka Tautan') || cleanU;
+const linkMd = `${bulletPrefix}[${inputLabel}](${cleanU})`;
+descEl.value = val.substring(0, start) + linkMd + val.substring(end);
+descEl.focus();
+descEl.setSelectionRange(start + linkMd.length, start + linkMd.length);
 };
 const form = modal.querySelector('#form-bulletin-composer');
 form.onsubmit = async (e) => {
@@ -1714,30 +1799,39 @@ submitBtn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Menyimpan...';
 const title = modal.querySelector('#bulletin-inp-title').value.trim();
 const audience = modal.querySelector('#bulletin-sel-audience').value;
 const dateVal = modal.querySelector('#bulletin-inp-date').value || todayStr;
-const desc = modal.querySelector('#bulletin-inp-desc').value.trim();
+let desc = modal.querySelector('#bulletin-inp-desc').value.trim();
+if (desc) {
+desc = desc.replace(/\t+/g, ' ');
+desc = desc.replace(/\[\s*([-*•]|\d+\.)\s+([^\]]+)\]\(((?:[^()\s]+|\([^()\s]*\))*)\)/g, '$1 [$2]($3)');
+desc = desc.replace(/\[([^\]]+)\]\(((?:[^()\s]+|\([^()\s]*\))*)\)/g, (m, label, u) => `[${label}](${cleanAnnouncementUrl(u)})`);
+}
 const u = (typeof Auth !== 'undefined' ? (Auth.userData || Auth.currentUser) : null) || {};
-const authorName = formatUserName(u) || u.name || u.displayName || 'Staf Humas';
+const authorName = formatUserName(u) || u.name || u.displayName || (editItem && editItem.author ? editItem.author : 'Staf Humas');
 const payload = {
 title,
 audience,
 date: dateVal,
 description: desc,
 author: authorName,
-authorRole: u.role || 'GTK',
-createdAt: Date.now()
+authorRole: u.role || (editItem && editItem.authorRole ? editItem.authorRole : 'GTK'),
+createdAt: editItem && editItem.createdAt ? editItem.createdAt : Date.now()
 };
 try {
 if (typeof DB !== 'undefined' && DB.savePersonnelAnnouncement) {
-await DB.savePersonnelAnnouncement(payload);
+await DB.savePersonnelAnnouncement(payload, isEdit ? editItem.id : null);
 } else if (typeof db !== 'undefined') {
+if (isEdit) {
+await db.ref(`personnel/announcements/${editItem.id}`).set(payload);
+} else {
 await db.ref('personnel/announcements').push().set(payload);
+}
 }
 closeModal();
 if (typeof options.onSaved === 'function') options.onSaved();
 } catch (err) {
 submitBtn.disabled = false;
-submitBtn.innerHTML = '<i class="ph ph-paper-plane-tilt"></i> Publikasikan';
-alert('Gagal mempublikasikan pengumuman: ' + (err.message || err));
+submitBtn.innerHTML = isEdit ? '<i class="ph ph-floppy-disk"></i> Simpan Perubahan' : '<i class="ph ph-paper-plane-tilt"></i> Publikasikan';
+alert('Gagal menyimpan pengumuman: ' + (err.message || err));
 }
 };
 }
@@ -1770,7 +1864,7 @@ const badgeMap = {
 'Tendik': 'badge-warning',
 'Orang Tua': 'badge-secondary'
 };
-container.innerHTML = `<div class="card panel-callout bulletin-board"><div class="bulletin-header"><div class="bulletin-header-left"><h3 class="card-title info-banner"><i class="ph ph-megaphone"></i> Papan Informasi</h3><span class="bulletin-count-badge">${filtered.length} Informasi</span></div>${canManage ? `<button type="button" class="btn btn-primary btn-sm btn-bulletin-add" id="btn-add-bulletin-action"><i class="ph ph-plus-circle"></i> Tambah Info</button>` : ''}</div><div class="bulletin-list">${filtered.length ? filtered.map(item => `<article class="bulletin-card" data-id="${item.id}"><div class="bulletin-card-head"><div class="bulletin-card-meta"><span class="badge ${badgeMap[item.audience] || 'badge-primary'}">${escapeHtml(item.audience || 'Semua')}</span><span class="bulletin-date"><i class="ph ph-calendar-blank"></i> ${escapeHtml(item.date || '-')}</span>${item.author ? `<span class="bulletin-author"><i class="ph ph-user"></i> ${escapeHtml(item.author)}</span>` : ''}</div>${canManage ? `<button type="button" class="btn-bulletin-del" data-id="${item.id}" title="Hapus Informasi"><i class="ph ph-trash"></i></button>` : ''}</div><h4 class="bulletin-title">${escapeHtml(item.title || 'Informasi Sekolah')}</h4><p class="bulletin-desc">${escapeHtml(item.description || '-')}</p></article>`).join('') : `<div class="bulletin-empty"><i class="ph ph-broadcast"></i><p class="bulletin-empty-text">${canManage ? 'Belum ada pengumuman aktif. Ketuk "Tambah Info" untuk menyiarkan informasi baru ke warga sekolah.' : 'Belum ada pengumuman baru untuk Anda saat ini.'}</p></div>`}</div></div>`;
+container.innerHTML = `<div class="card panel-callout bulletin-board"><div class="bulletin-header"><div class="bulletin-header-left"><h3 class="card-title info-banner"><i class="ph ph-megaphone"></i> Papan Informasi</h3><span class="bulletin-count-badge">${filtered.length} Informasi</span></div>${canManage ? `<button type="button" class="btn btn-primary btn-sm btn-bulletin-add" id="btn-add-bulletin-action"><i class="ph ph-plus-circle"></i> Tambah Info</button>` : ''}</div><div class="bulletin-list">${filtered.length ? filtered.map(item => `<article class="bulletin-card" data-id="${item.id}"><div class="bulletin-card-head"><div class="bulletin-card-meta"><span class="badge ${badgeMap[item.audience] || 'badge-primary'}">${escapeHtml(item.audience || 'Semua')}</span><span class="bulletin-date"><i class="ph ph-calendar-blank"></i> ${escapeHtml(item.date || '-')}</span>${item.author ? `<span class="bulletin-author"><i class="ph ph-user"></i> ${escapeHtml(item.author)}</span>` : ''}</div>${canManage ? `<div class="bulletin-card-actions"><button type="button" class="btn-bulletin-edit" data-id="${item.id}" title="Edit Informasi"><i class="ph ph-pencil-simple"></i></button><button type="button" class="btn-bulletin-del" data-id="${item.id}" title="Hapus Informasi"><i class="ph ph-trash"></i></button></div>` : ''}</div><h4 class="bulletin-title">${escapeHtml(item.title || 'Informasi Sekolah')}</h4><div class="bulletin-desc">${renderRichText(item.description || '-')}</div></article>`).join('') : `<div class="bulletin-empty"><i class="ph ph-broadcast"></i><p class="bulletin-empty-text">${canManage ? 'Belum ada pengumuman aktif. Ketuk "Tambah Info" untuk menyiarkan informasi baru ke warga sekolah.' : 'Belum ada pengumuman baru untuk Anda saat ini.'}</p></div>`}</div></div>`;
 if (canManage) {
 const addBtn = container.querySelector('#btn-add-bulletin-action');
 if (addBtn) {
@@ -1780,6 +1874,15 @@ onSaved: () => renderBulletinBoard(container, options)
 });
 };
 }
+container.querySelectorAll('.btn-bulletin-edit').forEach(btn => {
+btn.onclick = () => {
+const id = btn.dataset.id;
+const itm = filtered.find(i => i.id === id);
+if (itm) {
+showAddAnnouncementModal({ onSaved: () => renderBulletinBoard(container, options) }, itm);
+}
+};
+});
 container.querySelectorAll('.btn-bulletin-del').forEach(btn => {
 btn.onclick = async () => {
 const id = btn.dataset.id;
@@ -1915,6 +2018,7 @@ getDashboardHeroHtml,
 canManageAnnouncements,
 isAnnouncementVisible,
 showAddAnnouncementModal,
+renderRichText,
 renderBulletinBoard,
 attendanceGeofence: SCHOOL_GEOFENCE,
 SCHOOL_GEOFENCE,
