@@ -56,10 +56,12 @@ return url;
 function renderRichFeedbackText(rawText) {
 if (!rawText) return '';
 let text = AppConfig.escapeHtml(rawText);
+text = text.replace(/\t+/g, ' ');
 text = text.replace(/&lt;u&gt;([\s\S]*?)&lt;\/u&gt;/gi, '<u>$1</u>');
 text = text.replace(/__([^_]+)__/g, '<u>$1</u>');
 text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
 text = text.replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, '<em>$1</em>');
+text = text.replace(/\[\s*([-*•]|\d+\.)\s+([^\]]+)\]\(((?:[^()\s]+|\([^()\s]*\))*)\)/g, '$1 [$2]($3)');
 text = text.replace(/\[([^\]]+)\]\(((?:[^()\s]+|\([^()\s]*\))*)\)/g, (match, label, rawUrl) => {
 const cleanUrl = cleanFeedbackUrl(rawUrl.trim());
 const isSafe = /^https?:\/\//i.test(cleanUrl) || /^mailto:/i.test(cleanUrl) || cleanUrl.startsWith('#');
@@ -162,6 +164,8 @@ m.id = 'modal-fb-followup';
 m.className = 'modal-overlay active';
 let initialNote = issue.adminNote || 'Terimakasih atas laporannya.\n\n\n\n- IT Support -';
 if (issue.adminNote) {
+initialNote = initialNote.replace(/\t+/g, ' ');
+initialNote = initialNote.replace(/\[\s*([-*•]|\d+\.)\s+([^\]]+)\]\(((?:[^()\s]+|\([^()\s]*\))*)\)/g, '$1 [$2]($3)');
 initialNote = initialNote.replace(/\[([^\]]+)\]\(((?:[^()\s]+|\([^()\s]*\))*)\)/g, (m, label, u) => `[${label}](${cleanFeedbackUrl(u)})`);
 }
 m.innerHTML = `<div class="modal feedback-modal"><div class="modal-header"><h3 class="modal-title"><i class="ph ph-wrench"></i> Tindak Lanjut Masukan / Kendala</h3><button type="button" class="modal-close" id="btn-close-followup"><i class="ph ph-x"></i></button></div><form id="form-fb-followup"><div class="modal-body"><div class="feedback-detail-info"><p class="feedback-detail-row"><strong>Pelapor:</strong> ${AppConfig.escapeHtml(issue.userName || '-')} (${AppConfig.escapeHtml(issue.userRole || '-')})</p><p class="feedback-detail-row"><strong>Waktu:</strong> ${formatDateTime(issue.createdAt)}</p><p class="feedback-detail-row"><strong>Kategori & Modul:</strong> ${AppConfig.escapeHtml(issue.category || '-')} &bull; ${AppConfig.escapeHtml(issue.page || '-')}</p><p class="feedback-detail-row"><strong>Judul:</strong> ${AppConfig.escapeHtml(issue.title || '-')}</p><div class="feedback-desc-box"><label>Uraian Masukan / Kendala:</label><p class="feedback-desc-text">${AppConfig.escapeHtml(issue.description || '-')}</p></div>${issue.screenshotUrl ? `<div class="feedback-screenshot-link"><button type="button" class="btn btn-sm btn-outline" id="btn-view-modal-ss"><i class="ph ph-image"></i> Lihat Screenshot Bukti</button></div>` : ''}</div><div class="form-group"><label>Status Penanganan <span class="text-danger">*</span></label><select id="followup-status" class="form-control" required><option value="Baru" ${issue.status === 'Baru' ? 'selected' : ''}>Baru (Menunggu Tindak Lanjut)</option><option value="Diproses" ${issue.status === 'Diproses' ? 'selected' : ''}>Diproses (Sedang Dikerjakan Developer)</option><option value="Selesai" ${issue.status === 'Selesai' ? 'selected' : ''}>Selesai (Sudah Diterapkan / Diperbaiki)</option></select></div><div class="form-group"><label>Catatan Pengembang / Tanggapan IT Support</label><div class="feedback-reply-toolbar"><div class="feedback-reply-btn-group"><button type="button" class="fb-fmt-btn" id="fb-fmt-bold" title="Tebal (**teks**)"><strong>B</strong></button><button type="button" class="fb-fmt-btn" id="fb-fmt-italic" title="Miring (*teks*)"><em>I</em></button><button type="button" class="fb-fmt-btn" id="fb-fmt-underline" title="Garis Bawah (<u>teks</u>)"><u>U</u></button><button type="button" class="fb-fmt-btn" id="fb-fmt-link" title="Sisipkan Link Web / Panduan"><i class="ph ph-link"></i> Link</button></div><select id="fb-quick-template" class="fb-template-select"><option value="">-- Template Balasan Cepat --</option><option value="gps">GPS / Lokasi Belum Valid</option><option value="wip">Sedang Diproses Developer</option><option value="done">Selesai / Sudah Teratasi</option><option value="info">Minta Info / Bukti Tambahan</option></select></div><textarea id="followup-note" class="form-control feedback-reply-textarea" rows="7" placeholder="Tuliskan respon atau arahan teknis...">${AppConfig.escapeHtml(initialNote)}</textarea><div class="feedback-reply-hint"><i class="ph ph-info"></i> Format: **Tebal**, *Miring*, <u>Garis Bawah</u>, [Label Link](https://...), enter untuk baris baru.</div></div></div><div class="modal-footer"><button type="button" class="btn btn-outline" id="btn-cancel-followup">Batal</button><button type="submit" class="btn btn-primary" id="btn-save-followup"><i class="ph ph-floppy-disk"></i> Simpan Tanggapan</button></div></form></div>`;
@@ -200,8 +204,15 @@ const inputUrl = prompt('Masukkan URL / Link tujuan (contoh: https://musada.sch.
 if (!inputUrl) return;
 const cleanUrl = cleanFeedbackUrl(inputUrl.trim());
 if (!cleanUrl) return;
-const inputLabel = prompt('Teks label tautan yang ditampilkan:', selected || 'Buka Tautan') || cleanUrl;
-const linkMd = `[${inputLabel}](${cleanUrl})`;
+let targetSelected = selected;
+let bulletPrefix = '';
+const bMatch = targetSelected.match(/^(\s*[-*•]\s+|\s*\d+\.\s+)/);
+if (bMatch) {
+bulletPrefix = bMatch[0];
+targetSelected = targetSelected.substring(bulletPrefix.length);
+}
+const inputLabel = prompt('Teks label tautan yang ditampilkan:', targetSelected || 'Buka Tautan') || cleanUrl;
+const linkMd = `${bulletPrefix}[${inputLabel}](${cleanUrl})`;
 noteEl.value = val.substring(0, start) + linkMd + val.substring(end);
 noteEl.focus();
 noteEl.setSelectionRange(start + linkMd.length, start + linkMd.length);
@@ -242,6 +253,8 @@ btnSave.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Menyimpan...';
 const newStatus = m.querySelector('#followup-status').value;
 let newNote = m.querySelector('#followup-note').value.trim();
 if (newNote) {
+newNote = newNote.replace(/\t+/g, ' ');
+newNote = newNote.replace(/\[\s*([-*•]|\d+\.)\s+([^\]]+)\]\(((?:[^()\s]+|\([^()\s]*\))*)\)/g, '$1 [$2]($3)');
 newNote = newNote.replace(/\[([^\]]+)\]\(((?:[^()\s]+|\([^()\s]*\))*)\)/g, (m, label, u) => `[${label}](${cleanFeedbackUrl(u)})`);
 const prefix = 'Terimakasih atas laporannya.';
 if (!/^\s*terimakasih\s+atas\s+laporannya\.?/i.test(newNote)) {

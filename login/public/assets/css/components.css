@@ -3609,14 +3609,14 @@ body{background:#fff !important;color:#000 !important;}
 .feedback-admin-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
 .feedback-admin-badge{display:inline-flex;align-items:center;gap:4.5px;font-size:11px;font-weight:700;color:#047857;letter-spacing:0.01em;}
 .feedback-admin-time{font-size:10px;color:var(--text-muted,#64748b);display:inline-flex;align-items:center;gap:3px;}
-.feedback-admin-content{font-size:11.5px;line-height:1.55;color:var(--text-main,#1e293b);white-space:pre-wrap;word-break:break-word;}
+.feedback-admin-content{font-size:11.5px;line-height:1.6;color:var(--text-main,#1e293b);white-space:pre-wrap;word-break:break-word;overflow-wrap:break-word;tab-size:2;-moz-tab-size:2;}
 .feedback-admin-card--table .feedback-admin-content{font-size:11px;line-height:1.45;}
 .feedback-admin-content strong{font-weight:700;color:#0f172a;}
 .feedback-admin-content em{font-style:italic;}
 .feedback-admin-content u{text-decoration:underline;text-underline-offset:2px;}
-.feedback-reply-link{color:#0284c7;font-weight:600;text-decoration:underline;text-underline-offset:2px;display:inline-flex;align-items:center;gap:2px;transition:color .15s;}
+.feedback-reply-link{color:#0284c7;font-weight:600;text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px;word-break:break-word;overflow-wrap:break-word;transition:color .15s;display:inline;}
 .feedback-reply-link:hover{color:#0369a1;text-decoration:underline;}
-.feedback-reply-link i{font-size:11px;}
+.feedback-reply-link i{font-size:11px;vertical-align:-1px;margin-left:3px;display:inline-block;text-decoration:none;}
 .feedback-reply-toolbar{background:var(--bg-body,#f8fafc);border:1px solid var(--border-color,#cbd5e1);border-bottom:none;border-radius:6px 6px 0 0;padding:5px 8px;display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap;}
 .feedback-reply-btn-group{display:flex;align-items:center;gap:4px;}
 .fb-fmt-btn{background:var(--bg-card,#fff);border:1px solid var(--border-color,#cbd5e1);border-radius:4px;padding:3px 8px;font-size:11px;font-weight:700;color:var(--text-main,#334155);cursor:pointer;line-height:1.3;display:inline-flex;align-items:center;justify-content:center;transition:background .15s,border-color .15s;}
