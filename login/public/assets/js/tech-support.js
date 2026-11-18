@@ -31,6 +31,28 @@ default:
 return '<span class="badge badge-outline"><i class="ph ph-chat-circle-text"></i> Umum</span>';
 }
 }
+function renderRichFeedbackText(rawText) {
+if (!rawText) return '';
+let text = AppConfig.escapeHtml(rawText);
+text = text.replace(/&lt;u&gt;([\s\S]*?)&lt;\/u&gt;/gi, '<u>$1</u>');
+text = text.replace(/__([^_]+)__/g, '<u>$1</u>');
+text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+text = text.replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, '<em>$1</em>');
+text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, label, url) => {
+const cleanUrl = url.trim();
+const isSafe = /^https?:\/\//i.test(cleanUrl) || /^mailto:/i.test(cleanUrl) || cleanUrl.startsWith('#');
+const safeUrl = isSafe ? cleanUrl : '#';
+const target = cleanUrl.startsWith('#') ? '_self' : '_blank';
+return `<a href="${safeUrl}" class="feedback-reply-link" target="${target}" rel="noopener noreferrer">${label} <i class="ph ph-arrow-square-out"></i></a>`;
+});
+text = text.replace(/(?<!href=")(?<!">)(https?:\/\/[^\s<]+)/g, '<a href="$1" class="feedback-reply-link" target="_blank" rel="noopener noreferrer">$1 <i class="ph ph-arrow-square-out"></i></a>');
+return text;
+}
+function renderAdminReplyCard(item, isTable = false) {
+if (!item || !item.adminNote) return '';
+const timeStr = item.updatedAt ? formatDateTime(item.updatedAt) : '';
+return `<div class="feedback-admin-card${isTable ? ' feedback-admin-card--table' : ''}"><div class="feedback-admin-head"><span class="feedback-admin-badge"><i class="ph ph-shield-check"></i> Tanggapan IT Support</span>${timeStr ? `<span class="feedback-admin-time"><i class="ph ph-clock"></i> ${timeStr}</span>` : ''}</div><div class="feedback-admin-content">${renderRichFeedbackText(item.adminNote)}</div></div>`;
+}
 function extractFileIdFromUrl(rawUrl) {
 if (!rawUrl || typeof rawUrl !== 'string') return '';
 const url = rawUrl.trim();
@@ -113,7 +135,8 @@ if (old && old.parentNode) old.parentNode.removeChild(old);
 const m = document.createElement('div');
 m.id = 'modal-fb-followup';
 m.className = 'modal-overlay active';
-m.innerHTML = `<div class="modal feedback-modal"><div class="modal-header"><h3 class="modal-title"><i class="ph ph-wrench"></i> Tindak Lanjut Masukan / Kendala</h3><button type="button" class="modal-close" id="btn-close-followup"><i class="ph ph-x"></i></button></div><form id="form-fb-followup"><div class="modal-body"><div class="feedback-detail-info"><p class="feedback-detail-row"><strong>Pelapor:</strong> ${AppConfig.escapeHtml(issue.userName || '-')} (${AppConfig.escapeHtml(issue.userRole || '-')})</p><p class="feedback-detail-row"><strong>Waktu:</strong> ${formatDateTime(issue.createdAt)}</p><p class="feedback-detail-row"><strong>Kategori & Modul:</strong> ${AppConfig.escapeHtml(issue.category || '-')} &bull; ${AppConfig.escapeHtml(issue.page || '-')}</p><p class="feedback-detail-row"><strong>Judul:</strong> ${AppConfig.escapeHtml(issue.title || '-')}</p><div class="feedback-desc-box"><label>Uraian Masukan / Kendala:</label><p class="feedback-desc-text">${AppConfig.escapeHtml(issue.description || '-')}</p></div>${issue.screenshotUrl ? `<div class="feedback-screenshot-link"><button type="button" class="btn btn-sm btn-outline" id="btn-view-modal-ss"><i class="ph ph-image"></i> Lihat Screenshot Bukti</button></div>` : ''}</div><div class="form-group"><label>Status Penanganan <span class="text-danger">*</span></label><select id="followup-status" class="form-control" required><option value="Baru" ${issue.status === 'Baru' ? 'selected' : ''}>Baru (Menunggu Tindak Lanjut)</option><option value="Diproses" ${issue.status === 'Diproses' ? 'selected' : ''}>Diproses (Sedang Dikerjakan Developer)</option><option value="Selesai" ${issue.status === 'Selesai' ? 'selected' : ''}>Selesai (Sudah Diterapkan / Diperbaiki)</option></select></div><div class="form-group"><label>Catatan Pengembang / Administrator</label><textarea id="followup-note" class="form-control" rows="3" placeholder="Contoh: Sudah diperbaiki pada rilis aplikasi hari ini. Terima kasih masukannya...">${AppConfig.escapeHtml(issue.adminNote || '')}</textarea></div></div><div class="modal-footer"><button type="button" class="btn btn-outline" id="btn-cancel-followup">Batal</button><button type="submit" class="btn btn-primary" id="btn-save-followup"><i class="ph ph-floppy-disk"></i> Simpan Tanggapan</button></div></form></div>`;
+const initialNote = issue.adminNote || 'Terimakasih atas laporannya.\n\n\n\n- IT Support -';
+m.innerHTML = `<div class="modal feedback-modal"><div class="modal-header"><h3 class="modal-title"><i class="ph ph-wrench"></i> Tindak Lanjut Masukan / Kendala</h3><button type="button" class="modal-close" id="btn-close-followup"><i class="ph ph-x"></i></button></div><form id="form-fb-followup"><div class="modal-body"><div class="feedback-detail-info"><p class="feedback-detail-row"><strong>Pelapor:</strong> ${AppConfig.escapeHtml(issue.userName || '-')} (${AppConfig.escapeHtml(issue.userRole || '-')})</p><p class="feedback-detail-row"><strong>Waktu:</strong> ${formatDateTime(issue.createdAt)}</p><p class="feedback-detail-row"><strong>Kategori & Modul:</strong> ${AppConfig.escapeHtml(issue.category || '-')} &bull; ${AppConfig.escapeHtml(issue.page || '-')}</p><p class="feedback-detail-row"><strong>Judul:</strong> ${AppConfig.escapeHtml(issue.title || '-')}</p><div class="feedback-desc-box"><label>Uraian Masukan / Kendala:</label><p class="feedback-desc-text">${AppConfig.escapeHtml(issue.description || '-')}</p></div>${issue.screenshotUrl ? `<div class="feedback-screenshot-link"><button type="button" class="btn btn-sm btn-outline" id="btn-view-modal-ss"><i class="ph ph-image"></i> Lihat Screenshot Bukti</button></div>` : ''}</div><div class="form-group"><label>Status Penanganan <span class="text-danger">*</span></label><select id="followup-status" class="form-control" required><option value="Baru" ${issue.status === 'Baru' ? 'selected' : ''}>Baru (Menunggu Tindak Lanjut)</option><option value="Diproses" ${issue.status === 'Diproses' ? 'selected' : ''}>Diproses (Sedang Dikerjakan Developer)</option><option value="Selesai" ${issue.status === 'Selesai' ? 'selected' : ''}>Selesai (Sudah Diterapkan / Diperbaiki)</option></select></div><div class="form-group"><label>Catatan Pengembang / Tanggapan IT Support</label><div class="feedback-reply-toolbar"><div class="feedback-reply-btn-group"><button type="button" class="fb-fmt-btn" id="fb-fmt-bold" title="Tebal (**teks**)"><strong>B</strong></button><button type="button" class="fb-fmt-btn" id="fb-fmt-italic" title="Miring (*teks*)"><em>I</em></button><button type="button" class="fb-fmt-btn" id="fb-fmt-underline" title="Garis Bawah (<u>teks</u>)"><u>U</u></button><button type="button" class="fb-fmt-btn" id="fb-fmt-link" title="Sisipkan Link Web / Panduan"><i class="ph ph-link"></i> Link</button></div><select id="fb-quick-template" class="fb-template-select"><option value="">-- Template Balasan Cepat --</option><option value="gps">GPS / Lokasi Belum Valid</option><option value="wip">Sedang Diproses Developer</option><option value="done">Selesai / Sudah Teratasi</option><option value="info">Minta Info / Bukti Tambahan</option></select></div><textarea id="followup-note" class="form-control feedback-reply-textarea" rows="7" placeholder="Tuliskan respon atau arahan teknis...">${AppConfig.escapeHtml(initialNote)}</textarea><div class="feedback-reply-hint"><i class="ph ph-info"></i> Format: **Tebal**, *Miring*, <u>Garis Bawah</u>, [Label Link](https://...), enter untuk baris baru.</div></div></div><div class="modal-footer"><button type="button" class="btn btn-outline" id="btn-cancel-followup">Batal</button><button type="submit" class="btn btn-primary" id="btn-save-followup"><i class="ph ph-floppy-disk"></i> Simpan Tanggapan</button></div></form></div>`;
 document.body.appendChild(m);
 const closeM = () => { if (m && m.parentNode) m.parentNode.removeChild(m); };
 m.querySelector('#btn-close-followup').onclick = closeM;
@@ -123,6 +146,65 @@ if (issue.screenshotUrl) {
 const btnSs = m.querySelector('#btn-view-modal-ss');
 if (btnSs) btnSs.onclick = () => showImageViewer(issue.screenshotUrl, issue.title);
 }
+const noteEl = m.querySelector('#followup-note');
+if (!issue.adminNote) {
+noteEl.setSelectionRange(30, 30);
+}
+function wrapSelection(before, after, defaultText = 'teks') {
+const start = noteEl.selectionStart;
+const end = noteEl.selectionEnd;
+const val = noteEl.value;
+const selected = val.substring(start, end) || defaultText;
+const replacement = before + selected + after;
+noteEl.value = val.substring(0, start) + replacement + val.substring(end);
+noteEl.focus();
+noteEl.setSelectionRange(start + before.length, start + before.length + selected.length);
+}
+m.querySelector('#fb-fmt-bold').onclick = () => wrapSelection('**', '**', 'teks tebal');
+m.querySelector('#fb-fmt-italic').onclick = () => wrapSelection('*', '*', 'teks miring');
+m.querySelector('#fb-fmt-underline').onclick = () => wrapSelection('<u>', '</u>', 'teks bergaris bawah');
+m.querySelector('#fb-fmt-link').onclick = () => {
+const start = noteEl.selectionStart;
+const end = noteEl.selectionEnd;
+const val = noteEl.value;
+const selected = val.substring(start, end);
+const inputUrl = prompt('Masukkan URL / Link tujuan (contoh: https://musada.sch.id atau #/panduan):', 'https://');
+if (!inputUrl) return;
+const cleanUrl = inputUrl.trim();
+if (!cleanUrl) return;
+const inputLabel = prompt('Teks label tautan yang ditampilkan:', selected || 'Buka Tautan') || cleanUrl;
+const linkMd = `[${inputLabel}](${cleanUrl})`;
+noteEl.value = val.substring(0, start) + linkMd + val.substring(end);
+noteEl.focus();
+noteEl.setSelectionRange(start + linkMd.length, start + linkMd.length);
+};
+const tplSelect = m.querySelector('#fb-quick-template');
+if (tplSelect) {
+tplSelect.onchange = () => {
+const val = tplSelect.value;
+if (!val) return;
+let tplText = '';
+const stEl = m.querySelector('#followup-status');
+if (val === 'gps') {
+tplText = 'Terimakasih atas laporannya.\n\nKendala posisi belum valid umumnya terjadi saat akurasi GPS perangkat di atas batas toleransi (50 meter). Silakan coba langkah berikut:\n1. Pastikan fitur **Akurasi Lokasi Tinggi (Google Location Accuracy)** pada ponsel telah aktif.\n2. Buka aplikasi Google Maps sejenak hingga posisi biru terkunci sebelum presensi di SMS Musada.\n3. Pastikan izin lokasi browser disetel ke **Izinkan Saat Menggunakan Aplikasi**.\n4. Hindari aplikasi pihak ketiga seperti VPN atau Fake GPS.\n\nJika masih mendesak dan posisi tetap terkendala, silakan melakukan presensi manual sementara ke bagian Personalia.\n\n- IT Support -';
+if (stEl) stEl.value = 'Diproses';
+} else if (val === 'wip') {
+tplText = 'Terimakasih atas laporannya.\n\nLaporan kendala Anda telah kami terima dan saat ini sedang dalam proses penanganan oleh tim teknis. Kami akan mengabari kembali setelah perbaikan selesai diterapkan.\n\n- IT Support -';
+if (stEl) stEl.value = 'Diproses';
+} else if (val === 'done') {
+tplText = 'Terimakasih atas laporannya.\n\nKendala yang dilaporkan telah berhasil ditelusuri dan diselesaikan pada sistem. Silakan memuat ulang halaman (refresh) dan mencoba kembali fitur tersebut.\n\n- IT Support -';
+if (stEl) stEl.value = 'Selesai';
+} else if (val === 'info') {
+tplText = 'Terimakasih atas laporannya.\n\nUntuk mempermudah investigasi kendala ini, mohon bantuan Anda untuk menyampaikan informasi tambahan (misal: tipe perangkat, browser yang digunakan, atau tangkapan layar pesan error).\n\n- IT Support -';
+if (stEl) stEl.value = 'Diproses';
+}
+if (tplText) {
+noteEl.value = tplText;
+noteEl.focus();
+}
+tplSelect.value = '';
+};
+}
 const form = m.querySelector('#form-fb-followup');
 form.onsubmit = async (e) => {
 e.preventDefault();
@@ -130,7 +212,16 @@ const btnSave = m.querySelector('#btn-save-followup');
 btnSave.disabled = true;
 btnSave.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Menyimpan...';
 const newStatus = m.querySelector('#followup-status').value;
-const newNote = m.querySelector('#followup-note').value.trim();
+let newNote = m.querySelector('#followup-note').value.trim();
+if (newNote) {
+const prefix = 'Terimakasih atas laporannya.';
+if (!/^\s*terimakasih\s+atas\s+laporannya\.?/i.test(newNote)) {
+newNote = prefix + '\n\n' + newNote;
+}
+if (!/(?:it\s*support|\-\s*it\s*support\s*\-?)\s*$/i.test(newNote)) {
+newNote = newNote + '\n\n- IT Support -';
+}
+}
 try {
 await db.ref(`system_feedback/${issue.id}`).update({
 status: newStatus,
@@ -210,7 +301,7 @@ ${filteredInbox.length ? filteredInbox.map(item => `
 <td class="feedback-col-time">${formatDateTime(item.createdAt)}</td>
 <td class="feedback-col-user"><strong>${AppConfig.escapeHtml(item.userName || 'Anonim')}</strong><div class="text-muted small">${AppConfig.escapeHtml(item.userRole || '-')} &bull; ${AppConfig.escapeHtml(item.userEmail || '-')}</div></td>
 <td>${getCategoryBadge(item.category)}<div class="feedback-module-badge"><i class="ph ph-folder"></i> ${AppConfig.escapeHtml(item.page || '-')}</div></td>
-<td><strong class="feedback-row-title">${AppConfig.escapeHtml(item.title || '-')}</strong><p class="feedback-row-desc">${AppConfig.escapeHtml(item.description || '-')}</p>${item.adminNote ? `<div class="feedback-admin-reply"><i class="ph ph-arrow-bend-down-right"></i> <strong>Tanggapan:</strong> ${AppConfig.escapeHtml(item.adminNote)}</div>` : ''}</td>
+<td><strong class="feedback-row-title">${AppConfig.escapeHtml(item.title || '-')}</strong><p class="feedback-row-desc">${AppConfig.escapeHtml(item.description || '-')}</p>${renderAdminReplyCard(item, true)}</td>
 <td>${item.screenshotUrl ? `<button type="button" class="btn btn-xs btn-outline btn-fb-view-ss" data-url="${AppConfig.escapeHtml(item.screenshotUrl)}" data-title="${AppConfig.escapeHtml(item.title || '')}"><i class="ph ph-image"></i> Lihat</button>` : '<span class="text-muted small">—</span>'}</td>
 <td>${getStatusBadge(item.status)}</td>
 <td>
@@ -252,11 +343,7 @@ ${item.screenshotUrl ? `
 </button>
 </div>
 ` : ''}
-${item.adminNote ? `
-<div class="feedback-admin-reply">
-<i class="ph ph-arrow-bend-down-right"></i> <strong>Tanggapan Administrator:</strong> ${AppConfig.escapeHtml(item.adminNote)}
-</div>
-` : ''}
+${renderAdminReplyCard(item, false)}
 </div>
 <div class="feedback-inbox-card-actions">
 <button type="button" class="btn btn-xs btn-primary btn-fb-followup" data-id="${item.id}">
@@ -321,7 +408,7 @@ ${getCategoryBadge(item.category)}
 <h4 class="feedback-item-title">${AppConfig.escapeHtml(item.title || '-')}</h4>
 <p class="feedback-item-desc">${AppConfig.escapeHtml(item.description || '-')}</p>
 ${item.screenshotUrl ? `<div class="feedback-item-ss"><button type="button" class="btn btn-xs btn-outline btn-fb-view-ss" data-url="${AppConfig.escapeHtml(item.screenshotUrl)}" data-title="${AppConfig.escapeHtml(item.title || '')}"><i class="ph ph-image"></i> Lihat Screenshot Bukti</button></div>` : ''}
-${item.adminNote ? `<div class="feedback-admin-reply"><i class="ph ph-chat-circle-dots"></i> <strong>Tanggapan Administrator:</strong> "${AppConfig.escapeHtml(item.adminNote)}"</div>` : '<div class="feedback-admin-pending text-muted small"><i class="ph ph-hourglass-simple"></i> Menunggu tinjauan administrator.</div>'}
+${renderAdminReplyCard(item, false) || '<div class="feedback-admin-pending text-muted small"><i class="ph ph-hourglass-simple"></i> Menunggu tinjauan administrator.</div>'}
 </div>
 `).join('')}
 </div>
