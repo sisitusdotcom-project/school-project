@@ -57,23 +57,27 @@ const tomorrowScheds = teacherScheds.filter(s => s.day === tomorrowDayName).sort
 const renderSchedItems = (items) => {
 if (!items.length) return '<p class="guru-sched-empty">Tidak ada jadwal mengajar tatap muka.</p>';
 return items.map(s => {
-const cls = allClasses[s.classId];
-const sub = allSubjects[s.subjectId];
-const clsName = cls ? cls.name : s.classId;
-const subName = sub ? sub.name : s.subjectId;
+const cls = s.classId ? allClasses[s.classId] : null;
+const sub = s.subjectId ? allSubjects[s.subjectId] : null;
+const clsName = cls ? cls.name : (s.className || s.classId || '-');
+const subName = sub ? sub.name : (s.subjectName || s.subject || s.activityName || s.activity || s.subjectId || 'Kegiatan Pembelajaran');
 return `<div class="guru-sched-item"><div><strong class="guru-sched-sub">${AppConfig.escapeHtml(subName)}</strong><div class="guru-sched-cls">Kelas: ${AppConfig.escapeHtml(clsName)}</div></div><span class="badge badge-primary guru-sched-badge">${s.startTime || '-'} - ${s.endTime || '-'}</span></div>`;
 }).join('');
 };
-const fullWeekSchedRows = teacherScheds.length ? [...teacherScheds].sort((a, b) => {
-const dA = dayNames.indexOf(a.day);
-const dB = dayNames.indexOf(b.day);
-if (dA !== dB) return dA - dB;
-return (a.startTime || '').localeCompare(b.startTime || '');
-}).map(s => {
-const cls = allClasses[s.classId];
-const sub = allSubjects[s.subjectId];
-return `<tr><td><strong>${AppConfig.escapeHtml(s.day)}</strong></td><td><span class="badge badge-outline">${s.startTime || '-'} - ${s.endTime || '-'}</span></td><td>${AppConfig.escapeHtml(cls ? cls.name : s.classId)}</td><td>${AppConfig.escapeHtml(sub ? sub.name : s.subjectId)}</td></tr>`;
-}).join('') : '<tr><td colspan="4" class="text-center text-muted">Belum ada jadwal mengajar yang diterbitkan.</td></tr>';
+const activeDays = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'].filter(d => teacherScheds.some(s => s.day === d));
+const fullWeekSchedRows = activeDays.length ? activeDays.map(d => {
+const dayItems = teacherScheds.filter(s => s.day === d).sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''));
+const headerRow = `<tr><td colspan="3" class="guru-sched-day-divider"><div class="guru-sched-day-head"><span class="guru-sched-day-name"><i class="ph ph-calendar-check"></i> ${d}</span><span class="badge badge-neutral">${dayItems.length} Sesi / JP</span></div></td></tr>`;
+const itemRows = dayItems.map(s => {
+const cls = s.classId ? allClasses[s.classId] : null;
+const sub = s.subjectId ? allSubjects[s.subjectId] : null;
+const clsName = cls ? cls.name : (s.className || s.classId || '-');
+const subName = sub ? sub.name : (s.subjectName || s.subject || s.activityName || s.activity || s.subjectId || 'Kegiatan Pembelajaran');
+const roomLabel = s.room ? ` &middot; <span class="text-muted"><i class="ph ph-door"></i> ${AppConfig.escapeHtml(s.room)}</span>` : '';
+return `<tr><td><span class="badge badge-outline">${s.startTime || '-'} - ${s.endTime || '-'}</span></td><td><strong class="guru-sched-sub-name">${AppConfig.escapeHtml(subName)}</strong></td><td><span class="guru-sched-cls-name">${AppConfig.escapeHtml(clsName)}</span>${roomLabel}</td></tr>`;
+}).join('');
+return headerRow + itemRows;
+}).join('') : '<tr><td colspan="3" class="text-center text-muted">Belum ada jadwal mengajar yang diterbitkan.</td></tr>';
 container.innerHTML = `
 ${heroHtml}
 ${gradeResult.isPoorGrade ? `
@@ -124,9 +128,13 @@ ${renderSchedItems(tomorrowScheds)}
 </div>
 </div>
 <div id="guru-sched-week-wrap" class="guru-sched-week hidden">
-<div class="table-responsive">
-<table class="table">
-<thead><tr><th>Hari</th><th>Jam</th><th>Kelas</th><th>Mata Pelajaran</th></tr></thead>
+<div class="guru-sched-week-toolbar">
+<div class="guru-sched-week-title"><i class="ph ph-calendar-blank"></i> <strong>Rincian Jadwal Mengajar 1 Pekan</strong> (${teacherScheds.length} Sesi / JP)</div>
+<a href="#/guru/schedules" class="btn btn-outline btn-xs"><i class="ph ph-table"></i> Matriks Lengkap &rarr;</a>
+</div>
+<div class="table-wrap">
+<table class="table guru-sched-week-table">
+<thead><tr><th class="guru-sched-time-th">Waktu</th><th>Mata Pelajaran</th><th>Kelas & Ruang</th></tr></thead>
 <tbody>${fullWeekSchedRows}</tbody>
 </table>
 </div>
@@ -251,9 +259,16 @@ const btnToggle = container.querySelector('#btn-toggle-guru-sched');
 const schedWrap = container.querySelector('#guru-sched-week-wrap');
 if (btnToggle && schedWrap) {
 btnToggle.onclick = () => {
-const isHidden = schedWrap.style.display === 'none';
-schedWrap.style.display = isHidden ? 'block' : 'none';
-btnToggle.innerHTML = isHidden ? '<i class="ph ph-eye-slash"></i> Tutup 1 Pekan' : '<i class="ph ph-calendar"></i> Jadwal 1 Pekan';
+const isHidden = schedWrap.classList.contains('hidden');
+if (isHidden) {
+schedWrap.classList.remove('hidden');
+btnToggle.classList.add('active');
+btnToggle.innerHTML = '<i class="ph ph-eye-slash"></i> Tutup 1 Pekan';
+} else {
+schedWrap.classList.add('hidden');
+btnToggle.classList.remove('active');
+btnToggle.innerHTML = '<i class="ph ph-calendar"></i> Jadwal 1 Pekan';
+}
 };
 }
 },
