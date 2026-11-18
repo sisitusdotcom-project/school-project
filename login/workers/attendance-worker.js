@@ -243,19 +243,26 @@ export default {
           effectiveTimestamp = clientTimestamp;
         }
       }
-      const effectiveJakartaDate = new Date(new Date(effectiveTimestamp).toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }));
-      const jakartaNow = effectiveJakartaDate;
+      const effectiveDate = new Date(effectiveTimestamp);
       const serverDateStr = new Intl.DateTimeFormat('en-CA', {
         timeZone: 'Asia/Jakarta',
         year: 'numeric',
         month: '2-digit',
         day: '2-digit'
-      }).format(effectiveJakartaDate);
+      }).format(effectiveDate);
       const effectiveDateStr = serverDateStr;
-      const currentTimeText = effectiveJakartaDate.toTimeString().slice(0, 5);
+      const timeFormatted = new Intl.DateTimeFormat('id-ID', {
+        timeZone: 'Asia/Jakarta',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      }).format(effectiveDate).replace('.', ':');
+      const currentTimeText = timeFormatted;
       const windowName = type === 'in' ? 'hadir' : 'pulang';
-      const dayNames = ['minggu', 'senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu'];
-      const currentDayKey = dayNames[effectiveJakartaDate.getDay()] || 'senin';
+      const currentDayKey = new Intl.DateTimeFormat('id-ID', {
+        timeZone: 'Asia/Jakarta',
+        weekday: 'long'
+      }).format(effectiveDate).toLowerCase();
       const isUmmi = body.isUmmi || body.roleGroup === 'ummi';
       const groupKey = isUmmi ? 'ummi' : 'gtk';
       const sched = attendanceRules.schedules?.[groupKey]?.[currentDayKey] || {};
@@ -308,11 +315,6 @@ export default {
         photoHash
       };
       const serverSignature = await signPayload(signedPayload, env?.WORKER_SECRET || 'local-dev-secret');
-      const timeFormatted = new Intl.DateTimeFormat('id-ID', {
-        timeZone: 'Asia/Jakarta',
-        hour: '2-digit',
-        minute: '2-digit'
-      }).format(effectiveJakartaDate).replace('.', ':');
       const initialPatch = {
         serverTimestamp,
         client_action_timestamp: clientTimestamp || serverTimestamp,
