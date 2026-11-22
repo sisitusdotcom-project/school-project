@@ -2877,7 +2877,7 @@ async renderUmmiClasses(container) {
         };
       });
     };
-    const formalClassArr = DB.toArray(classesData).sort((a, b) => (Number(a.grade || 0) - Number(b.grade || 0)) || (a.name || '').localeCompare(b.name || ''));
+    const formalClassArr = DB.toArray(allClasses).sort((a, b) => (Number(a.grade || 0) - Number(b.grade || 0)) || (a.name || '').localeCompare(b.name || ''));
     const classFilterOptions = formalClassArr.map(c => `<option value="${c.id}">${AppConfig.escapeHtml(c.name)}</option>`).join('');
     const updateTasmiStudentOptions = (filterClassId = 'all', targetStudentId = '') => {
       const selStudent = document.getElementById('tasmi-plot-student');
