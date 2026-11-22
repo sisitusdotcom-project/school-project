@@ -176,11 +176,22 @@ const ModuleKit = {
   async loadRefs(def) {
     const kinds = [...new Set((def.fields || []).filter((f) => f.ref).map((f) => f.ref))];
     const ctx = { uid: Auth.currentUser ? Auth.currentUser.uid : '', admin: this.isPrivileged(def), meta: { studentClass: {} } };
-    const [settings] = await Promise.all([DB.getSettings()]);
-    const refs = { __settings: settings };
+    const hasStudentKind = kinds.some((k) => k.toLowerCase().includes('student'));
+    const [settings, classes] = await Promise.all([
+      DB.getSettings(),
+      hasStudentKind ? DB.getClasses() : Promise.resolve({})
+    ]);
+    if (hasStudentKind) {
+      const classMap = classes || {};
+      const classArr = DB.toArray(classMap).sort((a, b) => (Number(a.grade || 0) - Number(b.grade || 0)) || (a.name || '').localeCompare(b.name || ''));
+      ctx.meta.classes = classMap;
+      ctx.meta.classArr = classArr;
+    }
+    const refs = { __settings: settings, __rawRefs: {} };
     await Promise.all(kinds.map(async (kind) => {
       const data = (await this.REF_LOADERS[kind](ctx)) || {};
       refs[kind] = {};
+      refs.__rawRefs[kind] = data;
       Object.entries(data).forEach(([id, item]) => {
         if (!item || typeof item !== 'object') return;
         refs[kind][id] = item.name || item.displayName || item.email || id;
@@ -751,6 +762,55 @@ const ModuleKit = {
         }
         el.value = value === undefined || value === null ? '' : value;
       });
+      def.fields.filter(f => f.ref && f.ref.toLowerCase().includes('student')).forEach(f => {
+        const filterEl = form.querySelector(`#mk-f-${f.key}_filter_class`);
+        const selectEl = form.querySelector(`#mk-f-${f.key}`);
+        const rawMap = refs.__rawRefs?.[f.ref];
+        const classArr = refs.__ctx?.meta?.classArr;
+        if (filterEl && selectEl && rawMap && classArr) {
+          const populateFiltered = (filterClassId, targetVal = '') => {
+            let html = '<option value="">-- Pilih --</option>';
+            if (filterClassId && filterClassId !== 'all') {
+              const filtered = Object.entries(rawMap).filter(([, item]) => item && item.classId === filterClassId);
+              filtered.sort((a, b) => (a[1].name || '').localeCompare(b[1].name || ''));
+              html += filtered.map(([id, item]) => `<option value="${this.esc(id)}">${this.esc(item.name || id)}${item.nis ? ' (' + this.esc(item.nis) + ')' : ''}</option>`).join('');
+            } else {
+              const byClass = {};
+              Object.entries(rawMap).forEach(([id, item]) => {
+                if (!item) return;
+                const cId = item.classId || 'other';
+                if (!byClass[cId]) byClass[cId] = [];
+                byClass[cId].push({ id, name: item.name || id, nis: item.nis });
+              });
+              classArr.forEach(c => {
+                const list = byClass[c.id];
+                if (list && list.length) {
+                  list.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+                  html += `<optgroup label="Kelas ${this.esc(c.name)}">`;
+                  html += list.map(s => `<option value="${this.esc(s.id)}">${this.esc(s.name)}${s.nis ? ' (' + this.esc(s.nis) + ')' : ''}</option>`).join('');
+                  html += '</optgroup>';
+                }
+              });
+              if (byClass['other'] && byClass['other'].length) {
+                byClass['other'].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+                html += '<optgroup label="Lainnya / Tanpa Kelas">';
+                html += byClass['other'].map(s => `<option value="${this.esc(s.id)}">${this.esc(s.name)}${s.nis ? ' (' + this.esc(s.nis) + ')' : ''}</option>`).join('');
+                html += '</optgroup>';
+              }
+            }
+            selectEl.innerHTML = html;
+            if (targetVal) selectEl.value = targetVal;
+          };
+          filterEl.onchange = () => {
+            populateFiltered(filterEl.value);
+          };
+          const currentVal = row ? row[f.key] : '';
+          const currentStudent = currentVal ? rawMap[currentVal] : null;
+          const initialClass = (currentStudent && currentStudent.classId) ? currentStudent.classId : 'all';
+          filterEl.value = initialClass;
+          populateFiltered(initialClass, currentVal);
+        }
+      });
       if (window.AppConfig?.initRupiahInputs) window.AppConfig.initRupiahInputs(form);
       const isApprover = this.isApprover(def);
       if (isOrtu || (!isApprover && def.approverRoles)) {
@@ -1145,8 +1205,46 @@ const ModuleKit = {
       const options = Object.entries(refs[field.ref] || {}).sort((a, b) => String(a[1]).localeCompare(String(b[1])));
       control = `<div id="${id}" class="checkbox-grid mk-multi">${options.map(([k, label]) => `<label class="checkbox-card"><input type="checkbox" value="${this.esc(k)}"><span>${this.esc(label)}</span></label>`).join('') || '<p class="text-muted">Belum ada pilihan tersedia.</p>'}</div>`;
     } else if (field.ref) {
-      const options = Object.entries(refs[field.ref] || {}).sort((a, b) => String(a[1]).localeCompare(String(b[1])));
-      control = `<select id="${id}"${req}${dis}><option value="">-- Pilih --</option>${options.map(([k, label]) => `<option value="${this.esc(k)}">${this.esc(label)}</option>`).join('')}</select>`;
+      const isStudentRef = field.ref.toLowerCase().includes('student');
+      const rawMap = refs.__rawRefs?.[field.ref];
+      const classArr = refs.__ctx?.meta?.classArr;
+      if (isStudentRef && rawMap && classArr) {
+        const byClass = {};
+        Object.entries(rawMap).forEach(([id, item]) => {
+          if (!item) return;
+          const cId = item.classId || 'other';
+          if (!byClass[cId]) byClass[cId] = [];
+          byClass[cId].push({ id, name: item.name || refs[field.ref]?.[id] || id, nis: item.nis });
+        });
+        let optGroupsHtml = '<option value="">-- Pilih --</option>';
+        classArr.forEach(c => {
+          const list = byClass[c.id];
+          if (list && list.length) {
+            list.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+            optGroupsHtml += `<optgroup label="Kelas ${this.esc(c.name)}">`;
+            optGroupsHtml += list.map(s => `<option value="${this.esc(s.id)}">${this.esc(s.name)}${s.nis ? ' (' + this.esc(s.nis) + ')' : ''}</option>`).join('');
+            optGroupsHtml += '</optgroup>';
+          }
+        });
+        if (byClass['other'] && byClass['other'].length) {
+          byClass['other'].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+          optGroupsHtml += '<optgroup label="Lainnya / Tanpa Kelas">';
+          optGroupsHtml += byClass['other'].map(s => `<option value="${this.esc(s.id)}">${this.esc(s.name)}${s.nis ? ' (' + this.esc(s.nis) + ')' : ''}</option>`).join('');
+          optGroupsHtml += '</optgroup>';
+        }
+        control = `
+          <div class="mk-student-picker">
+            <select id="${id}_filter_class" class="form-select mk-filter-class-sub" style="margin-bottom:6px">
+              <option value="all">Semua Kelas</option>
+              ${classArr.map(c => `<option value="${this.esc(c.id)}">Filter: Kelas ${this.esc(c.name)}</option>`).join('')}
+            </select>
+            <select id="${id}"${req}${dis}>${optGroupsHtml}</select>
+          </div>
+        `;
+      } else {
+        const options = Object.entries(refs[field.ref] || {}).sort((a, b) => String(a[1]).localeCompare(String(b[1])));
+        control = `<select id="${id}"${req}${dis}><option value="">-- Pilih --</option>${options.map(([k, label]) => `<option value="${this.esc(k)}">${this.esc(label)}</option>`).join('')}</select>`;
+      }
     } else if (field.type === 'select') {
       let options = this.optionList(field);
       if (field.key === 'semester' && (!options || !options.length) && refs.__settings) {
