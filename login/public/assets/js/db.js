@@ -698,24 +698,6 @@ const DB = {
       updatedAt: firebase.database.ServerValue.TIMESTAMP
     });
   },
-  async getRooms() {
-    if (!isDBReady()) return {};
-    const snap = await db.ref('rooms').once('value');
-    const rooms = snap.val() || {};
-    const cleanRooms = {};
-    Object.keys(rooms).forEach(k => {
-      const r = rooms[k];
-      const name = (r && r.name) || '';
-      if (!name.toLowerCase().includes('sayap') && !name.toLowerCase().includes('perpustakaan')) {
-        cleanRooms[k] = r;
-      }
-    });
-    return cleanRooms;
-  },
-  async deleteRoom(id) {
-    if (!isDBReady() || !id) return;
-    await db.ref(`rooms/${id}`).remove();
-  },
   getUmmiRoomRecommendations(ummiClasses) {
     const uArr = this.toArray(ummiClasses || {});
     const roomMap = new Map();
@@ -733,12 +715,6 @@ const DB = {
       }
     });
     return Array.from(roomMap.values()).sort((a, b) => a.localeCompare(b, 'id'));
-  },
-  async saveRoom(id, data) {
-    if (!isDBReady()) return;
-    const key = id || db.ref('rooms').push().key;
-    await db.ref(`rooms/${key}`).set({ ...data, id: key });
-    return key;
   },
   async getAllStudents() {
     if (typeof Auth !== 'undefined' && Auth.currentUser && (Auth.currentRole === 'ortu' || Auth.userData?.role === 'ortu')) {
