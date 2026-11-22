@@ -230,15 +230,12 @@ const DB = {
       accuracy: Number(accuracy || 0)
     };
     const executeDirectFallback = async (reason = 'direct') => {
-      if (type === 'out') {
-        const rules = await this.getSettings().then(s => s?.attendanceRules || {}).catch(() => ({}));
-        const sched = AppConfig.getAttendanceSchedule(rules, isUmmi, new Date(actionIso));
-        if (!sched.isOff && !sched.allowFlexible) {
-          const actionMin = AppConfig.timeToMinutes ? AppConfig.timeToMinutes(timeStr) : (() => { const [h, m] = timeStr.split(':').map(Number); return h * 60 + m; })();
-          const outMin = AppConfig.timeToMinutes ? AppConfig.timeToMinutes(sched.outStart || '12:30') : (() => { const [h, m] = (sched.outStart || '12:30').split(':').map(Number); return h * 60 + m; })();
-          if (actionMin !== null && outMin !== null && actionMin < outMin) {
-            throw new Error(`Presensi pulang hari ${sched.dayKey} belum dapat dilakukan sebelum pukul ${sched.outStart || '12:30'}.`);
-          }
+      const rules = await this.getSettings().then(s => s?.attendanceRules || {}).catch(() => ({}));
+      const sched = AppConfig.getAttendanceSchedule(rules, isUmmi, new Date(actionIso));
+      if (typeof AppConfig !== 'undefined' && AppConfig.validateAttendanceWindow) {
+        const val = AppConfig.validateAttendanceWindow(type, sched, timeStr || new Date(actionIso));
+        if (!val.allowed) {
+          throw new Error(val.reason);
         }
       }
       await this.saveTeacherAttendance(dateStr, teacherId, {
@@ -301,7 +298,7 @@ const DB = {
     } catch (err) {
       if (timeoutId) clearTimeout(timeoutId);
       const msg = String(err && err.message ? err.message : err);
-      if (msg.includes('Presensi ditolak') || msg.includes('di luar area') || msg.includes('libur') || msg.includes('belum dibuka') || msg.includes('belum dapat dilakukan')) {
+      if (msg.includes('Presensi ditolak') || msg.includes('di luar area') || msg.includes('libur') || msg.includes('baru dibuka') || msg.includes('belum dibuka') || msg.includes('belum dapat dilakukan')) {
         throw err;
       }
       return await executeDirectFallback('worker_fallback');

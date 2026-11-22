@@ -610,6 +610,62 @@ const match = val.match(/^([0-1]?\d|2[0-3]):([0-5]\d)$/);
 if (!match) return null;
 return Number(match[1]) * 60 + Number(match[2]);
 }
+function validateAttendanceWindow(type, sched, dateOrTime = new Date()) {
+if (!sched || sched.isOff) {
+return {
+allowed: false,
+reason: sched && sched.isOff ? `Hari ini (${sched.dayKey || 'ini'}) adalah hari libur untuk ${sched.groupKey === 'ummi' ? 'Guru Ummi' : 'GTK'}. Presensi tidak dibuka.` : 'Jadwal presensi tidak valid atau belum diatur.',
+code: 'OFF_DAY',
+startStr: '',
+nowWib: ''
+};
+}
+if (sched.allowFlexible) {
+return { allowed: true, reason: '', code: 'OK', startStr: '', nowWib: '' };
+}
+let nowWib = '';
+if (typeof dateOrTime === 'string' && /^\d{1,2}:\d{2}$/.test(dateOrTime.trim())) {
+nowWib = dateOrTime.trim();
+} else {
+const d = dateOrTime instanceof Date ? dateOrTime : new Date(dateOrTime);
+nowWib = new Intl.DateTimeFormat('id-ID', {
+timeZone: 'Asia/Jakarta',
+hour: '2-digit',
+minute: '2-digit',
+hour12: false
+}).format(isNaN(d.getTime()) ? new Date() : d).replace('.', ':');
+}
+const nowMin = timeToMinutes(nowWib);
+if (type === 'in') {
+const inStartStr = (sched.inStart || (sched.dayKey === 'sabtu' && sched.groupKey !== 'ummi' ? '07:00' : '06:00')).replace('.', ':');
+const inMin = timeToMinutes(inStartStr);
+if (nowMin !== null && inMin !== null && nowMin < inMin) {
+return {
+allowed: false,
+reason: `Presensi datang hari ${sched.dayKey} baru dibuka mulai pukul ${inStartStr} WIB. Saat ini pukul ${nowWib} WIB.`,
+code: 'EARLY_IN',
+startStr: inStartStr,
+nowWib
+};
+}
+return { allowed: true, reason: '', code: 'OK', startStr: inStartStr, nowWib };
+}
+if (type === 'out') {
+const outStartStr = (sched.outStart || (sched.groupKey === 'ummi' ? '12:00' : (sched.dayKey === 'jumat' ? '12:45' : '14:30'))).replace('.', ':');
+const outMin = timeToMinutes(outStartStr);
+if (nowMin !== null && outMin !== null && nowMin < outMin) {
+return {
+allowed: false,
+reason: `Presensi pulang hari ${sched.dayKey} belum dapat dilakukan sebelum pukul ${outStartStr} WIB. Saat ini pukul ${nowWib} WIB.`,
+code: 'EARLY_OUT',
+startStr: outStartStr,
+nowWib
+};
+}
+return { allowed: true, reason: '', code: 'OK', startStr: outStartStr, nowWib };
+}
+return { allowed: true, reason: '', code: 'OK', startStr: '', nowWib };
+}
 function isAttendanceLate(timeIn, sched, attRecord = null) {
 if (!timeIn || !sched) return false;
 if (sched.isOff || sched.noLatePenalty) return false;
@@ -2014,6 +2070,7 @@ getTodayDateStr: getLocalDateStr,
 getLocalMonthStr,
 getAttendanceSchedule,
 isAttendanceLate,
+validateAttendanceWindow,
 timeToMinutes,
 calculateGradeSummary,
 PAYROLL_CUTOFF_START,
