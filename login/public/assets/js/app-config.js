@@ -89,6 +89,21 @@ if (!targetIdOrLabel) return '-';
 const found = TASMI_TARGET_OPTIONS.find(t => t.id === targetIdOrLabel || t.label === targetIdOrLabel || t.shortLabel === targetIdOrLabel);
 return found ? found.shortLabel : targetIdOrLabel;
 }
+const TASMI_EXAM_CATEGORIES = Object.freeze([
+"Tasmi' Sekali Duduk Juz 30",
+"Tasmi' Sekali Duduk Juz 29",
+"Tasmi' Sekali Duduk Juz 28",
+"Tasmi' Sekali Duduk Juz 1",
+"Tasmi' Sekali Duduk Juz 2",
+"Tasmi' Sekali Duduk 1 Juz (Pilihan)",
+"Tasmi' Sekali Duduk 3 Juz",
+"Tasmi' Porsi ½ Juz (Ujian)",
+"Tasmi' Porsi ¼ Juz (Ujian)",
+"Munaqasyah Ummi Tartil (Kelulusan Jilid 1 - 6)",
+"Munaqasyah Tahfidz",
+"Ujian Pra-Munaqasyah",
+"Ujian Lanjutan Pasca Ummi"
+]);
 function buildTeachingLabels(userId, classes = {}, subjects = {}) {
 const subjMap = new Map();
 const classList = Object.entries(classes || {});
@@ -2108,6 +2123,7 @@ TAHFIDZ_ENTRY_LABELS,
 TASMI_TARGET_OPTIONS,
 formatTasmiTargetLabel,
 formatTasmiTargetShort,
+TASMI_EXAM_CATEGORIES,
 timeToMinutes,
 calculateGradeSummary,
 PAYROLL_CUTOFF_START,

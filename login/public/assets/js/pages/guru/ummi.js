@@ -2631,14 +2631,16 @@ async renderUmmiClasses(container) {
   },
     async renderTasmiPlotting(container) {
     Router.setTitle("Plotting Penguji Tasmi' & Munaqosyah", "Jadwal dan penugasan ustadz/ustadzah penguji tasmi' bil ghoib dan munaqasyah santri.");
-    const [snapPlotting, allStudents, users, allClasses, roomsData] = await Promise.all([
+    const [snapPlotting, allStudents, users, allClasses, roomsData, snapUmmiClasses] = await Promise.all([
       DB.getUmmiTasmiPlotting(),
       DB.getAllStudents(),
       DB.getAllUsers(),
       DB.getClasses(),
-      DB.getRooms()
+      DB.getRooms(),
+      DB.getUmmiClasses()
     ]);
-    const plottingArr = DB.toArray(snapPlotting).sort((a, b) => (b.date || 0) - (a.date || 0) || (b.createdAt || 0) - (a.createdAt || 0));
+    const locationRecommendations = DB.getUmmiRoomRecommendations ? DB.getUmmiRoomRecommendations(snapUmmiClasses, roomsData, allClasses) : [];
+    const plottingArr = DB.toArray(snapPlotting).sort((a, b) => (b.date || '').localeCompare(a.date || '') || (b.createdAt || 0) - (a.createdAt || 0));
     const studentArr = DB.toArray(allStudents);
     const studentMap = studentArr.reduce((acc, s) => { acc[s.id] = s; return acc; }, {});
     const guruUmmi = DB.toArray(users).filter(u => AppConfig.isUserUmmi(u));
@@ -2830,6 +2832,21 @@ async renderUmmiClasses(container) {
       return `<option value="${s.id}">${AppConfig.escapeHtml(idStr + s.name + ' (' + cName + ')')}</option>`;
     }).join('');
     const guruOptions = guruUmmi.map(g => `<option value="${g.id}">${AppConfig.escapeHtml(g.name)}</option>`).join('');
+    const tasmiCategoryOptions = (AppConfig.TASMI_EXAM_CATEGORIES || [
+      "Tasmi' Sekali Duduk Juz 30",
+      "Tasmi' Sekali Duduk Juz 29",
+      "Tasmi' Sekali Duduk Juz 28",
+      "Tasmi' Sekali Duduk Juz 1",
+      "Tasmi' Sekali Duduk Juz 2",
+      "Tasmi' Sekali Duduk 1 Juz (Pilihan)",
+      "Tasmi' Sekali Duduk 3 Juz",
+      "Tasmi' Porsi ½ Juz (Ujian)",
+      "Tasmi' Porsi ¼ Juz (Ujian)",
+      "Munaqasyah Ummi Tartil (Kelulusan Jilid 1 - 6)",
+      "Munaqasyah Tahfidz",
+      "Ujian Pra-Munaqasyah",
+      "Ujian Lanjutan Pasca Ummi"
+    ]).map(c => `<option value="${AppConfig.escapeHtml(c)}">${AppConfig.escapeHtml(c)}</option>`).join('');
     container.innerHTML = `
       <section class="card-grid section-spacer">
         <div class="card stat-card">
@@ -2915,13 +2932,7 @@ async renderUmmiClasses(container) {
               <div class="form-group">
                 <label>Kategori Ujian / Munaqosyah</label>
                 <select id="tasmi-plot-category" required class="form-input">
-                  <option value="Tasmi' Sekali Duduk Juz 30">Tasmi' Sekali Duduk Juz 30</option>
-                  <option value="Tasmi' Sekali Duduk Juz 1">Tasmi' Sekali Duduk Juz 1</option>
-                  <option value="Tasmi' Sekali Duduk Juz 2">Tasmi' Sekali Duduk Juz 2</option>
-                  <option value="Munaqasyah Ummi Tartil">Munaqasyah Ummi Tartil (Kelulusan Jilid 1 - 6)</option>
-                  <option value="Munaqasyah Tahfidz">Munaqasyah Tahfidz</option>
-                  <option value="Ujian Pra-Munaqasyah">Ujian Pra-Munaqasyah</option>
-                  <option value="Ujian Lanjutan Pasca Ummi">Ujian Lanjutan Pasca Ummi</option>
+                  ${tasmiCategoryOptions}
                 </select>
               </div>
               <div class="form-group">
@@ -3043,7 +3054,7 @@ async renderUmmiClasses(container) {
       document.getElementById('tasmi-modal-title').innerText = 'Buat Jadwal & Plotting Penguji Tasmi';
       document.getElementById('form-tasmi-plot').reset();
       document.getElementById('tasmi-plot-id').value = '';
-      document.getElementById('tasmi-plot-date').value = new Date().toISOString().split('T')[0];
+      document.getElementById('tasmi-plot-date').value = AppConfig.getLocalDateStr ? AppConfig.getLocalDateStr() : new Date().toISOString().split('T')[0];
       document.getElementById('tasmi-plot-time').value = '07.30 - 08.30 WIB';
       document.getElementById('tasmi-plot-session').value = activeSession !== 'all' ? activeSession : '1';
       App.openModal('modal-tasmi-plot');
@@ -3051,6 +3062,7 @@ async renderUmmiClasses(container) {
     document.getElementById('form-tasmi-plot').onsubmit = async (e) => {
       e.preventDefault();
       const id = document.getElementById('tasmi-plot-id').value.trim();
+      const existItem = id ? plottingArr.find(x => x.id === id) : null;
       const studentId = document.getElementById('tasmi-plot-student').value;
       const sObj = studentMap[studentId];
       const session = document.getElementById('tasmi-plot-session').value;
@@ -3075,7 +3087,7 @@ async renderUmmiClasses(container) {
           time,
           room,
           prepNotes,
-          status: 'Terjadwal'
+          status: existItem ? (existItem.status || 'Terjadwal') : 'Terjadwal'
         };
         await DB.saveUmmiTasmiPlotting(id || null, data);
         App.closeModal('modal-tasmi-plot');
