@@ -716,19 +716,6 @@ const DB = {
     if (!isDBReady() || !id) return;
     await db.ref(`rooms/${id}`).remove();
   },
-  async cleanupLegacyRooms() {
-    if (!isDBReady()) return;
-    try {
-      const snap = await db.ref('rooms').once('value');
-      const rooms = snap.val() || {};
-      Object.keys(rooms).forEach(k => {
-        const name = (rooms[k]?.name || '').toLowerCase();
-        if (name.includes('sayap') || name.includes('perpustakaan') || name.includes('mihrab') || name.includes('sisi depan') || name.includes('sisi belakang')) {
-          db.ref(`rooms/${k}`).remove().catch(() => {});
-        }
-      });
-    } catch (_) {}
-  },
   getUmmiRoomRecommendations(ummiClasses) {
     const uArr = this.toArray(ummiClasses || {});
     const roomMap = new Map();
@@ -736,7 +723,6 @@ const DB = {
       const r = (u && u.room ? String(u.room) : '').trim();
       if (!r) return;
       const lower = r.toLowerCase();
-      if (lower.includes('sayap') || lower.includes('mihrab') || lower.includes('perpustakaan')) return;
       if (!roomMap.has(lower)) {
         roomMap.set(lower, r);
       } else {

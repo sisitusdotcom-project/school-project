@@ -171,18 +171,13 @@ const QURAN_SURAHS = [
 const UMMIPages = {
   async renderUmmiMapping(container) {
     Router.setTitle('Pemetaan Rombel & Guru Ummi', 'Atur pembagian rombel berbasis kemampuan santri lintas kelas dan pemetaan per sesi.');
-    const [ummiClasses, users, allStudents, allClasses, roomsData] = await Promise.all([
+    const [ummiClasses, users, allStudents, allClasses] = await Promise.all([
       DB.getUmmiClasses(),
       DB.getAllUsers(),
       DB.getAllStudents(),
-      DB.getClasses(),
-      DB.getRooms()
+      DB.getClasses()
     ]);
-    if (typeof DB.cleanupLegacyRooms === 'function') {
-      DB.cleanupLegacyRooms();
-    }
     const locationRecommendations = DB.getUmmiRoomRecommendations ? DB.getUmmiRoomRecommendations(ummiClasses) : [];
-    const roomArr = DB.toArray(roomsData);
     const classArr = DB.toArray(ummiClasses);
     const guruUmmi = DB.toArray(users).filter(u => AppConfig.isUserUmmi(u));
     const studentArr = DB.toArray(allStudents);
@@ -2246,12 +2241,11 @@ async renderUmmiClasses(container) {
   async renderTasmi(container) {
     Router.setTitle('Pengujian Tasmi\' Bil Ghaib', 'Pengujian hafalan Al-Qur\'an santri sekali duduk di hadapan dewan penguji.');
     const uid = Auth.currentUser.uid;
-    const [snapPlotting, allStudents, users, allClasses, roomsData, snapUmmiClasses] = await Promise.all([
+    const [snapPlotting, allStudents, users, allClasses, snapUmmiClasses] = await Promise.all([
       DB.getUmmiTasmiPlotting(),
       DB.getAllStudents(),
       DB.getAllUsers(),
       DB.getClasses(),
-      DB.getRooms(),
       DB.getUmmiClasses()
     ]);
     const locationRecommendations = DB.getUmmiRoomRecommendations ? DB.getUmmiRoomRecommendations(snapUmmiClasses) : [];
@@ -2631,12 +2625,11 @@ async renderUmmiClasses(container) {
   },
     async renderTasmiPlotting(container) {
     Router.setTitle("Plotting Penguji Tasmi' & Munaqosyah", "Jadwal dan penugasan ustadz/ustadzah penguji tasmi' bil ghoib dan munaqasyah santri.");
-    const [snapPlotting, allStudents, users, allClasses, roomsData, snapUmmiClasses] = await Promise.all([
+    const [snapPlotting, allStudents, users, allClasses, snapUmmiClasses] = await Promise.all([
       DB.getUmmiTasmiPlotting(),
       DB.getAllStudents(),
       DB.getAllUsers(),
       DB.getClasses(),
-      DB.getRooms(),
       DB.getUmmiClasses()
     ]);
     const locationRecommendations = DB.getUmmiRoomRecommendations ? DB.getUmmiRoomRecommendations(snapUmmiClasses) : [];
