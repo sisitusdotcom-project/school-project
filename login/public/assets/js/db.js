@@ -1479,15 +1479,6 @@ const DB = {
     const ref = id ? db.ref(`finance/rkas/${id}`) : db.ref('finance/rkas').push();
     await ref.set(item);
     return ref.key;
-  }
-,
-  async getStudentReferenceIndex() {
-    const students = await this.getAllStudents();
-    const index = {};
-    for (const key in students) {
-      index[key] = { name: students[key].name, nis: students[key].nis };
-    }
-    return index;
   },
   async getPersonnelDirectory() {
     return this._readCollection('personnel/directory', {});

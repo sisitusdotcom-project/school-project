@@ -1702,9 +1702,18 @@ async renderUmmiClasses(container) {
             <div class="modal-body">
               <input type="hidden" id="tahfidz-entry-id">
               <input type="hidden" id="tahfidz-entry-orig-student">
-              <div class="form-group">
-                <label>Pilih Santri *</label>
-                <select id="tahfidz-entry-student" required class="form-input"></select>
+              <div class="form-row">
+                <div class="form-group form-col">
+                  <label>Filter Rombel Santri</label>
+                  <select id="tahfidz-entry-filter-class" class="form-input">
+                    <option value="all">Semua Rombel Ummi</option>
+                    ${myClasses.map(c => `<option value="${c.id}">${AppConfig.escapeHtml(c.name)} (${AppConfig.escapeHtml(c.level || 'Jilid')})</option>`).join('')}
+                  </select>
+                </div>
+                <div class="form-group form-col">
+                  <label>Pilih Santri *</label>
+                  <select id="tahfidz-entry-student" required class="form-input"></select>
+                </div>
               </div>
               <div class="form-row">
                 <div class="form-group form-col">
@@ -1790,9 +1799,25 @@ async renderUmmiClasses(container) {
         enrolled = DB.toArray(allStudents);
       }
       enrolled.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-      selStudent.innerHTML = '<option value="all">Semua Santri</option>' + enrolled.map(s => `
-        <option value="${s.id}">${AppConfig.escapeHtml(s.name)} (${gradeClassMap[s.classId] || s.classId || '-'})</option>
-      `).join('');
+      if (activeClassId === 'all') {
+        const byClass = {};
+        enrolled.forEach(s => {
+          const cName = gradeClassMap[s.classId] || 'Lainnya';
+          if (!byClass[cName]) byClass[cName] = [];
+          byClass[cName].push(s);
+        });
+        let html = '<option value="all">Semua Santri</option>';
+        Object.keys(byClass).sort().forEach(cName => {
+          html += `<optgroup label="Kelas ${AppConfig.escapeHtml(cName)}">`;
+          html += byClass[cName].map(s => `<option value="${s.id}">${AppConfig.escapeHtml(s.name)}</option>`).join('');
+          html += '</optgroup>';
+        });
+        selStudent.innerHTML = html;
+      } else {
+        selStudent.innerHTML = '<option value="all">Semua Santri</option>' + enrolled.map(s => `
+          <option value="${s.id}">${AppConfig.escapeHtml(s.name)} (${gradeClassMap[s.classId] || s.classId || '-'})</option>
+        `).join('');
+      }
       selStudent.value = activeStudentId;
     };
     const renderTahfidzView = () => {
@@ -2051,20 +2076,47 @@ async renderUmmiClasses(container) {
         populateSurahs(selJuzInput.value, selSurahInput.value);
       };
       selTypeInput.onchange = updateTasmiVisibility;
-      let selectableStudents = [];
-      if (activeClassId !== 'all') {
-        const cls = classArr.find(c => c.id === activeClassId);
-        if (cls && cls.students) {
-          selectableStudents = Object.keys(cls.students).map(id => studentMap[id]).filter(Boolean);
+      const selFilterModal = document.getElementById('tahfidz-entry-filter-class');
+      const updateModalStudentOptions = (filterClassId, targetStudentId = '') => {
+        let list = [];
+        if (filterClassId && filterClassId !== 'all') {
+          const cls = classArr.find(c => c.id === filterClassId);
+          if (cls && cls.students) {
+            list = Object.keys(cls.students).map(id => studentMap[id]).filter(Boolean);
+          }
         }
+        if (!list.length && (filterClassId === 'all' || !filterClassId)) {
+          list = DB.toArray(allStudents);
+        }
+        list.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+        if (filterClassId === 'all') {
+          const byClass = {};
+          list.forEach(s => {
+            const cName = gradeClassMap[s.classId] || 'Lainnya';
+            if (!byClass[cName]) byClass[cName] = [];
+            byClass[cName].push(s);
+          });
+          let html = '<option value="">— Pilih Santri —</option>';
+          Object.keys(byClass).sort().forEach(cName => {
+            html += `<optgroup label="Kelas ${AppConfig.escapeHtml(cName)}">`;
+            html += byClass[cName].map(s => `<option value="${s.id}">${AppConfig.escapeHtml(s.name)}</option>`).join('');
+            html += '</optgroup>';
+          });
+          selStu.innerHTML = html;
+        } else {
+          selStu.innerHTML = '<option value="">— Pilih Santri —</option>' + list.map(s => `
+            <option value="${s.id}">${AppConfig.escapeHtml(s.name)} (${gradeClassMap[s.classId] || s.classId || '-'})</option>
+          `).join('');
+        }
+        if (targetStudentId) {
+          selStu.value = targetStudentId;
+        }
+      };
+      if (selFilterModal) {
+        selFilterModal.onchange = () => {
+          updateModalStudentOptions(selFilterModal.value);
+        };
       }
-      if (!selectableStudents.length) {
-        selectableStudents = DB.toArray(allStudents);
-      }
-      selectableStudents.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-      selStu.innerHTML = '<option value="">— Pilih Santri —</option>' + selectableStudents.map(s => `
-        <option value="${s.id}">${AppConfig.escapeHtml(s.name)} (${gradeClassMap[s.classId] || s.classId || '-'})</option>
-      `).join('');
       const populateSurahs = (juzVal, keepSurah = null) => {
         const isTasmi = selTypeInput && (selTypeInput.value === 'persiapan_tasmi' || selTypeInput.value === 'tasmi');
         let surahList = QURAN_SURAHS;
@@ -2101,11 +2153,20 @@ async renderUmmiClasses(container) {
           if (vCount) inputVerse.placeholder = `Contoh: 1 - ${vCount} (Tuntas)`;
         }
       };
+      let defaultRombelId = 'all';
+      if (editData && editData.studentId) {
+        const foundRombel = classArr.find(c => c.students && c.students[editData.studentId]);
+        if (foundRombel) defaultRombelId = foundRombel.id;
+        else if (activeClassId !== 'all') defaultRombelId = activeClassId;
+      } else {
+        defaultRombelId = activeClassId !== 'all' ? activeClassId : 'all';
+      }
+      if (selFilterModal) selFilterModal.value = defaultRombelId;
+      updateModalStudentOptions(defaultRombelId, editData ? editData.studentId : (activeStudentId !== 'all' ? activeStudentId : ''));
       if (editData) {
         modalTitle.innerText = 'Edit Setoran Tahfidz Santri';
         hiddenId.value = editData.id || '';
         hiddenOrigStu.value = editData.studentId || '';
-        selStu.value = editData.studentId || '';
         selTypeInput.value = editData.entryType || 'ziyadah';
         selTasmiTarget.value = editData.tasmiTarget || '1/4_juz_1';
         inputDate.value = editData.date || '';
@@ -2124,11 +2185,6 @@ async renderUmmiClasses(container) {
         inputDate.value = AppConfig.getLocalDateStr ? AppConfig.getLocalDateStr() : new Date().toISOString().slice(0, 10);
         selJuzInput.value = activeJuz !== 'all' ? activeJuz : '30';
         populateSurahs(selJuzInput.value);
-        if (activeStudentId !== 'all') {
-          selStu.value = activeStudentId;
-        } else if (selectableStudents.length === 1) {
-          selStu.value = selectableStudents[0].id;
-        }
         selGrade.value = 'A';
         inputVerse.value = '1 - ';
         updateTasmiVisibility();
@@ -2792,8 +2848,12 @@ async renderUmmiClasses(container) {
           const id = btn.dataset.editTasmi;
           const p = plottingArr.find(x => x.id === id);
           if (!p) return;
-          document.getElementById('tasmi-modal-title').innerText = 'Edit Plotting Penguji Tasmi';
+          document.getElementById('tasmi-modal-title').innerText = "Edit Plotting Penguji Tasmi'";
           document.getElementById('tasmi-plot-id').value = p.id;
+          const sObj = studentMap[p.studentId];
+          const targetClassId = (sObj && sObj.classId) ? sObj.classId : 'all';
+          if (document.getElementById('tasmi-filter-class')) document.getElementById('tasmi-filter-class').value = targetClassId;
+          updateTasmiStudentOptions(targetClassId, p.studentId);
           document.getElementById('tasmi-plot-student').value = p.studentId || '';
           document.getElementById('tasmi-plot-session').value = p.session || '1';
           document.getElementById('tasmi-plot-category').value = p.category || 'Tasmi\' Sekali Duduk Juz 30';
@@ -2817,12 +2877,50 @@ async renderUmmiClasses(container) {
         };
       });
     };
-    const studentOptions = studentArr.map(s => {
-      const fCls = classMap[s.classId];
-      const cName = fCls ? fCls.name : (s.classId || '-');
-      const idStr = s.nis ? `[NIS: ${s.nis}] ` : '';
-      return `<option value="${s.id}">${AppConfig.escapeHtml(idStr + s.name + ' (' + cName + ')')}</option>`;
-    }).join('');
+    const formalClassArr = DB.toArray(classesData).sort((a, b) => (Number(a.grade || 0) - Number(b.grade || 0)) || (a.name || '').localeCompare(b.name || ''));
+    const classFilterOptions = formalClassArr.map(c => `<option value="${c.id}">${AppConfig.escapeHtml(c.name)}</option>`).join('');
+    const updateTasmiStudentOptions = (filterClassId = 'all', targetStudentId = '') => {
+      const selStudent = document.getElementById('tasmi-plot-student');
+      if (!selStudent) return;
+      let html = '<option value="">— Pilih Santri —</option>';
+      if (filterClassId && filterClassId !== 'all') {
+        const filtered = studentArr.filter(s => s.classId === filterClassId);
+        html += filtered.map(s => {
+          const idStr = s.nis ? `[NIS: ${s.nis}] ` : '';
+          return `<option value="${s.id}">${AppConfig.escapeHtml(idStr + s.name)}</option>`;
+        }).join('');
+      } else {
+        const byClass = {};
+        studentArr.forEach(s => {
+          const cId = s.classId || 'other';
+          if (!byClass[cId]) byClass[cId] = [];
+          byClass[cId].push(s);
+        });
+        formalClassArr.forEach(c => {
+          const list = byClass[c.id];
+          if (list && list.length) {
+            html += `<optgroup label="Kelas ${AppConfig.escapeHtml(c.name)}">`;
+            html += list.map(s => {
+              const idStr = s.nis ? `[NIS: ${s.nis}] ` : '';
+              return `<option value="${s.id}">${AppConfig.escapeHtml(idStr + s.name)}</option>`;
+            }).join('');
+            html += '</optgroup>';
+          }
+        });
+        if (byClass['other'] && byClass['other'].length) {
+          html += '<optgroup label="Tanpa Kelas / Lainnya">';
+          html += byClass['other'].map(s => {
+            const idStr = s.nis ? `[NIS: ${s.nis}] ` : '';
+            return `<option value="${s.id}">${AppConfig.escapeHtml(idStr + s.name)}</option>`;
+          }).join('');
+          html += '</optgroup>';
+        }
+      }
+      selStudent.innerHTML = html;
+      if (targetStudentId) {
+        selStudent.value = targetStudentId;
+      }
+    };
     const guruOptions = guruUmmi.map(g => `<option value="${g.id}">${AppConfig.escapeHtml(g.name)}</option>`).join('');
     const tasmiCategoryOptions = (AppConfig.TASMI_EXAM_CATEGORIES || [
       "Tasmi' Sekali Duduk Juz 30",
@@ -2906,19 +3004,27 @@ async renderUmmiClasses(container) {
           <form id="form-tasmi-plot">
             <div class="modal-body">
               <input type="hidden" id="tasmi-plot-id">
-              <div class="form-group">
-                <label>Santri yang Diuji</label>
-                <select id="tasmi-plot-student" required class="form-input">
-                  <option value="">— Pilih Santri —</option>
-                  ${studentOptions}
-                </select>
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label>Filter Kelas Santri</label>
+                  <select id="tasmi-filter-class" class="form-input">
+                    <option value="all">Semua Kelas</option>
+                    ${classFilterOptions}
+                  </select>
+                </div>
+                <div class="form-group flex-1">
+                  <label>Sesi Jadwal Pembelajaran</label>
+                  <select id="tasmi-plot-session" required class="form-input">
+                    <option value="1">Sesi 1 (Kelas 1 - 2 / Fase A)</option>
+                    <option value="2">Sesi 2 (Kelas 3 - 4 / Fase B)</option>
+                    <option value="3">Sesi 3 (Kelas 5 - 6 / Fase C)</option>
+                  </select>
+                </div>
               </div>
               <div class="form-group">
-                <label>Sesi Jadwal Pembelajaran</label>
-                <select id="tasmi-plot-session" required class="form-input">
-                  <option value="1">Sesi 1 (Kelas 1 - 2 / Fase A)</option>
-                  <option value="2">Sesi 2 (Kelas 3 - 4 / Fase B)</option>
-                  <option value="3">Sesi 3 (Kelas 5 - 6 / Fase C)</option>
+                <label>Santri yang Diuji *</label>
+                <select id="tasmi-plot-student" required class="form-input">
+                  <option value="">— Pilih Santri —</option>
                 </select>
               </div>
               <div class="form-group">
@@ -3029,6 +3135,20 @@ async renderUmmiClasses(container) {
       };
     }
     renderTable();
+    const selFilterClass = document.getElementById('tasmi-filter-class');
+    if (selFilterClass) {
+      selFilterClass.onchange = () => {
+        const cId = selFilterClass.value;
+        updateTasmiStudentOptions(cId);
+        if (cId !== 'all') {
+          const cObj = classMap[cId];
+          const grade = cObj ? (Number(cObj.grade) || parseInt(cObj.name || '', 10) || 0) : 0;
+          if (grade === 1 || grade === 2) document.getElementById('tasmi-plot-session').value = '1';
+          else if (grade === 3 || grade === 4) document.getElementById('tasmi-plot-session').value = '2';
+          else if (grade === 5 || grade === 6) document.getElementById('tasmi-plot-session').value = '3';
+        }
+      };
+    }
     const selStudent = document.getElementById('tasmi-plot-student');
     if (selStudent) {
       selStudent.onchange = () => {
@@ -3043,13 +3163,15 @@ async renderUmmiClasses(container) {
       };
     }
     document.getElementById('btn-add-tasmi-plot').onclick = () => {
-      document.getElementById('tasmi-modal-title').innerText = 'Buat Jadwal & Plotting Penguji Tasmi';
+      document.getElementById('tasmi-modal-title').innerText = "Buat Jadwal & Plotting Penguji Tasmi'";
       document.getElementById('form-tasmi-plot').reset();
       document.getElementById('tasmi-plot-id').value = '';
-document.getElementById('tasmi-plot-room').value = '';
+      document.getElementById('tasmi-plot-room').value = '';
       document.getElementById('tasmi-plot-date').value = AppConfig.getLocalDateStr ? AppConfig.getLocalDateStr() : new Date().toISOString().split('T')[0];
       document.getElementById('tasmi-plot-time').value = '07.30 - 08.30 WIB';
       document.getElementById('tasmi-plot-session').value = activeSession !== 'all' ? activeSession : '1';
+      if (document.getElementById('tasmi-filter-class')) document.getElementById('tasmi-filter-class').value = 'all';
+      updateTasmiStudentOptions('all');
       App.openModal('modal-tasmi-plot');
     };
     document.getElementById('form-tasmi-plot').onsubmit = async (e) => {

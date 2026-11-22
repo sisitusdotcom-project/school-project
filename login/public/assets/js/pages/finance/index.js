@@ -7,7 +7,7 @@ const FinancePages = {
     const dateStr = AppConfig.getLocalDateStr ? AppConfig.getLocalDateStr(today) : today.toISOString().slice(0, 10);
     const user = Auth.userData || Auth.currentUser || {};
     const uid = user.uid || Auth.currentUser?.uid;
-    const [settings, summary, billsData, ledgerData, studentIndex, rkasData, assetsData, myAtt] = await Promise.all([
+    const [settings, summary, billsData, ledgerData, studentIndex, rkasData, assetsData, myAtt, classesData] = await Promise.all([
       DB.getSettings(),
       DB.getFinanceSummary(),
       DB.getStudentBills(),
@@ -15,8 +15,10 @@ const FinancePages = {
       DB.getStudentReferenceIndex(),
       DB.getRKAS(),
       DB.getFacilityAssets(),
-      DB.getTeacherAttendance(dateStr, uid).catch(() => null)
+      DB.getTeacherAttendance(dateStr, uid).catch(() => null),
+      DB.getClasses()
     ]);
+    const classArr = DB.toArray(classesData).sort((a, b) => (Number(a.grade || 0) - Number(b.grade || 0)) || (a.name || '').localeCompare(b.name || ''));
     const heroHtml = AppConfig.getDashboardHeroHtml({
       user,
       attendanceRecord: myAtt,
@@ -654,7 +656,6 @@ const FinancePages = {
       </div>
     `;
     const renderModals = () => {
-      const studentsOpts = Object.keys(studentIndex).map(id => `<option value="${id}">${esc(studentIndex[id].name)} (${esc(studentIndex[id].nis || '-')})</option>`).join('');
       const rkasOpts = rkasList.map(r => `<option value="${r.id}">[${esc(r.code || '-')}] ${esc(r.component)}</option>`).join('');
       return `
         <div class="modal-overlay" id="modal-fin-ledger">
@@ -729,12 +730,20 @@ const FinancePages = {
             </div>
             <form id="form-fin-bill">
               <div class="modal-body">
-                <div class="form-group">
-                  <label for="fin-bill-student">Pilih Siswa</label>
-                  <select id="fin-bill-student" class="form-select" required>
-                    <option value="">-- Pilih Siswa --</option>
-                    ${studentsOpts}
-                  </select>
+                <div class="form-row">
+                  <div class="form-group flex-1">
+                    <label for="fin-bill-filter-class">Filter Kelas</label>
+                    <select id="fin-bill-filter-class" class="form-select">
+                      <option value="all">Semua Kelas</option>
+                      ${classArr.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('')}
+                    </select>
+                  </div>
+                  <div class="form-group flex-1">
+                    <label for="fin-bill-student">Pilih Siswa *</label>
+                    <select id="fin-bill-student" class="form-select" required>
+                      <option value="">-- Pilih Siswa --</option>
+                    </select>
+                  </div>
                 </div>
                 <div class="form-group">
                   <label for="fin-bill-month">Bulan Tagihan</label>
@@ -879,9 +888,50 @@ const FinancePages = {
           App.openModal('modal-fin-ledger');
         });
       }
+      const selBillClass = container.querySelector('#fin-bill-filter-class');
+      const selBillStudent = container.querySelector('#fin-bill-student');
+      const updateBillStudentOptions = (filterClassId = 'all', targetStudentId = '') => {
+        if (!selBillStudent) return;
+        let html = '<option value="">-- Pilih Siswa --</option>';
+        const stuKeys = Object.keys(studentIndex);
+        if (filterClassId && filterClassId !== 'all') {
+          const filtered = stuKeys.filter(id => studentIndex[id].classId === filterClassId);
+          html += filtered.map(id => `<option value="${id}">${esc(studentIndex[id].name)} (${esc(studentIndex[id].nis || '-')})</option>`).join('');
+        } else {
+          const byClass = {};
+          stuKeys.forEach(id => {
+            const cId = studentIndex[id].classId || 'other';
+            if (!byClass[cId]) byClass[cId] = [];
+            byClass[cId].push(id);
+          });
+          classArr.forEach(c => {
+            const list = byClass[c.id];
+            if (list && list.length) {
+              html += `<optgroup label="Kelas ${esc(c.name)}">`;
+              html += list.map(id => `<option value="${id}">${esc(studentIndex[id].name)} (${esc(studentIndex[id].nis || '-')})</option>`).join('');
+              html += '</optgroup>';
+            }
+          });
+          if (byClass['other'] && byClass['other'].length) {
+            html += '<optgroup label="Lainnya / Tanpa Kelas">';
+            html += byClass['other'].map(id => `<option value="${id}">${esc(studentIndex[id].name)} (${esc(studentIndex[id].nis || '-')})</option>`).join('');
+            html += '</optgroup>';
+          }
+        }
+        selBillStudent.innerHTML = html;
+        if (targetStudentId) selBillStudent.value = targetStudentId;
+      };
+      if (selBillClass) {
+        selBillClass.addEventListener('change', () => {
+          updateBillStudentOptions(selBillClass.value);
+        });
+      }
+      updateBillStudentOptions('all');
       const btnAddBill = container.querySelector('#btn-open-add-bill');
       if (btnAddBill) {
         btnAddBill.addEventListener('click', () => {
+          if (selBillClass) selBillClass.value = 'all';
+          updateBillStudentOptions('all');
           App.openModal('modal-fin-bill');
         });
       }
