@@ -2639,7 +2639,6 @@ async renderUmmiClasses(container) {
     const guruUmmi = DB.toArray(users).filter(u => AppConfig.isUserUmmi(u));
     const teacherMap = guruUmmi.reduce((acc, u) => { acc[u.id] = u.name; return acc; }, {});
     const classMap = DB.toArray(allClasses).reduce((acc, c) => { acc[c.id] = c; return acc; }, {});
-    const roomArr = DB.toArray(roomsData);
     let sessStats = { '1': 0, '2': 0, '3': 0 };
     let scheduledCnt = 0;
     let passedCnt = 0;
