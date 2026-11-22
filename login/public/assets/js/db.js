@@ -723,41 +723,30 @@ const DB = {
       const rooms = snap.val() || {};
       Object.keys(rooms).forEach(k => {
         const name = (rooms[k]?.name || '').toLowerCase();
-        if (name.includes('sayap') || name.includes('perpustakaan')) {
+        if (name.includes('sayap') || name.includes('perpustakaan') || name.includes('mihrab') || name.includes('sisi depan') || name.includes('sisi belakang')) {
           db.ref(`rooms/${k}`).remove().catch(() => {});
         }
       });
     } catch (_) {}
   },
-  getUmmiRoomRecommendations(ummiClasses, roomsData, formalClasses) {
-    const roomSet = new Set();
+  getUmmiRoomRecommendations(ummiClasses) {
     const uArr = this.toArray(ummiClasses || {});
+    const roomMap = new Map();
     uArr.forEach(u => {
-      const r = (u.room || '').trim();
-      if (r && !r.toLowerCase().includes('sayap') && !r.toLowerCase().includes('perpustakaan')) {
-        roomSet.add(r);
-      }
-    });
-    const cArr = this.toArray(formalClasses || {});
-    cArr.forEach(c => {
-      if (c && c.name) {
-        const name = c.name.trim();
-        const formatted = name.toLowerCase().startsWith('ruang') ? name : `Ruang Kelas ${name}`;
-        if (!formatted.toLowerCase().includes('sayap') && !formatted.toLowerCase().includes('perpustakaan')) {
-          roomSet.add(formatted);
+      const r = (u && u.room ? String(u.room) : '').trim();
+      if (!r) return;
+      const lower = r.toLowerCase();
+      if (lower.includes('sayap') || lower.includes('mihrab') || lower.includes('perpustakaan')) return;
+      if (!roomMap.has(lower)) {
+        roomMap.set(lower, r);
+      } else {
+        const existing = roomMap.get(lower);
+        if (existing === existing.toUpperCase() && r !== r.toUpperCase()) {
+          roomMap.set(lower, r);
         }
       }
     });
-    const rArr = this.toArray(roomsData || {});
-    rArr.forEach(r => {
-      const name = (r && (r.name || r.id) || '').trim();
-      if (name && !name.toLowerCase().includes('sayap') && !name.toLowerCase().includes('perpustakaan')) {
-        roomSet.add(name);
-      }
-    });
-    if (!roomSet.has('Serambi Masjid')) roomSet.add('Serambi Masjid');
-    if (!roomSet.has('Serambi Kelas 6')) roomSet.add('Serambi Kelas 6');
-    return Array.from(roomSet).sort((a, b) => a.localeCompare(b, 'id'));
+    return Array.from(roomMap.values()).sort((a, b) => a.localeCompare(b, 'id'));
   },
   async saveRoom(id, data) {
     if (!isDBReady()) return;

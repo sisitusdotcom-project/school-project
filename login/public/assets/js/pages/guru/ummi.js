@@ -181,7 +181,7 @@ const UMMIPages = {
     if (typeof DB.cleanupLegacyRooms === 'function') {
       DB.cleanupLegacyRooms();
     }
-    const locationRecommendations = DB.getUmmiRoomRecommendations ? DB.getUmmiRoomRecommendations(ummiClasses, roomsData, allClasses) : [];
+    const locationRecommendations = DB.getUmmiRoomRecommendations ? DB.getUmmiRoomRecommendations(ummiClasses) : [];
     const roomArr = DB.toArray(roomsData);
     const classArr = DB.toArray(ummiClasses);
     const guruUmmi = DB.toArray(users).filter(u => AppConfig.isUserUmmi(u));
@@ -370,7 +370,7 @@ const UMMIPages = {
               </div>
               <div class="form-group">
                 <label>Tempat / Ruang Belajar (Di Lingkungan Sekolah)</label>
-                <input type="text" id="ummi-room" list="rooms-list-options" placeholder="Contoh: Serambi Masjid, Ruang Kelas 1 Abu Bakar, dll.">
+                <input type="text" id="ummi-room" list="rooms-list-options" placeholder="Pilih atau ketik ruang belajar...">
                 <datalist id="rooms-list-options">
                   ${locationRecommendations.map(loc => `<option value="${AppConfig.escapeHtml(loc)}"></option>`).join('')}
                 </datalist>
@@ -2254,7 +2254,7 @@ async renderUmmiClasses(container) {
       DB.getRooms(),
       DB.getUmmiClasses()
     ]);
-    const locationRecommendations = DB.getUmmiRoomRecommendations ? DB.getUmmiRoomRecommendations(snapUmmiClasses, roomsData, allClasses) : [];
+    const locationRecommendations = DB.getUmmiRoomRecommendations ? DB.getUmmiRoomRecommendations(snapUmmiClasses) : [];
     const plottingArr = DB.toArray(snapPlotting).sort((a, b) => (b.date || '').localeCompare(a.date || '') || (b.createdAt || 0) - (a.createdAt || 0));
     const studentMap = DB.toArray(allStudents).reduce((acc, s) => { acc[s.id] = s; return acc; }, {});
     const guruUmmi = DB.toArray(users).filter(u => AppConfig.isUserUmmi(u));
@@ -2457,7 +2457,7 @@ async renderUmmiClasses(container) {
               <div><strong>${p.date || '-'}</strong></div>
               <div class="text-xs text-muted"><i class="ph ph-clock"></i> ${AppConfig.escapeHtml(p.time || '07.30 - 08.30 WIB')}</div>
             </td>
-            <td><i class="ph ph-map-pin"></i> ${AppConfig.escapeHtml(p.room || 'Serambi Masjid')}</td>
+            <td><i class="ph ph-map-pin"></i> ${AppConfig.escapeHtml(p.room || '-')}</td>
             <td>
               <strong>${AppConfig.escapeHtml(examiner)}</strong>
               ${isMyExam ? '<div class="text-xs text-primary font-bold"><i class="ph ph-user"></i> Penugasan Anda</div>' : ''}
@@ -2496,7 +2496,7 @@ async renderUmmiClasses(container) {
             <div class="tasmi-item-body">
               <div class="tasmi-item-schedule">
                 <span class="badge badge-primary badge-sm">${AppConfig.escapeHtml(p.category || 'Tasmi\' Juz 30')}</span>
-                <span><i class="ph ph-map-pin"></i> ${AppConfig.escapeHtml(p.room || 'Serambi Masjid')}</span>
+                <span><i class="ph ph-map-pin"></i> ${AppConfig.escapeHtml(p.room || '-')}</span>
               </div>
               <div class="text-xs text-muted">
                 <i class="ph ph-calendar"></i> <strong>${p.date || '-'}</strong> (${AppConfig.escapeHtml(p.time || '07.30 - 08.30 WIB')})
@@ -2639,7 +2639,7 @@ async renderUmmiClasses(container) {
       DB.getRooms(),
       DB.getUmmiClasses()
     ]);
-    const locationRecommendations = DB.getUmmiRoomRecommendations ? DB.getUmmiRoomRecommendations(snapUmmiClasses, roomsData, allClasses) : [];
+    const locationRecommendations = DB.getUmmiRoomRecommendations ? DB.getUmmiRoomRecommendations(snapUmmiClasses) : [];
     const plottingArr = DB.toArray(snapPlotting).sort((a, b) => (b.date || '').localeCompare(a.date || '') || (b.createdAt || 0) - (a.createdAt || 0));
     const studentArr = DB.toArray(allStudents);
     const studentMap = studentArr.reduce((acc, s) => { acc[s.id] = s; return acc; }, {});
@@ -2714,7 +2714,7 @@ async renderUmmiClasses(container) {
             <td>${getSessionBadge(sess)}</td>
             <td><strong class="text-primary">${AppConfig.escapeHtml(p.category || 'Tasmi')}</strong></td>
             <td>${AppConfig.escapeHtml(examiner)}</td>
-            <td>${AppConfig.escapeHtml(p.date || '-')} · ${AppConfig.escapeHtml(p.time || '07.30')}<br><small class="text-muted"><i class="ph ph-map-pin"></i> ${AppConfig.escapeHtml(p.room || 'Masjid')}</small></td>
+            <td>${AppConfig.escapeHtml(p.date || '-')} · ${AppConfig.escapeHtml(p.time || '07.30')}<br><small class="text-muted"><i class="ph ph-map-pin"></i> ${AppConfig.escapeHtml(p.room || '-')}</small></td>
             <td>${statusBadge}</td>
             <td class="action-cell">
               <button class="btn btn-primary btn-sm" data-result-tasmi="${p.id}" title="Input Hasil Ujian"><i class="ph ph-check-circle"></i> Hasil</button>
@@ -2762,7 +2762,7 @@ async renderUmmiClasses(container) {
                 </div>
                 <div class="tasmi-plot-card-row">
                   <span>Jadwal & Ruang:</span>
-                  <span>${AppConfig.escapeHtml(p.date || '-')} · ${AppConfig.escapeHtml(p.time || '07.30')} (${AppConfig.escapeHtml(p.room || 'Masjid')})</span>
+                  <span>${AppConfig.escapeHtml(p.date || '-')} · ${AppConfig.escapeHtml(p.time || '07.30')} (${AppConfig.escapeHtml(p.room || '-')})</span>
                 </div>
                 ${p.notes ? `<div class="tasmi-plot-card-notes"><strong>Catatan:</strong> ${AppConfig.escapeHtml(p.notes)}</div>` : ''}
               </div>
@@ -2808,7 +2808,7 @@ async renderUmmiClasses(container) {
           document.getElementById('tasmi-plot-examiner').value = p.examinerId || '';
           document.getElementById('tasmi-plot-date').value = p.date || '';
           document.getElementById('tasmi-plot-time').value = p.time || '07.30 - 08.30 WIB';
-          document.getElementById('tasmi-plot-room').value = p.room || 'Serambi Masjid';
+          document.getElementById('tasmi-plot-room').value = p.room || '';
           document.getElementById('tasmi-plot-notes').value = p.prepNotes || '';
           App.openModal('modal-tasmi-plot');
         };
@@ -2954,7 +2954,7 @@ async renderUmmiClasses(container) {
               </div>
               <div class="form-group">
                 <label>Ruang / Lokasi Ujian</label>
-                <input type="text" id="tasmi-plot-room" list="tasmi-rooms-list" value="Serambi Masjid" placeholder="Contoh: Serambi Masjid, Ruang Kelas..." class="form-input">
+                <input type="text" id="tasmi-plot-room" list="tasmi-rooms-list" placeholder="Pilih atau ketik ruang ujian..." class="form-input">
                 <datalist id="tasmi-rooms-list">
                   ${locationRecommendations.map(loc => `<option value="${AppConfig.escapeHtml(loc)}"></option>`).join('')}
                 </datalist>
@@ -3054,6 +3054,7 @@ async renderUmmiClasses(container) {
       document.getElementById('tasmi-modal-title').innerText = 'Buat Jadwal & Plotting Penguji Tasmi';
       document.getElementById('form-tasmi-plot').reset();
       document.getElementById('tasmi-plot-id').value = '';
+document.getElementById('tasmi-plot-room').value = '';
       document.getElementById('tasmi-plot-date').value = AppConfig.getLocalDateStr ? AppConfig.getLocalDateStr() : new Date().toISOString().split('T')[0];
       document.getElementById('tasmi-plot-time').value = '07.30 - 08.30 WIB';
       document.getElementById('tasmi-plot-session').value = activeSession !== 'all' ? activeSession : '1';
