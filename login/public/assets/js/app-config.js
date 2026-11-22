@@ -57,6 +57,38 @@ const UNIT_LABELS = Object.freeze({
 'GURU_MAPEL_SENI': 'Guru Mapel Seni',
 'GURU_MAPEL_TIK': 'Guru Mapel TIK'
 });
+const TAHFIDZ_ENTRY_TYPES = Object.freeze({
+ZIYADAH: 'ziyadah',
+MURAJAAH: 'murajaah',
+PERSIAPAN_TASMI: 'persiapan_tasmi',
+TASMI: 'tasmi'
+});
+const TAHFIDZ_ENTRY_LABELS = Object.freeze({
+[TAHFIDZ_ENTRY_TYPES.ZIYADAH]: 'Ziyadah (Hafalan Baru)',
+[TAHFIDZ_ENTRY_TYPES.MURAJAAH]: 'Muraja\'ah Rutin',
+[TAHFIDZ_ENTRY_TYPES.PERSIAPAN_TASMI]: 'Persiapan Tasmi\'',
+[TAHFIDZ_ENTRY_TYPES.TASMI]: 'Ujian Tasmi\' Resmi'
+});
+const TASMI_TARGET_OPTIONS = Object.freeze([
+{ id: '1/4_juz_1', label: 'Persiapan Tasmi\' ¼ Juz ke-1', shortLabel: '¼ Juz ke-1' },
+{ id: '1/4_juz_2', label: 'Persiapan Tasmi\' ¼ Juz ke-2', shortLabel: '¼ Juz ke-2' },
+{ id: '1/4_juz_3', label: 'Persiapan Tasmi\' ¼ Juz ke-3', shortLabel: '¼ Juz ke-3' },
+{ id: '1/4_juz_4', label: 'Persiapan Tasmi\' ¼ Juz ke-4', shortLabel: '¼ Juz ke-4' },
+{ id: '1/2_juz_1', label: 'Persiapan Tasmi\' ½ Juz ke-1', shortLabel: '½ Juz ke-1' },
+{ id: '1/2_juz_2', label: 'Persiapan Tasmi\' ½ Juz ke-2', shortLabel: '½ Juz ke-2' },
+{ id: '1_juz', label: 'Persiapan Tasmi\' 1 Juz', shortLabel: '1 Juz' },
+{ id: '3_juz', label: 'Persiapan Tasmi\' 3 Juz Sekali Duduk', shortLabel: '3 Juz Sekali Duduk' }
+]);
+function formatTasmiTargetLabel(targetIdOrLabel) {
+if (!targetIdOrLabel) return '-';
+const found = TASMI_TARGET_OPTIONS.find(t => t.id === targetIdOrLabel || t.label === targetIdOrLabel || t.shortLabel === targetIdOrLabel);
+return found ? found.label : targetIdOrLabel;
+}
+function formatTasmiTargetShort(targetIdOrLabel) {
+if (!targetIdOrLabel) return '-';
+const found = TASMI_TARGET_OPTIONS.find(t => t.id === targetIdOrLabel || t.label === targetIdOrLabel || t.shortLabel === targetIdOrLabel);
+return found ? found.shortLabel : targetIdOrLabel;
+}
 function buildTeachingLabels(userId, classes = {}, subjects = {}) {
 const subjMap = new Map();
 const classList = Object.entries(classes || {});
@@ -2071,6 +2103,11 @@ getLocalMonthStr,
 getAttendanceSchedule,
 isAttendanceLate,
 validateAttendanceWindow,
+TAHFIDZ_ENTRY_TYPES,
+TAHFIDZ_ENTRY_LABELS,
+TASMI_TARGET_OPTIONS,
+formatTasmiTargetLabel,
+formatTasmiTargetShort,
 timeToMinutes,
 calculateGradeSummary,
 PAYROLL_CUTOFF_START,

@@ -1606,6 +1606,7 @@ async renderUmmiClasses(container) {
     let activeClassId = myClasses[0] ? myClasses[0].id : 'all';
     let activeStudentId = 'all';
     let activeJuz = 'all';
+    let activeType = 'all';
     let searchQuery = '';
     const getFlattenedRecords = () => {
       const records = [];
@@ -1646,6 +1647,16 @@ async renderUmmiClasses(container) {
               <label class="tahfidz-filter-label">Santri</label>
               <select id="sel-tahfidz-student" class="tahfidz-filter-select">
                 <option value="all">Semua Santri</option>
+              </select>
+            </div>
+            <div class="tahfidz-filter-item">
+              <label class="tahfidz-filter-label">Kategori</label>
+              <select id="sel-tahfidz-type" class="tahfidz-filter-select">
+                <option value="all">Semua Kategori</option>
+                <option value="ziyadah">Ziyadah</option>
+                <option value="murajaah">Muraja\'ah</option>
+                <option value="persiapan_tasmi">Persiapan Tasmi\'</option>
+                <option value="tasmi">Ujian Tasmi\'</option>
               </select>
             </div>
             <div class="tahfidz-filter-item">
@@ -1702,9 +1713,33 @@ async renderUmmiClasses(container) {
               </div>
               <div class="form-row">
                 <div class="form-group form-col">
+                  <label>Kategori / Jenis Setoran *</label>
+                  <select id="tahfidz-entry-type" class="form-input">
+                    <option value="ziyadah" selected>Ziyadah (Setoran Hafalan Baru)</option>
+                    <option value="murajaah">Muraja\'ah Rutin</option>
+                    <option value="persiapan_tasmi">Persiapan Tasmi\' (Ujian Porsi Juz)</option>
+                    <option value="tasmi">Ujian Tasmi\' Resmi</option>
+                  </select>
+                </div>
+                <div class="form-group form-col">
                   <label>Tanggal Setoran *</label>
                   <input type="date" id="tahfidz-entry-date" required class="form-input">
                 </div>
+              </div>
+              <div class="form-group" id="tahfidz-tasmi-target-row" style="display:none;">
+                <label id="lbl-tahfidz-tasmi-target">Porsi / Target Tasmi\' <span class="text-danger">*</span></label>
+                <select id="tahfidz-entry-tasmi-target" class="form-input">
+                  <option value="1/4_juz_1">Persiapan Tasmi\' ¼ Juz ke-1</option>
+                  <option value="1/4_juz_2">Persiapan Tasmi\' ¼ Juz ke-2</option>
+                  <option value="1/4_juz_3">Persiapan Tasmi\' ¼ Juz ke-3</option>
+                  <option value="1/4_juz_4">Persiapan Tasmi\' ¼ Juz ke-4</option>
+                  <option value="1/2_juz_1">Persiapan Tasmi\' ½ Juz ke-1</option>
+                  <option value="1/2_juz_2">Persiapan Tasmi\' ½ Juz ke-2</option>
+                  <option value="1_juz">Persiapan Tasmi\' 1 Juz</option>
+                  <option value="3_juz">Persiapan Tasmi\' 3 Juz Sekali Duduk</option>
+                </select>
+              </div>
+              <div class="form-row">
                 <div class="form-group form-col">
                   <label>Juz *</label>
                   <select id="tahfidz-entry-juz" required class="form-input">
@@ -1714,16 +1749,14 @@ async renderUmmiClasses(container) {
                     ${Array.from({ length: 27 }, (_, i) => `<option value="${i + 1}">Juz ${i + 1}</option>`).join('')}
                   </select>
                 </div>
-              </div>
-              <div class="form-row">
-                <div class="form-group form-col">
-                  <label>Surat *</label>
+                <div class="form-group form-col" id="tahfidz-surah-col">
+                  <label id="lbl-tahfidz-surah">Surat *</label>
                   <select id="tahfidz-entry-surah" required class="form-input"></select>
                 </div>
-                <div class="form-group form-col">
-                  <label>Rentang Ayat *</label>
-                  <input type="text" id="tahfidz-entry-verse" required placeholder="Contoh: 1 - 20 atau 1 - 40 (Tuntas)" class="form-input">
-                </div>
+              </div>
+              <div class="form-group">
+                <label id="lbl-tahfidz-verse">Rentang Ayat *</label>
+                <input type="text" id="tahfidz-entry-verse" required placeholder="Contoh: 1 - 20 atau 1 - 40 (Tuntas)" class="form-input">
               </div>
               <div class="form-group">
                 <label>Nilai / Predikat Kelancaran *</label>
@@ -1779,13 +1812,18 @@ async renderUmmiClasses(container) {
         }
         if (activeStudentId !== 'all' && r.studentId !== activeStudentId) return false;
         if (activeJuz !== 'all' && String(r.juz || '') !== String(activeJuz)) return false;
+        if (activeType !== 'all') {
+          const rType = r.entryType || 'ziyadah';
+          if (rType !== activeType) return false;
+        }
         if (searchQuery) {
           const sObj = studentMap[r.studentId];
           const sName = (sObj?.name || r.studentName || '').toLowerCase();
           const surah = (r.surah || '').toLowerCase();
           const notes = (r.notes || '').toLowerCase();
+          const targetText = (AppConfig.formatTasmiTargetLabel ? AppConfig.formatTasmiTargetLabel(r.tasmiTarget) : (r.tasmiTarget || '')).toLowerCase();
           const teacher = (teacherMap[r.teacherId] || r.teacherName || '').toLowerCase();
-          if (!sName.includes(searchQuery) && !surah.includes(searchQuery) && !notes.includes(searchQuery) && !teacher.includes(searchQuery)) return false;
+          if (!sName.includes(searchQuery) && !surah.includes(searchQuery) && !notes.includes(searchQuery) && !teacher.includes(searchQuery) && !targetText.includes(searchQuery)) return false;
         }
         return true;
       });
@@ -1845,6 +1883,25 @@ async renderUmmiClasses(container) {
         else if (r.grade === 'A') gradeBadge = '<span class="badge badge-primary font-bold">A (Lancar)</span>';
         else if (r.grade === 'C') gradeBadge = '<span class="badge badge-warning">C (Muraja\'ah)</span>';
         else if (r.grade === 'D') gradeBadge = '<span class="badge badge-danger">D (Kurang)</span>';
+        const isTasmi = r.entryType === 'persiapan_tasmi' || r.entryType === 'tasmi';
+        const isOfficialTasmi = r.entryType === 'tasmi';
+        const isMurajaah = r.entryType === 'murajaah';
+        let surahColHtml = '';
+        if (isTasmi) {
+          const tShort = AppConfig.formatTasmiTargetShort ? AppConfig.formatTasmiTargetShort(r.tasmiTarget) : (r.tasmiTarget || 'Tasmi\'');
+          surahColHtml = `
+            <div style="display:flex; flex-direction:column; gap:4px; align-items:flex-start;">
+              <span class="badge ${isOfficialTasmi ? 'badge-primary' : 'badge-warning'}" style="font-size:10px;"><i class="ph ph-medal"></i> ${isOfficialTasmi ? 'Ujian Tasmi\'' : 'Persiapan Tasmi\''}</span>
+              <strong>${AppConfig.escapeHtml(tShort)}</strong>
+              <span class="text-xs text-muted">Juz ${r.juz || 30}${r.surah ? ` · ${AppConfig.escapeHtml(r.surah)}` : ''}</span>
+            </div>`;
+        } else {
+          surahColHtml = `
+            <span class="badge badge-info">Juz ${r.juz || 30}</span>
+            <strong>${AppConfig.escapeHtml(r.surah || '-')}</strong>
+            ${isMurajaah ? '<span class="badge badge-outline badge-xs">Muraja\'ah</span>' : ''}`;
+        }
+        const verseColHtml = isTasmi ? `<span class="badge badge-outline">${AppConfig.escapeHtml(r.verse || 'Tuntas')}</span>` : `Ayat ${AppConfig.escapeHtml(r.verse || '-')}`;
         return `
           <tr>
             <td>${idx + 1}</td>
@@ -1854,11 +1911,8 @@ async renderUmmiClasses(container) {
               <div class="text-xs text-muted">${AppConfig.escapeHtml(cFormal)} · ${sObj.nis || sObj.id || ''}</div>
             </td>
             <td><span class="badge badge-outline">${AppConfig.escapeHtml(clsName)}</span></td>
-            <td>
-              <span class="badge badge-info">Juz ${r.juz || 30}</span>
-              <strong>${AppConfig.escapeHtml(r.surah || '-')}</strong>
-            </td>
-            <td>Ayat ${AppConfig.escapeHtml(r.verse || '-')}</td>
+            <td>${surahColHtml}</td>
+            <td>${verseColHtml}</td>
             <td>${gradeBadge}</td>
             <td>
               <div class="text-sm">${AppConfig.escapeHtml(r.notes || '-')}</div>
@@ -1883,6 +1937,32 @@ async renderUmmiClasses(container) {
         else if (r.grade === 'A') gradeBadge = '<span class="badge badge-primary font-bold">A (Lancar)</span>';
         else if (r.grade === 'C') gradeBadge = '<span class="badge badge-warning">C (Muraja\'ah)</span>';
         else if (r.grade === 'D') gradeBadge = '<span class="badge badge-danger">D (Kurang)</span>';
+        const isMobTasmi = r.entryType === 'persiapan_tasmi' || r.entryType === 'tasmi';
+        const isMobOfficial = r.entryType === 'tasmi';
+        const isMobMurajaah = r.entryType === 'murajaah';
+        let mobSurahHtml = '';
+        if (isMobTasmi) {
+          const tMobShort = AppConfig.formatTasmiTargetShort ? AppConfig.formatTasmiTargetShort(r.tasmiTarget) : (r.tasmiTarget || 'Tasmi\'');
+          mobSurahHtml = `
+            <div class="tahfidz-item-surah-row">
+              <span>
+                <span class="badge ${isMobOfficial ? 'badge-primary' : 'badge-warning'} badge-sm"><i class="ph ph-medal"></i> ${isMobOfficial ? 'Tasmi\'' : 'Persiapan Tasmi\''}</span>
+                <strong>${AppConfig.escapeHtml(tMobShort)}</strong>
+                <span class="text-xs text-muted">(Juz ${r.juz || 30})</span>
+              </span>
+              <span class="font-bold text-primary">${AppConfig.escapeHtml(r.verse || 'Tuntas')}</span>
+            </div>`;
+        } else {
+          mobSurahHtml = `
+            <div class="tahfidz-item-surah-row">
+              <span>
+                <span class="badge badge-info badge-sm">Juz ${r.juz || 30}</span>
+                <strong>${AppConfig.escapeHtml(r.surah || '-')}</strong>
+                ${isMobMurajaah ? '<span class="badge badge-outline badge-xs">Muraja\'ah</span>' : ''}
+              </span>
+              <span class="font-bold text-primary">Ayat ${AppConfig.escapeHtml(r.verse || '-')}</span>
+            </div>`;
+        }
         return `
           <div class="tahfidz-item-card">
             <div class="tahfidz-item-top">
@@ -1893,10 +1973,7 @@ async renderUmmiClasses(container) {
               <div>${gradeBadge}</div>
             </div>
             <div class="tahfidz-item-body">
-              <div class="tahfidz-item-surah-row">
-                <span><span class="badge badge-info badge-sm">Juz ${r.juz || 30}</span> <strong>${AppConfig.escapeHtml(r.surah || '-')}</strong></span>
-                <span class="font-bold text-primary">Ayat ${AppConfig.escapeHtml(r.verse || '-')}</span>
-              </div>
+              ${mobSurahHtml}
               ${r.notes ? `<div class="tahfidz-item-notes"><i class="ph ph-chat-text"></i> ${AppConfig.escapeHtml(r.notes)}</div>` : ''}
             </div>
             <div class="tahfidz-item-bottom">
@@ -1942,12 +2019,43 @@ async renderUmmiClasses(container) {
       const hiddenId = document.getElementById('tahfidz-entry-id');
       const hiddenOrigStu = document.getElementById('tahfidz-entry-orig-student');
       const selStu = document.getElementById('tahfidz-entry-student');
+      const selTypeInput = document.getElementById('tahfidz-entry-type');
       const inputDate = document.getElementById('tahfidz-entry-date');
+      const tasmiTargetRow = document.getElementById('tahfidz-tasmi-target-row');
+      const selTasmiTarget = document.getElementById('tahfidz-entry-tasmi-target');
+      const lblTasmiTarget = document.getElementById('lbl-tahfidz-tasmi-target');
+      const lblSurah = document.getElementById('lbl-tahfidz-surah');
+      const lblVerse = document.getElementById('lbl-tahfidz-verse');
       const selJuzInput = document.getElementById('tahfidz-entry-juz');
       const selSurahInput = document.getElementById('tahfidz-entry-surah');
       const inputVerse = document.getElementById('tahfidz-entry-verse');
       const selGrade = document.getElementById('tahfidz-entry-grade');
       const inputNotes = document.getElementById('tahfidz-entry-notes');
+      const updateTasmiVisibility = () => {
+        const isTasmi = selTypeInput.value === 'persiapan_tasmi' || selTypeInput.value === 'tasmi';
+        tasmiTargetRow.style.display = isTasmi ? 'block' : 'none';
+        if (isTasmi) {
+          lblTasmiTarget.innerHTML = selTypeInput.value === 'tasmi' ? 'Porsi / Target Ujian Tasmi\' <span class="text-danger">*</span>' : 'Porsi / Target Persiapan Tasmi\' <span class="text-danger">*</span>';
+          lblVerse.innerHTML = 'Keterangan Cakupan / Rentang Ayat';
+          if (lblSurah) lblSurah.innerHTML = 'Surat (Opsional / Awal Porsi)';
+          selSurahInput.required = false;
+          inputVerse.required = false;
+          if (!inputVerse.value || inputVerse.value === '1 - ') {
+            inputVerse.value = 'Tuntas (1 Porsi)';
+          }
+        } else {
+          lblTasmiTarget.innerHTML = 'Porsi / Target Tasmi\'';
+          lblVerse.innerHTML = 'Rentang Ayat *';
+          if (lblSurah) lblSurah.innerHTML = 'Surat *';
+          selSurahInput.required = true;
+          inputVerse.required = true;
+          if (inputVerse.value === 'Tuntas (1 Porsi)') {
+            inputVerse.value = '1 - ';
+          }
+        }
+        populateSurahs(selJuzInput.value, selSurahInput.value);
+      };
+      selTypeInput.onchange = updateTasmiVisibility;
       let selectableStudents = [];
       if (activeClassId !== 'all') {
         const cls = classArr.find(c => c.id === activeClassId);
@@ -1963,22 +2071,29 @@ async renderUmmiClasses(container) {
         <option value="${s.id}">${AppConfig.escapeHtml(s.name)} (${gradeClassMap[s.classId] || s.classId || '-'})</option>
       `).join('');
       const populateSurahs = (juzVal, keepSurah = null) => {
+        const isTasmi = selTypeInput && (selTypeInput.value === 'persiapan_tasmi' || selTypeInput.value === 'tasmi');
         let surahList = QURAN_SURAHS;
         if (juzVal && juzVal !== 'all') {
           const jNum = Number(juzVal);
           surahList = QURAN_SURAHS.filter(s => Array.isArray(s.juz) ? s.juz.includes(jNum) : s.juz === jNum);
           if (!surahList.length) surahList = QURAN_SURAHS;
         }
-        selSurahInput.innerHTML = surahList.map(s => `
+        let optionsHtml = '';
+        if (isTasmi) {
+          optionsHtml += '<option value="">(Semua Surat Sesuai Porsi)</option>';
+        }
+        optionsHtml += surahList.map(s => `
           <option value="${s.name}" data-verses="${s.verses}" data-juz="${Array.isArray(s.juz) ? s.juz.join(',') : s.juz}">No. ${s.no} - ${s.name} (${s.verses} ayat)</option>
         `).join('');
-        if (keepSurah && surahList.some(s => s.name === keepSurah)) {
+        selSurahInput.innerHTML = optionsHtml;
+        if (keepSurah !== null && (keepSurah === '' || surahList.some(s => s.name === keepSurah))) {
           selSurahInput.value = keepSurah;
         }
         const curOpt = selSurahInput.options[selSurahInput.selectedIndex];
         if (curOpt) {
           const vCount = curOpt.getAttribute('data-verses');
           if (vCount) inputVerse.placeholder = `Contoh: 1 - ${vCount} (Tuntas)`;
+          else if (isTasmi) inputVerse.placeholder = 'Contoh: Tuntas (1 Porsi) atau 1 - 20';
         }
       };
       selJuzInput.onchange = () => {
@@ -1996,17 +2111,21 @@ async renderUmmiClasses(container) {
         hiddenId.value = editData.id || '';
         hiddenOrigStu.value = editData.studentId || '';
         selStu.value = editData.studentId || '';
+        selTypeInput.value = editData.entryType || 'ziyadah';
+        selTasmiTarget.value = editData.tasmiTarget || '1/4_juz_1';
         inputDate.value = editData.date || '';
         selJuzInput.value = editData.juz || 30;
-        populateSurahs(editData.juz || 30);
-        selSurahInput.value = editData.surah || '';
+        populateSurahs(editData.juz || 30, editData.surah || '');
         inputVerse.value = editData.verse || '';
         selGrade.value = editData.grade || 'A';
         inputNotes.value = editData.notes || '';
+        updateTasmiVisibility();
       } else {
         modalTitle.innerText = 'Input Setoran Baru Tahfidz';
         hiddenId.value = '';
         hiddenOrigStu.value = '';
+        selTypeInput.value = 'ziyadah';
+        selTasmiTarget.value = '1/4_juz_1';
         inputDate.value = AppConfig.getLocalDateStr ? AppConfig.getLocalDateStr() : new Date().toISOString().slice(0, 10);
         selJuzInput.value = activeJuz !== 'all' ? activeJuz : '30';
         populateSurahs(selJuzInput.value);
@@ -2017,9 +2136,17 @@ async renderUmmiClasses(container) {
         }
         selGrade.value = 'A';
         inputVerse.value = '1 - ';
+        updateTasmiVisibility();
       }
       App.openModal('modal-tahfidz-entry');
     };
+    const selType = container.querySelector('#sel-tahfidz-type');
+    if (selType) {
+      selType.onchange = () => {
+        activeType = selType.value;
+        renderTahfidzView();
+      };
+    }
     selCls.onchange = () => {
       activeClassId = selCls.value;
       activeStudentId = 'all';
@@ -2046,6 +2173,8 @@ async renderUmmiClasses(container) {
       const recId = document.getElementById('tahfidz-entry-id').value.trim();
       const origStu = document.getElementById('tahfidz-entry-orig-student').value.trim();
       const studentId = document.getElementById('tahfidz-entry-student').value;
+      const entryType = document.getElementById('tahfidz-entry-type').value || 'ziyadah';
+      const tasmiTarget = (entryType === 'persiapan_tasmi' || entryType === 'tasmi') ? document.getElementById('tahfidz-entry-tasmi-target').value : '';
       const date = document.getElementById('tahfidz-entry-date').value;
       const juz = Number(document.getElementById('tahfidz-entry-juz').value) || 30;
       const surah = document.getElementById('tahfidz-entry-surah').value;
@@ -2072,6 +2201,8 @@ async renderUmmiClasses(container) {
           verse,
           grade,
           notes,
+          entryType,
+          tasmiTarget,
           studentName: sObj ? sObj.name : '',
           ummiClassId: clsObj ? clsObj.id : '',
           teacherId: uid,
@@ -2086,6 +2217,8 @@ async renderUmmiClasses(container) {
           verse,
           grade,
           notes,
+          entryType,
+          tasmiTarget,
           studentName: sObj ? sObj.name : '',
           ummiClassId: clsObj ? clsObj.id : '',
           teacherId: uid,
