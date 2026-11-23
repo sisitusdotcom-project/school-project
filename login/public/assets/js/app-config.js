@@ -174,6 +174,7 @@ const NAV_ITEMS = Object.freeze({
 { hash: '#/admin/characters', icon: 'ph-star', text: 'Indikator Karakter', group: 'Akademik' },
 { hash: '#/admin/leger', icon: 'ph-table', text: 'Buku Leger Rapor', group: 'Akademik' },
 { hash: '#/admin/attendance', icon: 'ph-clock-user', text: 'Pantau Presensi GTK', group: 'Monitoring' },
+{ hash: '#/personnel/leaves', icon: 'ph-calendar-check', text: 'Izin & Cuti GTK', group: 'Monitoring' },
 { hash: '#/personnel', icon: 'ph-sliders-horizontal', text: 'Pengaturan Personalia', group: 'Monitoring' },
 { hash: '#/kepsek/reports', icon: 'ph-clipboard-text', text: 'Pantau Rapor', group: 'Monitoring' },
 { hash: '#/it-admin/sync', icon: 'ph-arrows-clockwise', text: 'Sinkron Dapodik', group: 'Sistem & Data' },
@@ -185,6 +186,7 @@ const NAV_ITEMS = Object.freeze({
 ],
 'GURU_UMUM': [
 { hash: '#/attendance', icon: 'ph-map-pin', text: 'Presensi Mandiri' },
+{ hash: '#/personnel/leaves', icon: 'ph-calendar-plus', text: 'Izin & Cuti GTK' },
 { hash: '#/guru/academic', icon: 'ph-check-square', text: 'Nilai Mapel', group: 'Akademik' },
 { hash: '#/guru/schedules', icon: 'ph-calendar', text: 'Jadwal Mengajar', group: 'Akademik' },
 { hash: '#/curriculum/syllabus', icon: 'ph-upload-simple', text: 'Perangkat Ajar', group: 'Akademik' },
@@ -210,6 +212,7 @@ const NAV_ITEMS = Object.freeze({
 { hash: '#/student-affairs', icon: 'ph-users-three', text: 'Pantau Kesiswaan', group: 'Monitoring' },
 { hash: '#/finance', icon: 'ph-wallet', text: 'Pantau Keuangan', group: 'Monitoring' },
 { hash: '#/personnel', icon: 'ph-briefcase', text: 'Pantau Personalia', group: 'Monitoring' },
+{ hash: '#/personnel/leaves', icon: 'ph-calendar-check', text: 'Verifikasi Izin & Cuti', group: 'Monitoring' },
 { hash: '#/facilities', icon: 'ph-buildings', text: 'Pantau Sarpras', group: 'Monitoring' },
 { hash: '#/humas/official-travel', icon: 'ph-airplane-takeoff', text: 'Verifikasi Dinas', group: 'Monitoring' },
 { hash: '#/komite/activities', icon: 'ph-users-three', text: 'Agenda Paguyuban', group: 'Paguyuban' },
@@ -218,6 +221,7 @@ const NAV_ITEMS = Object.freeze({
 [ROLES.TENDIK]: [
 { hash: '#/dashboard', icon: 'ph-squares-four', text: 'Beranda' },
 { hash: '#/attendance', icon: 'ph-map-pin', text: 'Presensi Mandiri' },
+{ hash: '#/personnel/leaves', icon: 'ph-calendar-plus', text: 'Izin & Cuti GTK' },
 { hash: '#/tendik/performance', icon: 'ph-clipboard-text', text: 'Laporan Kinerja', group: 'Tugas Utama' },
 { hash: '#/tendik/portfolio', icon: 'ph-folder', text: 'Portofolio', group: 'Tugas Utama' },
 { hash: '#/guru/kpi', icon: 'ph-chart-line-up', text: 'Kinerja & KPI', group: 'Tugas Utama' },
@@ -230,6 +234,7 @@ const NAV_ITEMS = Object.freeze({
 [ROLES.GURU_UMMI]: [
 { hash: '#/dashboard', icon: 'ph-squares-four', text: 'Beranda' },
 { hash: '#/attendance', icon: 'ph-map-pin', text: 'Presensi Mandiri' },
+{ hash: '#/personnel/leaves', icon: 'ph-calendar-plus', text: 'Izin & Cuti GTK' },
 { hash: '#/guru/schedules', icon: 'ph-calendar', text: 'Jadwal Mengajar', group: 'Akademik' },
 { hash: '#/gtk/official-travel', icon: 'ph-airplane-takeoff', text: 'Tugas Dinas', group: 'Tugas Dinas' },
 { hash: '#/gtk/salary-slip', icon: 'ph-receipt', text: 'Slip Gaji', group: 'Tugas Dinas' }
@@ -274,6 +279,7 @@ const NAV_ITEMS = Object.freeze({
 { hash: '#/admin/users', icon: 'ph-users', text: 'Akun Pengguna', group: 'Personalia' },
 { hash: '#/admin/assignments', icon: 'ph-sliders', text: 'Atur Penugasan', group: 'Personalia' },
 { hash: '#/personnel/data', icon: 'ph-identification-card', text: 'Data GTK & Guru', group: 'Personalia' },
+{ hash: '#/personnel/leaves', icon: 'ph-calendar-check', text: 'Verifikasi Izin & Cuti', group: 'Personalia' },
 { hash: '#/admin/attendance', icon: 'ph-clock-user', text: 'Presensi & Gaji', group: 'Kinerja GTK' },
 { hash: '#/personnel/evaluations', icon: 'ph-chart-line-up', text: 'Penilaian Kinerja', group: 'Kinerja GTK' },
 { hash: '#/personnel/disciplinary', icon: 'ph-warning-octagon', text: 'Disiplin & SP', group: 'Kinerja GTK' },
@@ -291,6 +297,7 @@ const NAV_ITEMS = Object.freeze({
 'STAF_HUMAS_PERSONALIA': [
 { hash: '#/personnel', icon: 'ph-briefcase', text: 'Dasbor Personalia', group: 'Personalia' },
 { hash: '#/personnel/data', icon: 'ph-identification-card', text: 'Data GTK & Guru', group: 'Personalia' },
+{ hash: '#/personnel/leaves', icon: 'ph-calendar-check', text: 'Verifikasi Izin & Cuti', group: 'Personalia' },
 { hash: '#/personnel/portfolio', icon: 'ph-folder-user', text: 'Telaah Portofolio', group: 'Kinerja GTK' },
 { hash: '#/personnel/training', icon: 'ph-certificate', text: 'Portofolio GTK', group: 'Kinerja GTK' },
 { hash: '#/personnel/publications', icon: 'ph-newspaper', text: 'Publikasi & Info', group: 'Humas' },
@@ -423,12 +430,14 @@ const NAV_ITEMS = Object.freeze({
 { hash: '#/gtk/salary-slip', icon: 'ph-receipt', text: 'Slip Honorarium', group: 'Pengembangan' }
 ],
 'KOORD_UMMI': [
+{ hash: '#/personnel/leaves', icon: 'ph-calendar-check', text: 'Pantau Izin Ummi', group: 'Koordinator' },
 { hash: '#/guru/ummi/koord/mapping', icon: 'ph-users-three', text: 'Plotting Rombel', group: 'Koordinator' },
 { hash: '#/guru/ummi/koord/exams', icon: 'ph-check-circle', text: 'Antrean Munaqasyah', group: 'Koordinator' },
 { hash: '#/guru/ummi/koord/tasmi', icon: 'ph-microphone-stage', text: 'Penguji Tasmi\'', group: 'Koordinator' }
 ],
 'TIM_UMMI': [
 { hash: '#/guru/ummi/classes', icon: 'ph-chalkboard-teacher', text: 'Rombel Ummi', group: 'Pembelajaran' },
+{ hash: '#/personnel/leaves', icon: 'ph-calendar-plus', text: 'Izin & Cuti Ummi', group: 'Administrasi' },
 { hash: '#/guru/ummi/progress', icon: 'ph-book-open', text: 'Jurnal Jilid', group: 'Pembelajaran' },
 { hash: '#/guru/ummi/tahfidz', icon: 'ph-book-bookmark', text: 'Setoran Tahfidz', group: 'Tahfidz' },
 { hash: '#/guru/ummi/tasmi', icon: 'ph-headphones', text: 'Pengujian Tasmi\'', group: 'Tahfidz' },
@@ -846,6 +855,7 @@ if (isPureUmmi) {
 baseNav = [
 { hash: '#/dashboard', icon: 'ph-squares-four', text: 'Beranda' },
 { hash: '#/attendance', icon: 'ph-map-pin', text: 'Presensi Mandiri' },
+{ hash: '#/personnel/leaves', icon: 'ph-calendar-plus', text: 'Izin & Cuti Ummi', group: 'Tugas Dinas' },
 { hash: '#/gtk/official-travel', icon: 'ph-airplane-takeoff', text: 'Tugas Dinas', group: 'Tugas Dinas' },
 { hash: '#/gtk/salary-slip', icon: 'ph-receipt', text: 'Slip Gaji', group: 'Tugas Dinas' }
 ];
@@ -2063,6 +2073,43 @@ const rows = [
 if (title) rows.push([title]);
 return rows;
 }
+const GTK_LEAVE_TYPES = Object.freeze([
+{ key: 'izin_pribadi', label: 'Izin Kepentingan Pribadi (Maks 2 Hari/Bulan)', maxDays: 2, isPersonal: true },
+{ key: 'izin_keluar', label: 'Izin Meninggalkan Sekolah Sebelum Waktu', maxDays: 1, isLeavingEarly: true },
+{ key: 'sakit', label: 'Sakit / Udzur Medis (Wajib Surat Dokter)', requiresProof: true },
+{ key: 'cuti_melahirkan', label: 'Cuti Melahirkan Anak ke-1 & ke-2 (3 Bulan)', maxDays: 90, isOfficialLeave: true },
+{ key: 'cuti_haji', label: 'Cuti Ibadah Haji (50 Hari)', maxDays: 50, isOfficialLeave: true },
+{ key: 'cuti_umroh', label: 'Cuti Ibadah Umroh (12 Hari)', maxDays: 12, isOfficialLeave: true },
+{ key: 'cuti_nikah_sendiri', label: 'Cuti Menikah (6 Hari)', maxDays: 6, isOfficialLeave: true },
+{ key: 'cuti_nikah_anak', label: 'Cuti Menikahkan Anak (3 Hari)', maxDays: 3, isOfficialLeave: true },
+{ key: 'cuti_tugas_haji', label: 'Petugas Pembimbing Haji Resmi', isOfficialLeave: true, requiresProof: true },
+{ key: 'cuti_duka', label: 'Cuti Sanak Saudara Meninggal (5 Hari)', maxDays: 5, isOfficialLeave: true },
+{ key: 'cuti_khitan_anak', label: 'Cuti Anak Khitan (2 Hari)', maxDays: 2, isOfficialLeave: true }
+]);
+const GTK_LEAVE_POLICY = Object.freeze({
+MAX_PERSONAL_LEAVE_PER_MONTH: 2,
+LEAVE_BEFORE_TEN_AM_CUTOFF: '10:00',
+TYPES: GTK_LEAVE_TYPES,
+SANCTIONS: Object.freeze({
+lateness: { verbal: [5, 10], written: 11 },
+personalAbsence: { verbal: [3, 5], written: 6 },
+leaveOutsideTeaching: { verbal: [4, 8], written: 9 }
+})
+});
+const formatGtkLeaveTypeLabel = (typeKey) => {
+const found = GTK_LEAVE_TYPES.find(t => t.key === typeKey || t.label === typeKey);
+return found ? found.label : (typeKey || '-');
+};
+const evaluateGtkSanction = ({ lateCount = 0, personalLeaveCount = 0, leaveOutsideCount = 0 } = {}) => {
+const sanctions = [];
+if (lateCount > 10) sanctions.push({ category: 'Keterlambatan', level: 'Peringatan Tertulis', count: lateCount, desc: `Terlambat ${lateCount} kali dalam 1 bulan` });
+else if (lateCount >= 5) sanctions.push({ category: 'Keterlambatan', level: 'Teguran Lisan', count: lateCount, desc: `Terlambat ${lateCount} kali dalam 1 bulan` });
+if (personalLeaveCount > 5) sanctions.push({ category: 'Izin Pribadi', level: 'Peringatan Tertulis', count: personalLeaveCount, desc: `Izin tidak masuk kepentingan pribadi ${personalLeaveCount} kali sebulan` });
+else if (personalLeaveCount >= 3) sanctions.push({ category: 'Izin Pribadi', level: 'Teguran Lisan', count: personalLeaveCount, desc: `Izin tidak masuk kepentingan pribadi ${personalLeaveCount} kali sebulan` });
+if (leaveOutsideCount > 8) sanctions.push({ category: 'Izin Jam Sekolah', level: 'Peringatan Tertulis', count: leaveOutsideCount, desc: `Izin sekolah di luar jam mengajar ${leaveOutsideCount} kali sebulan` });
+else if (leaveOutsideCount >= 4) sanctions.push({ category: 'Izin Jam Sekolah', level: 'Teguran Lisan', count: leaveOutsideCount, desc: `Izin sekolah di luar jam mengajar ${leaveOutsideCount} kali sebulan` });
+return sanctions;
+};
 window.AppConfig = Object.freeze({
 SCHOOL_PROFILE,
 getOfficialKopHtml,
@@ -2145,6 +2192,10 @@ renderRichText,
 renderBulletinBoard,
 attendanceGeofence: SCHOOL_GEOFENCE,
 SCHOOL_GEOFENCE,
-ORIGINAL_SCHOOL_GEOFENCE
+ORIGINAL_SCHOOL_GEOFENCE,
+GTK_LEAVE_TYPES,
+GTK_LEAVE_POLICY,
+formatGtkLeaveTypeLabel,
+evaluateGtkSanction
 });
 })();

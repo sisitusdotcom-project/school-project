@@ -982,6 +982,65 @@ const DB = {
     });
     await db.ref().update(updates);
   },
+  async getGtkLeaves() {
+    return this._readCollection('personnel/leaves', {});
+  },
+  async getGtkLeavesByGtk(gtkId) {
+    if (!isDBReady()) return {};
+    const snap = await db.ref('personnel/leaves').orderByChild('gtkId').equalTo(gtkId).once('value');
+    return snap.val() || {};
+  },
+  async saveGtkLeave(id, data) {
+    if (!isDBReady()) return null;
+    const ref = id ? db.ref(`personnel/leaves/${id}`) : db.ref('personnel/leaves').push();
+    const payload = {
+      ...data,
+      updatedAt: firebase.database.ServerValue.TIMESTAMP
+    };
+    if (!id) payload.createdAt = firebase.database.ServerValue.TIMESTAMP;
+    await ref.update(payload);
+    return ref.key;
+  },
+  async deleteGtkLeave(id) {
+    if (!isDBReady()) return;
+    return db.ref(`personnel/leaves/${id}`).remove();
+  },
+  async reviewGtkLeave(id, status, reviewData = {}) {
+    if (!isDBReady()) return;
+    const snap = await db.ref(`personnel/leaves/${id}`).once('value');
+    const leave = snap.val();
+    if (!leave) throw new Error('Data permohonan izin/cuti tidak ditemukan');
+    const approverTitle = reviewData.approverTitle || 'Personalia';
+    const updatePayload = {
+      status,
+      reviewedBy: reviewData.reviewedBy || '',
+      reviewedByName: reviewData.reviewedByName || approverTitle,
+      reviewedByTitle: approverTitle,
+      reviewerFeedback: reviewData.reviewNote || reviewData.reviewerFeedback || '',
+      reviewedAt: firebase.database.ServerValue.TIMESTAMP
+    };
+    await db.ref(`personnel/leaves/${id}`).update(updatePayload);
+    if (status === 'Disetujui' && leave.startDate && leave.endDate && leave.gtkId) {
+      const start = new Date(leave.startDate);
+      const end = new Date(leave.endDate);
+      const cur = new Date(start);
+      const isSick = String(leave.type || '').toLowerCase().includes('sakit');
+      const isCuti = String(leave.type || '').toLowerCase().includes('cuti');
+      const attStatus = isSick ? 'Sakit' : (isCuti ? 'Cuti' : 'Izin');
+      const note = `${leave.type || 'Izin/Cuti'} (ACC ${approverTitle})`;
+      while (cur <= end) {
+        const dStr = cur.toISOString().slice(0, 10);
+        await this.saveTeacherAttendance(dStr, leave.gtkId, {
+          status: attStatus,
+          notes: note,
+          leave_id: id,
+          appeal_status: 'approved',
+          appeal_reviewed_by: reviewData.reviewedByName || approverTitle
+        });
+        cur.setDate(cur.getDate() + 1);
+      }
+    }
+  },
   async getFacilityAssets() {
     return this._readCollection('facilities/assets', {});
   },

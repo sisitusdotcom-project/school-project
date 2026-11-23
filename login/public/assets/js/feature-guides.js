@@ -36,6 +36,12 @@ const FeatureGuides = {
       to: 'Waka Humas & Personalia serta Kepala Sekolah',
       usage: 'Pilih tanggal atau bulan untuk mengecek jam kedatangan, keterlambatan, dan status kehadiran staf.'
     },
+    '#/personnel/leaves': {
+      func: 'Layanan permohonan izin tidak masuk, udzur medis / sakit, dan hak cuti resmi GTK sekolah.',
+      from: 'GTK Mandiri (Guru / Tendik)',
+      to: 'Waka Humas & Personalia (Terpusat untuk Seluruh GTK)',
+      usage: 'Klik tombol Tambah untuk mengajukan izin atau cuti, lampirkan dokumen pendukung, dan pantau status verifikasi.'
+    },
     '#/personnel/evaluations': {
       func: 'Penilaian Kinerja SDM Majelis Dikdasmen & PNF PCM Sedati: Loyalitas, Kapasitas, Kapabilitas, Pembinaan & Kajian PCM/PDM, serta Wawancara Komitmen Pakta Integritas.',
       from: 'Kepala Sekolah & Waka Humas Personalia',
@@ -807,6 +813,12 @@ const FeatureGuides = {
       'Klik tombol \'Atur Penugasan\' pada baris nama guru atau tenaga kependidikan yang ingin diberikan tugas.',
       'Beri tanda centang pada amanah atau peran struktural yang diemban (misal: Waka Kurikulum, Staf Kesiswaan, Tim IT, Koordinator Ummi, dll.).',
       'Klik \'Simpan\'. Begitu disimpan, menu-menu kerja yang bersangkutan di sidebar pengguna tersebut akan langsung aktif seketika.'
+    ],
+    '#/personnel/leaves': [
+      'Gunakan tombol \'Tambah\' untuk mengajukan permohonan izin tidak masuk, sakit / udzur medis, atau hak cuti resmi.',
+      'Pilih jenis izin/cuti serta tentukan rentang tanggal pelaksanaan. Jika izin sakit atau tugas resmi, lampirkan dokumen pendukung.',
+      'Bagi guru mengajar, cantumkan pelimpahan tugas KBM siswa kepada guru pengganti atau guru piket.',
+      'Seluruh permohonan izin GTK diverifikasi dan disetujui terpusat oleh Waka Humas & Personalia.'
     ],
     '#/student-affairs/leaves': [
       'Pantau daftar permohonan izin atau surat sakit yang diajukan oleh orang tua/wali murid.',

@@ -125,6 +125,19 @@ const ModuleKit = {
     ];
     return approverUnits.some((u) => this.hasUnit(u));
   },
+  canApproveLeave(row, def) {
+    if (!def) return false;
+    if (def.node !== 'personnel/leaves') return this.isApprover(def);
+    const role = Auth.currentRole;
+    if (role === AppConfig.ROLES.ADMIN || role === AppConfig.ROLES.KEPSEK) return true;
+    const isPersonalia = role === AppConfig.ROLES.PERSONNEL || this.hasUnit('WAKA_HUMAS_PERSONALIA') || this.hasUnit('STAF_HUMAS_PERSONALIA');
+    return isPersonalia;
+  },
+  canDeleteLeave(row, def) {
+    if (!def) return false;
+    if (def.node !== 'personnel/leaves') return def.canDelete !== false;
+    return this.canApproveLeave(row, def);
+  },
   canWrite(def) {
     const role = Auth.currentRole;
     if (role === AppConfig.ROLES.ADMIN) return true;
@@ -223,7 +236,22 @@ const ModuleKit = {
       const refName = (refs[field.ref] || {})[value] || (metaSubs && metaSubs[value] ? metaSubs[value].name : '') || '-';
       return this.esc(refName);
     }
+    if (def.node === 'personnel/leaves' && field.key === 'type') {
+      let out = this.esc(value || '-');
+      if (row.isUmmi) out += ` <span class="badge badge-info"><i class="ph ph-book-open"></i> Ummi</span>`;
+      if (row.isExceedingLimit) out += ` <span class="badge badge-warning" title="${this.esc(row.sanctionWarning || 'Melebihi Batas')}"><i class="ph ph-warning"></i> Ke-${row.personalLeaveMonthCount || '>2'} (${row.personalLeaveMonthCount <= 5 ? 'Teguran Lisan' : 'Peringatan Tertulis'})</span>`;
+      return out;
+    }
     if (field.key === def.statusField && value) {
+      if (def.node === 'personnel/leaves') {
+        if (value === 'Disetujui') {
+          return `<span class="badge badge-success"><i class="ph ph-check"></i> Disetujui (Personalia)</span>`;
+        }
+        if (value === 'Ditolak') {
+          return `<span class="badge badge-danger"><i class="ph ph-x"></i> Ditolak</span>`;
+        }
+        return `<span class="badge badge-warning"><i class="ph ph-clock"></i> Diajukan (Personalia)</span>`;
+      }
       const tone = (def.badges || {})[value] || 'warning';
       const opt = this.optionList(field).find((o) => o.value === value);
       return `<span class="badge badge-${tone}">${this.esc(opt ? opt.label : value)}</span>`;
@@ -339,6 +367,14 @@ const ModuleKit = {
           return all.filter((r) => r && myStudentIds.has(r.studentId));
         }
       }
+      if (def.node === 'personnel/leaves') {
+        const isKoordUmmi = this.hasUnit('KOORD_UMMI') || (Auth.currentAssignments || []).includes('KOORD_UMMI');
+        const isPersonalia = Auth.currentRole === AppConfig.ROLES.PERSONNEL || this.hasUnit('WAKA_HUMAS_PERSONALIA') || this.hasUnit('STAF_HUMAS_PERSONALIA');
+        const isAdminOrKepsek = Auth.currentRole === AppConfig.ROLES.ADMIN || Auth.currentRole === AppConfig.ROLES.KEPSEK;
+        if (isKoordUmmi && !isAdminOrKepsek && !isPersonalia) {
+          return all.filter((r) => r.isUmmi || r.unit === 'ummi' || r.gtkId === uid || r.createdBy === uid);
+        }
+      }
       if (!def.own || this.sees(def)) return all;
       const cleanUser = (Auth.userData?.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
       const dir = await DB.getPersonnelDirectory();
@@ -443,8 +479,12 @@ const ModuleKit = {
               <button type="button" class="btn btn-sm btn-success" data-leave-approve="${row.id}" title="Setujui Perizinan"><i class="ph ph-check"></i></button>
               <button type="button" class="btn btn-sm btn-danger" data-leave-reject="${row.id}" title="Tolak Perizinan (Otomatis Alpa)"><i class="ph ph-x"></i></button>
             ` : ''}
+            ${(def.node === 'personnel/leaves' && this.canApproveLeave(row, def) && row.status === 'Diajukan') ? `
+              <button type="button" class="btn btn-sm btn-success" data-gtk-leave-approve="${row.id}" title="Setujui Izin / Cuti"><i class="ph ph-check"></i></button>
+              <button type="button" class="btn btn-sm btn-danger" data-gtk-leave-reject="${row.id}" title="Tolak Izin / Cuti"><i class="ph ph-x"></i></button>
+            ` : ''}
             ${(!isOrtu || row.status === 'Diajukan') ? `<button type="button" class="btn btn-sm btn-outline" data-mk-edit="${row.id}" title="Ubah"><i class="ph ph-pencil-simple"></i></button>` : ''}
-            ${(canDel && (!isOrtu || row.status === 'Diajukan')) ? `<button type="button" class="btn btn-sm btn-danger" data-mk-del="${row.id}" title="Hapus"><i class="ph ph-trash"></i></button>` : ''}
+            ${(def.node === 'personnel/leaves' ? this.canDeleteLeave(row, def) : (canDel && (!isOrtu || row.status === 'Diajukan'))) ? `<button type="button" class="btn btn-sm btn-danger" data-mk-del="${row.id}" title="Hapus"><i class="ph ph-trash"></i></button>` : ''}
           </td>` : ''}
         </tr>`).join('') || `<tr><td colspan="${colCount}" class="text-muted">Belum ada data.</td></tr>`;
       countEl.textContent = `${list.length} dari ${state.rows.length} data`;
@@ -959,14 +999,256 @@ const ModuleKit = {
         updateFinCategories(initType);
         finTypeField.onchange = () => updateFinCategories(finTypeField.value);
       }
+      const existingTerms = form.querySelector('#mk-leave-terms');
+      if (existingTerms && def.node !== 'personnel/leaves') existingTerms.remove();
+      if (def.node === 'personnel/leaves') {
+        const formGrid = form.querySelector('.mk-form-grid');
+        if (formGrid) formGrid.scrollTop = 0;
+        let termsEl = form.querySelector('#mk-leave-terms');
+        if (!termsEl) {
+          termsEl = document.createElement('div');
+          termsEl.id = 'mk-leave-terms';
+          termsEl.className = 'feature-guide-card mk-leave-terms-card';
+          termsEl.innerHTML = `
+            <div class="feature-guide-header" id="btn-toggle-leave-terms">
+              <div class="feature-guide-title">
+                <i class="ph ph-info"></i>
+                <span>Ketentuan Izin &amp; Hak Cuti GTK</span>
+              </div>
+              <button type="button" class="btn-toggle-guide" title="Sembunyikan / Tampilkan ketentuan">
+                <span id="text-toggle-leave-terms">Tutup</span>
+                <i class="ph ph-caret-up" id="icon-toggle-leave-terms"></i>
+              </button>
+            </div>
+            <div class="feature-guide-body" id="body-leave-terms">
+              <div class="mk-leave-terms-grid">
+                <div class="mk-leave-term-item">• <strong>Izin Pribadi:</strong> Maks 2 hari/bulan. Ke-3 s.d. 5 sanksi Teguran Lisan, &gt;5 hari Peringatan Tertulis.</div>
+                <div class="mk-leave-term-item">• <strong>Udzur Medis / Sakit:</strong> Wajib melampirkan Surat Keterangan Dokter resmi.</div>
+                <div class="mk-leave-term-item">• <strong>Meninggalkan Sekolah:</strong> Izin di bawah 10.00 &amp; tidak kembali dihitung Alpa. Wajib pelimpahan tugas KBM.</div>
+                <div class="mk-leave-term-item">• <strong>Persetujuan:</strong> Seluruh perizinan diverifikasi dan disetujui terpusat oleh Personalia.</div>
+              </div>
+            </div>`;
+          if (formGrid) {
+            form.insertBefore(termsEl, formGrid);
+          } else {
+            form.insertBefore(termsEl, form.firstChild);
+          }
+        } else if (formGrid && termsEl.parentNode !== form) {
+          form.insertBefore(termsEl, formGrid);
+        }
+        const toggleBtn = termsEl.querySelector('#btn-toggle-leave-terms');
+        const bodyEl = termsEl.querySelector('#body-leave-terms');
+        const textEl = termsEl.querySelector('#text-toggle-leave-terms');
+        const iconEl = termsEl.querySelector('#icon-toggle-leave-terms');
+        let isManuallyToggled = false;
+        if (activeTermsTimer) {
+          clearTimeout(activeTermsTimer);
+          activeTermsTimer = null;
+        }
+        if (termsCleanup) {
+          termsCleanup();
+          termsCleanup = null;
+        }
+        const closeTerms = () => {
+          termsEl.classList.add('collapsed');
+          if (bodyEl) bodyEl.classList.add('collapsed');
+          if (textEl) textEl.textContent = 'Buka';
+          if (iconEl) iconEl.className = 'ph ph-caret-down';
+        };
+        const openTerms = () => {
+          termsEl.classList.remove('collapsed');
+          if (bodyEl) bodyEl.classList.remove('collapsed');
+          if (textEl) textEl.textContent = 'Tutup';
+          if (iconEl) iconEl.className = 'ph ph-caret-up';
+        };
+        openTerms();
+        if (toggleBtn) {
+          toggleBtn.onclick = (e) => {
+            e.preventDefault();
+            isManuallyToggled = true;
+            if (activeTermsTimer) {
+              clearTimeout(activeTermsTimer);
+              activeTermsTimer = null;
+            }
+            if (termsEl.classList.contains('collapsed')) {
+              openTerms();
+            } else {
+              closeTerms();
+            }
+          };
+        }
+        activeTermsTimer = setTimeout(() => {
+          if (!isManuallyToggled) closeTerms();
+        }, 4500);
+        termsEl.onmouseenter = () => {
+          if (activeTermsTimer) {
+            clearTimeout(activeTermsTimer);
+            activeTermsTimer = null;
+          }
+        };
+        const onPointerDown = (e) => {
+          if (!termsEl.contains(e.target)) {
+            if (!termsEl.classList.contains('collapsed')) closeTerms();
+            if (activeTermsTimer) {
+              clearTimeout(activeTermsTimer);
+              activeTermsTimer = null;
+            }
+          }
+        };
+        const onModalScroll = () => {
+          if (formGrid && formGrid.scrollTop > 30 && !isManuallyToggled) {
+            if (!termsEl.classList.contains('collapsed')) closeTerms();
+            if (activeTermsTimer) {
+              clearTimeout(activeTermsTimer);
+              activeTermsTimer = null;
+            }
+          }
+        };
+        document.addEventListener('pointerdown', onPointerDown, { passive: true });
+        if (formGrid) formGrid.addEventListener('scroll', onModalScroll, { passive: true });
+        termsCleanup = () => {
+          document.removeEventListener('pointerdown', onPointerDown);
+          if (formGrid) formGrid.removeEventListener('scroll', onModalScroll);
+        };
+        const isApproverUser = this.isApprover(def);
+        const gtkEl = form.querySelector('#mk-f-gtkId');
+        const statusEl = form.querySelector('#mk-f-status');
+        const feedbackEl = form.querySelector('#mk-f-reviewerFeedback');
+        if (!isApproverUser) {
+          if (gtkEl) {
+            const cleanUser = (Auth.userData?.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+            const myEmp = Object.entries(refs.__rawRefs?.employee || {}).find(([k, v]) => k === uid || v.userId === uid || (v.name && cleanUser && v.name.toLowerCase().replace(/[^a-z0-9]/g, '') === cleanUser));
+            if (myEmp) gtkEl.value = myEmp[0];
+            gtkEl.disabled = true;
+          }
+          if (statusEl) {
+            statusEl.value = row ? (row.status || 'Diajukan') : 'Diajukan';
+            statusEl.disabled = true;
+          }
+          if (feedbackEl) {
+            feedbackEl.disabled = true;
+            feedbackEl.readOnly = true;
+            feedbackEl.placeholder = '(Hanya dapat diisi oleh peninjau/koordinator)';
+          }
+        }
+        const startEl = form.querySelector('#mk-f-startDate');
+        const endEl = form.querySelector('#mk-f-endDate');
+        const totalEl = form.querySelector('#mk-f-totalDays');
+        const typeEl = form.querySelector('#mk-f-type');
+        if (startEl && endEl && totalEl) {
+          const calcDays = () => {
+            if (startEl.value && endEl.value) {
+              const d1 = new Date(startEl.value);
+              const d2 = new Date(endEl.value);
+              const diff = Math.max(1, Math.round((d2 - d1) / (1000 * 60 * 60 * 24)) + 1);
+              totalEl.value = isNaN(diff) ? 1 : diff;
+            }
+          };
+          startEl.onchange = calcDays;
+          endEl.onchange = calcDays;
+          if (typeEl) {
+            typeEl.onchange = () => {
+              const v = typeEl.value;
+              let days = 1;
+              if (v.includes('3 Bulan')) days = 90;
+              else if (v.includes('50 Hari')) days = 50;
+              else if (v.includes('12 Hari')) days = 12;
+              else if (v.includes('6 Hari')) days = 6;
+              else if (v.includes('5 Hari')) days = 5;
+              else if (v.includes('3 Hari')) days = 3;
+              else if (v.includes('2 Hari')) days = 2;
+              totalEl.value = days;
+              if (startEl.value) {
+                const d = new Date(startEl.value);
+                d.setDate(d.getDate() + days - 1);
+                endEl.value = d.toISOString().slice(0, 10);
+              }
+            };
+          }
+        }
+      }
       App.openModal(modalId);
     };
-    const closeForm = () => App.closeModal(modalId);
+    let activeTermsTimer = null;
+    let termsCleanup = null;
+    const closeForm = () => {
+      if (activeTermsTimer) {
+        clearTimeout(activeTermsTimer);
+        activeTermsTimer = null;
+      }
+      if (termsCleanup) {
+        termsCleanup();
+        termsCleanup = null;
+      }
+      App.closeModal(modalId);
+    };
     const addBtn = container.querySelector('#mk-add');
     if (addBtn) addBtn.addEventListener('click', () => openForm(null));
     container.querySelector('#mk-close').addEventListener('click', closeForm);
     container.querySelector('#mk-cancel').addEventListener('click', closeForm);
     body.addEventListener('click', async (e) => {
+      const approveGtkBtn = e.target.closest('[data-gtk-leave-approve]');
+      if (approveGtkBtn) {
+        const id = approveGtkBtn.dataset.gtkLeaveApprove;
+        const target = state.rows.find((r) => r.id === id);
+        if (target && !this.canApproveLeave(target, def)) {
+          alert('Anda tidak memiliki wewenang untuk menyetujui permohonan izin ini.');
+          return;
+        }
+        if (target && target.isExceedingLimit) {
+          const ok = confirm(`Perhatian Kuota Izin:\nPemohon telah mengajukan izin pribadi ke-${target.personalLeaveMonthCount || 3} pada bulan ini (melebihi batas kuota 2x).\n\nKategori Sanksi: ${target.sanctionWarning || 'Teguran Lisan'}.\n\nTetap setujui permohonan ini dengan catatan pembinaan?`);
+          if (!ok) return;
+        }
+        approveGtkBtn.disabled = true;
+        try {
+          const approverTitle = 'Personalia';
+          await DB.reviewGtkLeave(id, 'Disetujui', {
+            reviewedBy: uid,
+            reviewedByName: Auth.userData?.name || approverTitle,
+            approverTitle: approverTitle
+          });
+          if (target) {
+            target.status = 'Disetujui';
+            target.reviewedByTitle = approverTitle;
+          }
+          paint();
+        } catch (err) {
+          alert('Gagal menyetujui permohonan: ' + err.message);
+          approveGtkBtn.disabled = false;
+        }
+        return;
+      }
+      const rejectGtkBtn = e.target.closest('[data-gtk-leave-reject]');
+      if (rejectGtkBtn) {
+        const id = rejectGtkBtn.dataset.gtkLeaveReject;
+        const target = state.rows.find((r) => r.id === id);
+        if (target && !this.canApproveLeave(target, def)) {
+          alert('Anda tidak memiliki wewenang untuk menolak permohonan izin ini.');
+          return;
+        }
+        const reason = prompt('Masukkan catatan/alasan penolakan:');
+        if (!reason) return;
+        rejectGtkBtn.disabled = true;
+        try {
+          const approverTitle = 'Personalia';
+          await DB.reviewGtkLeave(id, 'Ditolak', {
+            reviewedBy: uid,
+            reviewedByName: Auth.userData?.name || approverTitle,
+            approverTitle: approverTitle,
+            reviewNote: reason
+          });
+          if (target) {
+            target.status = 'Ditolak';
+            target.reviewerFeedback = reason;
+            target.reviewedByTitle = approverTitle;
+          }
+          paint();
+        } catch (err) {
+          alert('Gagal menolak permohonan: ' + err.message);
+          rejectGtkBtn.disabled = false;
+        }
+        return;
+      }
       const approveBtn = e.target.closest('[data-leave-approve]');
       if (approveBtn) {
         const id = approveBtn.dataset.leaveApprove;
@@ -1011,6 +1293,10 @@ const ModuleKit = {
       }
       if (!delBtn) return;
       const targetRow = state.rows.find((r) => r.id === delBtn.dataset.mkDel);
+      if (def.node === 'personnel/leaves' && !this.canDeleteLeave(targetRow, def)) {
+        alert('Pemohon tidak diizinkan menghapus data perizinan agar rekapitulasi ketetapan hak izin dan sanksi tetap terekam secara akurat. Hanya peninjau/koordinator yang dapat menghapus.');
+        return;
+      }
       if (targetRow && targetRow[def.statusField || 'status'] === 'Disetujui (ACC)' && !this.isApprover(def) && def.approverRoles) {
         alert('Data/berkas yang telah disetujui (ACC) tidak dapat dihapus. Silakan hubungi bagian peninjau/verifikator.');
         return;
@@ -1130,6 +1416,53 @@ const ModuleKit = {
             }
           }
         });
+        if (def.node === 'personnel/leaves') {
+          const typeStr = String(payload.type || '');
+          const isSick = typeStr.toLowerCase().includes('sakit') || typeStr.toLowerCase().includes('medis');
+          const isOfficialDutyHajj = typeStr.toLowerCase().includes('petugas');
+          if ((isSick || isOfficialDutyHajj) && !payload.proof && !currentRow?.proof) {
+            alert('Sesuai ketentuan, permohonan ' + (isSick ? 'Sakit / Udzur Medis wajib melampirkan Surat Keterangan Dokter (Foto/PDF).' : 'Petugas Haji wajib melampirkan Surat Tugas Resmi.'));
+            throw new Error('Validation failed');
+          }
+          const leavePolicyTypes = AppConfig.GTK_LEAVE_POLICY?.TYPES || [];
+          const matchedPolicy = leavePolicyTypes.find((t) => t.label === payload.type || t.key === payload.type);
+          if (matchedPolicy && matchedPolicy.maxDays && Number(payload.totalDays || 1) > matchedPolicy.maxDays) {
+            alert(`Jumlah hari yang diajukan (${payload.totalDays} hari) melebihi batas maksimal hak cuti resmi (${matchedPolicy.maxDays} hari) untuk jenis cuti ini.`);
+            throw new Error('Validation failed');
+          }
+          const emp = refs.__rawRefs?.employee?.[payload.gtkId];
+          const isApplicantUmmi = Boolean(
+            (emp && (emp.role === 'guru_ummi' || emp.role === AppConfig.ROLES.GURU_UMMI || (emp.position && (String(emp.position).toLowerCase().includes('ummi') || String(emp.position).toLowerCase().includes('btq'))))) ||
+            (Auth.userData && AppConfig.isUserUmmi(Auth.currentRole, AppConfig.getRoleAssignments(Auth.userData)))
+          );
+          payload.isUmmi = isApplicantUmmi;
+          payload.unit = isApplicantUmmi ? 'ummi' : 'gtk_umum';
+          payload.verifikatorUnit = 'WAKA_HUMAS_PERSONALIA';
+          payload.verifikatorLabel = 'Personalia';
+          if (typeStr.includes('Kepentingan Pribadi')) {
+            const reqMonth = payload.startDate ? payload.startDate.slice(0, 7) : '';
+            const existingPersonal = state.rows.filter((r) => 
+              r.id !== state.editing && 
+              r.gtkId === payload.gtkId && 
+              String(r.type || '').includes('Kepentingan Pribadi') &&
+              String(r.startDate || '').startsWith(reqMonth) &&
+              r.status !== 'Ditolak'
+            );
+            const countThisMonth = existingPersonal.length + 1;
+            payload.personalLeaveMonthCount = countThisMonth;
+            if (countThisMonth > 2) {
+              payload.isExceedingLimit = true;
+              const sanctionLevel = countThisMonth <= 5 ? 'Teguran Lisan' : 'Peringatan Tertulis';
+              payload.sanctionWarning = `Izin pribadi ke-${countThisMonth} bulan ini. Batas maksimal 2 hari. Sanksi: ${sanctionLevel}.`;
+              const proceed = confirm(`Peringatan Batasan Izin GTK:\n\nPengajuan ini adalah izin kepentingan pribadi ke-${countThisMonth} pada bulan ini.\nKetentuan: Batas maksimal izin pribadi adalah 2 hari per bulan.\nPengajuan ke-3 s.d. 5 dikenakan sanksi ${sanctionLevel}.\n\nApakah Anda tetap ingin mengajukan izin ini untuk diverifikasi oleh ${payload.verifikatorLabel}?`);
+              if (!proceed) throw new Error('Validation failed');
+            }
+          }
+          if ((AppConfig.isTeacher(Auth.currentRole, AppConfig.getRoleAssignments(Auth.userData || {})) || isApplicantUmmi) && !payload.teachingDuty && Number(payload.totalDays || 1) >= 1) {
+            alert('Guru yang mengajukan izin wajib mengisi rincian pelimpahan tugas KBM siswa kepada guru pengganti/piket.');
+            throw new Error('Validation failed');
+          }
+        }
         const ctx = refs.__ctx;
         const derived = def.derive ? def.derive(payload, ctx) : {};
         const stamp = firebase.database.ServerValue.TIMESTAMP;
@@ -1152,6 +1485,15 @@ const ModuleKit = {
         }
         if (def.node === 'student_affairs/leaves') {
           await DB.syncLeaveToAttendance({ ...payload, ...derived, id: recordId });
+        }
+        if (def.node === 'personnel/leaves' && payload.status === 'Disetujui') {
+          const approverTitle = 'Personalia';
+          await DB.reviewGtkLeave(recordId, 'Disetujui', {
+            reviewedBy: uid,
+            reviewedByName: (Auth.userData && Auth.userData.name) || approverTitle,
+            approverTitle: approverTitle,
+            reviewNote: payload.reviewerFeedback || ''
+          });
         }
         if (def.after) await def.after({ ...payload, ...derived }, ctx, recordId);
         this.audit(state.editing ? 'update' : 'create', def.node, recordId);

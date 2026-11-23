@@ -1970,6 +1970,74 @@ color: var(--text-muted);
 display: block;
 margin-top: 3px;
 }
+.mk-leave-terms-card {
+margin: 10px 16px 4px;
+border-radius: 8px;
+flex-shrink: 0;
+border: 1px solid var(--border, rgba(15, 23, 42, 0.08));
+border-left: 3.5px solid var(--primary, #2f6fed);
+background: #fff;
+box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+transition: all 0.25s ease;
+}
+.mk-leave-terms-card.collapsed {
+margin-bottom: 2px;
+}
+.mk-leave-terms-card .feature-guide-header {
+padding: 6px 12px;
+min-height: 32px;
+background: rgba(47, 111, 237, 0.04);
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: space-between;
+}
+.mk-leave-terms-card .feature-guide-title {
+font-size: 12px;
+font-weight: 600;
+color: var(--primary, #2f6fed);
+display: flex;
+align-items: center;
+gap: 6px;
+}
+.mk-leave-terms-card .feature-guide-body {
+padding: 8px 12px 10px;
+max-height: 300px;
+overflow: visible;
+box-sizing: border-box;
+transition: max-height 0.3s ease, opacity 0.2s ease, padding 0.3s ease;
+}
+.mk-leave-terms-card.collapsed .feature-guide-body {
+max-height: 0;
+overflow: hidden;
+padding-top: 0;
+padding-bottom: 0;
+opacity: 0;
+pointer-events: none;
+}
+.mk-leave-terms-grid {
+display: grid;
+grid-template-columns: repeat(2, minmax(0, 1fr));
+gap: 6px 14px;
+}
+.mk-leave-term-item {
+font-size: 11px;
+line-height: 1.4;
+color: var(--text-main, #334155);
+}
+.mk-leave-term-item strong {
+color: var(--primary, #2f6fed);
+display: inline;
+}
+@media (max-width: 640px) {
+.mk-leave-terms-card {
+margin: 8px 12px 2px;
+}
+.mk-leave-terms-grid {
+grid-template-columns: 1fr;
+gap: 5px;
+}
+}
 .assignment-filter-bar {
 display: flex;
 gap: 6px;

@@ -1984,6 +1984,7 @@ ${initIconHtml}
 <div class="attendance-actions-row" style="display:${actionsDisplay};">
 <button id="btn-checkin" class="btn btn-primary" disabled><i class="ph ph-sign-in"></i> Presensi Datang</button>
 <button id="btn-checkout" class="btn btn-outline" disabled><i class="ph ph-sign-out"></i> Presensi Pulang</button>
+<a href="#/personnel/leaves" class="btn btn-outline"><i class="ph ph-calendar-plus font-bold"></i> Izin &amp; Cuti</a>
 </div>
 </div>
 <div class="card attendance-history-card">
@@ -3339,6 +3340,13 @@ ${heroHtml}
 <div class="quick-nav-desc">Rincian honor & tunjangan bulanan santri binaan</div>
 </div>
 </a>
+<a href="#/personnel/leaves" class="quick-nav-card">
+<div class="quick-nav-icon"><i class="ph ph-calendar-plus"></i></div>
+<div class="quick-nav-info">
+<div class="quick-nav-title">Izin &amp; Cuti Guru Ummi</div>
+<div class="quick-nav-desc">Pengajuan izin tidak masuk, sakit &amp; hak cuti resmi</div>
+</div>
+</a>
 </div>
 </div>
 </section>
@@ -3349,6 +3357,13 @@ ${isKoord ? `
 </div>
 <div class="card-body">
 <div class="quick-nav-grid">
+<a href="#/personnel/leaves" class="quick-nav-card">
+<div class="quick-nav-icon"><i class="ph ph-calendar-check"></i></div>
+<div class="quick-nav-info">
+<div class="quick-nav-title">Verifikasi Izin Ummi</div>
+<div class="quick-nav-desc">Persetujuan &amp; pengawasan izin guru Ummi</div>
+</div>
+</a>
 <a href="#/guru/ummi/koord/mapping" class="quick-nav-card">
 <div class="quick-nav-icon"><i class="ph ph-users-three"></i></div>
 <div class="quick-nav-info">

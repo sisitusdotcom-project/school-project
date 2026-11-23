@@ -63,6 +63,7 @@ const App = {
     if (path === '#/dashboard' || path === '#/ortu/dashboard') return !!this.getDashboardRenderer();
     if (role === AppConfig.ROLES.ADMIN) return true;
     if (path === '#/attendance' && role !== AppConfig.ROLES.ORTU && role !== AppConfig.ROLES.KOMITE) return true;
+    if ((path === '#/personnel/leaves' || path === '#/guru/leaves' || path === '#/gtk/leaves' || path === '#/attendance/leaves' || path === '#/personnel/leaves-approval') && role !== AppConfig.ROLES.ORTU && role !== AppConfig.ROLES.KOMITE) return true;
     if (path.startsWith('#/admin/students/')) path = '#/admin/classes';
     if (path.startsWith('#/guru/assess/')) path = '#/guru/classes';
     if (path.startsWith('#/guru/observe/')) path = '#/guru/classes';
@@ -74,6 +75,9 @@ const App = {
     if (role === AppConfig.ROLES.GURU || role === AppConfig.ROLES.GURU_EKSKUL || role === AppConfig.ROLES.GURU_UMMI) {
       const guruAllowed = [
         '#/attendance',
+        '#/personnel/leaves',
+        '#/guru/leaves',
+        '#/gtk/leaves',
         '#/guru/schedules',
         '#/schedules',
         '#/guru/academic',
@@ -149,7 +153,7 @@ const App = {
       if (path === '#/facilities' || path.startsWith('#/facilities/') || path.startsWith('#/sarpras/')) return true;
     }
     if (role === AppConfig.ROLES.TENDIK) {
-      const tendikAllowed = ['#/attendance', '#/guru/kpi', '#/tendik/performance', '#/tendik/portfolio'];
+      const tendikAllowed = ['#/attendance', '#/personnel/leaves', '#/guru/leaves', '#/gtk/leaves', '#/guru/kpi', '#/tendik/performance', '#/tendik/portfolio'];
       if (tendikAllowed.includes(path)) return true;
     }
     if (role === AppConfig.ROLES.KOMITE) {

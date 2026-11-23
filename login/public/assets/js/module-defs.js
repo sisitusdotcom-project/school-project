@@ -395,6 +395,46 @@
         sel('status', 'Status', ['Aktif', 'Cuti', 'Nonaktif'], { required: true, default: 'Aktif' })
       ]
     },
+    '#/personnel/leaves': {
+      own: true,
+      node: 'personnel/leaves', noun: 'Izin & Cuti GTK', writeRoles: [R.PERSONNEL, R.GURU, R.TENDIK, R.GURU_UMMI, R.GURU_EKSKUL, R.ADMIN], dateField: 'startDate', statusField: 'status',
+      badges: { 'Disetujui': 'success', 'Diajukan': 'warning', 'Ditolak': 'danger' },
+      approverRoles: [R.PERSONNEL, R.KEPSEK, R.ADMIN],
+      approverUnits: ['WAKA_HUMAS_PERSONALIA', 'STAF_HUMAS_PERSONALIA'],
+      seeAllUnits: ['WAKA_HUMAS_PERSONALIA', 'STAF_HUMAS_PERSONALIA', 'KOORD_UMMI', 'WAKA_KURIKULUM'],
+      subtitle: 'Pengajuan dan verifikasi izin kehadiran tidak masuk, udzur medis, dan hak cuti resmi GTK.',
+      summary: [
+        { label: 'Total Permohonan', icon: 'ph-calendar-check', tone: 'primary' },
+        { label: 'Menunggu Persetujuan', icon: 'ph-clock', tone: 'warning', where: { status: 'Diajukan' } },
+        { label: 'Disetujui', icon: 'ph-check-circle', tone: 'success', where: { status: 'Disetujui' } },
+        { label: 'Ditolak', icon: 'ph-x-circle', tone: 'danger', where: { status: 'Ditolak' } }
+      ],
+      fields: [
+        ref('gtkId', 'Guru / Pegawai', 'employee', { required: true }),
+        sel('type', 'Jenis Izin / Cuti', [
+          'Izin Kepentingan Pribadi (Maks 2 Hari/Bulan)',
+          'Izin Meninggalkan Sekolah Sebelum Waktu',
+          'Sakit / Udzur Medis (Wajib Surat Dokter)',
+          'Cuti Melahirkan Anak ke-1 & ke-2 (3 Bulan)',
+          'Cuti Ibadah Haji (50 Hari)',
+          'Cuti Ibadah Umroh (12 Hari)',
+          'Cuti Menikah (6 Hari)',
+          'Cuti Menikahkan Anak (3 Hari)',
+          'Petugas Pembimbing Haji Resmi',
+          'Cuti Sanak Saudara Meninggal (5 Hari)',
+          'Cuti Anak Khitan (2 Hari)'
+        ], { required: true, default: 'Izin Kepentingan Pribadi (Maks 2 Hari/Bulan)' }),
+        date('startDate', 'Tanggal Mulai', { required: true }),
+        date('endDate', 'Tanggal Selesai', { required: true }),
+        num('totalDays', 'Jumlah Hari Kerja', { required: true, default: 1 }),
+        area('reason', 'Alasan / Uraian Keperluan', { required: true }),
+        file('proof', 'Surat Dokter / Dokumen Pendukung (PDF/Foto)', 'gtk_leave_proofs'),
+        area('teachingDuty', 'Pelimpahan Tugas KBM Siswa (Wajib bagi Guru Mengajar)'),
+        ref('substituteTeacherId', 'Guru Pengganti / Guru Piket', 'teacher'),
+        sel('status', 'Status Persetujuan', ['Diajukan', 'Disetujui', 'Ditolak'], { required: true, default: 'Diajukan' }),
+        area('reviewerFeedback', 'Catatan Verifikasi Peninjau / Koordinator')
+      ]
+    },
     '#/personnel/evaluations': { own: true,
       node: 'personnel/evaluations', noun: 'Penilaian Kinerja SDM', writeRoles: PE, dateField: 'date', statusField: 'statusRecommendation', badges: { 'Prioritas': 'success', 'Prospek': 'success', 'Lanjutan': 'info', 'Pemula': 'warning', 'Perlu Pembinaan': 'danger', 'Naik': 'success', 'Tetap': 'info' },
       approverRoles: [R.PERSONNEL, R.KEPSEK],
@@ -1266,6 +1306,10 @@
     }
   });
   const ALIASES = {
+    '#/personnel/leaves-approval': '#/personnel/leaves',
+    '#/guru/leaves': '#/personnel/leaves',
+    '#/attendance/leaves': '#/personnel/leaves',
+    '#/gtk/leaves': '#/personnel/leaves',
     '#/personnel/employees': '#/personnel/data',
     '#/personnel/warnings': '#/personnel/disciplinary',
     '#/personnel/portfolios': '#/personnel/portfolio',

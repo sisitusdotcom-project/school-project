@@ -114,6 +114,7 @@ const PersonnelPages = {
           <div class="quick-nav-grid">
             ${App.renderQuickNav([
               { href: '#/personnel/data', icon: 'ph-folder-user', title: 'Data Kepegawaian', desc: 'Buku induk & berkas GTK' },
+              { href: '#/personnel/leaves', icon: 'ph-calendar-check', title: 'Izin & Cuti GTK', desc: 'Verifikasi izin tidak masuk, udzur & hak cuti resmi' },
               { href: '#/admin/assignments', icon: 'ph-tree-structure', title: 'Distribusi Penugasan', desc: 'Plotting Waka, Tim & Wali Kelas' },
               { href: '#/admin/attendance', icon: 'ph-clock-user', title: 'Pantau Disiplin GTK', desc: 'Monitoring presensi GPS realtime' },
               { href: '#/personnel/evaluations', icon: 'ph-chart-line-up', title: 'Penilaian Kinerja SDM', desc: 'Rubrik 3 pilar Majelis Dikdasmen' },
