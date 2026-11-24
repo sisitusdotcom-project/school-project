@@ -838,13 +838,21 @@ const ScheduleManager = {
   renderHabitsView(view) {
     return this.renderPembiasaanView(view);
   },
-  renderManageView(view) {
+  async renderManageView(view) {
     const totalSlots = Object.keys(this.schedules).length;
+    let masterSlotsCount = 729;
+    try {
+      const snap = await db.ref('curriculum/master_template').once('value');
+      const val = snap.val();
+      if (val && typeof val === 'object') {
+        masterSlotsCount = Object.keys(val).length;
+      }
+    } catch (e) {}
     view.innerHTML = `
       <section class="card section-spacer">
         <div class="card-body">
           <h3 class="card-title"><i class="ph ph-database"></i> Sinkronisasi &amp; Manajemen Data Jadwal</h3>
-          <p class="text-muted">Kelola basis data jadwal pembelajaran tahun ajaran ${this.selectedYear}. Anda dapat memuat seluruh jadwal 16 rombel dari dokumen acuan TAPEL 2026/2027.</p>
+          <p class="text-muted">Kelola basis data jadwal pembelajaran tahun ajaran ${this.selectedYear}. Anda dapat memulihkan seluruh jadwal 16 rombel dari cetak biru master atau menyimpan revisi berjalan menjadi template baru.</p>
           <div class="card-grid section-spacer">
             <div class="card sched-admin-box">
               <h4 class="sched-admin-card-title"><i class="ph ph-book-open"></i> Bank Mata Pelajaran (SSOT Akademik)</h4>
@@ -853,14 +861,19 @@ const ScheduleManager = {
             </div>
             <div class="card sched-admin-box">
               <h4 class="sched-admin-card-title"><i class="ph ph-cloud-arrow-down"></i> Sinkronisasi Master Jadwal 16 Rombel</h4>
-              <p class="sched-admin-card-desc">Pulihkan 664 slot jadwal resmi (16 rombel lengkap dengan mapel, guru walas, guru bidang studi, jam istirahat, dan seragam) dari template master database Firebase RTDB.</p>
-              <button type="button" class="btn btn-primary" id="btn-seed-jadwal">
-                <i class="ph ph-download-simple"></i> Jalankan Sinkronisasi Jadwal 16 Rombel
-              </button>
+              <p class="sched-admin-card-desc">Tersedia <strong>${masterSlotsCount} slot</strong> jadwal master resmi (16 rombel lengkap dengan mapel, guru walas, guru bidang studi, jam istirahat, ISHOMA, dan seragam) di database RTDB.</p>
+              <div class="sched-admin-btn-group">
+                <button type="button" class="btn btn-primary" id="btn-seed-jadwal">
+                  <i class="ph ph-download-simple"></i> Pulihkan dari Master (${masterSlotsCount} Slot)
+                </button>
+                <button type="button" class="btn btn-outline" id="btn-save-as-master" title="Simpan jadwal aktif saat ini menjadi template master baru">
+                  <i class="ph ph-floppy-disk"></i> Simpan Jadwal Berjalan Jadi Master
+                </button>
+              </div>
             </div>
             <div class="card sched-admin-box--danger">
               <h4 class="sched-admin-card-title--danger"><i class="ph ph-trash"></i> Bersihkan / Reset Jadwal</h4>
-              <p class="sched-admin-card-desc">Saat ini terdapat <strong>${totalSlots} slot</strong> jadwal tersimpan di database. Reset akan mengosongkan seluruh slot jadwal berjalan.</p>
+              <p class="sched-admin-card-desc">Saat ini terdapat <strong>${totalSlots} slot</strong> jadwal aktif tersimpan di database. Reset akan mengosongkan seluruh slot jadwal berjalan.</p>
               <button type="button" class="btn btn-outline btn-outline-danger" id="btn-clear-jadwal">
                 <i class="ph ph-trash"></i> Kosongkan Seluruh Slot Jadwal
               </button>
@@ -872,7 +885,7 @@ const ScheduleManager = {
     const btnSeed = view.querySelector('#btn-seed-jadwal');
     if (btnSeed) {
       btnSeed.addEventListener('click', async () => {
-        if (!confirm('Impor jadwal 16 rombel T.A. 2026/2027 ke database? Data jadwal yang ada akan diperbarui.')) return;
+        if (!confirm(`Pulihkan seluruh ${masterSlotsCount} slot jadwal 16 rombel dari Master Template RTDB? Jadwal berjalan saat ini akan diselaraskan kembali ke cetak biru master.`)) return;
         btnSeed.disabled = true;
         btnSeed.innerHTML = '<span class="btn-spinner"></span> Menyinkronkan...';
         try {
@@ -882,7 +895,24 @@ const ScheduleManager = {
         } catch (err) {
           alert('Gagal menyinkronkan data: ' + err.message);
           btnSeed.disabled = false;
-          btnSeed.innerHTML = '<i class="ph ph-download-simple"></i> Jalankan Sinkronisasi Jadwal 16 Rombel';
+          btnSeed.innerHTML = `<i class="ph ph-download-simple"></i> Pulihkan dari Master (${masterSlotsCount} Slot)`;
+        }
+      });
+    }
+    const btnSaveMaster = view.querySelector('#btn-save-as-master');
+    if (btnSaveMaster) {
+      btnSaveMaster.addEventListener('click', async () => {
+        if (!confirm(`Simpan seluruh ${totalSlots} slot jadwal berjalan saat ini sebagai acuan Master Template baku?`)) return;
+        btnSaveMaster.disabled = true;
+        btnSaveMaster.innerHTML = '<span class="btn-spinner"></span> Menyimpan...';
+        try {
+          await db.ref('curriculum/master_template').set(this.schedules);
+          alert('Template master berhasil diperbarui sesuai jadwal berjalan saat ini.');
+          location.reload();
+        } catch (err) {
+          alert('Gagal memperbarui master template: ' + err.message);
+          btnSaveMaster.disabled = false;
+          btnSaveMaster.innerHTML = '<i class="ph ph-floppy-disk"></i> Simpan Jadwal Berjalan Jadi Master';
         }
       });
     }
