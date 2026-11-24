@@ -150,7 +150,7 @@ const PersonnelPages = {
               </div>
               <div class="sched-actions-row">
                 <button type="button" class="btn btn-sm btn-outline sched-reset-btn" id="btn-reset-default-sched"><i class="ph ph-arrow-counter-clockwise"></i> Terapkan Jadwal Default Resmi</button>
-                <label class="sched-flexible-toggle" title="Jika dicentang, guru bisa absen kapan saja tanpa dibatasi jam buka/tutup presensi.">
+                <label class="form-switch" title="Jika dicentang, guru bisa absen kapan saja tanpa dibatasi jam buka/tutup presensi.">
                   <input type="checkbox" id="set-flexible-time" ${settings.attendanceRules?.allowFlexibleTime ? 'checked' : ''}>
                   <span><strong>Mode Fleksibel:</strong> Bolehkan absensi kapan saja (jam bebas / tanpa batas jam buka)</span>
                 </label>

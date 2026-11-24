@@ -482,6 +482,14 @@ ummi: Object.freeze([
 const DEFAULT_SETTINGS = Object.freeze({
 currentAcademicYear: '2026/2027',
 currentSemester: '1',
+defaultUniforms: Object.freeze({
+'Senin': 'Putih - Merah (Upacara)',
+'Selasa': 'Batik Muhammadiyah - Putih',
+'Rabu': 'Tapak Suci (Kelas Bawah) / Merah - Putih (Kelas Atas)',
+'Kamis': 'Olahraga (Kelas Bawah) / HW (Kelas Atas)',
+'Jumat': 'Hizbul Wathan / Batik Berkarakter',
+"Jum'at": 'Hizbul Wathan / Batik Berkarakter'
+}),
 attendanceRules: Object.freeze({
 scheduleVersion: 2,
 checkInStart: '06:00',

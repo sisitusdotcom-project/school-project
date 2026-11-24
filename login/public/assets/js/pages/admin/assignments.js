@@ -101,9 +101,9 @@ window.AdminAssignmentsModule = {
       });
     };
     const waliCheckboxesHtml = classList.length ? classList.map(c => `
-      <label title="${AppConfig.escapeHtml(c.name)}">
+      <label class="checkbox-card" title="${AppConfig.escapeHtml(c.name)}">
         <input type="checkbox" value="GURU_KELAS_${c.id}" data-class-id="${c.id}">
-        Wali ${AppConfig.escapeHtml(c.name)}
+        <span>Wali ${AppConfig.escapeHtml(c.name)}</span>
       </label>
     `).join('') : '<p class="text-muted text-xs">Belum ada data rombel di master data.</p>';
     container.innerHTML = `
@@ -177,25 +177,25 @@ window.AdminAssignmentsModule = {
               <div class="assignment-unit-group">
                 <div class="assignment-unit-title"><i class="ph ph-briefcase"></i> Waka & Staf Unit Kerja</div>
                 <div class="assignment-checkbox-grid">
-                  <label><input type="checkbox" value="WAKA_KURIKULUM"> Waka Kurikulum</label>
-                  <label><input type="checkbox" value="STAF_KURIKULUM"> Staf Kurikulum</label>
-                  <label><input type="checkbox" value="WAKA_KESISWAAN"> Waka Kesiswaan</label>
-                  <label><input type="checkbox" value="STAF_KESISWAAN"> Staf Kesiswaan</label>
-                  <label><input type="checkbox" value="WAKA_HUMAS_PERSONALIA"> Waka Humas & Personalia</label>
-                  <label><input type="checkbox" value="STAF_HUMAS_PERSONALIA"> Staf Humas & Personalia</label>
-                  <label><input type="checkbox" value="WAKA_KEUANGAN"> Waka Keuangan</label>
-                  <label><input type="checkbox" value="STAF_KEUANGAN"> Staf Keuangan</label>
-                  <label><input type="checkbox" value="WAKA_SARPRAS"> Waka Sarpras</label>
-                  <label><input type="checkbox" value="STAF_SARPRAS"> Staf Sarpras</label>
+                  <label class="checkbox-card"><input type="checkbox" value="WAKA_KURIKULUM"> <span>Waka Kurikulum</span></label>
+                  <label class="checkbox-card"><input type="checkbox" value="STAF_KURIKULUM"> <span>Staf Kurikulum</span></label>
+                  <label class="checkbox-card"><input type="checkbox" value="WAKA_KESISWAAN"> <span>Waka Kesiswaan</span></label>
+                  <label class="checkbox-card"><input type="checkbox" value="STAF_KESISWAAN"> <span>Staf Kesiswaan</span></label>
+                  <label class="checkbox-card"><input type="checkbox" value="WAKA_HUMAS_PERSONALIA"> <span>Waka Humas & Personalia</span></label>
+                  <label class="checkbox-card"><input type="checkbox" value="STAF_HUMAS_PERSONALIA"> <span>Staf Humas & Personalia</span></label>
+                  <label class="checkbox-card"><input type="checkbox" value="WAKA_KEUANGAN"> <span>Waka Keuangan</span></label>
+                  <label class="checkbox-card"><input type="checkbox" value="STAF_KEUANGAN"> <span>Staf Keuangan</span></label>
+                  <label class="checkbox-card"><input type="checkbox" value="WAKA_SARPRAS"> <span>Waka Sarpras</span></label>
+                  <label class="checkbox-card"><input type="checkbox" value="STAF_SARPRAS"> <span>Staf Sarpras</span></label>
                 </div>
               </div>
               <div class="assignment-unit-group">
                 <div class="assignment-unit-title"><i class="ph ph-star"></i> Tim Khusus & Koordinator</div>
                 <div class="assignment-checkbox-grid">
-                  <label><input type="checkbox" value="KOORD_UMMI"> Koordinator Ummi</label>
-                  <label><input type="checkbox" value="TIM_UMMI"> Guru / Tim Ummi</label>
-                  <label><input type="checkbox" value="TIM_IT"> Tim IT & Sistem</label>
-                  <label><input type="checkbox" value="TIM_B_INGGRIS"> Tim English Lab</label>
+                  <label class="checkbox-card"><input type="checkbox" value="KOORD_UMMI"> <span>Koordinator Ummi</span></label>
+                  <label class="checkbox-card"><input type="checkbox" value="TIM_UMMI"> <span>Guru / Tim Ummi</span></label>
+                  <label class="checkbox-card"><input type="checkbox" value="TIM_IT"> <span>Tim IT & Sistem</span></label>
+                  <label class="checkbox-card"><input type="checkbox" value="TIM_B_INGGRIS"> <span>Tim English Lab</span></label>
                 </div>
               </div>
               <div class="assignment-unit-group">
@@ -207,17 +207,17 @@ window.AdminAssignmentsModule = {
               <div class="assignment-unit-group">
                 <div class="assignment-unit-title"><i class="ph ph-trophy"></i> Pembina Ekstrakurikuler</div>
                 <div class="assignment-checkbox-grid">
-                  <label><input type="checkbox" value="GURU_EKSTRA_BADMINTON"> Ekskul Badminton</label>
-                  <label><input type="checkbox" value="GURU_EKSTRA_FUTSAL"> Ekskul Futsal</label>
-                  <label><input type="checkbox" value="GURU_EKSTRA_COOKING"> Ekskul Cooking</label>
-                  <label><input type="checkbox" value="GURU_EKSTRA_RENANG"> Ekskul Renang</label>
-                  <label><input type="checkbox" value="GURU_EKSTRA_TS"> Pembina Tapak Suci</label>
-                  <label><input type="checkbox" value="GURU_EKSTRA_PANAHAN_PUTRA"> Ekskul Panahan Putra</label>
-                  <label><input type="checkbox" value="GURU_EKSTRA_PANAHAN_PUTRI"> Ekskul Panahan Putri</label>
-                  <label><input type="checkbox" value="GURU_EKSTRA_TARI"> Ekskul Seni Tari</label>
-                  <label><input type="checkbox" value="GURU_EKSTRA_KONTEN_KREATOR"> Ekskul Konten Kreator</label>
-                  <label><input type="checkbox" value="GURU_EKSTRA_ROBOTIK"> Ekskul Robotika</label>
-                  <label><input type="checkbox" value="GURU_EKSTRA_CODING"> Ekskul Coding & Pemrograman</label>
+                  <label class="checkbox-card"><input type="checkbox" value="GURU_EKSTRA_BADMINTON"> <span>Ekskul Badminton</span></label>
+                  <label class="checkbox-card"><input type="checkbox" value="GURU_EKSTRA_FUTSAL"> <span>Ekskul Futsal</span></label>
+                  <label class="checkbox-card"><input type="checkbox" value="GURU_EKSTRA_COOKING"> <span>Ekskul Cooking</span></label>
+                  <label class="checkbox-card"><input type="checkbox" value="GURU_EKSTRA_RENANG"> <span>Ekskul Renang</span></label>
+                  <label class="checkbox-card"><input type="checkbox" value="GURU_EKSTRA_TS"> <span>Pembina Tapak Suci</span></label>
+                  <label class="checkbox-card"><input type="checkbox" value="GURU_EKSTRA_PANAHAN_PUTRA"> <span>Ekskul Panahan Putra</span></label>
+                  <label class="checkbox-card"><input type="checkbox" value="GURU_EKSTRA_PANAHAN_PUTRI"> <span>Ekskul Panahan Putri</span></label>
+                  <label class="checkbox-card"><input type="checkbox" value="GURU_EKSTRA_TARI"> <span>Ekskul Seni Tari</span></label>
+                  <label class="checkbox-card"><input type="checkbox" value="GURU_EKSTRA_KONTEN_KREATOR"> <span>Ekskul Konten Kreator</span></label>
+                  <label class="checkbox-card"><input type="checkbox" value="GURU_EKSTRA_ROBOTIK"> <span>Ekskul Robotika</span></label>
+                  <label class="checkbox-card"><input type="checkbox" value="GURU_EKSTRA_CODING"> <span>Ekskul Coding & Pemrograman</span></label>
                 </div>
               </div>
             </div>

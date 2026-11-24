@@ -634,7 +634,7 @@ ${classArr.map(c => `<option value="${c.id}">${AppConfig.escapeHtml(c.name)}</op
 <div class="card-header">
 <label><strong>Daftar Siswa yang Akan Dipromosikan:</strong></label>
 <div>
-<input type="checkbox" id="promo-select-all" checked> <label for="promo-select-all">Pilih Semua</label>
+<label class="checkbox-label" for="promo-select-all"><input type="checkbox" id="promo-select-all" checked> <span>Pilih Semua</span></label>
 </div>
 </div>
 <div class="table-responsive">

@@ -33,12 +33,13 @@ const ScheduleManager = {
     { period: 7, time: '11.15 - 12.30', type: 'jumat', label: "Sholat Jum'at / Keputrian" },
     { period: 8, time: '12.30 - 13.15', type: 'ekskul', label: 'Ekstrakurikuler Wajib' }
   ],
-  uniforms: {
-    'Senin': 'Putih - Merah',
-    'Selasa': 'Batik - Putih',
-    'Rabu': 'Tapak Suci',
-    'Kamis': 'Olahraga',
-    "Jum'at": 'Hizbul Wathan (HW)'
+  uniforms: (AppConfig.DEFAULT_SETTINGS && AppConfig.DEFAULT_SETTINGS.defaultUniforms) ? { ...AppConfig.DEFAULT_SETTINGS.defaultUniforms } : {
+    'Senin': 'Putih - Merah (Upacara)',
+    'Selasa': 'Batik Muhammadiyah - Putih',
+    'Rabu': 'Tapak Suci (Kelas Bawah) / Merah - Putih (Kelas Atas)',
+    'Kamis': 'Olahraga (Kelas Bawah) / HW (Kelas Atas)',
+    'Jumat': 'Hizbul Wathan / Batik Berkarakter',
+    "Jum'at": 'Hizbul Wathan / Batik Berkarakter'
   },
   days: ['Senin', 'Selasa', 'Rabu', 'Kamis', "Jum'at"],
   habituationData: {
@@ -140,12 +141,13 @@ const ScheduleManager = {
     this.cachedConflicts = {};
     const slots = Object.entries(this.schedules).map(([id, s]) => ({ id, ...s })).filter(s => s && s.day && (s.teacherId || (s.teachers && s.teachers.length)) && s.type !== 'break' && s.type !== 'ishoma');
     const bucket = {};
+    const normDay = (d) => (d === "Jum'at" || d === 'Jumat') ? "Jum'at" : d;
     slots.forEach(s => {
       const pKey = s.period || s.startTime;
       const tIds = (s.teachers && s.teachers.length) ? s.teachers : [s.teacherId, s.coTeacherId].filter(Boolean);
       tIds.forEach(tId => {
         if (!tId || tId === 'TIM_UMMI') return;
-        const key = `${s.day}__${pKey}__${tId}`;
+        const key = `${normDay(s.day)}__${pKey}__${tId}`;
         if (!bucket[key]) bucket[key] = [];
         bucket[key].push(s);
       });
@@ -198,7 +200,7 @@ const ScheduleManager = {
       this.renderWorkloadControls(controls);
       this.renderWorkloadView(view);
     } else if (this.currentTab === 'pembiasaan') {
-      controls.innerHTML = '';
+      this.renderPembiasaanControls(controls);
       this.renderPembiasaanView(view);
     } else if (this.currentTab === 'manage') {
       controls.innerHTML = '';
@@ -244,62 +246,99 @@ const ScheduleManager = {
     const classSlots = Object.entries(this.schedules)
       .map(([id, s]) => ({ id, ...s }))
       .filter(s => s && s.classId === this.selectedClassId);
+    const maxPeriod = classSlots.reduce((max, s) => Math.max(max, Number(s.period) || 0), 0);
+    const totalPeriods = Math.max(10, maxPeriod);
+    const periodList = Array.from({ length: totalPeriods }, (_, i) => i + 1);
     const uniformCards = this.days.map(d => `
-      <div class="sched-uniform-card">
+      <div class="sched-uniform-card sched-uniform-card--clickable" data-action="open-uniforms-modal" title="Klik untuk mengubah setelan seragam sekolah">
         <div class="sched-uniform-day">${d}</div>
         <div class="sched-uniform-val">${this.uniforms[d] || '-'}</div>
       </div>
     `).join('');
-    const gridRows = this.periodsSeninKamis.map((p, pIdx) => {
-      const isBreak = p.type === 'break' || p.type === 'ishoma';
-      if (isBreak) {
-        return `
-          <tr>
-            <td class="sched-time-col">${p.time}</td>
-            <td colspan="5" class="sched-cell-card--break">
-              <i class="ph ${p.type === 'ishoma' ? 'ph-bowl-food' : 'ph-coffee'}"></i> ${p.label}
+    const gridRows = periodList.map(pNum => {
+      const cells = [];
+      let cIdx = 0;
+      while (cIdx < this.days.length) {
+        const day = this.days[cIdx];
+        const normD = (day === "Jum'at" || day === 'Jumat') ? "Jum'at" : day;
+        const slot = classSlots.find(s => ((s.day === "Jum'at" || s.day === 'Jumat') ? "Jum'at" : s.day) === normD && Number(s.period) === pNum);
+        const isBreak = slot && (slot.type === 'break' || slot.type === 'ishoma' || (slot.subjectName || '').toLowerCase().includes('istirahat') || (slot.subjectName || '').toLowerCase().includes('ishoma'));
+        if (isBreak) {
+          let span = 1;
+          const bLabel = (slot.subjectName || (slot.type === 'ishoma' ? 'ISHOMA' : 'Istirahat')).trim();
+          while (cIdx + span < this.days.length) {
+            const nextDay = this.days[cIdx + span];
+            const nextNormD = (nextDay === "Jum'at" || nextDay === 'Jumat') ? "Jum'at" : nextDay;
+            const nextSlot = classSlots.find(s => ((s.day === "Jum'at" || s.day === 'Jumat') ? "Jum'at" : s.day) === nextNormD && Number(s.period) === pNum);
+            const nextIsBreak = nextSlot && (nextSlot.type === 'break' || nextSlot.type === 'ishoma' || (nextSlot.subjectName || '').toLowerCase().includes('istirahat') || (nextSlot.subjectName || '').toLowerCase().includes('ishoma'));
+            if (nextIsBreak) {
+              const nbLabel = (nextSlot.subjectName || (nextSlot.type === 'ishoma' ? 'ISHOMA' : 'Istirahat')).trim();
+              if (nbLabel.toLowerCase() === bLabel.toLowerCase() || (bLabel.toLowerCase().includes('istirahat') && nbLabel.toLowerCase().includes('istirahat')) || (bLabel.toLowerCase().includes('ishoma') && nbLabel.toLowerCase().includes('ishoma'))) {
+                span++;
+                continue;
+              }
+            }
+            break;
+          }
+          const icon = bLabel.toLowerCase().includes('ishoma') ? 'ph-bowl-food' : 'ph-coffee';
+          cells.push(`<td colspan="${span}" class="sched-cell-break-merged" data-slot-id="${slot.id}"><i class="ph ${icon}"></i> ${AppConfig.escapeHtml(bLabel)}</td>`);
+          cIdx += span;
+        } else if (slot) {
+          let span = 1;
+          const sub = this.subjects[slot.subjectId];
+          const subName = slot.subjectName || (sub ? sub.name : slot.subjectId) || '-';
+          const teacher = this.users[slot.teacherId];
+          const tName = slot.teacherName || (teacher ? (teacher.name || teacher.displayName) : '');
+          const hasConflict = !!this.cachedConflicts[slot.id];
+          while (cIdx + span < this.days.length) {
+            const nextDay = this.days[cIdx + span];
+            const nextNormD = (nextDay === "Jum'at" || nextDay === 'Jumat') ? "Jum'at" : nextDay;
+            const nextSlot = classSlots.find(s => ((s.day === "Jum'at" || s.day === 'Jumat') ? "Jum'at" : s.day) === nextNormD && Number(s.period) === pNum);
+            if (nextSlot && !this.cachedConflicts[nextSlot.id] && !hasConflict) {
+              const nextSub = this.subjects[nextSlot.subjectId];
+              const nextSubName = nextSlot.subjectName || (nextSub ? nextSub.name : nextSlot.subjectId) || '-';
+              const nextTeacher = this.users[nextSlot.teacherId];
+              const nextTName = nextSlot.teacherName || (nextTeacher ? (nextTeacher.name || nextTeacher.displayName) : '');
+              if (nextSubName === subName && nextTName === tName && (nextSlot.room || '') === (slot.room || '') && !!nextSlot.isJoint === !!slot.isJoint) {
+                span++;
+                continue;
+              }
+            }
+            break;
+          }
+          let toneClass = 'sched-cell-card--umum';
+          const lowerSub = subName.toLowerCase();
+          if (lowerSub.includes('pembiasaan') || lowerSub.includes('upacara')) toneClass = 'sched-cell-card--break';
+          else if (lowerSub.includes('aqidah') || lowerSub.includes('ibadah') || lowerSub.includes('tarikh') || lowerSub.includes('qur') || lowerSub.includes('arab') || lowerSub.includes('btq') || lowerSub.includes('kemuhammadiyahan')) toneClass = 'sched-cell-card--ismuba';
+          else if (lowerSub.includes('pjok') || lowerSub.includes('tapak suci') || lowerSub.includes('hw') || lowerSub.includes('ekstra')) toneClass = 'sched-cell-card--ekskul';
+          if (hasConflict) toneClass = 'sched-cell-card--conflict';
+          cells.push(`
+            <td ${span > 1 ? `colspan="${span}" class="sched-td-merged"` : ''}>
+              <div class="sched-cell-card ${toneClass}" data-slot-id="${slot.id}">
+                <div class="sched-card-subj">${AppConfig.escapeHtml(subName)}</div>
+                ${tName ? `<div class="sched-card-teacher"><i class="ph ph-chalkboard-teacher"></i> ${AppConfig.escapeHtml(tName)}</div>` : ''}
+                ${slot.room ? `<div class="sched-card-room"><i class="ph ph-door"></i> ${AppConfig.escapeHtml(slot.room)}</div>` : ''}
+                ${slot.startTime && slot.endTime ? `<div class="sched-card-time"><i class="ph ph-clock"></i> ${AppConfig.escapeHtml(slot.startTime)} - ${AppConfig.escapeHtml(slot.endTime)}</div>` : ''}
+                ${hasConflict ? `<div class="sched-conflict-badge"><i class="ph ph-warning-octagon"></i> Bentrok Guru!</div>` : (slot.isJoint ? `<div class="sched-joint-badge"><i class="ph ph-users-three"></i> Sesi Gabungan</div>` : '')}
+              </div>
             </td>
-          </tr>
-        `;
-      }
-      const dayCells = this.days.map(day => {
-        const slot = classSlots.find(s => s.day === day && (Number(s.period) === p.period || s.startTime === p.time.split(' - ')[0]));
-        if (!slot) {
-          return `
-            <td class="sched-cell-empty" data-day="${day}" data-period="${p.period}" data-time="${p.time}">
+          `);
+          cIdx += span;
+        } else {
+          cells.push(`
+            <td class="sched-cell-empty" data-day="${day}" data-period="${pNum}">
               <span class="text-muted sched-cell-empty-dash">-</span>
             </td>
-          `;
+          `);
+          cIdx++;
         }
-        const hasConflict = !!this.cachedConflicts[slot.id];
-        const teacher = this.users[slot.teacherId];
-        const tName = slot.teacherName || (teacher ? (teacher.name || teacher.displayName) : '');
-        const sub = this.subjects[slot.subjectId];
-        const subName = slot.subjectName || (sub ? sub.name : slot.subjectId) || '-';
-        let toneClass = 'sched-cell-card--umum';
-        const lowerSub = subName.toLowerCase();
-        if (lowerSub.includes('pembiasaan') || lowerSub.includes('upacara')) toneClass = 'sched-cell-card--break';
-        else if (lowerSub.includes('aqidah') || lowerSub.includes('ibadah') || lowerSub.includes('tarikh') || lowerSub.includes('qur') || lowerSub.includes('arab') || lowerSub.includes('btq') || lowerSub.includes('kemuhammadiyahan')) toneClass = 'sched-cell-card--ismuba';
-        else if (lowerSub.includes('pjok') || lowerSub.includes('tapak suci') || lowerSub.includes('hw') || lowerSub.includes('ekstra')) toneClass = 'sched-cell-card--ekskul';
-        if (hasConflict) toneClass = 'sched-cell-card--conflict';
-        return `
-          <td>
-            <div class="sched-cell-card ${toneClass}" data-slot-id="${slot.id}">
-              <div class="sched-card-subj">${AppConfig.escapeHtml(subName)}</div>
-              ${tName ? `<div class="sched-card-teacher"><i class="ph ph-chalkboard-teacher"></i> ${AppConfig.escapeHtml(tName)}</div>` : ''}
-              ${slot.room ? `<div class="sched-card-room"><i class="ph ph-door"></i> ${AppConfig.escapeHtml(slot.room)}</div>` : ''}
-              ${hasConflict ? `<div class="sched-conflict-badge"><i class="ph ph-warning-octagon"></i> Bentrok Guru!</div>` : (slot.isJoint ? `<div class="sched-joint-badge"><i class="ph ph-users-three"></i> Sesi Gabungan</div>` : '')}
-            </div>
-          </td>
-        `;
-      }).join('');
+      }
       return `
         <tr>
           <td class="sched-time-col">
-            <div class="sched-col-time-period">JAM ${p.period}</div>
-            <div class="sched-col-time-val">${p.time.split(' - ')[0]}</div>
+            <div class="sched-col-time-period">Jam Ke-${pNum}</div>
           </td>
-          ${dayCells}
+          ${cells.join('')}
         </tr>
       `;
     }).join('');
@@ -359,20 +398,25 @@ const ScheduleManager = {
           this.openSlotModal(slotId);
         });
       });
+      view.querySelectorAll('.sched-cell-break-merged').forEach(cell => {
+        cell.addEventListener('click', () => {
+          const slotId = cell.dataset.slotId;
+          if (slotId) this.openSlotModal(slotId);
+        });
+      });
       view.querySelectorAll('.sched-cell-empty').forEach(cell => {
         cell.addEventListener('click', () => {
           const day = cell.dataset.day;
           const period = Number(cell.dataset.period);
-          const time = cell.dataset.time || '';
-          const [startTime, endTime] = time.split(' - ');
           this.openSlotModal(null, {
             classId: this.selectedClassId,
             day,
-            period,
-            startTime,
-            endTime
+            period
           });
         });
+      });
+      view.querySelectorAll('[data-action="open-uniforms-modal"]').forEach(card => {
+        card.addEventListener('click', () => this.openUniformsModal());
       });
     }
   },
@@ -428,53 +472,74 @@ const ScheduleManager = {
       }
       if (this.cachedConflicts[s.id]) conflictCount++;
     });
-    const gridRows = this.periodsSeninKamis.map(p => {
-      const isBreak = p.type === 'break' || p.type === 'ishoma';
-      if (isBreak) {
-        return `
-          <tr>
-            <td class="sched-time-col">${p.time}</td>
-            <td colspan="5" class="sched-cell-card--break">
-              <i class="ph ${p.type === 'ishoma' ? 'ph-bowl-food' : 'ph-coffee'}"></i> ${p.label}
+    const maxPeriod = teacherSlots.reduce((max, s) => Math.max(max, Number(s.period) || 0), 0);
+    const totalPeriods = Math.max(10, maxPeriod);
+    const periodList = Array.from({ length: totalPeriods }, (_, i) => i + 1);
+    const gridRows = periodList.map(pNum => {
+      const cells = [];
+      let cIdx = 0;
+      while (cIdx < this.days.length) {
+        const day = this.days[cIdx];
+        const normD = (day === "Jum'at" || day === 'Jumat') ? "Jum'at" : day;
+        const slotsInPeriod = teacherSlots.filter(s => ((s.day === "Jum'at" || s.day === 'Jumat') ? "Jum'at" : s.day) === normD && Number(s.period) === pNum);
+        const breakSlot = slotsInPeriod.find(s => s.type === 'break' || s.type === 'ishoma' || (s.subjectName || '').toLowerCase().includes('istirahat') || (s.subjectName || '').toLowerCase().includes('ishoma'));
+        if (breakSlot) {
+          let span = 1;
+          const bLabel = (breakSlot.subjectName || (breakSlot.type === 'ishoma' ? 'ISHOMA' : 'Istirahat')).trim();
+          while (cIdx + span < this.days.length) {
+            const nextDay = this.days[cIdx + span];
+            const nextNormD = (nextDay === "Jum'at" || nextDay === 'Jumat') ? "Jum'at" : nextDay;
+            const nextSlots = teacherSlots.filter(s => ((s.day === "Jum'at" || s.day === 'Jumat') ? "Jum'at" : s.day) === nextNormD && Number(s.period) === pNum);
+            const nextBreak = nextSlots.find(s => s.type === 'break' || s.type === 'ishoma' || (s.subjectName || '').toLowerCase().includes('istirahat') || (s.subjectName || '').toLowerCase().includes('ishoma'));
+            if (nextBreak) {
+              const nbLabel = (nextBreak.subjectName || (nextBreak.type === 'ishoma' ? 'ISHOMA' : 'Istirahat')).trim();
+              if (nbLabel.toLowerCase() === bLabel.toLowerCase() || (bLabel.toLowerCase().includes('istirahat') && nbLabel.toLowerCase().includes('istirahat')) || (bLabel.toLowerCase().includes('ishoma') && nbLabel.toLowerCase().includes('ishoma'))) {
+                span++;
+                continue;
+              }
+            }
+            break;
+          }
+          const icon = bLabel.toLowerCase().includes('ishoma') ? 'ph-bowl-food' : 'ph-coffee';
+          cells.push(`<td colspan="${span}" class="sched-cell-break-merged"><i class="ph ${icon}"></i> ${AppConfig.escapeHtml(bLabel)}</td>`);
+          cIdx += span;
+        } else if (slotsInPeriod.length) {
+          const hasConflict = slotsInPeriod.length > 1 || slotsInPeriod.some(s => this.cachedConflicts[s.id]);
+          cells.push(`
+            <td>
+              ${slotsInPeriod.map(slot => {
+                const cls = this.classes[slot.classId];
+                const cName = cls ? cls.name : (slot.className || slot.classId);
+                const sub = this.subjects[slot.subjectId];
+                const subName = slot.subjectName || (sub ? sub.name : slot.subjectId) || '-';
+                return `
+                  <div class="sched-cell-card ${hasConflict ? 'sched-cell-card--conflict' : 'sched-cell-card--umum'}" data-slot-id="${slot.id}">
+                    <div class="sched-card-subj">${AppConfig.escapeHtml(subName)}</div>
+                    <div class="sched-card-teacher"><i class="ph ph-chalkboard"></i> ${AppConfig.escapeHtml(cName)}</div>
+                    ${slot.room ? `<div class="sched-card-room"><i class="ph ph-door"></i> ${AppConfig.escapeHtml(slot.room)}</div>` : ''}
+                    ${slot.startTime && slot.endTime ? `<div class="sched-card-time"><i class="ph ph-clock"></i> ${AppConfig.escapeHtml(slot.startTime)} - ${AppConfig.escapeHtml(slot.endTime)}</div>` : ''}
+                    ${hasConflict ? `<div class="sched-conflict-badge"><i class="ph ph-warning-octagon"></i> Bentrok Mengajar!</div>` : (slot.isJoint ? `<div class="sched-joint-badge"><i class="ph ph-users-three"></i> Sesi Gabungan</div>` : '')}
+                  </div>
+                `;
+              }).join('')}
             </td>
-          </tr>
-        `;
-      }
-      const dayCells = this.days.map(day => {
-        const slotsInPeriod = teacherSlots.filter(s => s.day === day && (Number(s.period) === p.period || s.startTime === p.time.split(' - ')[0]));
-        if (!slotsInPeriod.length) {
-          return `
+          `);
+          cIdx++;
+        } else {
+          cells.push(`
             <td class="sched-cell-empty">
               <span class="text-muted sched-cell-empty-dash">-</span>
             </td>
-          `;
+          `);
+          cIdx++;
         }
-        const hasConflict = slotsInPeriod.length > 1 || slotsInPeriod.some(s => this.cachedConflicts[s.id]);
-        return `
-          <td>
-            ${slotsInPeriod.map(slot => {
-              const cls = this.classes[slot.classId];
-              const cName = cls ? cls.name : (slot.className || slot.classId);
-              const sub = this.subjects[slot.subjectId];
-              const subName = slot.subjectName || (sub ? sub.name : slot.subjectId) || '-';
-              return `
-                <div class="sched-cell-card ${hasConflict ? 'sched-cell-card--conflict' : 'sched-cell-card--umum'}">
-                  <div class="sched-card-subj">${AppConfig.escapeHtml(subName)}</div>
-                  <div class="sched-card-teacher"><i class="ph ph-chalkboard"></i> ${AppConfig.escapeHtml(cName)}</div>
-                  ${hasConflict ? `<div class="sched-conflict-badge"><i class="ph ph-warning-octagon"></i> Bentrok Jadwal!</div>` : (slot.isJoint ? `<div class="sched-joint-badge"><i class="ph ph-users-three"></i> Sesi Gabungan</div>` : '')}
-                </div>
-              `;
-            }).join('')}
-          </td>
-        `;
-      }).join('');
+      }
       return `
         <tr>
           <td class="sched-time-col">
-            <div class="sched-col-time-period">JAM ${p.period}</div>
-            <div class="sched-col-time-val">${p.time.split(' - ')[0]}</div>
+            <div class="sched-col-time-period">Jam Ke-${pNum}</div>
           </td>
-          ${dayCells}
+          ${cells.join('')}
         </tr>
       `;
     }).join('');
@@ -483,21 +548,12 @@ const ScheduleManager = {
         <div class="print-only sched-print-kop-wrapper">
           ${AppConfig.getOfficialKopHtml({ showDivider: false })}
         </div>
-        <div class="sched-stats-cards no-print">
+        <div class="sched-stat-grid no-print">
           <div class="sched-stat-item">
-            <div class="sched-stat-icon sched-stat-icon--blue"><i class="ph ph-books"></i></div>
+            <div class="sched-stat-icon sched-stat-icon--primary"><i class="ph ph-clock"></i></div>
             <div>
-              <div class="sched-stat-label">Total Jam Mengajar</div>
-              <div class="sched-stat-val">${totalJp} JP / Pekan</div>
-            </div>
-          </div>
-          <div class="sched-stat-item">
-            <div class="sched-stat-icon sched-stat-icon--green"><i class="ph ph-check-circle"></i></div>
-            <div>
-              <div class="sched-stat-label">Status Beban Kerja</div>
-              <div class="sched-stat-status-text ${totalJp >= 18 ? 'sched-stat-status-text--ok' : 'sched-stat-status-text--warn'}">
-                ${totalJp >= 18 ? (totalJp > 24 ? 'Jam Lebih (Vakasi)' : 'Ideal (18 - 24 JP)') : 'Kurang (< 18 JP)'}
-              </div>
+              <div class="sched-stat-label">Total Beban Tatap Muka</div>
+              <div class="sched-stat-val">${totalJp} <span class="sched-stat-unit">JP / Pekan</span></div>
             </div>
           </div>
           <div class="sched-stat-item">
@@ -645,35 +701,52 @@ const ScheduleManager = {
         <div class="print-only sched-signatures-grid">
           <div class="sched-sig-box">
             <p class="sched-sig-role">Mengetahui,<br>Kepala SD Muhammadiyah 1 Sedati</p>
-            <p class="sched-sig-name">${AppConfig.SCHOOL_PROFILE.headmaster}</p>
-            <p class="sched-sig-id">NBM: ${AppConfig.SCHOOL_PROFILE.headmasterNbm}</p>
+            <p class="sched-sig-name">${AppConfig.escapeHtml(kepsek.name)}</p>
+            <p class="sched-sig-id">NBM: ${AppConfig.escapeHtml(kepsek.nbm)}</p>
           </div>
           <div class="sched-sig-box">
             <p class="sched-sig-role">Sidoarjo, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}<br>Waka Kurikulum</p>
-            <p class="sched-sig-name">Dhani Harsyahyadi, S.H.I.</p>
-            <p class="sched-sig-id">NBM: 8962767668130162</p>
+            <p class="sched-sig-name">${AppConfig.escapeHtml(curriculumLead.name)}</p>
+            <p class="sched-sig-id">NBM/NIP: ${AppConfig.escapeHtml(curriculumLead.nbm)}</p>
           </div>
         </div>
       </section>
     `;
   },
+  renderPembiasaanControls(controls) {
+    controls.innerHTML = `
+      <div class="form-group compact-field sched-filter-action-group">
+        <button type="button" class="btn btn-outline" id="btn-edit-habits-ctrl"><i class="ph ph-sparkle"></i> Ubah Pembiasaan</button>
+        <button type="button" class="btn btn-primary" id="btn-print-habits-ctrl"><i class="ph ph-printer"></i> Cetak Jadwal Pembiasaan</button>
+      </div>
+    `;
+    const btnPrint = controls.querySelector('#btn-print-habits-ctrl');
+    if (btnPrint) btnPrint.addEventListener('click', () => window.print());
+    const btnHabits = controls.querySelector('#btn-edit-habits-ctrl');
+    if (btnHabits) btnHabits.addEventListener('click', () => this.openHabitsModal());
+  },
   renderPembiasaanView(view) {
-    const lowerRows = this.habituationData.lower.map(item => `
+    const kepsek = this.getKepsekInfo();
+    const curriculumLead = this.getCurriculumLeadInfo();
+    const habits = this.habituationData || {};
+    const lowerList = Array.isArray(habits.lower) ? habits.lower : [];
+    const upperList = Array.isArray(habits.upper) ? habits.upper : [];
+    const lowerRows = lowerList.map(item => `
       <tr>
         <td class="sched-td-center-bold">Minggu ${item.week}</td>
-        <td>${item.senin}</td>
-        <td>${item.selasa}</td>
-        <td>${item.rabu}</td>
-        <td>${item.kamis}</td>
+        <td>${item.senin || '-'}</td>
+        <td>${item.selasa || '-'}</td>
+        <td>${item.rabu || '-'}</td>
+        <td>${item.kamis || '-'}</td>
       </tr>
     `).join('');
-    const upperRows = this.habituationData.upper.map(item => `
+    const upperRows = upperList.map(item => `
       <tr>
         <td class="sched-td-center-bold">Minggu ${item.week}</td>
-        <td>${item.senin}</td>
-        <td>${item.selasa}</td>
-        <td>${item.rabu}</td>
-        <td>${item.kamis}</td>
+        <td>${item.senin || '-'}</td>
+        <td>${item.selasa || '-'}</td>
+        <td>${item.rabu || '-'}</td>
+        <td>${item.kamis || '-'}</td>
       </tr>
     `).join('');
     view.innerHTML = `
@@ -686,7 +759,10 @@ const ScheduleManager = {
             <h2 class="sched-page-title">Jadwal Pembiasaan Karakter &amp; Budaya Sekolah</h2>
             <p class="sched-page-subtitle">Pelaksanaan Jam Ke-0 (07.00 - 07.30 WIB) · SD Muhammadiyah 1 Sedati</p>
           </div>
-          <button type="button" class="btn btn-outline no-print" id="btn-print-habits"><i class="ph ph-printer"></i> Cetak SOP</button>
+          <div class="sched-actions-row no-print">
+            <button type="button" class="btn btn-outline" id="btn-edit-habits-view"><i class="ph ph-sparkle"></i> Ubah Pembiasaan</button>
+            <button type="button" class="btn btn-primary" id="btn-print-habits-view"><i class="ph ph-printer"></i> Cetak Jadwal Pembiasaan</button>
+          </div>
         </div>
         <div class="sched-habit-block">
           <h3 class="sched-section-subtitle"><i class="ph ph-sparkle"></i> Siklus Pembiasaan Kelas 1 - 3 (Fase A &amp; B Awal)</h3>
@@ -730,7 +806,7 @@ const ScheduleManager = {
           <h3 class="sched-section-subtitle"><i class="ph ph-t-shirt"></i> Ketentuan Seragam Harian Siswa &amp; Guru</h3>
           <div class="sched-uniform-row">
             ${this.days.map(d => `
-              <div class="sched-uniform-card">
+              <div class="sched-uniform-card sched-uniform-card--clickable" data-action="open-uniforms-modal" title="Klik untuk mengubah setelan seragam sekolah">
                 <div class="sched-uniform-day">${d}</div>
                 <div class="sched-uniform-val">${this.uniforms[d] || '-'}</div>
               </div>
@@ -751,8 +827,16 @@ const ScheduleManager = {
         </div>
       </section>
     `;
-    const btnPrint = view.querySelector('#btn-print-habits');
-    if (btnPrint) btnPrint.addEventListener('click', () => window.print());
+    const btnPrintView = view.querySelector('#btn-print-habits-view');
+    if (btnPrintView) btnPrintView.addEventListener('click', () => window.print());
+    const btnHabitsView = view.querySelector('#btn-edit-habits-view');
+    if (btnHabitsView) btnHabitsView.addEventListener('click', () => this.openHabitsModal());
+    view.querySelectorAll('[data-action="open-uniforms-modal"]').forEach(card => {
+      card.addEventListener('click', () => this.openUniformsModal());
+    });
+  },
+  renderHabitsView(view) {
+    return this.renderPembiasaanView(view);
   },
   renderManageView(view) {
     const totalSlots = Object.keys(this.schedules).length;
@@ -879,8 +963,14 @@ const ScheduleManager = {
               <input type="text" id="slot-room" class="form-input" placeholder="Contoh: Lab Komputer / Lapangan" value="${AppConfig.escapeHtml(existing.room || '')}">
             </div>
             <div class="form-group compact-field">
-              <label class="form-check-label">
-                <input type="checkbox" id="slot-is-joint" ${existing.isJoint ? 'checked' : ''}> Sesi Gabungan Paralel (Joint Class)
+              <label class="form-switch-card">
+                <div class="form-switch-info">
+                  <span class="form-switch-title"><i class="ph ph-users-three"></i> Sesi Gabungan Paralel</span>
+                  <span class="form-switch-desc">Aktifkan jika sesi ini diajar bersama rombel lain (Joint Class)</span>
+                </div>
+                <span class="form-switch">
+                  <input type="checkbox" id="slot-is-joint" ${existing.isJoint ? 'checked' : ''}>
+                </span>
               </label>
             </div>
           </div>
@@ -992,6 +1082,192 @@ const ScheduleManager = {
         btnSave.innerHTML = '<i class="ph ph-floppy-disk"></i> Simpan Slot';
       }
     });
+  },
+  openHabitsModal() {
+    const modalWrap = document.getElementById('sched-modal-container');
+    if (!modalWrap) return;
+    const habits = this.habituationData || {};
+    const lower = Array.isArray(habits.lower) && habits.lower.length ? habits.lower : [
+      { week: 1, senin: 'Upacara Bendera', selasa: "Dhuha & Muraja'ah", rabu: 'Literasi Numerasi', kamis: 'Hadits & Doa' },
+      { week: 2, senin: 'Upacara Bendera', selasa: "Dhuha & Muraja'ah", rabu: 'English Morning', kamis: 'Adab & Karakter' },
+      { week: 3, senin: 'Upacara Bendera', selasa: "Dhuha & Muraja'ah", rabu: 'Bahasa Arab Dasar', kamis: 'Aritmatika Ceria' },
+      { week: 4, senin: 'Upacara Bendera', selasa: "Dhuha & Muraja'ah", rabu: 'Kisah Sahabat Nabi', kamis: 'Tahfidz Bersama' },
+      { week: 5, senin: 'Upacara Bendera', selasa: "Dhuha & Muraja'ah", rabu: 'Kreativitas / Musik', kamis: 'Muhasabah Pagi' }
+    ];
+    const upper = Array.isArray(habits.upper) && habits.upper.length ? habits.upper : [
+      { week: 1, senin: 'Upacara Bendera', selasa: "Dhuha & Muraja'ah", rabu: 'Literasi Membaca', kamis: 'Aritmatika / Sains' },
+      { week: 2, senin: 'Upacara Bendera', selasa: "Dhuha & Muraja'ah", rabu: 'English Speech', kamis: 'Hadits Pilihan' },
+      { week: 3, senin: 'Upacara Bendera', selasa: "Dhuha & Muraja'ah", rabu: 'Muhadatsah Arab', kamis: 'Kemuhammadiyahan' },
+      { week: 4, senin: 'Upacara Bendera', selasa: "Dhuha & Muraja'ah", rabu: 'Literasi Digital', kamis: 'Kajian Karakter' },
+      { week: 5, senin: 'Upacara Bendera', selasa: "Dhuha & Muraja'ah", rabu: 'Public Speaking', kamis: 'Kultum Siswa' }
+    ];
+    const renderRows = (arr, prefix) => arr.map(item => `
+      <tr>
+        <td class="sched-td-center-bold">Minggu ${item.week}</td>
+        <td><input type="text" class="sched-habit-input" id="${prefix}-senin-${item.week}" value="${AppConfig.escapeHtml(item.senin || '')}" required></td>
+        <td><input type="text" class="sched-habit-input" id="${prefix}-selasa-${item.week}" value="${AppConfig.escapeHtml(item.selasa || '')}" required></td>
+        <td><input type="text" class="sched-habit-input" id="${prefix}-rabu-${item.week}" value="${AppConfig.escapeHtml(item.rabu || '')}" required></td>
+        <td><input type="text" class="sched-habit-input" id="${prefix}-kamis-${item.week}" value="${AppConfig.escapeHtml(item.kamis || '')}" required></td>
+      </tr>
+    `).join('');
+    modalWrap.innerHTML = `
+      <div class="modal-overlay active" id="modal-habits-overlay">
+        <div class="modal sched-modal-dialog-lg">
+          <div class="modal-header">
+            <h3 class="modal-title"><i class="ph ph-sparkle"></i> Kelola Siklus Pembiasaan Sekolah</h3>
+            <button type="button" class="btn-icon" id="btn-close-habits-modal"><i class="ph ph-x"></i></button>
+          </div>
+          <form id="form-habits-settings">
+            <div class="modal-body sched-modal-form">
+              <p class="text-sm text-muted">Agenda pembiasaan karakter jam ke-0 (07.00 - 07.30 WIB) berlaku untuk siklus 5 pekan. Perubahan tersimpan secara terpusat (SSOT) di Realtime Database.</p>
+              <div class="sched-habit-modal-block">
+                <h4 class="sched-section-subtitle"><i class="ph ph-sparkle"></i> Siklus Pembiasaan Kelas 1 - 3 (Fase A &amp; B Awal)</h4>
+                <div class="table-responsive">
+                  <table class="sched-habit-edit-table">
+                    <thead>
+                      <tr>
+                        <th class="sched-th-week">Pekan</th>
+                        <th>Senin</th>
+                        <th>Selasa</th>
+                        <th>Rabu</th>
+                        <th>Kamis</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${renderRows(lower, 'lower')}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="sched-habit-modal-block">
+                <h4 class="sched-section-subtitle"><i class="ph ph-sparkle"></i> Siklus Pembiasaan Kelas 4 - 6 (Fase B Atas &amp; C)</h4>
+                <div class="table-responsive">
+                  <table class="sched-habit-edit-table">
+                    <thead>
+                      <tr>
+                        <th class="sched-th-week">Pekan</th>
+                        <th>Senin</th>
+                        <th>Selasa</th>
+                        <th>Rabu</th>
+                        <th>Kamis</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${renderRows(upper, 'upper')}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer sched-modal-footer-flex">
+              <button type="button" class="btn btn-outline" id="btn-cancel-habits-modal">Batal</button>
+              <button type="submit" class="btn btn-primary" id="btn-save-habits-modal"><i class="ph ph-floppy-disk"></i> Simpan Jadwal Pembiasaan</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    `;
+    const closeModal = () => { modalWrap.innerHTML = ''; };
+    const overlay = modalWrap.querySelector('#modal-habits-overlay');
+    const btnClose = modalWrap.querySelector('#btn-close-habits-modal');
+    const btnCancel = modalWrap.querySelector('#btn-cancel-habits-modal');
+    const form = modalWrap.querySelector('#form-habits-settings');
+    if (btnClose) btnClose.addEventListener('click', closeModal);
+    if (btnCancel) btnCancel.addEventListener('click', closeModal);
+    if (overlay) overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+    if (form) {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const updatedLower = lower.map(item => ({
+          week: item.week,
+          senin: (form.querySelector(`#lower-senin-${item.week}`)?.value || '').trim(),
+          selasa: (form.querySelector(`#lower-selasa-${item.week}`)?.value || '').trim(),
+          rabu: (form.querySelector(`#lower-rabu-${item.week}`)?.value || '').trim(),
+          kamis: (form.querySelector(`#lower-kamis-${item.week}`)?.value || '').trim()
+        }));
+        const updatedUpper = upper.map(item => ({
+          week: item.week,
+          senin: (form.querySelector(`#upper-senin-${item.week}`)?.value || '').trim(),
+          selasa: (form.querySelector(`#upper-selasa-${item.week}`)?.value || '').trim(),
+          rabu: (form.querySelector(`#upper-rabu-${item.week}`)?.value || '').trim(),
+          kamis: (form.querySelector(`#upper-kamis-${item.week}`)?.value || '').trim()
+        }));
+        const newHabits = { lower: updatedLower, upper: updatedUpper };
+        try {
+          await DB.saveScheduleSettings({ habits: newHabits });
+          this.habituationData = newHabits;
+          closeModal();
+          const view = document.getElementById('sched-content-view');
+          if (view) this.renderPembiasaanView(view);
+          alert('Jadwal pembiasaan berhasil disimpan ke database.');
+        } catch (err) {
+          alert('Gagal menyimpan: ' + err.message);
+        }
+      });
+    }
+  },
+  openUniformsModal() {
+    const modalWrap = document.getElementById('sched-modal-container');
+    if (!modalWrap) return;
+    const days = ['Senin', 'Selasa', 'Rabu', 'Kamis', "Jum'at"];
+    const inputsHtml = days.map(d => `
+      <div class="form-group compact-field">
+        <label>Seragam Hari ${d} <span class="text-danger">*</span></label>
+        <input type="text" id="uniform-${d}" class="form-input" value="${AppConfig.escapeHtml(this.uniforms[d] || '')}" required>
+      </div>
+    `).join('');
+    modalWrap.innerHTML = `
+      <div class="modal-overlay active" id="modal-uniforms-overlay">
+        <div class="modal sched-modal-dialog">
+          <div class="modal-header">
+            <h3 class="modal-title"><i class="ph ph-t-shirt"></i> Kelola Ketentuan Seragam Sekolah</h3>
+            <button type="button" class="btn-icon" id="btn-close-uniforms"><i class="ph ph-x"></i></button>
+          </div>
+          <form id="form-uniforms">
+            <div class="modal-body sched-modal-form">
+              <p class="text-sm text-muted">Pengaturan seragam ini tersimpan secara terpusat (SSOT) di Realtime Database dan langsung disinkronkan ke seluruh jadwal pelajaran rombel serta jadwal pembiasaan.</p>
+              ${inputsHtml}
+            </div>
+            <div class="modal-footer sched-modal-footer-flex">
+              <button type="button" class="btn btn-outline" id="btn-cancel-uniforms">Batal</button>
+              <button type="submit" class="btn btn-primary" id="btn-save-uniforms"><i class="ph ph-floppy-disk"></i> Simpan Ketentuan Seragam</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    `;
+    const closeModal = () => { modalWrap.innerHTML = ''; };
+    const overlay = modalWrap.querySelector('#modal-uniforms-overlay');
+    const btnClose = modalWrap.querySelector('#btn-close-uniforms');
+    const btnCancel = modalWrap.querySelector('#btn-cancel-uniforms');
+    const form = modalWrap.querySelector('#form-uniforms');
+    if (btnClose) btnClose.addEventListener('click', closeModal);
+    if (btnCancel) btnCancel.addEventListener('click', closeModal);
+    if (overlay) overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+    if (form) {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const updated = {};
+        days.forEach(d => {
+          const inp = form.querySelector(`#uniform-${d}`);
+          if (inp) updated[d] = inp.value.trim();
+        });
+        if (updated["Jum'at"]) updated['Jumat'] = updated["Jum'at"];
+        try {
+          await DB.saveScheduleSettings({ uniforms: updated });
+          this.uniforms = { ...this.uniforms, ...updated };
+          closeModal();
+          const view = document.getElementById('sched-content-view');
+          if (view) {
+            if (this.currentTab === 'rombel') this.renderRombelView(view);
+            else if (this.currentTab === 'pembiasaan') this.renderHabitsView(view);
+          }
+          alert('Ketentuan seragam berhasil disimpan ke database.');
+        } catch (err) {
+          alert('Gagal menyimpan: ' + err.message);
+        }
+      });
+    }
   },
   async seedTsvData() {
     if (!isDBReady()) return;

@@ -956,11 +956,14 @@ const DB = {
     await db.ref('curriculum/schedules').update(schedulesMap);
   },
   async getScheduleSettings() {
+    const s = await this._read('curriculum/settings', null);
+    if (s) return s;
     return this._read('curriculum/schedule_settings', null);
   },
   async saveScheduleSettings(data) {
-    if (!isDBReady()) return;
-    await db.ref('curriculum/schedule_settings').set(data);
+    if (!isDBReady() || !data) return;
+    await db.ref('curriculum/settings').update(data);
+    await db.ref('curriculum/schedule_settings').update(data);
   },
   async getExtracurriculars() {
     return this._readCollection('extracurriculars', {});

@@ -2424,9 +2424,14 @@ async renderUmmiClasses(container) {
                 <textarea id="eval-tasmi-notes" rows="3" required placeholder="Catatan kelancaran, ayat yang perlu diperbaiki, evaluasi tajwid..." class="form-input"></textarea>
               </div>
               <div class="form-group" id="wrap-promote-pasca">
-                <label class="checkbox-label">
-                  <input type="checkbox" id="eval-tasmi-promote">
-                  <span>Tandai Lulus Munaqosyah & Naikkan ke Tingkat Pasca</span>
+                <label class="form-switch-card">
+                  <div class="form-switch-info">
+                    <span class="form-switch-title"><i class="ph ph-graduation-cap"></i> Tandai Lulus Munaqosyah & Naikkan Tingkat</span>
+                    <span class="form-switch-desc">Otomatis mutasikan santri ke tingkat Pasca Ummi</span>
+                  </div>
+                  <span class="form-switch">
+                    <input type="checkbox" id="eval-tasmi-promote">
+                  </span>
                 </label>
               </div>
             </div>
@@ -3105,9 +3110,14 @@ async renderUmmiClasses(container) {
                 <textarea id="res-tasmi-notes" rows="3" required placeholder="Catatan evaluasi bacaan santri..." class="form-input"></textarea>
               </div>
               <div class="form-group">
-                <label class="checkbox-label checkbox-label-inline">
-                  <input type="checkbox" id="res-tasmi-promote">
-                  <span>Naikkan tingkat santri ke <strong>Pasca Ummi</strong> (untuk lulusan Munaqosyah / tuntas seluruh jilid)</span>
+                <label class="form-switch-card">
+                  <div class="form-switch-info">
+                    <span class="form-switch-title"><i class="ph ph-graduation-cap"></i> Naikkan Tingkat ke Pasca Ummi</span>
+                    <span class="form-switch-desc">Untuk santri yang dinyatakan lulus Munaqosyah / tuntas seluruh jilid</span>
+                  </div>
+                  <span class="form-switch">
+                    <input type="checkbox" id="res-tasmi-promote">
+                  </span>
                 </label>
               </div>
             </div>
